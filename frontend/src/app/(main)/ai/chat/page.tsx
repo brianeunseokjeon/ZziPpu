@@ -1,29 +1,69 @@
-import { MessageCircle } from "lucide-react";
-import { Card, CardContent } from "@/shared/components/ui/card";
+'use client'
+
+import { useEffect, useRef } from 'react'
+import { RotateCcw } from 'lucide-react'
+import { MOCK_BABY_ID } from '@/config/constants'
+import {
+  useChat,
+  ChatMessageBubble,
+  StreamingMessage,
+  ChatInput,
+  QuickQuestions,
+} from '@/features/ai-chat'
 
 export default function AIChatPage() {
+  const { messages, isStreaming, streamingContent, sendMessage, resetChat } =
+    useChat(MOCK_BABY_ID)
+  const bottomRef = useRef<HTMLDivElement>(null)
+
+  // 메시지 추가 시 자동 스크롤
+  useEffect(() => {
+    bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
+  }, [messages, streamingContent])
+
+  const hasMessages = messages.length > 0
+
   return (
-    <div className="space-y-4">
-      <Card>
-        <CardContent className="pt-6">
-          <div className="flex flex-col items-center gap-4 py-8 text-center">
-            <div className="w-16 h-16 rounded-full bg-gradient-to-br from-green-400 to-blue-500 flex items-center justify-center">
-              <MessageCircle className="w-8 h-8 text-white" />
-            </div>
-            <div>
-              <h2 className="text-xl font-bold text-gray-900 mb-2">AI 육아 상담</h2>
-              <p className="text-gray-500 text-sm leading-relaxed">
-                육아 관련 궁금한 점을 AI에게 직접
-                <br />
-                물어보세요.
-              </p>
-            </div>
-            <div className="bg-amber-50 border border-amber-200 rounded-2xl px-5 py-3 text-sm text-amber-700 font-medium">
-              🚧 Phase 2에서 준비됩니다
-            </div>
+    <div className="flex flex-col h-[100dvh] bg-gray-50">
+      {/* 헤더 */}
+      <div className="flex-shrink-0 flex items-center justify-between px-4 py-3 bg-white border-b border-gray-200">
+        <div className="flex items-center gap-2">
+          <span className="text-xl">🩺</span>
+          <div>
+            <h1 className="text-base font-semibold text-gray-900">AI 소아과 상담</h1>
+            <p className="text-xs text-gray-400">전문 소아과 지식 기반 AI 상담</p>
           </div>
-        </CardContent>
-      </Card>
+        </div>
+        {hasMessages && (
+          <button
+            onClick={resetChat}
+            className="flex items-center gap-1.5 text-xs text-gray-500 hover:text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-full px-3 py-1.5 transition-colors"
+          >
+            <RotateCcw className="w-3 h-3" />
+            새 대화
+          </button>
+        )}
+      </div>
+
+      {/* 채팅 메시지 영역 */}
+      <div className="flex-1 overflow-y-auto px-4 pt-4 pb-4">
+        {!hasMessages && !isStreaming ? (
+          <QuickQuestions onSelect={sendMessage} />
+        ) : (
+          <>
+            {messages.map((msg) => (
+              <ChatMessageBubble key={msg.id} message={msg} />
+            ))}
+            {isStreaming && <StreamingMessage content={streamingContent} />}
+          </>
+        )}
+        <div ref={bottomRef} />
+      </div>
+
+      {/* 채팅 입력창 - 탭바 위 고정 */}
+      <div className="flex-shrink-0 pb-20">
+        <ChatInput onSend={sendMessage} disabled={isStreaming} />
+      </div>
     </div>
-  );
+  )
 }
