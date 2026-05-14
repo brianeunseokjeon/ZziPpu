@@ -7,6 +7,10 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.config import settings
 from app.infrastructure.persistence.database import engine
 from app.infrastructure.persistence.models.base import Base
+from app.infrastructure.persistence.models import (  # noqa: F401 — ensure all models are registered
+    GrowthModel,
+    VaccinationModel,
+)
 from app.presentation.api.v1.router import v1_router
 from app.presentation.middleware.error_handler import ErrorHandlerMiddleware
 

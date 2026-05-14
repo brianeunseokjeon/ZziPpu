@@ -7,6 +7,8 @@ from .ai_review_repository import AIReviewRepository
 from .chat_repository import ChatRepository
 from .saved_info_repository import SavedInfoRepository
 from .user_repository import UserRepository
+from .growth_repository import GrowthRepository
+from .vaccination_repository import VaccinationRepository
 
 __all__ = [
     "BabyRepository",
@@ -18,4 +20,6 @@ __all__ = [
     "ChatRepository",
     "SavedInfoRepository",
     "UserRepository",
+    "GrowthRepository",
+    "VaccinationRepository",
 ]

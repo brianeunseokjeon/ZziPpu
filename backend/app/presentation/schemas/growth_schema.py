@@ -1,0 +1,25 @@
+from datetime import date, datetime
+from uuid import UUID
+
+from pydantic import BaseModel, Field
+
+
+class CreateGrowthRequest(BaseModel):
+    recorded_at: date
+    weight_g: int | None = Field(None, gt=0, description="체중 (그램)")
+    height_cm: float | None = Field(None, gt=0, description="키 (cm)")
+    head_circumference_cm: float | None = Field(None, gt=0, description="머리둘레 (cm)")
+    memo: str | None = None
+
+
+class GrowthResponse(BaseModel):
+    id: UUID
+    baby_id: UUID
+    recorded_at: date
+    weight_g: int | None
+    height_cm: float | None
+    head_circumference_cm: float | None
+    memo: str | None
+    created_at: datetime
+
+    model_config = {"from_attributes": True}

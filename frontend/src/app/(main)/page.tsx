@@ -1,7 +1,8 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { Milk, Moon, Baby, Gamepad2, ChevronRight } from "lucide-react";
+import Link from "next/link";
+import { Milk, Moon, Baby, Gamepad2, ChevronRight, AlertTriangle } from "lucide-react";
 import { Card, CardContent } from "@/shared/components/ui/card";
 import { Button } from "@/shared/components/ui/button";
 import { DailySummaryCard } from "@/features/dashboard/components/DailySummaryCard";
@@ -11,6 +12,8 @@ import { useTimer } from "@/shared/hooks/useTimer";
 import { formatTime } from "@/lib/date-utils";
 import { useFeedings } from "@/features/feeding/api/feedingApi";
 import { getDateString } from "@/lib/date-utils";
+import { useUpcomingVaccinations } from "@/features/vaccination/api/vaccinationApi";
+import { MOCK_BABY_ID } from "@/config/constants";
 
 function SleepStatusCard() {
   const timer = useTimer("sleep");
@@ -94,11 +97,50 @@ const QUICK_ACTIONS = [
   { icon: Gamepad2, label: "놀이", path: "/record/play", color: "text-green-500 bg-green-50" },
 ];
 
+function VaccinationBanner() {
+  const { data: upcoming } = useUpcomingVaccinations(MOCK_BABY_ID);
+
+  if (!upcoming || upcoming.length === 0) return null;
+
+  const hasOverdue = upcoming.some((v) => v.is_overdue);
+
+  return (
+    <Link href="/vaccination">
+      <div
+        className={`rounded-2xl p-3 border flex items-center gap-3 ${
+          hasOverdue
+            ? "bg-red-50 border-red-200"
+            : "bg-orange-50 border-orange-200"
+        }`}
+      >
+        <AlertTriangle
+          className={`w-5 h-5 shrink-0 ${
+            hasOverdue ? "text-red-500" : "text-orange-500"
+          }`}
+        />
+        <p
+          className={`text-sm font-medium flex-1 ${
+            hasOverdue ? "text-red-700" : "text-orange-700"
+          }`}
+        >
+          {hasOverdue
+            ? `접종 기한 초과 항목이 있어요 (${upcoming.filter((v) => v.is_overdue).length}건)`
+            : `30일 이내 예방접종 ${upcoming.length}건이 있어요`}
+        </p>
+        <ChevronRight
+          className={`w-4 h-4 ${hasOverdue ? "text-red-400" : "text-orange-400"}`}
+        />
+      </div>
+    </Link>
+  );
+}
+
 export default function HomePage() {
   const router = useRouter();
 
   return (
     <div className="space-y-4">
+      <VaccinationBanner />
       <SleepStatusCard />
       <LastFeedingCard />
 

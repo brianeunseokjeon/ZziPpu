@@ -9,6 +9,8 @@ from .ai_review_model import AIReviewModel
 from .chat_conversation_model import ChatConversationModel
 from .chat_message_model import ChatMessageModel
 from .saved_info_model import SavedInfoModel
+from .growth_model import GrowthModel
+from .vaccination_model import VaccinationModel
 
 __all__ = [
     "Base",
@@ -22,4 +24,6 @@ __all__ = [
     "ChatConversationModel",
     "ChatMessageModel",
     "SavedInfoModel",
+    "GrowthModel",
+    "VaccinationModel",
 ]

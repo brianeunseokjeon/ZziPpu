@@ -16,6 +16,8 @@ from app.infrastructure.persistence.repositories import (
     ChatRepositoryImpl,
     SavedInfoRepositoryImpl,
     UserRepositoryImpl,
+    GrowthRepositoryImpl,
+    VaccinationRepositoryImpl,
 )
 from app.infrastructure.ai.claude_service import ClaudeService
 from app.infrastructure.auth.jwt_handler import decode_access_token
@@ -33,6 +35,15 @@ from app.application.use_cases.ai import (
     GenerateDailyReviewUseCase,
     ChatWithPediatricianUseCase,
     SaveChatInfoUseCase,
+)
+from app.application.use_cases.growth import (
+    CreateGrowthRecordUseCase,
+    GetGrowthRecordsUseCase,
+    DeleteGrowthRecordUseCase,
+)
+from app.application.use_cases.vaccination import (
+    GetVaccinationsUseCase,
+    MarkAdministeredUseCase,
 )
 
 security = HTTPBearer()
@@ -204,3 +215,41 @@ def get_save_info_use_case(
     saved_info_repo: Annotated[SavedInfoRepositoryImpl, Depends(get_saved_info_repo)],
 ) -> SaveChatInfoUseCase:
     return SaveChatInfoUseCase(saved_info_repo)
+
+
+def get_growth_repo(db: DbDep) -> GrowthRepositoryImpl:
+    return GrowthRepositoryImpl(db)
+
+
+def get_vaccination_repo(db: DbDep) -> VaccinationRepositoryImpl:
+    return VaccinationRepositoryImpl(db)
+
+
+def get_create_growth_use_case(
+    growth_repo: Annotated[GrowthRepositoryImpl, Depends(get_growth_repo)],
+) -> CreateGrowthRecordUseCase:
+    return CreateGrowthRecordUseCase(growth_repo)
+
+
+def get_get_growth_records_use_case(
+    growth_repo: Annotated[GrowthRepositoryImpl, Depends(get_growth_repo)],
+) -> GetGrowthRecordsUseCase:
+    return GetGrowthRecordsUseCase(growth_repo)
+
+
+def get_delete_growth_use_case(
+    growth_repo: Annotated[GrowthRepositoryImpl, Depends(get_growth_repo)],
+) -> DeleteGrowthRecordUseCase:
+    return DeleteGrowthRecordUseCase(growth_repo)
+
+
+def get_vaccinations_use_case(
+    vaccination_repo: Annotated[VaccinationRepositoryImpl, Depends(get_vaccination_repo)],
+) -> GetVaccinationsUseCase:
+    return GetVaccinationsUseCase(vaccination_repo)
+
+
+def get_mark_administered_use_case(
+    vaccination_repo: Annotated[VaccinationRepositoryImpl, Depends(get_vaccination_repo)],
+) -> MarkAdministeredUseCase:
+    return MarkAdministeredUseCase(vaccination_repo)

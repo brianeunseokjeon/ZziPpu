@@ -1,6 +1,7 @@
 "use client";
 
-import { Baby, Bell, Palette, Info, ChevronRight } from "lucide-react";
+import Link from "next/link";
+import { Baby, Bell, Palette, Info, ChevronRight, TrendingUp, Syringe } from "lucide-react";
 import { Card, CardContent } from "@/shared/components/ui/card";
 import { useUIStore } from "@/shared/stores/uiStore";
 import { getAgeText } from "@/lib/date-utils";
@@ -77,6 +78,43 @@ export default function SettingsPage() {
           </CardContent>
         </Card>
       ))}
+
+      <Card>
+        <CardContent className="pt-4">
+          <div className="flex items-center gap-2 mb-3">
+            <TrendingUp className="w-4 h-4 text-purple-500" />
+            <h3 className="text-sm font-semibold text-gray-700">건강 관리</h3>
+          </div>
+          <div className="space-y-1">
+            <Link
+              href="/growth"
+              className="w-full flex items-center justify-between py-3 px-1 hover:bg-gray-50 rounded-xl transition-colors"
+            >
+              <div className="flex items-center gap-2.5">
+                <span className="text-base">🌱</span>
+                <div className="text-left">
+                  <p className="text-sm font-medium text-gray-800">성장 기록</p>
+                  <p className="text-xs text-gray-400">체중, 키, 머리둘레 기록</p>
+                </div>
+              </div>
+              <ChevronRight className="w-4 h-4 text-gray-300" />
+            </Link>
+            <Link
+              href="/vaccination"
+              className="w-full flex items-center justify-between py-3 px-1 hover:bg-gray-50 rounded-xl transition-colors"
+            >
+              <div className="flex items-center gap-2.5">
+                <span className="text-base">💉</span>
+                <div className="text-left">
+                  <p className="text-sm font-medium text-gray-800">예방접종 일정</p>
+                  <p className="text-xs text-gray-400">접종 스케줄 및 완료 기록</p>
+                </div>
+              </div>
+              <ChevronRight className="w-4 h-4 text-gray-300" />
+            </Link>
+          </div>
+        </CardContent>
+      </Card>
 
       <Card>
         <CardContent className="pt-4">
