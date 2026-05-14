@@ -1,0 +1,85 @@
+from datetime import date
+from typing import Annotated
+from uuid import UUID
+
+from fastapi import APIRouter, Depends, HTTPException, Query, status
+
+from app.application.dto.feeding_dto import CreateFeedingDTO
+from app.application.use_cases.feeding import (
+    CreateFeedingUseCase,
+    GetFeedingsUseCase,
+    DeleteFeedingUseCase,
+)
+from app.presentation.dependencies import (
+    CurrentUserDep,
+    get_create_feeding_use_case,
+    get_get_feedings_use_case,
+    get_delete_feeding_use_case,
+)
+from app.presentation.schemas.feeding_schema import FeedingCreateRequest, FeedingResponse
+
+router = APIRouter(prefix="/babies/{baby_id}/feedings", tags=["feedings"])
+
+
+@router.post("", response_model=FeedingResponse, status_code=status.HTTP_201_CREATED)
+async def create_feeding(
+    baby_id: UUID,
+    body: FeedingCreateRequest,
+    user_id: CurrentUserDep,
+    use_case: Annotated[CreateFeedingUseCase, Depends(get_create_feeding_use_case)],
+) -> FeedingResponse:
+    dto = CreateFeedingDTO(
+        baby_id=baby_id,
+        feeding_type=body.feeding_type,
+        started_at=body.started_at,
+        ended_at=body.ended_at,
+        amount_ml=body.amount_ml,
+        duration_minutes=body.duration_minutes,
+        memo=body.memo,
+    )
+    result = await use_case.execute(dto)
+    return FeedingResponse(
+        id=result.id,
+        baby_id=result.baby_id,
+        feeding_type=result.feeding_type,
+        started_at=result.started_at,
+        ended_at=result.ended_at,
+        amount_ml=result.amount_ml,
+        duration_minutes=result.duration_minutes,
+        memo=result.memo,
+        created_at=result.created_at,
+    )
+
+
+@router.get("", response_model=list[FeedingResponse])
+async def get_feedings(
+    baby_id: UUID,
+    user_id: CurrentUserDep,
+    use_case: Annotated[GetFeedingsUseCase, Depends(get_get_feedings_use_case)],
+    target_date: date = Query(default_factory=date.today, alias="date"),
+) -> list[FeedingResponse]:
+    results = await use_case.execute(baby_id, target_date)
+    return [
+        FeedingResponse(
+            id=r.id,
+            baby_id=r.baby_id,
+            feeding_type=r.feeding_type,
+            started_at=r.started_at,
+            ended_at=r.ended_at,
+            amount_ml=r.amount_ml,
+            duration_minutes=r.duration_minutes,
+            memo=r.memo,
+            created_at=r.created_at,
+        )
+        for r in results
+    ]
+
+
+@router.delete("/{feeding_id}", status_code=status.HTTP_204_NO_CONTENT)
+async def delete_feeding(
+    baby_id: UUID,
+    feeding_id: UUID,
+    user_id: CurrentUserDep,
+    use_case: Annotated[DeleteFeedingUseCase, Depends(get_delete_feeding_use_case)],
+) -> None:
+    await use_case.execute(feeding_id)
