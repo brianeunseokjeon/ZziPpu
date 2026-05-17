@@ -11,6 +11,7 @@ from .chat_message_model import ChatMessageModel
 from .saved_info_model import SavedInfoModel
 from .growth_model import GrowthModel
 from .vaccination_model import VaccinationModel
+from .otp_model import OtpModel
 
 __all__ = [
     "Base",
@@ -26,4 +27,5 @@ __all__ = [
     "SavedInfoModel",
     "GrowthModel",
     "VaccinationModel",
+    "OtpModel",
 ]

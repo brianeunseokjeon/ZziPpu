@@ -5,11 +5,16 @@ from uuid import UUID
 from fastapi import APIRouter, Depends, Query, status
 
 from app.application.dto.diaper_dto import CreateDiaperDTO
-from app.application.use_cases.diaper import CreateDiaperRecordUseCase, GetDiaperRecordsUseCase
+from app.application.use_cases.diaper import (
+    CreateDiaperRecordUseCase,
+    GetDiaperRecordsUseCase,
+    DeleteDiaperUseCase,
+)
 from app.presentation.dependencies import (
     CurrentUserDep,
     get_create_diaper_use_case,
     get_get_diapers_use_case,
+    get_delete_diaper_use_case,
 )
 from app.presentation.schemas.diaper_schema import DiaperCreateRequest, DiaperResponse
 
@@ -65,3 +70,13 @@ async def get_diapers(
         )
         for r in results
     ]
+
+
+@router.delete("/{diaper_id}", status_code=status.HTTP_204_NO_CONTENT)
+async def delete_diaper(
+    baby_id: UUID,
+    diaper_id: UUID,
+    user_id: CurrentUserDep,
+    use_case: Annotated[DeleteDiaperUseCase, Depends(get_delete_diaper_use_case)],
+) -> None:
+    await use_case.execute(diaper_id)

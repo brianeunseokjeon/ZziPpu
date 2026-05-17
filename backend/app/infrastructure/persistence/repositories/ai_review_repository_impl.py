@@ -26,6 +26,10 @@ class AIReviewRepositoryImpl(AIReviewRepository):
             alerts=model.alerts,
             recommendations=model.recommendations,
             created_at=model.created_at,
+            positives=model.positives or [],
+            considerations=model.considerations or [],
+            concerns=model.concerns or [],
+            critical_warnings=model.critical_warnings or [],
         )
 
     async def get_by_baby_and_date(self, baby_id: UUID, review_date: date) -> AIReview | None:
@@ -49,6 +53,10 @@ class AIReviewRepositoryImpl(AIReviewRepository):
             overall_assessment=review.overall_assessment,
             alerts=review.alerts,
             recommendations=review.recommendations,
+            positives=review.positives,
+            considerations=review.considerations,
+            concerns=review.concerns,
+            critical_warnings=review.critical_warnings,
             created_at=review.created_at,
         )
         self._session.add(model)

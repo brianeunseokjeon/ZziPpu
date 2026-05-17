@@ -18,6 +18,7 @@ class UserRepositoryImpl(UserRepository):
             email=model.email,
             name=model.name,
             created_at=model.created_at,
+            phone=model.phone,
         )
 
     async def get(self, id: UUID) -> User | None:
@@ -30,10 +31,17 @@ class UserRepositoryImpl(UserRepository):
         model = result.scalar_one_or_none()
         return self._to_entity(model) if model else None
 
+    async def get_by_phone(self, phone: str) -> User | None:
+        stmt = select(UserModel).where(UserModel.phone == phone)
+        result = await self._session.execute(stmt)
+        model = result.scalar_one_or_none()
+        return self._to_entity(model) if model else None
+
     async def save(self, user: User) -> User:
         model = UserModel(
             id=user.id,
             email=user.email,
+            phone=user.phone,
             name=user.name,
             created_at=user.created_at,
         )
@@ -45,6 +53,7 @@ class UserRepositoryImpl(UserRepository):
         model = UserModel(
             id=user.id,
             email=user.email,
+            phone=user.phone,
             name=user.name,
             hashed_password=hashed_password,
             created_at=user.created_at,

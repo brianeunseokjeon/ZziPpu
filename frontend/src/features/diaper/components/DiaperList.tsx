@@ -20,6 +20,7 @@ function diaperEmoji(type: DiaperType) {
   return "💧💩";
 }
 
+
 export function DiaperList() {
   const { activeBabyId, selectedDate } = useUIStore();
   const { data: diapers, isLoading } = useDiapers(activeBabyId, selectedDate);
@@ -45,7 +46,7 @@ export function DiaperList() {
   }
 
   const sorted = [...diapers].sort(
-    (a, b) => new Date(b.occurredAt).getTime() - new Date(a.occurredAt).getTime()
+    (a, b) => new Date(b.recordedAt).getTime() - new Date(a.recordedAt).getTime()
   );
 
   return (
@@ -62,11 +63,11 @@ export function DiaperList() {
           >
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-full bg-orange-50 flex items-center justify-center text-xl">
-                {diaperEmoji(d.type)}
+                {diaperEmoji(d.diaperType)}
               </div>
               <div>
                 <div className="flex items-center gap-2">
-                  <Badge variant="diaper">{diaperLabel(d.type)}</Badge>
+                  <Badge variant="diaper">{diaperLabel(d.diaperType)}</Badge>
                   {colorInfo && (
                     <span className="flex items-center gap-1 text-xs text-gray-500">
                       <span
@@ -77,7 +78,7 @@ export function DiaperList() {
                     </span>
                   )}
                 </div>
-                <p className="text-xs text-gray-400 mt-0.5">{formatTime(d.occurredAt)}</p>
+                <p className="text-xs text-gray-400 mt-0.5">{formatTime(d.recordedAt)}</p>
                 {d.memo && <p className="text-xs text-gray-500 mt-0.5">{d.memo}</p>}
               </div>
             </div>

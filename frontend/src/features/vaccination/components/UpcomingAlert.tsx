@@ -10,8 +10,8 @@ export function UpcomingAlert() {
 
   if (!upcoming || upcoming.length === 0) return null;
 
-  const overdue = upcoming.filter((v) => v.is_overdue);
-  const pending = upcoming.filter((v) => !v.is_overdue);
+  const overdue = upcoming.filter((v) => v.isOverdue);
+  const pending = upcoming.filter((v) => !v.isOverdue);
 
   return (
     <div
@@ -42,11 +42,11 @@ export function UpcomingAlert() {
               <p
                 key={v.id}
                 className={`text-xs ${
-                  v.is_overdue ? "text-red-600" : "text-orange-600"
+                  v.isOverdue ? "text-red-600" : "text-orange-600"
                 }`}
               >
-                {v.vaccine_name} {v.dose_number}차 · {formatDate(v.scheduled_date)}
-                {v.is_overdue && " (기한 초과)"}
+                {v.vaccineName} {v.doseNumber}차 · {formatDate(v.scheduledDate)}
+                {v.isOverdue && " (기한 초과)"}
               </p>
             ))}
             {upcoming.length > 3 && (

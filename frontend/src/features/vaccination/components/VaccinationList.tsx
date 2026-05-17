@@ -15,11 +15,11 @@ function groupVaccinations(vaccinations: Vaccination[]) {
   const done: Vaccination[] = [];
 
   for (const v of vaccinations) {
-    if (v.administered_date) {
+    if (v.administeredDate) {
       done.push(v);
       continue;
     }
-    const scheduled = new Date(v.scheduled_date);
+    const scheduled = new Date(v.scheduledDate);
     if (
       scheduled.getFullYear() === currentYear &&
       scheduled.getMonth() === currentMonth

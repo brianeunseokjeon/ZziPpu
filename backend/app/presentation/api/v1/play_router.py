@@ -5,11 +5,16 @@ from uuid import UUID
 from fastapi import APIRouter, Depends, Query, status
 
 from app.application.dto.play_dto import CreatePlayDTO
-from app.application.use_cases.play import CreatePlayRecordUseCase, GetPlayRecordsUseCase
+from app.application.use_cases.play import (
+    CreatePlayRecordUseCase,
+    GetPlayRecordsUseCase,
+    DeletePlayUseCase,
+)
 from app.presentation.dependencies import (
     CurrentUserDep,
     get_create_play_use_case,
     get_get_plays_use_case,
+    get_delete_play_use_case,
 )
 from app.presentation.schemas.play_schema import PlayCreateRequest, PlayResponse
 
@@ -65,3 +70,13 @@ async def get_plays(
         )
         for r in results
     ]
+
+
+@router.delete("/{play_id}", status_code=status.HTTP_204_NO_CONTENT)
+async def delete_play(
+    baby_id: UUID,
+    play_id: UUID,
+    user_id: CurrentUserDep,
+    use_case: Annotated[DeletePlayUseCase, Depends(get_delete_play_use_case)],
+) -> None:
+    await use_case.execute(play_id)

@@ -2,12 +2,13 @@
 
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useUIStore } from "@/shared/stores/uiStore";
-import { formatDate, getAgeText, getDateString } from "@/lib/date-utils";
-import { MOCK_BIRTH_DATE } from "@/config/constants";
+import { formatDate, getDateString } from "@/lib/date-utils";
+import { useBabyInfo } from "@/features/baby/hooks/useBabyInfo";
 import { addDays, subDays } from "date-fns";
 
 export function Header() {
   const { selectedDate, setSelectedDate } = useUIStore();
+  const { ageText, photoUrl } = useBabyInfo();
 
   const dateObj = new Date(selectedDate + "T00:00:00");
   const isToday = selectedDate === getDateString(new Date());
@@ -29,9 +30,20 @@ export function Header() {
   return (
     <header className="sticky top-0 z-30 bg-white border-b border-gray-100 pt-[env(safe-area-inset-top)]">
       <div className="max-w-md mx-auto px-4 h-14 flex items-center justify-between gap-2">
-        <div className="flex flex-col leading-tight">
-          <span className="text-base font-bold text-gray-900">먹놀잠 👶</span>
-          <span className="text-xs text-gray-400">{getAgeText(MOCK_BIRTH_DATE)}</span>
+        <div className="flex items-center gap-2">
+          {/* 아기 아바타 */}
+          <div className="w-8 h-8 rounded-full overflow-hidden border border-blue-100 bg-gradient-to-br from-blue-200 to-purple-200 flex items-center justify-center flex-shrink-0">
+            {photoUrl ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={photoUrl} alt="아기" className="w-full h-full object-cover" />
+            ) : (
+              <span className="text-base">👶</span>
+            )}
+          </div>
+          <div className="flex flex-col leading-tight">
+            <span className="text-base font-bold text-gray-900">먹놀잠</span>
+            <span className="text-xs text-gray-400">{ageText}</span>
+          </div>
         </div>
 
         <div className="flex items-center gap-1">

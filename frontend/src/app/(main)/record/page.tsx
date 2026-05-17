@@ -1,9 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { FeedingForm } from "@/features/feeding/components/FeedingForm";
+import { CombinedRecordForm } from "@/features/recording/components/CombinedRecordForm";
 import { FeedingList } from "@/features/feeding/components/FeedingList";
-import { DiaperForm } from "@/features/diaper/components/DiaperForm";
 import { DiaperList } from "@/features/diaper/components/DiaperList";
 import { SleepTimer } from "@/features/sleep/components/SleepTimer";
 import { SleepList } from "@/features/sleep/components/SleepList";
@@ -11,24 +10,22 @@ import { PlayForm } from "@/features/play/components/PlayForm";
 import { PlayList } from "@/features/play/components/PlayList";
 import { cn } from "@/lib/utils";
 
-type RecordTab = "feeding" | "diaper" | "sleep" | "play";
+type RecordTab = "combined" | "sleep" | "play";
 
 const TABS: { value: RecordTab; label: string; emoji: string }[] = [
-  { value: "feeding", label: "수유", emoji: "🍼" },
-  { value: "diaper", label: "배변", emoji: "🧷" },
+  { value: "combined", label: "수유·배변", emoji: "🍼" },
   { value: "sleep", label: "수면", emoji: "😴" },
   { value: "play", label: "놀이", emoji: "🎈" },
 ];
 
 const TAB_COLORS: Record<RecordTab, string> = {
-  feeding: "border-blue-400 text-blue-600",
-  diaper: "border-orange-400 text-orange-600",
-  sleep: "border-purple-400 text-purple-600",
-  play: "border-green-400 text-green-600",
+  combined: "border-blue-400",
+  sleep: "border-purple-400",
+  play: "border-green-400",
 };
 
 export default function RecordPage() {
-  const [activeTab, setActiveTab] = useState<RecordTab>("feeding");
+  const [activeTab, setActiveTab] = useState<RecordTab>("combined");
 
   return (
     <div className="space-y-4">
@@ -51,18 +48,36 @@ export default function RecordPage() {
       </div>
 
       <div className={cn("bg-white rounded-2xl p-4 border-2", TAB_COLORS[activeTab])}>
-        {activeTab === "feeding" && <FeedingForm />}
-        {activeTab === "diaper" && <DiaperForm />}
+        {activeTab === "combined" && <CombinedRecordForm />}
         {activeTab === "sleep" && <SleepTimer />}
         {activeTab === "play" && <PlayForm />}
       </div>
 
-      <div>
-        <h3 className="text-sm font-semibold text-gray-500 mb-2">오늘 기록</h3>
-        {activeTab === "feeding" && <FeedingList />}
-        {activeTab === "diaper" && <DiaperList />}
-        {activeTab === "sleep" && <SleepList />}
-        {activeTab === "play" && <PlayList />}
+      <div className="space-y-4">
+        {activeTab === "combined" && (
+          <>
+            <div>
+              <h3 className="text-sm font-semibold text-gray-500 mb-2">오늘 수유 기록</h3>
+              <FeedingList />
+            </div>
+            <div>
+              <h3 className="text-sm font-semibold text-gray-500 mb-2">오늘 배변 기록</h3>
+              <DiaperList />
+            </div>
+          </>
+        )}
+        {activeTab === "sleep" && (
+          <div>
+            <h3 className="text-sm font-semibold text-gray-500 mb-2">오늘 수면 기록</h3>
+            <SleepList />
+          </div>
+        )}
+        {activeTab === "play" && (
+          <div>
+            <h3 className="text-sm font-semibold text-gray-500 mb-2">오늘 놀이 기록</h3>
+            <PlayList />
+          </div>
+        )}
       </div>
     </div>
   );

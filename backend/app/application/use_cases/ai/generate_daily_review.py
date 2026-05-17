@@ -45,6 +45,10 @@ class GenerateDailyReviewUseCase:
                 overall_assessment=existing.overall_assessment,
                 alerts=existing.alerts,
                 recommendations=existing.recommendations,
+                positives=existing.positives,
+                considerations=existing.considerations,
+                concerns=existing.concerns,
+                critical_warnings=existing.critical_warnings,
             )
 
         baby = await self._baby_repo.get(baby_id)
@@ -69,6 +73,10 @@ class GenerateDailyReviewUseCase:
             overall_assessment=dto.overall_assessment,
             alerts=dto.alerts,
             recommendations=dto.recommendations,
+            positives=dto.positives,
+            considerations=dto.considerations,
+            concerns=dto.concerns,
+            critical_warnings=dto.critical_warnings,
             created_at=datetime.now(timezone.utc),
         )
         await self._ai_review_repo.save(review)

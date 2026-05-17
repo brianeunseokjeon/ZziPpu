@@ -23,13 +23,16 @@ export function PlayForm() {
 
   const [playType, setPlayType] = useState<PlayType>("tummy_time");
   const [memo, setMemo] = useState("");
+  const [manualStartedAt, setManualStartedAt] = useState("");
 
   function handleSave() {
     const durationMinutes = timer.isRunning || timer.elapsedSeconds > 0
       ? Math.max(1, Math.round(timer.elapsedSeconds / 60))
       : 1;
 
-    const startedAt = timer.startedAt
+    const startedAt = manualStartedAt
+      ? new Date(manualStartedAt).toISOString()
+      : timer.startedAt
       ? new Date(timer.startedAt).toISOString()
       : new Date().toISOString();
 
@@ -98,6 +101,17 @@ export function PlayForm() {
             </Button>
           )}
         </div>
+      </div>
+
+      <div>
+        <p className="text-sm font-medium text-gray-700 mb-1.5">기록 시간 (과거 날짜 입력 가능)</p>
+        <Input
+          type="datetime-local"
+          value={manualStartedAt}
+          max={new Date().toISOString().slice(0, 16)}
+          onChange={(e) => setManualStartedAt(e.target.value)}
+          placeholder="비워두면 타이머 기준"
+        />
       </div>
 
       <div>

@@ -1,9 +1,8 @@
 from datetime import date, datetime
 from uuid import UUID
 
-from sqlalchemy import Date, DateTime, Float, Integer, Text
+from sqlalchemy import Date, DateTime, Float, Integer, Text, Uuid
 from sqlalchemy.orm import Mapped, mapped_column
-from sqlalchemy.dialects.postgresql import UUID as PGUUID
 
 from app.infrastructure.persistence.models.base import Base
 
@@ -11,8 +10,8 @@ from app.infrastructure.persistence.models.base import Base
 class GrowthModel(Base):
     __tablename__ = "growth_records"
 
-    id: Mapped[UUID] = mapped_column(PGUUID(as_uuid=True), primary_key=True)
-    baby_id: Mapped[UUID] = mapped_column(PGUUID(as_uuid=True), nullable=False, index=True)
+    id: Mapped[UUID] = mapped_column(Uuid(as_uuid=True), primary_key=True)
+    baby_id: Mapped[UUID] = mapped_column(Uuid(as_uuid=True), nullable=False, index=True)
     recorded_at: Mapped[date] = mapped_column(Date, nullable=False)
     weight_g: Mapped[int | None] = mapped_column(Integer, nullable=True)
     height_cm: Mapped[float | None] = mapped_column(Float, nullable=True)

@@ -8,6 +8,10 @@ export interface DailyReview {
   overall_assessment: string;
   alerts: string[];
   recommendations: string[];
+  positives: string[];
+  considerations: string[];
+  concerns: string[];
+  critical_warnings: string[];
 }
 
 export interface SavedInfo {

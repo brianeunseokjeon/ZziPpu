@@ -12,10 +12,12 @@ class Baby:
     gender: str | None
     birth_weight_g: int | None
     created_at: datetime
+    photo_url: str | None = None
 
     @property
     def age_days(self) -> int:
-        return (date.today() - self.birth_date).days
+        # 한국식: 생일 당일 = 생후 1일
+        return (date.today() - self.birth_date).days + 1
 
     @property
     def age_months(self) -> int:

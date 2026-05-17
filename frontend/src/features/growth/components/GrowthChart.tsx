@@ -11,8 +11,8 @@ import {
   ResponsiveContainer,
 } from "recharts";
 import { useGrowthRecords } from "../api/growthApi";
-import { MOCK_BABY_ID, MOCK_BIRTH_DATE } from "@/config/constants";
-import { getAgeDays } from "@/lib/date-utils";
+import { MOCK_BABY_ID } from "@/config/constants";
+import { useBabyInfo } from "@/features/baby/hooks/useBabyInfo";
 
 type MetricKey = "weight" | "height" | "head";
 
@@ -22,18 +22,19 @@ const TABS: { key: MetricKey; label: string; unit: string }[] = [
   { key: "head", label: "머리둘레", unit: "cm" },
 ];
 
-function getBirthDays(recordedAt: string): number {
-  const birthDate = new Date(MOCK_BIRTH_DATE);
-  const recordDate = new Date(recordedAt);
-  const diff = Math.floor(
-    (recordDate.getTime() - birthDate.getTime()) / (1000 * 60 * 60 * 24)
-  );
-  return diff + 1;
-}
-
 export function GrowthChart() {
   const [activeTab, setActiveTab] = useState<MetricKey>("weight");
+  const { birthDate } = useBabyInfo();
   const { data: records, isLoading } = useGrowthRecords(MOCK_BABY_ID);
+
+  function getBirthDays(recordedAt: string): number {
+    const birth = new Date(birthDate);
+    const recordDate = new Date(recordedAt);
+    const diff = Math.floor(
+      (recordDate.getTime() - birth.getTime()) / (1000 * 60 * 60 * 24)
+    );
+    return diff + 1;
+  }
 
   if (isLoading) {
     return (

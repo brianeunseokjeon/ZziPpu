@@ -1,5 +1,5 @@
 export const API_BASE_URL =
-  process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
+  process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8081";
 
 export const TAB_ITEMS = [
   { icon: "Home", label: "홈", path: "/" },
@@ -44,5 +44,5 @@ export const PLAY_TYPES = [
   { value: "sensory_play", label: "감각놀이", emoji: "🎵" },
 ] as const;
 
-export const MOCK_BABY_ID = "baby-001";
+export const MOCK_BABY_ID = "00000000-0000-0000-0000-000000000002";
 export const MOCK_BIRTH_DATE = "2025-04-13";

@@ -9,6 +9,7 @@ from .saved_info_repository_impl import SavedInfoRepositoryImpl
 from .user_repository_impl import UserRepositoryImpl
 from .growth_repository_impl import GrowthRepositoryImpl
 from .vaccination_repository_impl import VaccinationRepositoryImpl
+from .otp_repository_impl import OtpRepositoryImpl
 
 __all__ = [
     "BabyRepositoryImpl",
@@ -22,4 +23,5 @@ __all__ = [
     "UserRepositoryImpl",
     "GrowthRepositoryImpl",
     "VaccinationRepositoryImpl",
+    "OtpRepositoryImpl",
 ]

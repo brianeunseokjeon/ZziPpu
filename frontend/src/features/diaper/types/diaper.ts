@@ -1,6 +1,6 @@
 export enum DiaperType {
   Pee = "pee",
-  Poop = "poop",
+  Poop = "poo",
   Both = "both",
 }
 
@@ -23,19 +23,19 @@ export enum StoolState {
 export interface DiaperRecord {
   id: string;
   babyId: string;
-  type: DiaperType;
+  diaperType: DiaperType;
   stoolColor?: StoolColor;
   stoolState?: StoolState;
-  occurredAt: string;
+  recordedAt: string;
   memo?: string;
   createdAt: string;
 }
 
 export interface CreateDiaperRequest {
   babyId: string;
-  type: DiaperType;
+  diaperType: DiaperType;
   stoolColor?: StoolColor;
   stoolState?: StoolState;
-  occurredAt: string;
+  recordedAt: string;
   memo?: string;
 }

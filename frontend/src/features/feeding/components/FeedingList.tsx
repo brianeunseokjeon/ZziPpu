@@ -57,7 +57,7 @@ export function FeedingList() {
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <Badge variant="feeding">{feedingLabel(f.type)}</Badge>
+                <Badge variant="feeding">{feedingLabel(f.feedingType)}</Badge>
                 {f.amountMl && (
                   <span className="text-sm font-semibold text-gray-900">
                     {f.amountMl}ml

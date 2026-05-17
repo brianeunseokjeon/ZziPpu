@@ -89,3 +89,16 @@ class VaccinationRepositoryImpl(VaccinationRepository):
         if model:
             await self._session.delete(model)
             await self._session.flush()
+
+    async def delete_pending_by_baby(self, baby_id: UUID) -> None:
+        stmt = (
+            select(VaccinationModel)
+            .where(
+                VaccinationModel.baby_id == baby_id,
+                VaccinationModel.administered_date.is_(None),
+            )
+        )
+        result = await self._session.execute(stmt)
+        for model in result.scalars().all():
+            await self._session.delete(model)
+        await self._session.flush()

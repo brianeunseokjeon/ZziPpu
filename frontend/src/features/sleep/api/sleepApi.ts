@@ -21,7 +21,7 @@ export function useSleepRecords(babyId: string, date: string) {
     queryKey: sleepKeys.list(babyId, date),
     queryFn: () =>
       apiClient.get<SleepRecord[]>(
-        `/api/v1/babies/${babyId}/sleep?date=${date}`
+        `/api/v1/babies/${babyId}/sleeps?date=${date}`
       ),
     enabled: !!babyId,
   });
@@ -32,7 +32,7 @@ export function useActiveSleep(babyId: string) {
     queryKey: sleepKeys.active(babyId),
     queryFn: () =>
       apiClient.get<SleepRecord | null>(
-        `/api/v1/babies/${babyId}/sleep/active`
+        `/api/v1/babies/${babyId}/sleeps/active`
       ),
     enabled: !!babyId,
     refetchInterval: 10000,
@@ -43,7 +43,7 @@ export function useStartSleep() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (data: StartSleepRequest) =>
-      apiClient.post<SleepRecord>(`/api/v1/babies/${data.babyId}/sleep/start`, data),
+      apiClient.post<SleepRecord>(`/api/v1/babies/${data.babyId}/sleeps`, data),
     onSettled: (_data, _err, vars) => {
       qc.invalidateQueries({ queryKey: sleepKeys.active(vars.babyId) });
       qc.invalidateQueries({ queryKey: sleepKeys.all });
@@ -56,7 +56,7 @@ export function useEndSleep() {
   return useMutation({
     mutationFn: ({ babyId, sleepId, endedAt }: { babyId: string; sleepId: string; endedAt: string }) =>
       apiClient.put<SleepRecord>(
-        `/api/v1/babies/${babyId}/sleep/${sleepId}/end`,
+        `/api/v1/babies/${babyId}/sleeps/${sleepId}/end`,
         { endedAt }
       ),
     onSettled: (_data, _err, vars) => {
@@ -71,7 +71,7 @@ export function useCreateSleep() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (data: CreateSleepRequest) =>
-      apiClient.post<SleepRecord>(`/api/v1/babies/${data.babyId}/sleep`, data),
+      apiClient.post<SleepRecord>(`/api/v1/babies/${data.babyId}/sleeps`, data),
     onSettled: (_data, _err, vars) => {
       const date = vars.startedAt.slice(0, 10);
       qc.invalidateQueries({ queryKey: sleepKeys.list(vars.babyId, date) });
@@ -84,7 +84,7 @@ export function useDeleteSleep() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: ({ babyId, sleepId }: { babyId: string; sleepId: string }) =>
-      apiClient.delete<void>(`/api/v1/babies/${babyId}/sleep/${sleepId}`),
+      apiClient.delete<void>(`/api/v1/babies/${babyId}/sleeps/${sleepId}`),
     onSettled: () => {
       qc.invalidateQueries({ queryKey: sleepKeys.all });
       qc.invalidateQueries({ queryKey: ["daily-summary"] });

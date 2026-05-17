@@ -8,7 +8,7 @@ export enum FeedingType {
 export interface Feeding {
   id: string;
   babyId: string;
-  type: FeedingType;
+  feedingType: FeedingType;
   amountMl?: number;
   durationMinutes?: number;
   startedAt: string;
@@ -19,7 +19,7 @@ export interface Feeding {
 
 export interface CreateFeedingRequest {
   babyId: string;
-  type: FeedingType;
+  feedingType: FeedingType;
   amountMl?: number;
   durationMinutes?: number;
   startedAt: string;

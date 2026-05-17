@@ -14,6 +14,10 @@ class DailyReviewDTO:
     overall_assessment: str
     alerts: list[str]
     recommendations: list[str]
+    positives: list[str] = field(default_factory=list)
+    considerations: list[str] = field(default_factory=list)
+    concerns: list[str] = field(default_factory=list)
+    critical_warnings: list[str] = field(default_factory=list)
 
 
 @dataclass

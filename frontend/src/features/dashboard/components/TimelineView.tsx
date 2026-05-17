@@ -28,7 +28,7 @@ export function TimelineView() {
   const events: TimelineEvent[] = [];
 
   feedings?.forEach((f) => {
-    const isFormula = f.type === FeedingType.Formula;
+    const isFormula = f.feedingType === FeedingType.Formula;
     events.push({
       time: new Date(f.startedAt),
       emoji: "🍼",
@@ -38,11 +38,11 @@ export function TimelineView() {
   });
 
   diapers?.forEach((d) => {
-    const isPoop = d.type === DiaperType.Poop || d.type === DiaperType.Both;
+    const isPoop = d.diaperType === DiaperType.Poop || d.diaperType === DiaperType.Both;
     events.push({
-      time: new Date(d.occurredAt),
+      time: new Date(d.recordedAt),
       emoji: isPoop ? "💩" : "💧",
-      label: d.type === DiaperType.Pee ? "소변" : d.type === DiaperType.Poop ? "대변" : "소변+대변",
+      label: d.diaperType === DiaperType.Pee ? "소변" : d.diaperType === DiaperType.Poop ? "대변" : "소변+대변",
       color: "border-orange-300 bg-orange-50",
     });
   });

@@ -16,14 +16,14 @@ interface VaccinationCardProps {
 }
 
 function StatusBadge({ v }: { v: Vaccination }) {
-  if (v.administered_date) {
+  if (v.administeredDate) {
     return (
       <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-700">
         ✓ 완료
       </span>
     );
   }
-  if (v.is_overdue) {
+  if (v.isOverdue) {
     return (
       <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-700">
         ! 지남
@@ -51,8 +51,8 @@ export function VaccinationCard({ vaccination: v, onMark }: VaccinationCardProps
         babyId: MOCK_BABY_ID,
         vaccinationId: v.id,
         data: {
-          administered_date: adminDate,
-          hospital_name: hospitalName || undefined,
+          administeredDate: adminDate,
+          hospitalName: hospitalName || undefined,
         },
       },
       {
@@ -64,9 +64,9 @@ export function VaccinationCard({ vaccination: v, onMark }: VaccinationCardProps
     );
   }
 
-  const borderColor = v.administered_date
+  const borderColor = v.administeredDate
     ? "border-green-100"
-    : v.is_overdue
+    : v.isOverdue
     ? "border-red-100"
     : "border-blue-100";
 
@@ -78,9 +78,9 @@ export function VaccinationCard({ vaccination: v, onMark }: VaccinationCardProps
         <div className="flex items-center gap-3">
           <div
             className={`w-10 h-10 rounded-full flex items-center justify-center text-xl ${
-              v.administered_date
+              v.administeredDate
                 ? "bg-green-50"
-                : v.is_overdue
+                : v.isOverdue
                 ? "bg-red-50"
                 : "bg-blue-50"
             }`}
@@ -90,32 +90,32 @@ export function VaccinationCard({ vaccination: v, onMark }: VaccinationCardProps
           <div>
             <div className="flex items-center gap-2 flex-wrap">
               <p className="text-sm font-semibold text-gray-800">
-                {v.vaccine_name}
+                {v.vaccineName}
               </p>
-              <span className="text-xs text-gray-400">{v.dose_number}차</span>
+              <span className="text-xs text-gray-400">{v.doseNumber}차</span>
               <StatusBadge v={v} />
             </div>
             <p className="text-xs text-gray-400 mt-0.5">
-              예정일: {formatDate(v.scheduled_date)}
+              예정일: {formatDate(v.scheduledDate)}
             </p>
-            {v.administered_date && (
+            {v.administeredDate && (
               <p className="text-xs text-green-600 mt-0.5">
-                접종: {formatDate(v.administered_date)}
-                {v.hospital_name && ` · ${v.hospital_name}`}
+                접종: {formatDate(v.administeredDate)}
+                {v.hospitalName && ` · ${v.hospitalName}`}
               </p>
             )}
-            {!v.administered_date && v.days_until !== null && (
+            {!v.administeredDate && v.daysUntil !== null && (
               <p className="text-xs text-gray-400 mt-0.5">
-                {v.days_until > 0
-                  ? `D-${v.days_until}`
-                  : v.days_until === 0
+                {v.daysUntil > 0
+                  ? `D-${v.daysUntil}`
+                  : v.daysUntil === 0
                   ? "오늘"
-                  : `D+${Math.abs(v.days_until)}`}
+                  : `D+${Math.abs(v.daysUntil)}`}
               </p>
             )}
           </div>
         </div>
-        {!v.administered_date && (
+        {!v.administeredDate && (
           <Button
             size="sm"
             onClick={() => setModalOpen(true)}
@@ -129,7 +129,7 @@ export function VaccinationCard({ vaccination: v, onMark }: VaccinationCardProps
       <Dialog
         open={modalOpen}
         onClose={() => setModalOpen(false)}
-        title={`${v.vaccine_name} ${v.dose_number}차 접종 완료`}
+        title={`${v.vaccineName} ${v.doseNumber}차 접종 완료`}
       >
         <div className="space-y-4">
           <div>

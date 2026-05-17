@@ -28,7 +28,7 @@ export function useCreateDiaper() {
     mutationFn: (data: CreateDiaperRequest) =>
       apiClient.post<DiaperRecord>(`/api/v1/babies/${data.babyId}/diapers`, data),
     onSettled: (_data, _err, vars) => {
-      const date = vars.occurredAt.slice(0, 10);
+      const date = vars.recordedAt.slice(0, 10);
       qc.invalidateQueries({ queryKey: diaperKeys.list(vars.babyId, date) });
       qc.invalidateQueries({ queryKey: ["daily-summary"] });
     },

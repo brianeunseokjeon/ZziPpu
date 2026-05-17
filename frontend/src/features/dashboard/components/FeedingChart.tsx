@@ -30,7 +30,7 @@ export function FeedingChart() {
 
   if (feedings) {
     feedings.forEach((f) => {
-      if (f.type === FeedingType.Formula && f.amountMl) {
+      if (f.feedingType === FeedingType.Formula && f.amountMl) {
         const hour = new Date(f.startedAt).getHours();
         hourlyData[hour].ml += f.amountMl;
       }

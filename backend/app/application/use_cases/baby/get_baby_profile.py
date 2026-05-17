@@ -22,6 +22,7 @@ class GetBabyProfileUseCase:
             age_days=baby.age_days,
             age_months=baby.age_months,
             created_at=baby.created_at,
+            photo_url=baby.photo_url,
         )
 
     async def get_by_user(self, user_id: UUID) -> list[BabyResponseDTO]:
@@ -37,6 +38,7 @@ class GetBabyProfileUseCase:
                 age_days=b.age_days,
                 age_months=b.age_months,
                 created_at=b.created_at,
+                photo_url=b.photo_url,
             )
             for b in babies
         ]

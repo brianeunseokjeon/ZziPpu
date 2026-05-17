@@ -5,12 +5,18 @@ from uuid import UUID
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 
 from app.application.dto.sleep_dto import StartSleepDTO, EndSleepDTO
-from app.application.use_cases.sleep import StartSleepUseCase, EndSleepUseCase, GetSleepRecordsUseCase
+from app.application.use_cases.sleep import (
+    StartSleepUseCase,
+    EndSleepUseCase,
+    GetSleepRecordsUseCase,
+    DeleteSleepUseCase,
+)
 from app.presentation.dependencies import (
     CurrentUserDep,
     get_start_sleep_use_case,
     get_end_sleep_use_case,
     get_get_sleeps_use_case,
+    get_delete_sleep_use_case,
 )
 from app.presentation.schemas.sleep_schema import SleepStartRequest, SleepEndRequest, SleepResponse
 
@@ -108,3 +114,13 @@ async def get_active_sleep(
         memo=result.memo,
         created_at=result.created_at,
     )
+
+
+@router.delete("/{sleep_id}", status_code=status.HTTP_204_NO_CONTENT)
+async def delete_sleep(
+    baby_id: UUID,
+    sleep_id: UUID,
+    user_id: CurrentUserDep,
+    use_case: Annotated[DeleteSleepUseCase, Depends(get_delete_sleep_use_case)],
+) -> None:
+    await use_case.execute(sleep_id)

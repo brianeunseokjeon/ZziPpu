@@ -14,5 +14,9 @@ class UserRepository(ABC):
         ...
 
     @abstractmethod
+    async def get_by_phone(self, phone: str) -> User | None:
+        ...
+
+    @abstractmethod
     async def save(self, user: User) -> User:
         ...

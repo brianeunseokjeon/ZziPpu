@@ -26,10 +26,10 @@ export function DiaperForm() {
   function handleSave() {
     createDiaper({
       babyId: activeBabyId,
-      type,
+      diaperType: type,
       stoolColor: hasPoop ? stoolColor : undefined,
       stoolState: hasPoop ? stoolState : undefined,
-      occurredAt: new Date(occurredAt).toISOString(),
+      recordedAt: new Date(occurredAt).toISOString(),
       memo: memo || undefined,
     });
     setMemo("");
@@ -113,10 +113,11 @@ export function DiaperForm() {
       )}
 
       <div>
-        <p className="text-sm font-medium text-gray-700 mb-1.5">시간</p>
+        <p className="text-sm font-medium text-gray-700 mb-1.5">기록 시간 (과거 날짜 입력 가능)</p>
         <Input
           type="datetime-local"
           value={occurredAt}
+          max={new Date().toISOString().slice(0, 16)}
           onChange={(e) => setOccurredAt(e.target.value)}
         />
       </div>

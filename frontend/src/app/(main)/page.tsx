@@ -2,17 +2,16 @@
 
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { Milk, Moon, Baby, Gamepad2, ChevronRight, AlertTriangle } from "lucide-react";
+import { Milk, Moon, Gamepad2, ChevronRight, Syringe } from "lucide-react";
 import { Card, CardContent } from "@/shared/components/ui/card";
-import { Button } from "@/shared/components/ui/button";
 import { DailySummaryCard } from "@/features/dashboard/components/DailySummaryCard";
 import { useUIStore } from "@/shared/stores/uiStore";
-import { useTimerStore } from "@/shared/stores/timerStore";
 import { useTimer } from "@/shared/hooks/useTimer";
-import { formatTime } from "@/lib/date-utils";
+import { formatTime, formatDate } from "@/lib/date-utils";
 import { useFeedings } from "@/features/feeding/api/feedingApi";
 import { getDateString } from "@/lib/date-utils";
-import { useUpcomingVaccinations } from "@/features/vaccination/api/vaccinationApi";
+import { useVaccinations, useUpcomingVaccinations } from "@/features/vaccination/api/vaccinationApi";
+import { MilestoneBanner } from "@/features/baby/components/MilestoneBanner";
 import { MOCK_BABY_ID } from "@/config/constants";
 
 function SleepStatusCard() {
@@ -91,45 +90,77 @@ function LastFeedingCard() {
 }
 
 const QUICK_ACTIONS = [
-  { icon: Milk, label: "수유", path: "/record/feeding", color: "text-blue-500 bg-blue-50" },
-  { icon: Baby, label: "배변", path: "/record/diaper", color: "text-orange-500 bg-orange-50" },
+  { icon: Milk, label: "수유·배변", path: "/record", color: "text-blue-500 bg-blue-50" },
   { icon: Moon, label: "수면", path: "/record/sleep", color: "text-purple-500 bg-purple-50" },
   { icon: Gamepad2, label: "놀이", path: "/record/play", color: "text-green-500 bg-green-50" },
 ];
 
-function VaccinationBanner() {
-  const { data: upcoming } = useUpcomingVaccinations(MOCK_BABY_ID);
+function VaccinationScheduleCard() {
+  const { data: allVaccinations } = useVaccinations(MOCK_BABY_ID);
 
-  if (!upcoming || upcoming.length === 0) return null;
+  const allPending = (allVaccinations ?? [])
+    .filter((v) => !v.administeredDate)
+    .sort((a, b) => new Date(a.scheduledDate).getTime() - new Date(b.scheduledDate).getTime());
 
-  const hasOverdue = upcoming.some((v) => v.is_overdue);
+  // 기한 초과 + 다가오는 접종 최대 4개
+  const overdue = allPending.filter((v) => v.isOverdue);
+  const upcoming = allPending.filter((v) => !v.isOverdue);
+  const pending = [...overdue, ...upcoming].slice(0, 4);
 
   return (
     <Link href="/vaccination">
-      <div
-        className={`rounded-2xl p-3 border flex items-center gap-3 ${
-          hasOverdue
-            ? "bg-red-50 border-red-200"
-            : "bg-orange-50 border-orange-200"
-        }`}
-      >
-        <AlertTriangle
-          className={`w-5 h-5 shrink-0 ${
-            hasOverdue ? "text-red-500" : "text-orange-500"
-          }`}
-        />
-        <p
-          className={`text-sm font-medium flex-1 ${
-            hasOverdue ? "text-red-700" : "text-orange-700"
-          }`}
-        >
-          {hasOverdue
-            ? `접종 기한 초과 항목이 있어요 (${upcoming.filter((v) => v.is_overdue).length}건)`
-            : `30일 이내 예방접종 ${upcoming.length}건이 있어요`}
-        </p>
-        <ChevronRight
-          className={`w-4 h-4 ${hasOverdue ? "text-red-400" : "text-orange-400"}`}
-        />
+      <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden">
+        <div className={`px-4 py-3 flex items-center justify-between ${
+          overdue.length > 0 ? "bg-red-50" : "bg-teal-50"
+        }`}>
+          <div className="flex items-center gap-2">
+            <Syringe className={`w-4 h-4 ${overdue.length > 0 ? "text-red-500" : "text-teal-600"}`} />
+            <span className={`text-sm font-semibold ${overdue.length > 0 ? "text-red-700" : "text-teal-700"}`}>
+              예방접종 일정
+            </span>
+            {overdue.length > 0 && (
+              <span className="text-xs bg-red-500 text-white rounded-full px-1.5 py-0.5 font-medium">
+                기한 초과 {overdue.length}건
+              </span>
+            )}
+          </div>
+          <ChevronRight className="w-4 h-4 text-gray-400" />
+        </div>
+
+        {pending.length === 0 ? (
+          <div className="px-4 py-3 text-xs text-gray-400">예정된 접종이 없어요</div>
+        ) : (
+          <div className="divide-y divide-gray-50">
+            {pending.map((v) => (
+              <div key={v.id} className="px-4 py-2.5 flex items-center justify-between">
+                <div className="flex items-center gap-2.5">
+                  <span className="text-lg">💉</span>
+                  <div>
+                    <p className="text-xs font-semibold text-gray-800">
+                      {v.vaccineName} <span className="text-gray-400 font-normal">{v.doseNumber}차</span>
+                    </p>
+                    <p className="text-xs text-gray-400">{formatDate(v.scheduledDate)}</p>
+                  </div>
+                </div>
+                <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${
+                  v.isOverdue
+                    ? "bg-red-100 text-red-600"
+                    : v.daysUntil === 0
+                    ? "bg-orange-100 text-orange-600"
+                    : v.daysUntil !== null && v.daysUntil <= 7
+                    ? "bg-yellow-100 text-yellow-700"
+                    : "bg-blue-50 text-blue-500"
+                }`}>
+                  {v.isOverdue
+                    ? `D+${Math.abs(v.daysUntil ?? 0)}`
+                    : v.daysUntil === 0
+                    ? "오늘"
+                    : `D-${v.daysUntil}`}
+                </span>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     </Link>
   );
@@ -140,7 +171,7 @@ export default function HomePage() {
 
   return (
     <div className="space-y-4">
-      <VaccinationBanner />
+      <MilestoneBanner />
       <SleepStatusCard />
       <LastFeedingCard />
 
@@ -151,7 +182,7 @@ export default function HomePage() {
 
       <div>
         <h2 className="text-sm font-semibold text-gray-500 mb-2">빠른 기록</h2>
-        <div className="grid grid-cols-4 gap-3">
+        <div className="grid grid-cols-3 gap-3">
           {QUICK_ACTIONS.map(({ icon: Icon, label, path, color }) => (
             <button
               key={path}
@@ -164,6 +195,8 @@ export default function HomePage() {
           ))}
         </div>
       </div>
+
+      <VaccinationScheduleCard />
 
       <div>
         <button

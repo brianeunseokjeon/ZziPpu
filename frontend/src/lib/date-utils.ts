@@ -20,8 +20,12 @@ export function formatDuration(minutes: number): string {
 }
 
 export function getAgeDays(birthDate: Date | string): number {
-  const d = typeof birthDate === "string" ? new Date(birthDate) : birthDate;
-  return differenceInDays(new Date(), d) + 1;
+  // 한국식: 생일 당일 = 생후 1일. TZ 무관하게 캘린더 날짜로만 비교.
+  const birth = typeof birthDate === "string" ? new Date(birthDate) : birthDate;
+  const birthLocal = new Date(birth.getFullYear(), birth.getMonth(), birth.getDate());
+  const today = new Date();
+  const todayLocal = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+  return differenceInDays(todayLocal, birthLocal) + 1;
 }
 
 export function getAgeText(birthDate: Date | string): string {

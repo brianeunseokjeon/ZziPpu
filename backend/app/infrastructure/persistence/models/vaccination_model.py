@@ -1,9 +1,8 @@
 from datetime import date, datetime
 from uuid import UUID
 
-from sqlalchemy import Date, DateTime, Integer, String, Text
+from sqlalchemy import Date, DateTime, Integer, String, Text, Uuid
 from sqlalchemy.orm import Mapped, mapped_column
-from sqlalchemy.dialects.postgresql import UUID as PGUUID
 
 from app.infrastructure.persistence.models.base import Base
 
@@ -11,8 +10,8 @@ from app.infrastructure.persistence.models.base import Base
 class VaccinationModel(Base):
     __tablename__ = "vaccinations"
 
-    id: Mapped[UUID] = mapped_column(PGUUID(as_uuid=True), primary_key=True)
-    baby_id: Mapped[UUID] = mapped_column(PGUUID(as_uuid=True), nullable=False, index=True)
+    id: Mapped[UUID] = mapped_column(Uuid(as_uuid=True), primary_key=True)
+    baby_id: Mapped[UUID] = mapped_column(Uuid(as_uuid=True), nullable=False, index=True)
     vaccine_name: Mapped[str] = mapped_column(String(100), nullable=False)
     dose_number: Mapped[int] = mapped_column(Integer, nullable=False)
     scheduled_date: Mapped[date] = mapped_column(Date, nullable=False)

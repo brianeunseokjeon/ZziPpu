@@ -18,6 +18,10 @@ class DailyReviewResponse(BaseModel):
     overall_assessment: str
     alerts: list[str]
     recommendations: list[str]
+    positives: list[str] = Field(default_factory=list)
+    considerations: list[str] = Field(default_factory=list)
+    concerns: list[str] = Field(default_factory=list)
+    critical_warnings: list[str] = Field(default_factory=list)
 
 
 class ChatRequest(BaseModel):

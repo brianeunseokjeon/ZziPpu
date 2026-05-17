@@ -45,13 +45,16 @@ export function DailySummaryCard() {
   const fallback = {
     totalFeedingMl: 0,
     feedingCount: 0,
-    lastFeedingAt: undefined,
     totalSleepMinutes: 0,
     sleepCount: 0,
     diaperCount: 0,
     poopCount: 0,
-    tummyTimeMinutes: 0,
+    peeCount: 0,
     totalPlayMinutes: 0,
+    tummyTimeMinutes: 0,
+    lastFeedingAt: undefined,
+    lastDiaperAt: undefined,
+    lastSleepAt: undefined,
   };
 
   const s = summary ?? fallback;

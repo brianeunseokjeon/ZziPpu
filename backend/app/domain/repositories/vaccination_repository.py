@@ -30,3 +30,8 @@ class VaccinationRepository(ABC):
     @abstractmethod
     async def delete(self, id: UUID) -> None:
         ...
+
+    @abstractmethod
+    async def delete_pending_by_baby(self, baby_id: UUID) -> None:
+        """미접종(administered_date is None) 일정 모두 삭제."""
+        ...

@@ -21,6 +21,7 @@ class BabyRepositoryImpl(BabyRepository):
             gender=model.gender,
             birth_weight_g=model.birth_weight_g,
             created_at=model.created_at,
+            photo_url=model.photo_url,
         )
 
     def _to_model(self, entity: Baby) -> BabyModel:
@@ -32,6 +33,7 @@ class BabyRepositoryImpl(BabyRepository):
             gender=entity.gender,
             birth_weight_g=entity.birth_weight_g,
             created_at=entity.created_at,
+            photo_url=entity.photo_url,
         )
 
     async def get(self, id: UUID) -> Baby | None:
@@ -57,6 +59,7 @@ class BabyRepositoryImpl(BabyRepository):
         model.birth_date = baby.birth_date
         model.gender = baby.gender
         model.birth_weight_g = baby.birth_weight_g
+        model.photo_url = baby.photo_url
         await self._session.flush()
         return self._to_entity(model)
 

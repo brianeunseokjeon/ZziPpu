@@ -31,12 +31,12 @@ class ClaudeService(AIService):
         plays: list[PlayRecord],
     ) -> DailyReviewDTO:
         context = build_daily_context(baby, feedings, sleeps, diapers, plays)
-        prompt = build_daily_review_prompt(context)
+        prompt = build_daily_review_prompt(context, age_days=baby.age_days)
 
         message = await self._client.messages.create(
             model="claude-haiku-4-5",
             max_tokens=4096,
-            system="당신은 신생아 육아 전문가입니다. JSON 형식으로만 응답하세요.",
+            system=f"당신은 신생아 및 영아 전문 소아과 의사입니다. 생후 {baby.age_days}일({baby.age_months}개월) 아기의 기록을 검토합니다. JSON 형식으로만 응답하세요.",
             messages=[{"role": "user", "content": prompt}],
         )
 
@@ -64,6 +64,10 @@ class ClaudeService(AIService):
             overall_assessment=data.get("overall_assessment", "종합 평가를 생성할 수 없습니다."),
             alerts=data.get("alerts", []),
             recommendations=data.get("recommendations", []),
+            positives=data.get("positives", []),
+            considerations=data.get("considerations", []),
+            concerns=data.get("concerns", []),
+            critical_warnings=data.get("critical_warnings", []),
         )
 
     async def chat_stream(
