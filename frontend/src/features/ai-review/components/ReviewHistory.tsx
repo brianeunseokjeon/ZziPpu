@@ -36,7 +36,7 @@ function formatDisplayDate(dateStr: string): string {
 export function ReviewHistory({ reviews }: Props) {
   const [expandedDate, setExpandedDate] = useState<string | null>(null);
   const last7 = getLast7Days();
-  const reviewMap = new Map(reviews.map((r) => [r.review_date, r]));
+  const reviewMap = new Map(reviews.map((r) => [r.reviewDate, r]));
 
   const toggle = (date: string) =>
     setExpandedDate((prev) => (prev === date ? null : date));
@@ -89,7 +89,7 @@ export function ReviewHistory({ reviews }: Props) {
                 {review && isExpanded && (
                   <div className="mt-2 ml-2 pl-3 border-l-2 border-blue-200 space-y-2 pb-1">
                     <p className="text-xs text-gray-600 leading-relaxed">
-                      {review.overall_assessment}
+                      {review.overallAssessment}
                     </p>
                     {review.alerts.length > 0 && (
                       <div className="space-y-1">

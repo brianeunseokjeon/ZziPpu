@@ -31,7 +31,7 @@ export function SavedInfoCard({ info, onDelete }: Props) {
   const displayContent =
     !isLong || expanded ? info.content : info.content.slice(0, 80) + "...";
 
-  const formattedDate = new Date(info.created_at).toLocaleDateString("ko-KR", {
+  const formattedDate = new Date(info.createdAt).toLocaleDateString("ko-KR", {
     month: "short",
     day: "numeric",
   });

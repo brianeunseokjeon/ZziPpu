@@ -1,25 +1,26 @@
+// api-client가 응답을 자동 camelize 하므로 모든 필드는 camelCase.
 export interface DailyReview {
-  baby_id: string;
-  review_date: string;
-  feeding_analysis: string;
-  sleep_analysis: string;
-  diaper_analysis: string;
-  play_analysis: string;
-  overall_assessment: string;
+  babyId: string;
+  reviewDate: string;
+  feedingAnalysis: string;
+  sleepAnalysis: string;
+  diaperAnalysis: string;
+  playAnalysis: string;
+  overallAssessment: string;
   alerts: string[];
   recommendations: string[];
   positives: string[];
   considerations: string[];
   concerns: string[];
-  critical_warnings: string[];
+  criticalWarnings: string[];
 }
 
 export interface SavedInfo {
   id: string;
-  baby_id: string;
+  babyId: string;
   title: string;
   content: string;
   category: "feeding" | "sleep" | "development" | "health" | "general";
-  chat_message_id?: string;
-  created_at: string;
+  chatMessageId?: string;
+  createdAt: string;
 }

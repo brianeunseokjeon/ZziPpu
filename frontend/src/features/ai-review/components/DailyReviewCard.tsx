@@ -19,7 +19,7 @@ interface Props {
 
 const SECTIONS = [
   {
-    key: "feeding_analysis" as const,
+    key: "feedingAnalysis" as const,
     label: "수유",
     emoji: "🍼",
     bg: "bg-blue-50",
@@ -28,7 +28,7 @@ const SECTIONS = [
     activeTab: "bg-blue-500 text-white",
   },
   {
-    key: "sleep_analysis" as const,
+    key: "sleepAnalysis" as const,
     label: "수면",
     emoji: "😴",
     bg: "bg-purple-50",
@@ -37,7 +37,7 @@ const SECTIONS = [
     activeTab: "bg-purple-500 text-white",
   },
   {
-    key: "diaper_analysis" as const,
+    key: "diaperAnalysis" as const,
     label: "배변",
     emoji: "🧷",
     bg: "bg-orange-50",
@@ -46,7 +46,7 @@ const SECTIONS = [
     activeTab: "bg-orange-500 text-white",
   },
   {
-    key: "play_analysis" as const,
+    key: "playAnalysis" as const,
     label: "놀이",
     emoji: "🤸",
     bg: "bg-green-50",
@@ -88,7 +88,7 @@ export function DailyReviewCard({ review }: Props) {
   const hasPositives = review.positives?.length > 0;
   const hasConsiderations = review.considerations?.length > 0;
   const hasConcerns = review.concerns?.length > 0;
-  const hasCritical = review.critical_warnings?.length > 0;
+  const hasCritical = review.criticalWarnings?.length > 0;
 
   return (
     <div className="space-y-3">
@@ -100,7 +100,7 @@ export function DailyReviewCard({ review }: Props) {
               <p className="text-sm font-bold text-red-700">즉시 확인 필요</p>
             </div>
             <SectionList
-              items={review.critical_warnings}
+              items={review.criticalWarnings}
               icon={AlertCircle}
               iconClass="text-red-500"
               itemClass="bg-red-50 border border-red-200 text-red-800"
@@ -113,7 +113,7 @@ export function DailyReviewCard({ review }: Props) {
         <CardContent className="pt-5">
           <div className="bg-gradient-to-br from-blue-50 to-purple-50 rounded-xl p-4 border border-blue-100">
             <p className="text-sm font-semibold text-blue-800 mb-1">오늘의 총평</p>
-            <p className="text-sm text-gray-700 leading-relaxed">{review.overall_assessment}</p>
+            <p className="text-sm text-gray-700 leading-relaxed">{review.overallAssessment}</p>
           </div>
         </CardContent>
       </Card>

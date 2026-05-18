@@ -31,7 +31,7 @@ export default function AIReviewPage() {
   const { data: reviews = [], isLoading: reviewsLoading } = useAIReviews(MOCK_BABY_ID);
   const generateMutation = useGenerateReview(MOCK_BABY_ID, today);
 
-  const todayReview = reviews.find((r) => r.review_date === today);
+  const todayReview = reviews.find((r) => r.reviewDate === today);
 
   const handleGenerate = () => {
     generateMutation.mutate();

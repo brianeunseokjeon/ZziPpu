@@ -13,9 +13,13 @@ from app.application.use_cases.ai import (
     SaveChatInfoUseCase,
 )
 from app.domain.entities.chat_message import ChatMessage
-from app.infrastructure.persistence.repositories import ChatRepositoryImpl
+from app.infrastructure.persistence.repositories import (
+    AIReviewRepositoryImpl,
+    ChatRepositoryImpl,
+)
 from app.presentation.dependencies import (
     CurrentUserDep,
+    get_ai_review_repo,
     get_generate_review_use_case,
     get_chat_use_case,
     get_save_info_use_case,
@@ -32,6 +36,24 @@ from app.presentation.schemas.ai_schema import (
 router = APIRouter(prefix="/babies/{baby_id}/ai", tags=["ai"])
 
 
+def _to_review_response(result) -> DailyReviewResponse:
+    return DailyReviewResponse(
+        baby_id=result.baby_id,
+        review_date=result.review_date,
+        feeding_analysis=result.feeding_analysis,
+        sleep_analysis=result.sleep_analysis,
+        diaper_analysis=result.diaper_analysis,
+        play_analysis=result.play_analysis,
+        overall_assessment=result.overall_assessment,
+        alerts=list(result.alerts or []),
+        recommendations=list(result.recommendations or []),
+        positives=list(getattr(result, "positives", []) or []),
+        considerations=list(getattr(result, "considerations", []) or []),
+        concerns=list(getattr(result, "concerns", []) or []),
+        critical_warnings=list(getattr(result, "critical_warnings", []) or []),
+    )
+
+
 @router.post("/review", response_model=DailyReviewResponse)
 async def generate_review(
     baby_id: UUID,
@@ -43,17 +65,19 @@ async def generate_review(
         result = await use_case.execute(baby_id, body.review_date)
     except ValueError as e:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
-    return DailyReviewResponse(
-        baby_id=result.baby_id,
-        review_date=result.review_date,
-        feeding_analysis=result.feeding_analysis,
-        sleep_analysis=result.sleep_analysis,
-        diaper_analysis=result.diaper_analysis,
-        play_analysis=result.play_analysis,
-        overall_assessment=result.overall_assessment,
-        alerts=result.alerts,
-        recommendations=result.recommendations,
-    )
+    return _to_review_response(result)
+
+
+@router.get("/reviews", response_model=list[DailyReviewResponse])
+async def list_reviews(
+    baby_id: UUID,
+    user_id: CurrentUserDep,
+    ai_review_repo: Annotated[AIReviewRepositoryImpl, Depends(get_ai_review_repo)],
+    limit: int = 30,
+) -> list[DailyReviewResponse]:
+    """저장된 일일 AI 리뷰 목록 (최신순)."""
+    reviews = await ai_review_repo.get_recent(baby_id, limit=limit)
+    return [_to_review_response(r) for r in reviews]
 
 
 @router.post("/chat")
