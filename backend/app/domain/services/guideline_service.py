@@ -2,7 +2,10 @@ from dataclasses import dataclass, field
 
 from app.domain.guidelines.feeding_guidelines import get_feeding_guideline
 from app.domain.guidelines.sleep_guidelines import get_sleep_guideline
-from app.domain.guidelines.diaper_guidelines import get_diaper_guideline
+from app.domain.guidelines.diaper_guidelines import (
+    get_diaper_guideline,
+    get_diaper_guideline_by_months,
+)
 from app.domain.guidelines.play_guidelines import get_play_guideline
 from app.domain.entities.feeding import Feeding
 from app.domain.entities.sleep_record import SleepRecord
@@ -83,7 +86,8 @@ class GuidelineService:
         )
 
     def evaluate_diaper(self, records: list[DiaperRecord], age_months: int) -> GuidelineResult:
-        guideline = get_diaper_guideline(age_months)
+        # 신생아 첫 며칠을 정밀하게 다루려면 evaluate_diaper_by_days 사용 권장.
+        guideline = get_diaper_guideline_by_months(age_months)
         wet_count = sum(1 for r in records if r.diaper_type.value in ("pee", "both"))
         poo_count = sum(1 for r in records if r.diaper_type.value in ("poo", "both"))
         alert_colors = [
