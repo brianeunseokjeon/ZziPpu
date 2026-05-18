@@ -1,54 +1,71 @@
 "use client";
 
-import { useState } from "react";
-import { Minus, Plus, ChevronDown, ChevronUp } from "lucide-react";
+import { useEffect, useState } from "react";
+import { Minus, Plus, Play, Pause, CheckCircle2, RotateCcw } from "lucide-react";
 import { Button } from "@/shared/components/ui/button";
 import { Input } from "@/shared/components/ui/input";
-import { useTimer } from "@/shared/hooks/useTimer";
+import { useActivityTimer, formatElapsed } from "@/shared/hooks/useActivityTimer";
+import {
+  useRecordingPreferencesStore,
+  type RecordingMode,
+} from "@/shared/stores/recordingPreferencesStore";
 import { useCreateFeeding } from "../api/feedingApi";
 import { FeedingType } from "../types/feeding";
 import { useUIStore } from "@/shared/stores/uiStore";
-import { useCreateDiaper } from "@/features/diaper/api/diaperApi";
-import { DiaperType, StoolColor, StoolState } from "@/features/diaper/types/diaper";
-import { STOOL_COLORS, STOOL_STATES } from "@/config/constants";
+import { ModeToggle } from "@/features/recording/components/ModeToggle";
 import { cn } from "@/lib/utils";
 
 type Tab = "formula" | "breast";
 type BreastSide = "left" | "right" | "both";
 
-function formatTimerDisplay(seconds: number) {
-  const h = Math.floor(seconds / 3600);
-  const m = Math.floor((seconds % 3600) / 60);
-  const s = seconds % 60;
-  if (h > 0) {
-    return `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
-  }
-  return `${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
+function sideToFeedingType(side: BreastSide): FeedingType {
+  if (side === "left") return FeedingType.BreastLeft;
+  if (side === "right") return FeedingType.BreastRight;
+  return FeedingType.BreastBoth;
+}
+
+function metaToBreastSide(meta?: string): BreastSide {
+  if (meta === "breast_left") return "left";
+  if (meta === "breast_right") return "right";
+  return "both";
 }
 
 export function FeedingForm() {
   const { activeBabyId } = useUIStore();
-  const { mutate: createFeeding, isPending: feedingPending } = useCreateFeeding();
-  const { mutate: createDiaper, isPending: diaperPending } = useCreateDiaper();
-  const timer = useTimer("feeding");
+  const { mutateAsync: createFeeding, isPending } = useCreateFeeding();
+  const timer = useActivityTimer("feeding");
+  const formulaDefault = useRecordingPreferencesStore((s) => s.defaultModes.feedingFormula);
+  const breastDefault = useRecordingPreferencesStore((s) => s.defaultModes.feedingBreast);
 
-  const [tab, setTab] = useState<Tab>("formula");
-  const [amountMl, setAmountMl] = useState(100);
-  const [amountInput, setAmountInput] = useState("100");
-  const [breastSide, setBreastSide] = useState<BreastSide>("both");
-  const [memo, setMemo] = useState("");
-  const [startedAt, setStartedAt] = useState(() =>
-    new Date().toISOString().slice(0, 16)
+  const [tab, setTab] = useState<Tab>(timer.isActive ? "breast" : "formula");
+  // 분유는 "now" / "manual" 만 의미 있음 (타이머는 모유 전용)
+  const [formulaMode, setFormulaMode] = useState<RecordingMode>(
+    formulaDefault === "timer" ? "now" : formulaDefault
+  );
+  const [breastMode, setBreastMode] = useState<RecordingMode>(
+    timer.isActive ? "timer" : breastDefault
   );
 
-  // 배변 함께 기록
-  const [withDiaper, setWithDiaper] = useState(false);
-  const [diaperType, setDiaperType] = useState<DiaperType>(DiaperType.Pee);
-  const [stoolColor, setStoolColor] = useState<StoolColor | undefined>();
-  const [stoolState, setStoolState] = useState<StoolState | undefined>();
+  useEffect(() => {
+    if (timer.isActive) {
+      setTab("breast");
+      setBreastMode("timer");
+    }
+  }, [timer.isActive]);
 
-  const hasPoop = diaperType === DiaperType.Poop || diaperType === DiaperType.Both;
-  const isPending = feedingPending || diaperPending;
+  // 분유 상태
+  const [amountMl, setAmountMl] = useState(100);
+  const [amountInput, setAmountInput] = useState("100");
+  // 모유 상태
+  const [breastSide, setBreastSide] = useState<BreastSide>(
+    metaToBreastSide(timer.session?.meta.feedingType)
+  );
+  // 공통
+  const [memo, setMemo] = useState("");
+  const [manualStartedAt, setManualStartedAt] = useState(() =>
+    new Date().toISOString().slice(0, 16)
+  );
+  const [manualMinutes, setManualMinutes] = useState<number | "">("");
 
   function adjustAmount(delta: number) {
     const next = Math.max(0, Math.min(500, amountMl + delta));
@@ -62,54 +79,107 @@ export function FeedingForm() {
     if (!isNaN(n)) setAmountMl(Math.max(0, Math.min(500, n)));
   }
 
-  function getFeedingType(): FeedingType {
-    if (tab === "formula") return FeedingType.Formula;
-    if (breastSide === "left") return FeedingType.BreastLeft;
-    if (breastSide === "right") return FeedingType.BreastRight;
-    return FeedingType.BreastBoth;
-  }
-
-  function handleSave() {
-    const durationSeconds =
-      tab === "breast" && timer.startedAt
-        ? Math.floor((Date.now() - timer.startedAt) / 1000)
-        : 0;
-
-    if (timer.isRunning) timer.stop();
-
-    const occurredAt = new Date(startedAt).toISOString();
-
-    createFeeding({
-      babyId: activeBabyId,
-      feedingType: getFeedingType(),
-      amountMl: tab === "formula" ? amountMl : undefined,
-      durationMinutes: tab === "breast" ? Math.round(durationSeconds / 60) : undefined,
-      startedAt: occurredAt,
-      memo: memo || undefined,
-    });
-
-    if (withDiaper) {
-      createDiaper({
-        babyId: activeBabyId,
-        diaperType: diaperType,
-        stoolColor: hasPoop ? stoolColor : undefined,
-        stoolState: hasPoop ? stoolState : undefined,
-        recordedAt: occurredAt,
-        memo: undefined,
+  function handleBreastSideChange(s: BreastSide) {
+    setBreastSide(s);
+    if (timer.isActive) {
+      timer.updateMeta({
+        feedingType: s === "left" ? "breast_left" : s === "right" ? "breast_right" : "breast_both",
       });
     }
+  }
 
+  // === 저장 ===
+
+  async function saveFormulaNow() {
+    if (amountMl <= 0) {
+      alert("수유량을 입력해주세요");
+      return;
+    }
+    await createFeeding({
+      babyId: activeBabyId,
+      feedingType: FeedingType.Formula,
+      amountMl,
+      startedAt: new Date().toISOString(),
+      memo: memo || undefined,
+    });
     setMemo("");
-    setAmountMl(100);
-    setAmountInput("100");
-    setStoolColor(undefined);
-    setStoolState(undefined);
-    timer.reset();
+  }
+
+  async function saveFormulaManual() {
+    if (amountMl <= 0 || !manualStartedAt) {
+      alert("수유량과 시간을 입력해주세요");
+      return;
+    }
+    await createFeeding({
+      babyId: activeBabyId,
+      feedingType: FeedingType.Formula,
+      amountMl,
+      startedAt: new Date(manualStartedAt).toISOString(),
+      memo: memo || undefined,
+    });
+    setMemo("");
+  }
+
+  async function saveBreastNow() {
+    // 1탭 — 좌/우/양쪽 + 종료 시간 없음 (옵셔널이라 단발 기록)
+    await createFeeding({
+      babyId: activeBabyId,
+      feedingType: sideToFeedingType(breastSide),
+      startedAt: new Date().toISOString(),
+      memo: memo || undefined,
+    });
+    setMemo("");
+  }
+
+  function handleTimerStart() {
+    timer.start({
+      feedingType:
+        breastSide === "left"
+          ? "breast_left"
+          : breastSide === "right"
+          ? "breast_right"
+          : "breast_both",
+      babyId: activeBabyId,
+    });
+  }
+
+  async function handleTimerFinish() {
+    const finished = timer.finish();
+    if (!finished) return;
+    await createFeeding({
+      babyId: activeBabyId,
+      feedingType: sideToFeedingType(breastSide),
+      durationMinutes: finished.durationMinutes,
+      startedAt: finished.startedAt.toISOString(),
+      memo: memo || undefined,
+    });
+    setMemo("");
+  }
+
+  async function saveBreastManual() {
+    if (!manualStartedAt) {
+      alert("시작 시간을 입력해주세요");
+      return;
+    }
+    // 종료 시간은 옵셔널 — manualMinutes만 있어도 OK
+    const durationMinutes =
+      manualMinutes !== "" && Number(manualMinutes) > 0
+        ? Math.round(Number(manualMinutes))
+        : undefined;
+    await createFeeding({
+      babyId: activeBabyId,
+      feedingType: sideToFeedingType(breastSide),
+      durationMinutes,
+      startedAt: new Date(manualStartedAt).toISOString(),
+      memo: memo || undefined,
+    });
+    setMemo("");
+    setManualMinutes("");
   }
 
   return (
-    <div className="space-y-4">
-      {/* 수유 탭 */}
+    <div className="space-y-5">
+      {/* 분유/모유 탭 */}
       <div className="flex rounded-xl bg-gray-100 p-1">
         {(["formula", "breast"] as Tab[]).map((t) => (
           <button
@@ -120,23 +190,30 @@ export function FeedingForm() {
               tab === t ? "bg-white text-gray-900 shadow-sm" : "text-gray-500"
             )}
           >
-            {t === "formula" ? "분유" : "모유"}
+            {t === "formula" ? "🍼 분유" : "🤱 모유"}
           </button>
         ))}
       </div>
 
-      {/* 분유 */}
+      {/* ── 분유 (단발성 — now / manual 만) ── */}
       {tab === "formula" && (
-        <div className="space-y-3">
-          <p className="text-sm font-medium text-gray-700">수유량 (ml)</p>
-          <div className="flex items-center gap-3">
-            <button
-              onClick={() => adjustAmount(-10)}
-              className="w-11 h-11 rounded-full bg-blue-50 flex items-center justify-center text-blue-500 hover:bg-blue-100 active:bg-blue-200"
-            >
-              <Minus className="w-5 h-5" />
-            </button>
-            <div className="flex-1 text-center">
+        <>
+          <ModeToggle
+            activity="feedingFormula"
+            mode={formulaMode}
+            onChange={(m) => setFormulaMode(m === "timer" ? "now" : m)}
+            availableModes={["now", "manual"]}
+          />
+
+          <div className="space-y-3">
+            <p className="text-sm font-medium text-gray-700">수유량 (ml)</p>
+            <div className="flex items-center gap-3">
+              <button
+                onClick={() => adjustAmount(-10)}
+                className="w-11 h-11 rounded-full bg-blue-50 flex items-center justify-center text-blue-500"
+              >
+                <Minus className="w-5 h-5" />
+              </button>
               <Input
                 type="number"
                 value={amountInput}
@@ -145,51 +222,78 @@ export function FeedingForm() {
                 min={0}
                 max={500}
               />
-            </div>
-            <button
-              onClick={() => adjustAmount(10)}
-              className="w-11 h-11 rounded-full bg-blue-50 flex items-center justify-center text-blue-500 hover:bg-blue-100 active:bg-blue-200"
-            >
-              <Plus className="w-5 h-5" />
-            </button>
-          </div>
-          <div className="flex gap-2 flex-wrap">
-            {[60, 80, 100, 120, 150, 180].map((v) => (
               <button
-                key={v}
-                onClick={() => {
-                  setAmountMl(v);
-                  setAmountInput(String(v));
-                }}
-                className={cn(
-                  "px-3 py-1.5 rounded-full text-sm font-medium border transition-colors",
-                  amountMl === v
-                    ? "bg-blue-400 text-white border-blue-400"
-                    : "bg-white text-gray-600 border-gray-200 hover:border-blue-300"
-                )}
+                onClick={() => adjustAmount(10)}
+                className="w-11 h-11 rounded-full bg-blue-50 flex items-center justify-center text-blue-500"
               >
-                {v}ml
+                <Plus className="w-5 h-5" />
               </button>
-            ))}
+            </div>
+            <div className="flex gap-2 flex-wrap">
+              {[60, 80, 100, 120, 150, 180].map((v) => (
+                <button
+                  key={v}
+                  onClick={() => {
+                    setAmountMl(v);
+                    setAmountInput(String(v));
+                  }}
+                  className={cn(
+                    "px-3 py-1.5 rounded-full text-sm font-medium border",
+                    amountMl === v
+                      ? "bg-blue-400 text-white border-blue-400"
+                      : "bg-white text-gray-600 border-gray-200"
+                  )}
+                >
+                  {v}ml
+                </button>
+              ))}
+            </div>
           </div>
-        </div>
+
+          {formulaMode === "manual" && (
+            <div>
+              <p className="text-sm font-medium text-gray-700 mb-1.5">기록 시간</p>
+              <Input
+                type="datetime-local"
+                value={manualStartedAt}
+                max={new Date().toISOString().slice(0, 16)}
+                onChange={(e) => setManualStartedAt(e.target.value)}
+              />
+            </div>
+          )}
+
+          <div>
+            <p className="text-sm font-medium text-gray-700 mb-1.5">메모 (선택)</p>
+            <Input value={memo} onChange={(e) => setMemo(e.target.value)} />
+          </div>
+
+          <Button
+            onClick={formulaMode === "now" ? saveFormulaNow : saveFormulaManual}
+            disabled={isPending}
+            className="w-full h-14 text-lg bg-blue-500 hover:bg-blue-600"
+          >
+            {isPending ? "저장 중..." : formulaMode === "now" ? "지금 기록" : "저장"}
+          </Button>
+        </>
       )}
 
-      {/* 모유 */}
+      {/* ── 모유 (3-mode) ── */}
       {tab === "breast" && (
-        <div className="space-y-4">
+        <>
+          <ModeToggle activity="feedingBreast" mode={breastMode} onChange={setBreastMode} />
+
           <div>
             <p className="text-sm font-medium text-gray-700 mb-2">수유 방향</p>
             <div className="flex gap-2">
               {(["left", "right", "both"] as BreastSide[]).map((side) => (
                 <button
                   key={side}
-                  onClick={() => setBreastSide(side)}
+                  onClick={() => handleBreastSideChange(side)}
                   className={cn(
-                    "flex-1 py-2.5 rounded-xl text-sm font-medium border transition-all",
+                    "flex-1 py-2.5 rounded-xl text-sm font-medium border",
                     breastSide === side
                       ? "bg-blue-400 text-white border-blue-400"
-                      : "bg-white text-gray-600 border-gray-200 hover:border-blue-300"
+                      : "bg-white text-gray-600 border-gray-200"
                   )}
                 >
                   {side === "left" ? "좌" : side === "right" ? "우" : "양쪽"}
@@ -197,156 +301,126 @@ export function FeedingForm() {
               ))}
             </div>
           </div>
-          <div className="flex flex-col items-center gap-3 py-4">
-            <div className="text-4xl font-bold tabular-nums text-gray-900">
-              {formatTimerDisplay(timer.elapsedSeconds)}
+
+          {/* ⚡ 지금 기록 */}
+          {breastMode === "now" && (
+            <div className="bg-blue-50 rounded-2xl p-4 space-y-3 border border-blue-100">
+              <p className="text-sm text-blue-700">
+                "방금 수유했어요" — 시간 측정 없이 단발 기록. 종료 시간은 옵셔널입니다.
+              </p>
+              <Button
+                onClick={saveBreastNow}
+                disabled={isPending}
+                className="w-full h-14 bg-blue-500 hover:bg-blue-600"
+              >
+                {isPending ? "저장 중..." : "지금 기록"}
+              </Button>
             </div>
-            <div className="flex gap-3">
-              {!timer.isRunning ? (
-                <Button onClick={timer.start} className="px-8 bg-blue-400 hover:bg-blue-500">
-                  시작
-                </Button>
-              ) : (
-                <Button onClick={timer.stop} variant="outline" className="px-8">
-                  일시정지
-                </Button>
-              )}
-              {timer.elapsedSeconds > 0 && (
-                <Button onClick={timer.reset} variant="ghost" size="sm">
-                  초기화
-                </Button>
-              )}
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* 기록 시간 */}
-      <div>
-        <p className="text-sm font-medium text-gray-700 mb-1.5">기록 시간 (과거 날짜 입력 가능)</p>
-        <Input
-          type="datetime-local"
-          value={startedAt}
-          max={new Date().toISOString().slice(0, 16)}
-          onChange={(e) => setStartedAt(e.target.value)}
-        />
-      </div>
-
-      {/* 메모 */}
-      <div>
-        <p className="text-sm font-medium text-gray-700 mb-1.5">메모 (선택)</p>
-        <Input
-          placeholder="메모를 입력하세요"
-          value={memo}
-          onChange={(e) => setMemo(e.target.value)}
-        />
-      </div>
-
-      {/* 배변 함께 기록 토글 */}
-      <div className="border border-orange-200 rounded-2xl overflow-hidden">
-        <button
-          onClick={() => setWithDiaper((v) => !v)}
-          className={cn(
-            "w-full flex items-center justify-between px-4 py-3 text-sm font-medium transition-colors",
-            withDiaper
-              ? "bg-orange-50 text-orange-700"
-              : "bg-gray-50 text-gray-500 hover:bg-orange-50 hover:text-orange-600"
           )}
-        >
-          <span>🧷 배변도 함께 기록</span>
-          {withDiaper ? (
-            <ChevronUp className="w-4 h-4" />
-          ) : (
-            <ChevronDown className="w-4 h-4" />
-          )}
-        </button>
 
-        {withDiaper && (
-          <div className="px-4 pb-4 pt-3 space-y-4 bg-orange-50/30">
-            {/* 종류 */}
-            <div>
-              <p className="text-xs font-medium text-gray-600 mb-2">종류</p>
-              <div className="flex gap-2">
-                {[
-                  { value: DiaperType.Pee, label: "소변", emoji: "💧" },
-                  { value: DiaperType.Poop, label: "대변", emoji: "💩" },
-                  { value: DiaperType.Both, label: "둘 다", emoji: "💧💩" },
-                ].map(({ value, label, emoji }) => (
-                  <button
-                    key={value}
-                    onClick={() => setDiaperType(value)}
-                    className={cn(
-                      "flex-1 flex flex-col items-center py-3 rounded-xl border-2 transition-all",
-                      diaperType === value
-                        ? "border-orange-400 bg-orange-50 text-orange-700"
-                        : "border-gray-100 bg-white text-gray-600 hover:border-gray-200"
-                    )}
+          {/* ⏱ 타이머 */}
+          {breastMode === "timer" && (
+            <div className="flex flex-col items-center py-4 gap-4">
+              <div className="text-5xl font-bold tabular-nums text-gray-900">
+                {formatElapsed(timer.elapsedMs)}
+              </div>
+              {timer.isPaused && <div className="text-sm text-gray-500">⏸ 일시정지됨</div>}
+
+              <div className="flex gap-2 flex-wrap justify-center">
+                {!timer.isActive ? (
+                  <Button
+                    onClick={handleTimerStart}
+                    className="px-6 bg-blue-500 hover:bg-blue-600 flex items-center gap-2"
                   >
-                    <span className="text-xl mb-0.5">{emoji}</span>
-                    <span className="text-xs font-medium">{label}</span>
-                  </button>
-                ))}
+                    <Play className="w-4 h-4" />
+                    시작
+                  </Button>
+                ) : (
+                  <>
+                    {timer.isPaused ? (
+                      <Button
+                        onClick={timer.resume}
+                        className="px-5 bg-blue-500 hover:bg-blue-600 flex items-center gap-2"
+                      >
+                        <Play className="w-4 h-4" />
+                        재개
+                      </Button>
+                    ) : (
+                      <Button
+                        onClick={timer.pause}
+                        variant="outline"
+                        className="px-5 border-blue-300 text-blue-600 flex items-center gap-2"
+                      >
+                        <Pause className="w-4 h-4" />
+                        일시정지
+                      </Button>
+                    )}
+                    <Button
+                      onClick={handleTimerFinish}
+                      disabled={isPending}
+                      className="px-5 bg-green-500 hover:bg-green-600 flex items-center gap-2"
+                    >
+                      <CheckCircle2 className="w-4 h-4" />
+                      완료
+                    </Button>
+                    <Button onClick={timer.cancel} variant="ghost" size="sm" title="취소">
+                      <RotateCcw className="w-4 h-4 text-gray-400" />
+                    </Button>
+                  </>
+                )}
+              </div>
+              <p className="text-xs text-gray-400 text-center max-w-xs">
+                종료 시간은 옵셔널이에요. 완료 못해도 진행 중 표시가 모든 화면에 보입니다.
+              </p>
+            </div>
+          )}
+
+          {/* ✏️ 수동 입력 */}
+          {breastMode === "manual" && (
+            <div className="space-y-3 bg-gray-50 rounded-2xl p-4 border border-gray-100">
+              <div>
+                <p className="text-sm font-medium text-gray-700 mb-1.5">시작 시간</p>
+                <Input
+                  type="datetime-local"
+                  value={manualStartedAt}
+                  max={new Date().toISOString().slice(0, 16)}
+                  onChange={(e) => setManualStartedAt(e.target.value)}
+                />
+              </div>
+              <div>
+                <p className="text-sm font-medium text-gray-700 mb-1.5">
+                  수유 시간 (분) <span className="text-gray-400 text-xs">옵셔널</span>
+                </p>
+                <Input
+                  type="number"
+                  min={1}
+                  max={120}
+                  placeholder="예: 15 (비워두면 시작 시간만 기록)"
+                  value={manualMinutes}
+                  onChange={(e) =>
+                    setManualMinutes(e.target.value === "" ? "" : Number(e.target.value))
+                  }
+                />
               </div>
             </div>
+          )}
 
-            {/* 대변 색상/상태 */}
-            {hasPoop && (
-              <>
-                <div>
-                  <p className="text-xs font-medium text-gray-600 mb-2">색상</p>
-                  <div className="flex gap-2 flex-wrap">
-                    {STOOL_COLORS.map(({ value, label, hex }) => (
-                      <button
-                        key={value}
-                        onClick={() => setStoolColor(value as StoolColor)}
-                        className={cn(
-                          "flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl border-2 transition-all",
-                          stoolColor === value
-                            ? "border-gray-700 bg-gray-50"
-                            : "border-gray-100 bg-white hover:border-gray-300"
-                        )}
-                      >
-                        <span
-                          className="w-4 h-4 rounded-full border border-gray-200 flex-shrink-0"
-                          style={{ backgroundColor: hex }}
-                        />
-                        <span className="text-xs text-gray-700">{label}</span>
-                      </button>
-                    ))}
-                  </div>
-                </div>
-                <div>
-                  <p className="text-xs font-medium text-gray-600 mb-2">상태</p>
-                  <div className="flex gap-2">
-                    {STOOL_STATES.map(({ value, label }) => (
-                      <button
-                        key={value}
-                        onClick={() => setStoolState(value as StoolState)}
-                        className={cn(
-                          "flex-1 py-2 rounded-xl text-xs font-medium border-2 transition-all",
-                          stoolState === value
-                            ? "border-orange-400 bg-orange-50 text-orange-700"
-                            : "border-gray-100 bg-white text-gray-600 hover:border-gray-200"
-                        )}
-                      >
-                        {label}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              </>
-            )}
+          <div>
+            <p className="text-sm font-medium text-gray-700 mb-1.5">메모 (선택)</p>
+            <Input value={memo} onChange={(e) => setMemo(e.target.value)} />
           </div>
-        )}
-      </div>
 
-      <Button
-        onClick={handleSave}
-        disabled={isPending}
-        className="w-full h-14 text-lg bg-blue-400 hover:bg-blue-500"
-      >
-        {isPending ? "저장 중..." : withDiaper ? "수유 + 배변 저장" : "저장"}
-      </Button>
+          {breastMode === "manual" && (
+            <Button
+              onClick={saveBreastManual}
+              disabled={isPending}
+              className="w-full h-14 text-lg bg-blue-500 hover:bg-blue-600"
+            >
+              {isPending ? "저장 중..." : "저장"}
+            </Button>
+          )}
+        </>
+      )}
     </div>
   );
 }
