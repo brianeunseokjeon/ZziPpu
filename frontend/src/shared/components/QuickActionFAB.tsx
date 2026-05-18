@@ -3,6 +3,7 @@
 import { Plus, X, Milk, Baby, Moon, Gamepad2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useUIStore } from "@/shared/stores/uiStore";
+import { VoiceMicButton } from "@/shared/components/VoiceMicButton";
 import { cn } from "@/lib/utils";
 
 const ACTIONS = [
@@ -52,19 +53,22 @@ export function QuickActionFAB() {
             </button>
           ))}
 
-        <button
-          onClick={toggleQuickAction}
-          className={cn(
-            "w-14 h-14 rounded-full bg-blue-500 text-white shadow-xl flex items-center justify-center",
-            "transition-all duration-200 hover:bg-blue-600 active:scale-95"
-          )}
-        >
-          {isQuickActionOpen ? (
-            <X className="w-6 h-6" />
-          ) : (
-            <Plus className="w-6 h-6" />
-          )}
-        </button>
+        <div className="flex items-center gap-2">
+          {!isQuickActionOpen && <VoiceMicButton />}
+          <button
+            onClick={toggleQuickAction}
+            className={cn(
+              "w-14 h-14 rounded-full bg-blue-500 text-white shadow-xl flex items-center justify-center",
+              "transition-all duration-200 hover:bg-blue-600 active:scale-95"
+            )}
+          >
+            {isQuickActionOpen ? (
+              <X className="w-6 h-6" />
+            ) : (
+              <Plus className="w-6 h-6" />
+            )}
+          </button>
+        </div>
       </div>
     </>
   );
