@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import {
   Home,
   BarChart3,
+  Bot,
   Sparkles,
   Settings,
 } from "lucide-react";
@@ -13,6 +14,7 @@ import { cn } from "@/lib/utils";
 const TABS = [
   { icon: Home, label: "홈", path: "/" },
   { icon: BarChart3, label: "대시보드", path: "/dashboard" },
+  { icon: Bot, label: "AI", path: "/ai" },
   { icon: Sparkles, label: "발달", path: "/development" },
   { icon: Settings, label: "설정", path: "/settings" },
 ];

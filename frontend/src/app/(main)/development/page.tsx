@@ -7,6 +7,7 @@ import { useCurrentStage, useStages } from "@/features/development/api/developme
 import { MilestoneTimeline } from "@/features/development/components/MilestoneTimeline";
 import { DateCalculator } from "@/features/development/components/DateCalculator";
 import { StageDetail } from "@/features/development/components/StageDetail";
+import { VaccinationScheduleCard } from "@/features/vaccination/components/VaccinationScheduleCard";
 
 export default function DevelopmentPage() {
   const { ageDays, name } = useBabyInfo();
@@ -41,6 +42,9 @@ export default function DevelopmentPage() {
           대한소아청소년과학회 + AAP 최신 가이드 기반
         </p>
       </div>
+
+      {/* 예방접종 일정 (홈에서 이동) */}
+      <VaccinationScheduleCard />
 
       {/* 마일스톤 타임라인 */}
       <MilestoneTimeline />
