@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { Milk, Moon, Gamepad2, ChevronRight, Syringe, Bot, MessageCircle } from "lucide-react";
+import { Milk, Moon, ChevronRight, Syringe, Bot, MessageCircle } from "lucide-react";
 import { Card, CardContent } from "@/shared/components/ui/card";
 import { DailySummaryCard } from "@/features/dashboard/components/DailySummaryCard";
 import { useUIStore } from "@/shared/stores/uiStore";
@@ -10,9 +10,11 @@ import { useTimer } from "@/shared/hooks/useTimer";
 import { formatTime, formatDate } from "@/lib/date-utils";
 import { useFeedings } from "@/features/feeding/api/feedingApi";
 import { getDateString } from "@/lib/date-utils";
-import { useVaccinations, useUpcomingVaccinations } from "@/features/vaccination/api/vaccinationApi";
+import { useVaccinations } from "@/features/vaccination/api/vaccinationApi";
 import { MilestoneBanner } from "@/features/baby/components/MilestoneBanner";
 import { QuickRepeatRow } from "@/features/recording/components/QuickRepeatRow";
+import { BigActionGrid } from "@/features/recording/components/BigActionGrid";
+import { VoiceCommandHero } from "@/features/recording/components/VoiceCommandHero";
 import { MOCK_BABY_ID } from "@/config/constants";
 
 function SleepStatusCard() {
@@ -90,12 +92,6 @@ function LastFeedingCard() {
   );
 }
 
-const QUICK_ACTIONS = [
-  { icon: Milk, label: "수유·배변", path: "/record", color: "text-blue-500 bg-blue-50" },
-  { icon: Moon, label: "수면", path: "/record/sleep", color: "text-purple-500 bg-purple-50" },
-  { icon: Gamepad2, label: "놀이", path: "/record/play", color: "text-green-500 bg-green-50" },
-];
-
 function VaccinationScheduleCard() {
   const { data: allVaccinations } = useVaccinations(MOCK_BABY_ID);
 
@@ -103,7 +99,6 @@ function VaccinationScheduleCard() {
     .filter((v) => !v.administeredDate)
     .sort((a, b) => new Date(a.scheduledDate).getTime() - new Date(b.scheduledDate).getTime());
 
-  // 기한 초과 + 다가오는 접종 최대 4개
   const overdue = allPending.filter((v) => v.isOverdue);
   const upcoming = allPending.filter((v) => !v.isOverdue);
   const pending = [...overdue, ...upcoming].slice(0, 4);
@@ -168,39 +163,36 @@ function VaccinationScheduleCard() {
 }
 
 export default function HomePage() {
-  const router = useRouter();
-
   return (
     <div className="space-y-4">
+      {/* 마일스톤 배너 */}
       <MilestoneBanner />
+
+      {/* 진행 중 타이머 표시 (legacy sleep timer) */}
       <SleepStatusCard />
+
+      {/* 반복 1탭 기록 */}
       <QuickRepeatRow />
+
+      {/* 2×3 큰 기록 버튼 */}
+      <BigActionGrid />
+
+      {/* 음성 명령 */}
+      <VoiceCommandHero />
+
+      {/* 마지막 수유 정보 */}
       <LastFeedingCard />
 
+      {/* 오늘 요약 */}
       <div>
         <h2 className="text-sm font-semibold text-gray-500 mb-2">오늘 요약</h2>
         <DailySummaryCard />
       </div>
 
-      <div>
-        <h2 className="text-sm font-semibold text-gray-500 mb-2">빠른 기록</h2>
-        <div className="grid grid-cols-3 gap-3">
-          {QUICK_ACTIONS.map(({ icon: Icon, label, path, color }) => (
-            <button
-              key={path}
-              onClick={() => router.push(path)}
-              className={`flex flex-col items-center gap-2 py-4 rounded-2xl ${color} transition-all active:scale-95`}
-            >
-              <Icon className="w-6 h-6" />
-              <span className="text-xs font-medium">{label}</span>
-            </button>
-          ))}
-        </div>
-      </div>
-
+      {/* 예방접종 일정 */}
       <VaccinationScheduleCard />
 
-      {/* AI 진입점 (탭에서 발달로 교체되어 여기로 이동) */}
+      {/* AI 진입점 */}
       <div className="grid grid-cols-2 gap-3">
         <Link
           href="/ai/review"
@@ -222,16 +214,6 @@ export default function HomePage() {
             <p className="text-[10px] text-pink-500">언제든 질문</p>
           </div>
         </Link>
-      </div>
-
-      <div>
-        <button
-          onClick={() => router.push("/record")}
-          className="w-full flex items-center justify-between p-4 bg-white rounded-2xl border border-gray-100 hover:bg-gray-50 transition-colors"
-        >
-          <span className="text-sm font-medium text-gray-700">전체 기록 보기</span>
-          <ChevronRight className="w-4 h-4 text-gray-400" />
-        </button>
       </div>
     </div>
   );

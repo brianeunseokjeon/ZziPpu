@@ -4,12 +4,11 @@ import { useState } from "react";
 import Link from "next/link";
 import {
   Baby,
-  Bell,
   Palette,
   Info,
   ChevronRight,
   TrendingUp,
-  Syringe,
+  ClipboardList,
   Check,
   X,
   Download,
@@ -20,9 +19,13 @@ import { API_BASE_URL, MOCK_BABY_ID } from "@/config/constants";
 import ExportModal from "@/features/baby/components/ExportModal";
 import { PhotoUploader } from "@/features/baby/components/PhotoUploader";
 import { LogoutButton } from "@/features/auth/components/LogoutButton";
+import { useRecordingDefaultsStore } from "@/shared/stores/recordingDefaultsStore";
+
+const ML_PRESETS = [60, 80, 100, 120, 150, 180];
 
 export default function SettingsPage() {
   const { name, birthDate, ageText, photoUrl, setName, setBirthDate, setPhotoUrl } = useBabyInfo();
+  const recordingDefaults = useRecordingDefaultsStore();
 
   const [editingName, setEditingName] = useState(false);
   const [nameInput, setNameInput] = useState(name);
@@ -216,6 +219,59 @@ export default function SettingsPage() {
               </div>
               <ChevronRight className="w-4 h-4 text-gray-300" />
             </Link>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* 기록 디폴트 */}
+      <Card>
+        <CardContent className="pt-4">
+          <div className="flex items-center gap-2 mb-3">
+            <ClipboardList className="w-4 h-4 text-blue-500" />
+            <h3 className="text-sm font-semibold text-gray-700">기록 디폴트</h3>
+          </div>
+
+          {/* 디폴트 분유량 */}
+          <div className="py-3 border-b border-gray-50">
+            <p className="text-xs text-gray-400 mb-2">기본 분유량</p>
+            <div className="flex flex-wrap gap-1.5">
+              {ML_PRESETS.map((ml) => (
+                <button
+                  key={ml}
+                  onClick={() => recordingDefaults.setFormulaMl(ml)}
+                  className={`px-3 py-1.5 rounded-full text-xs font-medium border transition-colors ${
+                    recordingDefaults.formulaMl === ml
+                      ? "bg-blue-500 text-white border-blue-500"
+                      : "bg-white text-gray-600 border-gray-200"
+                  }`}
+                >
+                  {ml}ml
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* 디폴트 모유 측 */}
+          <div className="py-3">
+            <p className="text-xs text-gray-400 mb-2">기본 모유 방향</p>
+            <div className="flex gap-2">
+              {(["left", "right", "both"] as const).map((side) => {
+                const labels = { left: "왼쪽", right: "오른쪽", both: "양쪽" };
+                return (
+                  <button
+                    key={side}
+                    onClick={() => recordingDefaults.setBreastSide(side)}
+                    className={`flex-1 py-2 rounded-xl text-xs font-medium border-2 transition-all ${
+                      recordingDefaults.breastSide === side
+                        ? "bg-pink-50 border-pink-400 text-pink-700"
+                        : "bg-white border-gray-200 text-gray-600"
+                    }`}
+                  >
+                    {labels[side]}
+                  </button>
+                );
+              })}
+            </div>
           </div>
         </CardContent>
       </Card>

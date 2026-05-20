@@ -3,12 +3,24 @@
 import { useEffect, useRef, useState } from "react";
 import type { ActivityType } from "@/shared/stores/activityTimerStore";
 
-export type VoiceCommandAction = "start" | "finish" | "pause" | "resume" | "cancel";
+export type VoiceCommandAction =
+  | "start"
+  | "finish"
+  | "pause"
+  | "resume"
+  | "cancel"
+  | "quick_save";
 
 export interface VoiceCommand {
   action: VoiceCommandAction;
   activity?: ActivityType;
-  meta?: { playType?: string; feedingType?: string };
+  meta?: {
+    playType?: string;
+    feedingType?: string;
+    // quick_save 전용
+    saveType?: "formula" | "pee" | "poo";
+    amountMl?: number;
+  };
   matchedText: string;
 }
 
@@ -82,6 +94,28 @@ export function parseVoiceCommand(text: string): VoiceCommand | null {
   }
   if (/취소|그만|취소해/.test(t)) {
     return { action: "cancel", matchedText: text };
+  }
+
+  // ── 빠른 저장 (quick_save) ──────────────────────────────────
+  // "분유 100" / "분유 120밀리" / "분유백이십" 등
+  const formulaMatch = text.match(/분유\s*(\d{2,3})/);
+  if (formulaMatch) {
+    const amountMl = parseInt(formulaMatch[1], 10);
+    if (amountMl >= 10 && amountMl <= 500) {
+      return {
+        action: "quick_save",
+        meta: { saveType: "formula", amountMl },
+        matchedText: text,
+      };
+    }
+  }
+  // "소변" / "쉬했어" / "쉬했다"
+  if (/소변|쉬했|쉬해/.test(t)) {
+    return { action: "quick_save", meta: { saveType: "pee" }, matchedText: text };
+  }
+  // "대변" / "응가했어" / "응가했다"
+  if (/대변|응가했|응가해/.test(t)) {
+    return { action: "quick_save", meta: { saveType: "poo" }, matchedText: text };
   }
 
   return null;
