@@ -3,90 +3,42 @@ from app.domain.entities.feeding import Feeding
 from app.domain.entities.sleep_record import SleepRecord
 from app.domain.entities.diaper import DiaperRecord
 from app.domain.entities.play_record import PlayRecord
+from app.domain.guidelines.developmental_milestones import get_stage_for_age_days
 from app.domain.value_objects.feeding_type import FeedingType
 
 
 def _get_developmental_milestones(age_days: int) -> str:
     """
-    K-DST 6개 영역(대근육·소근육·인지·언어·사회성·자조) 기준 발달 이정표.
-    출처: 보건복지부 K-DST(2024), AAP Bright Futures 4판(2024), 대한소아청소년과학회.
+    K-DST 6영역 + 부모 행동 + 위험 신호.
+    단일 출처: developmental_milestones.DEVELOPMENT_STAGES — AI 채팅과 발달 가이드 페이지가 공유.
     """
-    if age_days <= 28:
-        return (
-            "【발달 이정표 (신생아기, K-DST 기준)】\n"
-            "- 대근육: 굴곡 자세, 짧은 시간 머리 들기\n"
-            "- 인지/사회성: 빛과 소리에 반응, 얼굴 응시 시작\n"
-            "- 언어: 울음으로 욕구 표현\n"
-            "【위험 신호 (즉시 내원)】\n"
-            "- 직장 체온 38℃ 이상 발열 (3개월 미만은 무조건 응급)\n"
-            "- 황달이 2주 이상 지속되거나 더 진해짐\n"
-            "- 수유 거부 8시간 이상, 처짐, 청색증\n"
-            "【절대 금지】 엎어 재우기(SIDS), 흔들기(SBS), 베개/이불"
-        )
-    elif age_days <= 60:
-        return (
-            "【발달 이정표 (생후 1~2개월)】\n"
-            "- 대근육: 엎드려서 잠시 머리 들기\n"
-            "- 인지/사회성: 사회적 미소 시작 (4~6주)\n"
-            "- 언어: 부드러운 발성 시작 (cooing)\n"
-            "- 자조: 수유 텀 점차 길어짐\n"
-            "【위험 신호】 38℃ 이상 발열, 수유 거부, 호흡 곤란\n"
-            "【권고】 비타민 D 400IU/일 (모유수유 시 출생 직후부터, AAP)"
-        )
-    elif age_days <= 90:
-        return (
-            "【발달 이정표 (생후 2~3개월)】\n"
-            "- 대근육: 목 가누기 시작, 엎드려 가슴 들기\n"
-            "- 소근육: 손을 펴서 가운데로 모으기\n"
-            "- 사회성: 사람을 향해 웃음, 얼굴 인식\n"
-            "- 터미타임: 하루 누적 15~30분 (3~4회 분산)\n"
-            "【절대 금지】 4개월 이전 이유식, 꿀, 흔들기\n"
-            "【권고】 비타민 D 400IU/일 지속"
-        )
-    elif age_days <= 180:
-        return (
-            "【발달 이정표 (생후 3~6개월)】\n"
-            "- 대근육: 목 완전히 가눔(4개월), 뒤집기(4~6개월)\n"
-            "- 소근육: 물건 잡고 입으로 가져가기\n"
-            "- 언어: 옹알이 활발, 다양한 자음 시도\n"
-            "- 사회성: 자기 이름에 반응, 낯선 사람 인식 시작\n"
-            "【이유식】 6개월 시작 권장 (AAP·대한소아과학회). 4개월 이전 금지\n"
-            "【주의】 뒤집기 시작 → 침대 낙상 위험. 꿀 금지 지속"
-        )
-    elif age_days <= 270:
-        return (
-            "【발달 이정표 (생후 6~9개월)】\n"
-            "- 대근육: 혼자 앉기(6~7개월), 기기 시작\n"
-            "- 소근육: 손에서 손으로 물건 옮기기\n"
-            "- 인지: 대상영속성(까꿍 놀이 반응)\n"
-            "- 사회성: 낯가림 시작\n"
-            "- 자조: 이유식 시작, 컵 사용 연습\n"
-            "【권고】 모유수유 시 철분 1mg/kg/day (AAP, 이유식 철분 강화로 보완)\n"
-            "【주의】 질식 위험 식품 금지 (견과, 통포도, 사탕, 생당근)"
-        )
-    elif age_days <= 365:
-        return (
-            "【발달 이정표 (생후 9~12개월)】\n"
-            "- 대근육: 잡고 서기, 첫 걸음 준비\n"
-            "- 소근육: 손가락 집기(pincer grasp)\n"
-            "- 언어: '엄마/아빠' 같은 단어 1~2개 시도\n"
-            "- 사회성: 손 흔들기, 안녕 표현\n"
-            "- 자조: 손가락 음식 스스로 먹기\n"
-            "【절대 금지】 꿀, 생우유(12개월 미만), 보행기\n"
-            "【권고】 12개월 검진(K-DST 1차 발달선별검사) 예약"
-        )
-    else:
-        months = age_days // 30
-        return (
-            f"【발달 이정표 (생후 {months}개월, 유아기 초기)】\n"
-            "- 대근육: 걷기, 계단 잡고 오르내리기\n"
-            "- 언어: 18개월 어휘 10~50개, 24개월 두 단어 조합\n"
-            "- 사회성: 따라 하기, 평행 놀이\n"
-            "- 자조: 숟가락 사용, 옷 벗기 도움 받기\n"
-            "【권고】 12개월 이후 생우유 480~720ml/일 가능, 일반식 전환\n"
-            "【화면 노출】 18개월 미만 화상통화 외 영상 금지 (AAP)\n"
-            "【주의】 작은 물건 삼킴(4cm 미만 위험), 보행기 금지"
-        )
+    s = get_stage_for_age_days(age_days)
+
+    def _line(label: str, items: list[str]) -> str:
+        return f"- {label}: " + (", ".join(items) if items else "(해당 없음)")
+
+    lines = [
+        f"【발달 이정표 ({s.label}, K-DST 기준)】",
+        f"- 요약: {s.summary}",
+        _line("대근육", s.gross_motor),
+        _line("소근육", s.fine_motor),
+        _line("인지", s.cognition),
+        _line("언어", s.language),
+        _line("사회성", s.social),
+        _line("자조", s.self_care),
+        f"- 수유: {s.feeding_summary}",
+        f"- 수면: {s.sleep_summary}",
+        f"- 놀이: {s.play_summary}",
+    ]
+    if s.parent_actions:
+        lines.append("【이 시기 부모 행동】")
+        for a in s.parent_actions[:5]:
+            lines.append(f"- [{a.priority}] {a.icon} {a.title}: {a.detail} (출처: {a.source})")
+    if s.warning_signs:
+        lines.append("【위험 신호 — 이 중 하나라도 보이면 즉시 내원】")
+        for w in s.warning_signs:
+            lines.append(f"- {w}")
+    return "\n".join(lines)
 
 
 def build_daily_context(

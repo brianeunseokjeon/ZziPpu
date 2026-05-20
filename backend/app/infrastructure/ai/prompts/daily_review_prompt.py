@@ -5,6 +5,7 @@
 1. 대한소아청소년과학회 + 질병관리청 표준예방접종/영유아건강검진
 2. AAP Bright Futures 4판 (2024)
 """
+from app.domain.guidelines.developmental_milestones import get_stage_for_age_days
 from app.domain.guidelines.guideline_references import (
     AMERICAN_AUTHORITIES,
     GUIDELINE_LAST_UPDATED,
@@ -13,68 +14,37 @@ from app.domain.guidelines.guideline_references import (
 
 
 def _get_age_stage(age_days: int) -> str:
-    """K-DST 6개 영역(대근육·소근육·인지·언어·사회성·자조) 기준 발달 이정표."""
-    if age_days <= 28:
-        return (
-            "신생아기 (생후 0~4주)\n"
-            "- 대근육: 사지를 굽힌 자세, 수유 시 흡철 반사 강함\n"
-            "- 인지/사회성: 빛·소리에 반응, 얼굴 응시 시작 (2주~)\n"
-            "- 수유 (AAP): 분유 30~60ml × 2~3시간(하루 8~12회) / 모유 10~15분/측\n"
-            "- 수면 (AASM): 하루 14~17시간, 4~5시간 이상 연속 수면은 피하기\n"
-            "- 배변 (AAP): 1주 이후 wet 6~8회/일, 대변 변동 큼 (모유수유는 매끼 가능)\n"
-            "- 절대 금지: 엎어 재우기(SIDS), 흔들기(SBS), 베개·이불"
-        )
-    elif age_days <= 90:
-        return (
-            "초기 영아기 (생후 1~3개월)\n"
-            "- 대근육: 목 가누기 시작 (2개월~), 엎드려 머리 들기\n"
-            "- 사회성/언어: 사회적 미소(4~6주), 옹알이 시작\n"
-            "- 수유: 분유 60~120ml × 2.5~3.5시간 (하루 7~10회)\n"
-            "- 수면: 하루 14~17시간, 야간 5~8시간 연속 가능\n"
-            "- 비타민 D 400IU/일 (대한소아과학회·AAP 권고)\n"
-            "- 터미타임: 하루 누적 15~30분 (3~4회 분산)\n"
-            "- 절대 금지: 이유식(4개월 이전), 꿀, 엎어 재우기"
-        )
-    elif age_days <= 180:
-        return (
-            "중기 영아기 (생후 3~6개월)\n"
-            "- 대근육: 목 완전히 가누기(4개월), 뒤집기(4~6개월)\n"
-            "- 소근육: 손으로 물건 잡기 시작\n"
-            "- 언어: 옹알이 활발, 자기 소리에 반응\n"
-            "- 수유: 분유 120~180ml × 3.5~5시간 (하루 5~6회)\n"
-            "- 수면: 하루 12~16시간, 야간 8~10시간 연속\n"
-            "- 이유식: 6개월부터 시작 권장 (AAP·대한소아과학회). 4개월 이전 금지\n"
-            "- 주의: 낙상(뒤집기 시작), 꿀 금지 지속"
-        )
-    elif age_days <= 270:
-        return (
-            "후기 영아기 (생후 6~9개월)\n"
-            "- 대근육: 혼자 앉기(6~7개월), 기기 준비\n"
-            "- 인지/사회성: 낯가림 시작, 대상영속성(까꿍 놀이)\n"
-            "- 수유 + 이유식: 분유/모유 + 이유식 1~2회 (철분 강화)\n"
-            "- 수면: 하루 12~16시간, 낮잠 2~3회\n"
-            "- 비타민 D 400IU 계속, 철분 보충 (AAP: 4~6개월부터 1mg/kg/day 모유수유 시)\n"
-            "- 주의: 손가락 음식 시작 시 질식 위험 식품(견과·통포도·생당근) 금지"
-        )
-    elif age_days <= 365:
-        return (
-            "후기 영아기 (생후 9~12개월)\n"
-            "- 대근육: 기기, 잡고 서기, 첫 걸음 준비\n"
-            "- 소근육: 손가락 집기(pincer grasp), 컵 사용 시작\n"
-            "- 언어: '엄마/아빠' 같은 단어 1~2개 시도\n"
-            "- 이유식: 하루 2~3회, 다양한 식재료\n"
-            "- 절대 금지: 꿀(12개월 미만), 생우유(12개월 미만), 보행기"
-        )
-    else:
-        age_months = age_days // 30
-        return (
-            f"유아기 초기 (생후 {age_months}개월)\n"
-            "- 12개월 이후: 생우유 480~720ml/일 가능, 일반식 전환\n"
-            "- 대근육: 걷기, 계단 잡고 오르내리기\n"
-            "- 언어: 단어 수 점점 증가, 18개월에 10~50개 어휘 목표\n"
-            "- 화면 노출: 18개월 미만 화상통화 외 영상 금지 (AAP)\n"
-            "- 정기 건강검진: K-DST 발달선별검사 시기 확인 (보건복지부)"
-        )
+    """
+    K-DST 6영역 + 부모 행동 + 위험 신호를 텍스트로 직렬화.
+    단일 출처: developmental_milestones.DEVELOPMENT_STAGES (발달 가이드 페이지와 공유).
+    """
+    s = get_stage_for_age_days(age_days)
+
+    def _list(items: list[str], sep: str = ", ") -> str:
+        return sep.join(items) if items else "(해당 없음)"
+
+    sections = [
+        f"{s.label}",
+        f"  요약: {s.summary}",
+        f"  대근육: {_list(s.gross_motor)}",
+        f"  소근육: {_list(s.fine_motor)}",
+        f"  인지: {_list(s.cognition)}",
+        f"  언어: {_list(s.language)}",
+        f"  사회성: {_list(s.social)}",
+        f"  자조: {_list(s.self_care)}",
+        f"  수유: {s.feeding_summary}",
+        f"  수면: {s.sleep_summary}",
+        f"  놀이: {s.play_summary}",
+    ]
+    if s.parent_actions:
+        sections.append("  이 시기 부모 행동:")
+        for a in s.parent_actions[:5]:
+            sections.append(f"    [{a.priority}] {a.icon} {a.title} — {a.detail} (출처: {a.source})")
+    if s.warning_signs:
+        sections.append("  위험 신호 (이 중 하나라도 보이면 즉시 내원):")
+        for w in s.warning_signs:
+            sections.append(f"    · {w}")
+    return "\n".join(sections)
 
 
 def build_daily_review_prompt(context: str, age_days: int = 0) -> str:

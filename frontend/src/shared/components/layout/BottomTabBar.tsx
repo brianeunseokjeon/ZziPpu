@@ -6,7 +6,7 @@ import {
   Home,
   ClipboardList,
   BarChart3,
-  Bot,
+  Sparkles,
   Settings,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -15,7 +15,7 @@ const TABS = [
   { icon: Home, label: "홈", path: "/" },
   { icon: ClipboardList, label: "기록", path: "/record" },
   { icon: BarChart3, label: "대시보드", path: "/dashboard" },
-  { icon: Bot, label: "AI", path: "/ai/review" },
+  { icon: Sparkles, label: "발달", path: "/development" },
   { icon: Settings, label: "설정", path: "/settings" },
 ];
 

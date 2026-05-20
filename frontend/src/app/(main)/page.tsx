@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { Milk, Moon, Gamepad2, ChevronRight, Syringe } from "lucide-react";
+import { Milk, Moon, Gamepad2, ChevronRight, Syringe, Bot, MessageCircle } from "lucide-react";
 import { Card, CardContent } from "@/shared/components/ui/card";
 import { DailySummaryCard } from "@/features/dashboard/components/DailySummaryCard";
 import { useUIStore } from "@/shared/stores/uiStore";
@@ -197,6 +197,30 @@ export default function HomePage() {
       </div>
 
       <VaccinationScheduleCard />
+
+      {/* AI 진입점 (탭에서 발달로 교체되어 여기로 이동) */}
+      <div className="grid grid-cols-2 gap-3">
+        <Link
+          href="/ai/review"
+          className="flex items-center gap-2 p-3 bg-purple-50 rounded-2xl border border-purple-100 hover:bg-purple-100 transition-colors"
+        >
+          <Bot className="w-5 h-5 text-purple-500" />
+          <div className="text-left">
+            <p className="text-sm font-semibold text-purple-700">AI 일일 리뷰</p>
+            <p className="text-[10px] text-purple-500">오늘의 종합 분석</p>
+          </div>
+        </Link>
+        <Link
+          href="/ai/chat"
+          className="flex items-center gap-2 p-3 bg-pink-50 rounded-2xl border border-pink-100 hover:bg-pink-100 transition-colors"
+        >
+          <MessageCircle className="w-5 h-5 text-pink-500" />
+          <div className="text-left">
+            <p className="text-sm font-semibold text-pink-700">소아과 채팅</p>
+            <p className="text-[10px] text-pink-500">언제든 질문</p>
+          </div>
+        </Link>
+      </div>
 
       <div>
         <button
