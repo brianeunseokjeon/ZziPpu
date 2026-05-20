@@ -12,6 +12,7 @@ import { useFeedings } from "@/features/feeding/api/feedingApi";
 import { getDateString } from "@/lib/date-utils";
 import { useVaccinations, useUpcomingVaccinations } from "@/features/vaccination/api/vaccinationApi";
 import { MilestoneBanner } from "@/features/baby/components/MilestoneBanner";
+import { QuickRepeatRow } from "@/features/recording/components/QuickRepeatRow";
 import { MOCK_BABY_ID } from "@/config/constants";
 
 function SleepStatusCard() {
@@ -173,6 +174,7 @@ export default function HomePage() {
     <div className="space-y-4">
       <MilestoneBanner />
       <SleepStatusCard />
+      <QuickRepeatRow />
       <LastFeedingCard />
 
       <div>
