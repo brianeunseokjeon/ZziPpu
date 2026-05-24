@@ -26,7 +26,7 @@ if [[ ! -d "$BACKEND/.venv" ]]; then
   log "Python 가상환경 생성 중..."
   python3 -m venv "$BACKEND/.venv"
   source "$BACKEND/.venv/bin/activate"
-  pip install -q fastapi "uvicorn[standard]" sqlalchemy asyncpg alembic pydantic "pydantic[email]" pydantic-settings anthropic "python-jose[cryptography]" "passlib[bcrypt]" httpx sse-starlette
+  pip install -q fastapi "uvicorn[standard]" sqlalchemy aiosqlite asyncpg alembic pydantic "pydantic[email]" pydantic-settings anthropic "python-jose[cryptography]" "passlib[bcrypt]" httpx sse-starlette
   ok "Python 패키지 설치 완료"
 else
   source "$BACKEND/.venv/bin/activate"
@@ -39,6 +39,23 @@ if [[ ! -d "$FRONTEND/node_modules" ]]; then
   ok "Node 패키지 설치 완료"
 fi
 
+# ── 기존 프로세스 정리 ────────────────────────────────────────────────
+kill_port() {
+  local port="$1"
+  local pids
+  pids=$(lsof -ti tcp:"$port" 2>/dev/null) || true
+  if [[ -n "$pids" ]]; then
+    warn "포트 $port 점유 프로세스(PID $pids) 강제 종료 중..."
+    echo "$pids" | xargs kill -9 2>/dev/null || true
+    # 포트가 실제로 해제될 때까지 최대 5초 대기
+    local i=0
+    while lsof -ti tcp:"$port" &>/dev/null && (( i++ < 10 )); do sleep 0.5; done
+    ok "포트 $port 해제 완료"
+  fi
+}
+kill_port 8081
+kill_port 3000
+
 # ── 종료 핸들러 ────────────────────────────────────────────────────────
 cleanup() {
   log "서버를 종료합니다..."
@@ -50,15 +67,15 @@ cleanup() {
 trap cleanup EXIT INT TERM
 
 # ── 백엔드 시작 ────────────────────────────────────────────────────────
-log "백엔드 서버 시작 중... (http://localhost:8000)"
+log "백엔드 서버 시작 중... (http://localhost:8081)"
 cd "$BACKEND"
-python3 -m uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload &
+python3 -m uvicorn app.main:app --host 0.0.0.0 --port 8081 --reload &
 BACKEND_PID=$!
 
 # ── 프론트엔드 시작 ────────────────────────────────────────────────────
 log "프론트엔드 서버 시작 중... (http://localhost:3000)"
 cd "$FRONTEND"
-npm run dev &
+npm run dev -- --port 3000 &
 FRONTEND_PID=$!
 
 echo ""
@@ -66,8 +83,8 @@ echo -e "${GREEN}━━━━━━━━━━━━━━━━━━━━━
 echo -e "${GREEN}  먹놀잠 서비스가 시작되었습니다 👶${NC}"
 echo -e "${GREEN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
 echo -e "  프론트엔드: ${CYAN}http://localhost:3000${NC}"
-echo -e "  백엔드 API: ${CYAN}http://localhost:8000${NC}"
-echo -e "  API 문서:   ${CYAN}http://localhost:8000/docs${NC}"
+echo -e "  백엔드 API: ${CYAN}http://localhost:8081${NC}"
+echo -e "  API 문서:   ${CYAN}http://localhost:8081/docs${NC}"
 echo -e "${GREEN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
 echo -e "  ${YELLOW}Ctrl+C${NC} 로 종료"
 echo ""

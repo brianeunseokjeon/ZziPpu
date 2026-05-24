@@ -14,6 +14,7 @@ import { useCreatePlay } from "@/features/play/api/playApi";
 import { useCreateFeeding } from "@/features/feeding/api/feedingApi";
 import { useUIStore } from "@/shared/stores/uiStore";
 import { FeedingType } from "@/features/feeding/types/feeding";
+import { isoToTimeInput } from "@/lib/date-utils";
 
 /** 진행 중인 모든 세션을 헤더 아래에 표시. 모든 페이지에서 보임. */
 export function ActiveSessionBanner() {
@@ -64,10 +65,7 @@ function SessionRow({ session }: { session: ActiveSession }) {
   const isStale = elapsedMs > 24 * 60 * 60 * 1000;
   const isPaused = session.pausedAt !== null;
 
-  const startTime = new Date(session.startedAt);
-  const startStr = `${String(startTime.getHours()).padStart(2, "0")}:${String(
-    startTime.getMinutes()
-  ).padStart(2, "0")}`;
+  const startStr = isoToTimeInput(new Date(session.startedAt).toISOString());
 
   async function handleFinish() {
     const finished = store.finishSession(session.type);

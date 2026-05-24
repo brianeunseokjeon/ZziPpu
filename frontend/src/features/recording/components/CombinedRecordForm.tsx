@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Minus, Plus, Milk, Baby as BabyIcon, Clock } from "lucide-react";
 import { Button } from "@/shared/components/ui/button";
 import { Input } from "@/shared/components/ui/input";
@@ -11,21 +11,10 @@ import { DiaperType, StoolColor, StoolState } from "@/features/diaper/types/diap
 import { useUIStore } from "@/shared/stores/uiStore";
 import { STOOL_COLORS, STOOL_STATES } from "@/config/constants";
 import { cn } from "@/lib/utils";
+import { nowTimeInput, todayTimeToISO } from "@/lib/date-utils";
 
 type BreastSide = "left" | "right" | "both";
 type DiaperMode = "off" | "pee" | "poo" | "both";
-
-function getNowHHMM(): string {
-  const d = new Date();
-  return `${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`;
-}
-
-function todayWithTime(hhmm: string): string {
-  const [hh, mm] = hhmm.split(":").map(Number);
-  const d = new Date();
-  d.setHours(hh, mm, 0, 0);
-  return d.toISOString();
-}
 
 export function CombinedRecordForm() {
   const { activeBabyId } = useUIStore();
@@ -47,8 +36,11 @@ export function CombinedRecordForm() {
   const [stoolState, setStoolState] = useState<StoolState | undefined>();
 
   // 공통: 시간 (HH:MM, 기본=지금). 시간 편집 토글로 노출
-  const [timeStr, setTimeStr] = useState(getNowHHMM);
+  const [timeStr, setTimeStr] = useState(nowTimeInput);
   const [timeEditing, setTimeEditing] = useState(false);
+
+  // SSR hydration 대응: 클라이언트에서 KST 시각으로 재보정
+  useEffect(() => { setTimeStr(nowTimeInput()); }, []);
   const [memo, setMemo] = useState("");
 
   const hasPoop = diaperMode === "poo" || diaperMode === "both";
@@ -81,7 +73,7 @@ export function CombinedRecordForm() {
 
   async function handleSave() {
     if (!canSave) return;
-    const occurredAt = todayWithTime(timeStr);
+    const occurredAt = todayTimeToISO(timeStr);
     const tasks: Promise<unknown>[] = [];
 
     // 분유 (켜져 있으면)
@@ -134,7 +126,7 @@ export function CombinedRecordForm() {
     setStoolColor(undefined);
     setStoolState(undefined);
     setMemo("");
-    setTimeStr(getNowHHMM());
+    setTimeStr(nowTimeInput());
     setTimeEditing(false);
   }
 
@@ -372,7 +364,7 @@ export function CombinedRecordForm() {
               if (timeEditing) {
                 setTimeEditing(false);
               } else {
-                setTimeStr(getNowHHMM());
+                setTimeStr(nowTimeInput());
                 setTimeEditing(true);
               }
             }}

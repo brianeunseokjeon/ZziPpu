@@ -11,6 +11,7 @@ from app.presentation.api.v1.ai_router import router as ai_router
 from app.presentation.api.v1.growth_router import router as growth_router
 from app.presentation.api.v1.vaccination_router import router as vaccination_router
 from app.presentation.api.v1.development_router import router as development_router
+from app.presentation.api.v1.youtube_router import router as youtube_router
 
 v1_router = APIRouter(prefix="/api/v1")
 
@@ -25,3 +26,4 @@ v1_router.include_router(ai_router)
 v1_router.include_router(growth_router)
 v1_router.include_router(vaccination_router)
 v1_router.include_router(development_router)
+v1_router.include_router(youtube_router)

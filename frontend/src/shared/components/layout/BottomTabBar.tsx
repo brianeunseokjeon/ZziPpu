@@ -28,7 +28,7 @@ export function BottomTabBar() {
   }
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-gray-100 pb-[env(safe-area-inset-bottom)]">
+    <nav className="flex-shrink-0 z-40 bg-white border-t border-gray-100 pb-[env(safe-area-inset-bottom)]">
       <div className="max-w-md mx-auto flex">
         {TABS.map(({ icon: Icon, label, path }) => {
           const active = isActive(path);

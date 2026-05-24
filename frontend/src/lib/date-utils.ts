@@ -1,14 +1,69 @@
-import { format, differenceInDays, isToday as fnsIsToday } from "date-fns";
-import { ko } from "date-fns/locale";
+import { differenceInDays, isToday as fnsIsToday } from "date-fns";
 
+/* ─── KST 기반 time input 헬퍼 ─────────────────────────────── */
+// 한국(KST)은 DST 없음 → UTC+9 고정. Intl.DateTimeFormat locale 버그 없이
+// UTC 밀리초에 +9h를 더해서 getUTC* 로 날짜/시각을 직접 읽는 방식 사용.
+
+const KST = "Asia/Seoul";
+const KST_OFFSET_MS = 9 * 60 * 60 * 1000;
+
+function toKSTDate(date: Date): Date {
+  return new Date(date.getTime() + KST_OFFSET_MS);
+}
+
+/** ISO → "HH:MM" (KST 기준) — <input type="time"> 값 */
+export function isoToTimeInput(iso: string): string {
+  const kst = toKSTDate(new Date(iso));
+  const h = String(kst.getUTCHours()).padStart(2, "0");
+  const m = String(kst.getUTCMinutes()).padStart(2, "0");
+  return `${h}:${m}`;
+}
+
+/** 현재 KST 시각 "HH:MM" */
+export function nowTimeInput(): string {
+  return isoToTimeInput(new Date().toISOString());
+}
+
+/**
+ * "HH:MM" (KST) + 기준 ISO의 KST 날짜 → 새 ISO (UTC)
+ * (수정 시: 원래 기록 날짜는 유지하고 시간만 교체)
+ */
+export function applyTimeInput(originalISO: string, timeStr: string): string {
+  const [h, m] = timeStr.split(":").map(Number);
+  const kst = toKSTDate(new Date(originalISO));
+  const year  = kst.getUTCFullYear();
+  const month = kst.getUTCMonth();  // 0-indexed
+  const day   = kst.getUTCDate();
+  // KST HH:MM → UTC: subtract 9 hours
+  return new Date(Date.UTC(year, month, day, h - 9, m)).toISOString();
+}
+
+/** "HH:MM" + 오늘 KST 날짜 → ISO (새 기록 저장용) */
+export function todayTimeToISO(timeStr: string): string {
+  return applyTimeInput(new Date().toISOString(), timeStr);
+}
+
+/* ─── 표시용 포맷 ──────────────────────────────────────────── */
+
+/** "오전 4:33" / "오후 2:05" 형식 (KST 강제) */
 export function formatTime(date: Date | string): string {
   const d = typeof date === "string" ? new Date(date) : date;
-  return format(d, "a h:mm", { locale: ko });
+  return new Intl.DateTimeFormat("ko-KR", {
+    timeZone: KST,
+    hour: "numeric",
+    minute: "2-digit",
+    hour12: true,
+  }).format(d);
 }
 
 export function formatDate(date: Date | string): string {
   const d = typeof date === "string" ? new Date(date) : date;
-  return format(d, "M월 d일 (E)", { locale: ko });
+  return new Intl.DateTimeFormat("ko-KR", {
+    timeZone: KST,
+    month: "long",
+    day: "numeric",
+    weekday: "short",
+  }).format(d);
 }
 
 export function formatDuration(minutes: number): string {
@@ -20,7 +75,6 @@ export function formatDuration(minutes: number): string {
 }
 
 export function getAgeDays(birthDate: Date | string): number {
-  // 한국식: 생일 당일 = 생후 1일. TZ 무관하게 캘린더 날짜로만 비교.
   const birth = typeof birthDate === "string" ? new Date(birthDate) : birthDate;
   const birthLocal = new Date(birth.getFullYear(), birth.getMonth(), birth.getDate());
   const today = new Date();
@@ -39,5 +93,9 @@ export function isToday(date: Date | string): boolean {
 
 export function getDateString(date: Date | string): string {
   const d = typeof date === "string" ? new Date(date) : date;
-  return format(d, "yyyy-MM-dd");
+  const kst = toKSTDate(d);
+  const y  = kst.getUTCFullYear();
+  const mo = String(kst.getUTCMonth() + 1).padStart(2, "0");
+  const da = String(kst.getUTCDate()).padStart(2, "0");
+  return `${y}-${mo}-${da}`;
 }

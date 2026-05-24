@@ -1,199 +1,207 @@
 "use client";
 
 /**
- * DayTimeline — 한 날짜의 24시간 세로 그리드.
+ * DayTimeline — 한 날짜의 기록을 시간순 텍스트 리스트로 표시.
  *
- * 좌측 시간 라벨(0, 6, 12, 18시) + 우측 4개 레인:
- *   레인 1: 수면 (보라 막대)
- *   레인 2: 놀이 (초록 막대)
- *   레인 3: 수유 (분유=파란 점 / 모유=핑크 점 + 막대)
- *   레인 4: 배변 (소변=하늘 점 / 대변=노란 점)
+ * 레이아웃:
+ *   [시간]  [분유 100ml]  [✏️]
+ *           [소변]        [✏️]
+ *   [시간]  [수면 시작]   [✏️]
  *
- * 각 막대/점 탭 시 RecordPopover.
+ * - 같은 1분 내 기록은 같은 시간 블록에 묶임
+ * - 묶음 내 순서: 분유/모유 → 소변/대변 → 수면 → 놀이
+ * - ✏️ 탭 → RecordEditSheet (수정 + 삭제)
  */
 
 import { useState } from "react";
+import { Pencil } from "lucide-react";
 import { useDayRecords } from "../hooks/useDayRecords";
-import { RecordPopover, type TimelineRecord } from "./RecordPopover";
-
-const HOUR_HEIGHT = 36; // px per hour → 24h = 864px
-const TOTAL_HEIGHT = HOUR_HEIGHT * 24;
-const LABEL_HOURS = [0, 3, 6, 9, 12, 15, 18, 21];
-const MIN_BAR_HEIGHT = 4;
+import { RecordEditSheet } from "./RecordEditSheet";
+import { formatTime, formatDuration } from "@/lib/date-utils";
+import type { TimelineRecord } from "./RecordPopover";
 
 interface Props {
   babyId: string;
   date: string; // YYYY-MM-DD
 }
 
-/** 한 날짜의 자정 기준 시각(local timezone)에서 분 단위로 측정 */
-function minutesSinceDayStart(iso: string, dateStr: string): number {
-  const recDate = new Date(iso);
-  const [y, m, d] = dateStr.split("-").map(Number);
-  const dayStart = new Date(y, m - 1, d, 0, 0, 0);
-  const diffMs = recDate.getTime() - dayStart.getTime();
-  return Math.max(0, Math.min(24 * 60, diffMs / 60000));
+/* ─── 카테고리 우선순위 (분유/모유→배변→수면→놀이) ────────── */
+
+const CATEGORY_ORDER: Record<string, number> = {
+  formula: 0,
+  breast_left: 0,
+  breast_right: 0,
+  breast_both: 0,
+  pee: 1,
+  poo: 1,
+  both: 1,
+  sleep: 2,
+  play: 3,
+};
+
+function categoryKey(record: TimelineRecord): number {
+  if (record.kind === "feeding") return CATEGORY_ORDER[record.type] ?? 0;
+  if (record.kind === "diaper") return CATEGORY_ORDER[record.type] ?? 1;
+  if (record.kind === "sleep") return 2;
+  if (record.kind === "play") return 3;
+  return 9;
 }
 
-/** 그 시각이 해당 날짜 범위에 있는가? */
-function isWithinDay(iso: string, dateStr: string): boolean {
-  const recDate = new Date(iso);
-  const [y, m, d] = dateStr.split("-").map(Number);
-  const dayStart = new Date(y, m - 1, d, 0, 0, 0).getTime();
-  const dayEnd = dayStart + 24 * 60 * 60 * 1000;
-  return recDate.getTime() >= dayStart && recDate.getTime() < dayEnd;
+/* ─── 텍스트 변환 ────────────────────────────────────────── */
+
+function feedingLabel(f: { feedingType: string; amountMl?: number | null; durationMinutes?: number | null }): string {
+  switch (f.feedingType) {
+    case "formula":      return f.amountMl ? `분유 ${f.amountMl}ml` : "분유";
+    case "breast_left":  return f.durationMinutes ? `모유 왼쪽 (${f.durationMinutes}분)` : "모유 왼쪽";
+    case "breast_right": return f.durationMinutes ? `모유 오른쪽 (${f.durationMinutes}분)` : "모유 오른쪽";
+    case "breast_both":  return f.durationMinutes ? `모유 양쪽 (${f.durationMinutes}분)` : "모유 양쪽";
+    default:             return "수유";
+  }
 }
 
-function minutesToTop(min: number): number {
-  return (min / 60) * HOUR_HEIGHT;
+function diaperLabel(d: { diaperType: string }): string {
+  switch (d.diaperType) {
+    case "pee":  return "소변";
+    case "poo":  return "대변";
+    case "both": return "소변 + 대변";
+    default:     return "배변";
+  }
 }
+
+function sleepLabel(s: { durationMinutes?: number | null; endedAt?: string | null }): string {
+  if (s.endedAt && s.durationMinutes != null) return `수면 (${formatDuration(s.durationMinutes)})`;
+  return "수면 시작";
+}
+
+function playLabel(p: { playType: string; durationMinutes: number; endedAt?: string | null }): string {
+  const names: Record<string, string> = { tummy_time: "터미타임", free_play: "자유놀이", sensory_play: "감각놀이" };
+  const name = names[p.playType] ?? "놀이";
+  if (p.endedAt && p.durationMinutes > 0) return `${name} (${formatDuration(p.durationMinutes)})`;
+  return `${name} 시작`;
+}
+
+/* ─── 색 도트 ────────────────────────────────────────────── */
+
+const DOTS: Record<string, string> = {
+  formula: "bg-blue-500", breast_left: "bg-pink-400", breast_right: "bg-pink-400", breast_both: "bg-pink-400",
+  pee: "bg-cyan-400", poo: "bg-yellow-500", both: "bg-orange-400",
+  sleep: "bg-purple-400", play: "bg-green-400",
+};
+
+function dotClass(record: TimelineRecord): string {
+  if (record.kind === "feeding") return DOTS[record.type] ?? "bg-gray-300";
+  if (record.kind === "diaper")  return DOTS[record.type] ?? "bg-gray-300";
+  if (record.kind === "sleep")   return DOTS.sleep;
+  if (record.kind === "play")    return DOTS.play;
+  return "bg-gray-300";
+}
+
+/* ─── 통합 아이템 ────────────────────────────────────────── */
+
+interface FlatItem {
+  ts: number;
+  record: TimelineRecord;
+  label: string;
+  dot: string;
+  catOrder: number;
+}
+
+/* ─── 1분 단위 그루핑 ─────────────────────────────────── */
+
+interface Group {
+  minuteKey: number;
+  ts: number;               // 그룹 내 가장 이른 시각
+  items: FlatItem[];        // catOrder 기준 정렬된
+}
+
+function groupByMinute(items: FlatItem[]): Group[] {
+  const map = new Map<number, Group>();
+  for (const item of items) {
+    const key = Math.floor(item.ts / 60000);
+    if (!map.has(key)) map.set(key, { minuteKey: key, ts: item.ts, items: [] });
+    map.get(key)!.items.push(item);
+  }
+  // 각 그룹 내 카테고리 순 정렬
+  for (const g of map.values()) {
+    g.items.sort((a, b) => a.catOrder - b.catOrder || a.ts - b.ts);
+  }
+  return Array.from(map.values()).sort((a, b) => a.ts - b.ts);
+}
+
+/* ─── 메인 ─────────────────────────────────────────────── */
 
 export function DayTimeline({ babyId, date }: Props) {
   const { feedings, diapers, sleeps, plays, isLoading, isEmpty } = useDayRecords(babyId, date);
-  const [selected, setSelected] = useState<TimelineRecord | null>(null);
+  const [editRecord, setEditRecord] = useState<TimelineRecord | null>(null);
+
+  const flatItems: FlatItem[] = [
+    ...feedings.map((f) => {
+      const r: TimelineRecord = { kind: "feeding", ...f, type: f.feedingType };
+      return { ts: new Date(f.startedAt).getTime(), record: r, label: feedingLabel(f), dot: dotClass(r), catOrder: categoryKey(r) };
+    }),
+    ...diapers.map((d) => {
+      const r: TimelineRecord = { kind: "diaper", ...d, type: d.diaperType };
+      return { ts: new Date(d.recordedAt).getTime(), record: r, label: diaperLabel(d), dot: dotClass(r), catOrder: categoryKey(r) };
+    }),
+    ...sleeps.map((s) => {
+      const r: TimelineRecord = { kind: "sleep", ...s };
+      return { ts: new Date(s.startedAt).getTime(), record: r, label: sleepLabel(s), dot: dotClass(r), catOrder: 2 };
+    }),
+    ...plays.map((p) => {
+      const r: TimelineRecord = { kind: "play", ...p };
+      return { ts: new Date(p.startedAt).getTime(), record: r, label: playLabel(p), dot: dotClass(r), catOrder: 3 };
+    }),
+  ];
+
+  const groups = groupByMinute(flatItems);
+
+  if (isLoading) {
+    return <div className="py-6 text-center text-xs text-gray-300">불러오는 중...</div>;
+  }
+
+  if (isEmpty) {
+    return <div className="py-6 text-center text-xs text-gray-300">이 날의 기록이 없어요</div>;
+  }
 
   return (
-    <div className="relative bg-white rounded-2xl border border-gray-100 overflow-hidden">
-      {/* 24h 본문 */}
-      <div className="relative flex" style={{ height: TOTAL_HEIGHT }}>
-        {/* 좌측 시간 라벨 */}
-        <div className="relative w-10 flex-shrink-0 border-r border-gray-100 bg-gray-50/50">
-          {LABEL_HOURS.map((h) => (
-            <div
-              key={h}
-              className="absolute left-0 right-0 text-[10px] text-gray-400 text-right pr-1.5"
-              style={{ top: minutesToTop(h * 60) - 6 }}
-            >
-              {String(h).padStart(2, "0")}시
-            </div>
-          ))}
-        </div>
+    <>
+      <div className="divide-y divide-gray-50">
+        {groups.map((group) => {
+          const timeStr = formatTime(new Date(group.ts));
+          return (
+            <div key={group.minuteKey} className="flex gap-3 px-4 py-2">
+              {/* 시간 — 그룹 상단 정렬 */}
+              <div className="w-16 flex-shrink-0 text-[11px] text-gray-400 font-mono leading-[1.8rem] select-none">
+                {timeStr}
+              </div>
 
-        {/* 우측 활동 영역 */}
-        <div className="relative flex-1">
-          {/* 시간 grid line (3h 단위) */}
-          {LABEL_HOURS.map((h) => (
-            <div
-              key={h}
-              className="absolute left-0 right-0 border-t border-dashed border-gray-100"
-              style={{ top: minutesToTop(h * 60) }}
-            />
-          ))}
-
-          {/* 4 레인 — 가로 split (각 레인은 25% 폭) */}
-          <div className="absolute inset-0 grid grid-cols-4 gap-px">
-            {/* 레인 1: 수면 */}
-            <div className="relative">
-              {sleeps
-                .filter((s) => isWithinDay(s.startedAt, date) || (s.endedAt && isWithinDay(s.endedAt, date)))
-                .map((s) => {
-                  const top = minutesToTop(minutesSinceDayStart(s.startedAt, date));
-                  const endTime = s.endedAt ? minutesSinceDayStart(s.endedAt, date) : 24 * 60;
-                  const startTime = minutesSinceDayStart(s.startedAt, date);
-                  const height = Math.max(MIN_BAR_HEIGHT, minutesToTop(endTime - startTime));
-                  return (
+              {/* 활동 목록 (카테고리 순 세로 배열) */}
+              <div className="flex-1 space-y-0.5">
+                {group.items.map((item) => (
+                  <div
+                    key={item.record.id}
+                    className="flex items-center justify-between min-h-[1.8rem]"
+                  >
+                    <div className="flex items-center gap-2 flex-1">
+                      <span className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${item.dot}`} />
+                      <span className="text-sm text-gray-800">{item.label}</span>
+                    </div>
                     <button
-                      key={s.id}
-                      onClick={() => setSelected({ kind: "sleep", ...s })}
-                      className="absolute left-0.5 right-0.5 bg-purple-300/80 hover:bg-purple-400 rounded-md transition-colors"
-                      style={{ top, height }}
-                      title={`수면 ${s.durationMinutes ?? "?"}분`}
-                    />
-                  );
-                })}
+                      onClick={() => setEditRecord(item.record)}
+                      className="ml-2 p-1.5 text-gray-300 hover:text-blue-400 active:text-blue-500 rounded-lg transition-colors"
+                      aria-label="수정"
+                    >
+                      <Pencil className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                ))}
+              </div>
             </div>
-
-            {/* 레인 2: 놀이 */}
-            <div className="relative">
-              {plays.map((p) => {
-                if (!isWithinDay(p.startedAt, date)) return null;
-                const startTime = minutesSinceDayStart(p.startedAt, date);
-                const top = minutesToTop(startTime);
-                const height = Math.max(MIN_BAR_HEIGHT, minutesToTop(p.durationMinutes));
-                return (
-                  <button
-                    key={p.id}
-                    onClick={() => setSelected({ kind: "play", ...p })}
-                    className="absolute left-0.5 right-0.5 bg-green-300/80 hover:bg-green-400 rounded-md transition-colors"
-                    style={{ top, height }}
-                    title={`놀이 ${p.durationMinutes}분`}
-                  />
-                );
-              })}
-            </div>
-
-            {/* 레인 3: 수유 */}
-            <div className="relative">
-              {feedings.map((f) => {
-                if (!isWithinDay(f.startedAt, date)) return null;
-                const top = minutesToTop(minutesSinceDayStart(f.startedAt, date));
-                const isFormula = f.feedingType === "formula";
-                const color = isFormula ? "bg-blue-500" : "bg-pink-500";
-                // 모유: duration 있으면 막대, 없으면 점. 분유: 항상 점.
-                if (!isFormula && f.durationMinutes && f.durationMinutes > 0) {
-                  const height = Math.max(MIN_BAR_HEIGHT, minutesToTop(f.durationMinutes));
-                  return (
-                    <button
-                      key={f.id}
-                      onClick={() => setSelected({ kind: "feeding", ...f, type: f.feedingType })}
-                      className={`absolute left-0.5 right-0.5 ${color} opacity-70 hover:opacity-100 rounded-md`}
-                      style={{ top, height }}
-                      title="모유 수유"
-                    />
-                  );
-                }
-                return (
-                  <button
-                    key={f.id}
-                    onClick={() => setSelected({ kind: "feeding", ...f, type: f.feedingType })}
-                    className={`absolute left-1/2 w-3 h-3 -translate-x-1/2 ${color} rounded-full hover:scale-125 transition-transform shadow-sm`}
-                    style={{ top: top - 6 }}
-                    title={isFormula ? `분유 ${f.amountMl ?? ""}ml` : "모유"}
-                  />
-                );
-              })}
-            </div>
-
-            {/* 레인 4: 배변 */}
-            <div className="relative">
-              {diapers.map((d) => {
-                if (!isWithinDay(d.recordedAt, date)) return null;
-                const top = minutesToTop(minutesSinceDayStart(d.recordedAt, date));
-                const isPee = d.diaperType === "pee";
-                const color = isPee ? "bg-cyan-400" : "bg-yellow-500";
-                return (
-                  <button
-                    key={d.id}
-                    onClick={() => setSelected({ kind: "diaper", ...d, type: d.diaperType })}
-                    className={`absolute left-1/2 w-3 h-3 -translate-x-1/2 ${color} rounded-full hover:scale-125 transition-transform shadow-sm`}
-                    style={{ top: top - 6 }}
-                    title={isPee ? "소변" : "대변"}
-                  />
-                );
-              })}
-            </div>
-          </div>
-        </div>
+          );
+        })}
       </div>
 
-      {/* 빈 날 안내 */}
-      {!isLoading && isEmpty && (
-        <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-          <p className="text-xs text-gray-300">이 날의 기록이 없어요</p>
-        </div>
-      )}
-
-      {/* 범례 (날짜 카드 하단) */}
-      <div className="border-t border-gray-100 px-3 py-2 flex flex-wrap gap-x-3 gap-y-1 text-[10px] text-gray-500">
-        <span className="flex items-center gap-1"><span className="w-2 h-2 bg-purple-300 rounded-sm" />수면</span>
-        <span className="flex items-center gap-1"><span className="w-2 h-2 bg-green-300 rounded-sm" />놀이</span>
-        <span className="flex items-center gap-1"><span className="w-2 h-2 bg-blue-500 rounded-full" />분유</span>
-        <span className="flex items-center gap-1"><span className="w-2 h-2 bg-pink-500 rounded-full" />모유</span>
-        <span className="flex items-center gap-1"><span className="w-2 h-2 bg-cyan-400 rounded-full" />소변</span>
-        <span className="flex items-center gap-1"><span className="w-2 h-2 bg-yellow-500 rounded-full" />대변</span>
-      </div>
-
-      <RecordPopover record={selected} onClose={() => setSelected(null)} />
-    </div>
+      <RecordEditSheet key={editRecord?.id ?? ""} record={editRecord} onClose={() => setEditRecord(null)} />
+    </>
   );
 }

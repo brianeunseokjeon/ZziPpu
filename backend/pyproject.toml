@@ -16,6 +16,7 @@ dependencies = [
     "passlib[bcrypt]>=1.7.4",
     "httpx>=0.28.0",
     "sse-starlette>=2.2.0",
+    "youtube-transcript-api>=0.6",
 ]
 
 [project.optional-dependencies]

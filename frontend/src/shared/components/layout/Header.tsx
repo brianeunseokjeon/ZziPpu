@@ -49,7 +49,7 @@ export function Header() {
         <div className="flex items-center gap-1">
           <button
             onClick={goBack}
-            className="p-1.5 rounded-full hover:bg-gray-100 transition-colors"
+            className="p-1.5 rounded-full active:bg-gray-100 transition-colors"
           >
             <ChevronLeft className="w-4 h-4 text-gray-500" />
           </button>
@@ -64,7 +64,7 @@ export function Header() {
           <button
             onClick={goForward}
             disabled={isToday}
-            className="p-1.5 rounded-full hover:bg-gray-100 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+            className="p-1.5 rounded-full active:bg-gray-100 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
           >
             <ChevronRight className="w-4 h-4 text-gray-500" />
           </button>

@@ -21,12 +21,16 @@ export function useQuickSave() {
     useCreateDiaper();
   const { mutateAsync: deleteDiaper } = useDeleteDiaper();
 
-  async function saveFormula(babyId: string, ml: number): Promise<UndoHandle> {
+  async function saveFormula(
+    babyId: string,
+    ml: number,
+    at?: string
+  ): Promise<UndoHandle> {
     const saved = await createFeeding({
       babyId,
       feedingType: FeedingType.Formula,
       amountMl: ml,
-      startedAt: new Date().toISOString(),
+      startedAt: at ?? new Date().toISOString(),
     });
     return {
       undo: () => deleteFeeding({ babyId, feedingId: saved.id }),
@@ -35,7 +39,8 @@ export function useQuickSave() {
 
   async function saveBreast(
     babyId: string,
-    side: "left" | "right" | "both"
+    side: "left" | "right" | "both",
+    at?: string
   ): Promise<UndoHandle> {
     const typeMap: Record<string, FeedingType> = {
       left: FeedingType.BreastLeft,
@@ -45,29 +50,29 @@ export function useQuickSave() {
     const saved = await createFeeding({
       babyId,
       feedingType: typeMap[side],
-      startedAt: new Date().toISOString(),
+      startedAt: at ?? new Date().toISOString(),
     });
     return {
       undo: () => deleteFeeding({ babyId, feedingId: saved.id }),
     };
   }
 
-  async function savePee(babyId: string): Promise<UndoHandle> {
+  async function savePee(babyId: string, at?: string): Promise<UndoHandle> {
     const saved = await createDiaper({
       babyId,
       diaperType: DiaperType.Pee,
-      recordedAt: new Date().toISOString(),
+      recordedAt: at ?? new Date().toISOString(),
     });
     return {
       undo: () => deleteDiaper({ babyId, diaperId: saved.id }),
     };
   }
 
-  async function savePoo(babyId: string): Promise<UndoHandle> {
+  async function savePoo(babyId: string, at?: string): Promise<UndoHandle> {
     const saved = await createDiaper({
       babyId,
       diaperType: DiaperType.Poop,
-      recordedAt: new Date().toISOString(),
+      recordedAt: at ?? new Date().toISOString(),
     });
     return {
       undo: () => deleteDiaper({ babyId, diaperId: saved.id }),

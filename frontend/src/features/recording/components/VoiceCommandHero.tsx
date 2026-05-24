@@ -132,49 +132,47 @@ export function VoiceCommandHero() {
   };
 
   return (
-    <div className="bg-gradient-to-br from-indigo-50 to-purple-50 rounded-2xl p-4 border border-indigo-100">
-      <div className="flex items-center gap-4">
-        {/* 큰 마이크 버튼 */}
-        <button
-          onClick={handleMicClick}
-          className={`relative w-16 h-16 rounded-full flex items-center justify-center shadow-md transition-all active:scale-95 flex-shrink-0 ${
-            isListening
-              ? "bg-red-500 text-white animate-pulse"
-              : "bg-indigo-500 text-white hover:bg-indigo-600"
-          }`}
-        >
-          {isListening ? (
-            <MicOff className="w-7 h-7" />
-          ) : (
-            <Mic className="w-7 h-7" />
-          )}
-        </button>
+    <div className={`rounded-xl border px-3 py-2 flex items-center gap-3 transition-colors ${
+      isListening
+        ? "bg-red-50 border-red-200"
+        : "bg-indigo-50 border-indigo-100"
+    }`}>
+      {/* 마이크 버튼 — 컴팩트 */}
+      <button
+        onClick={handleMicClick}
+        className={`w-10 h-10 rounded-full flex items-center justify-center shadow-sm transition-all active:scale-90 flex-shrink-0 ${
+          isListening
+            ? "bg-red-500 text-white animate-pulse"
+            : "bg-indigo-500 text-white"
+        }`}
+      >
+        {isListening ? <MicOff className="w-5 h-5" /> : <Mic className="w-5 h-5" />}
+      </button>
 
-        {/* 예시 명령어 */}
-        <div className="flex-1 min-w-0">
-          <p className="text-xs font-semibold text-indigo-700 mb-1.5">
-            {isListening ? "🎤 듣고 있어요..." : "🎤 음성으로 기록"}
-          </p>
-          <div className="flex flex-wrap gap-1.5">
-            {EXAMPLE_COMMANDS.map((cmd) => (
-              <span
-                key={cmd}
-                className="text-[10px] bg-white border border-indigo-100 text-indigo-500 rounded-full px-2 py-0.5"
-              >
-                {cmd}
-              </span>
-            ))}
-          </div>
-        </div>
-      </div>
-
-      {/* 인식 결과 카드 */}
-      {result && (
-        <div className={`mt-3 rounded-xl px-3 py-2 text-sm font-medium ${resultBg[result.kind]}`}>
+      {/* 상태 + 예시 명령어 */}
+      {result ? (
+        <span className={`text-xs font-medium flex-1 ${
+          result.kind === "ok" ? "text-gray-800" :
+          result.kind === "err" ? "text-red-600" : "text-yellow-700"
+        }`}>
           {result.kind === "ok" && "✅ "}
           {result.kind === "err" && "❌ "}
           {result.kind === "unrecognized" && "⚠️ "}
           {result.msg}
+        </span>
+      ) : (
+        <div className="flex-1 min-w-0 flex items-center gap-1.5 flex-wrap">
+          <span className="text-xs font-semibold text-indigo-700 flex-shrink-0">
+            {isListening ? "듣고 있어요..." : "음성"}
+          </span>
+          {!isListening && EXAMPLE_COMMANDS.map((cmd) => (
+            <span
+              key={cmd}
+              className="text-[10px] bg-white border border-indigo-100 text-indigo-400 rounded-full px-1.5 py-0.5"
+            >
+              {cmd}
+            </span>
+          ))}
         </div>
       )}
     </div>

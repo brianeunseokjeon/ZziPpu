@@ -214,7 +214,7 @@ export function BigActionGrid() {
     <div className="space-y-2">
       <h2 className="text-sm font-semibold text-gray-500">빠른 기록</h2>
 
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-3 gap-2">
         {ACTIONS.map((action) => {
           const active = isTimerActive(action.key);
           const loading = savingKey === action.key || (isSaving && (action.key === "formula" || action.key === "pee" || action.key === "poo"));
@@ -230,23 +230,21 @@ export function BigActionGrid() {
               onPointerLeave={onPressEnd}
               onPointerCancel={onPressEnd}
               disabled={!!savingKey}
-              className={`relative flex flex-col items-center gap-1.5 py-5 rounded-2xl border-2 transition-all active:scale-95 select-none ${
+              className={`relative flex flex-col items-center gap-1 py-3 rounded-xl border transition-all active:scale-95 select-none ${
                 active
                   ? `${action.activeBg} ${action.activeText}`
                   : `${action.idleBg} ${action.idleText}`
               } disabled:opacity-60`}
             >
-              <span className="text-2xl">{action.emoji}</span>
-              <span className="text-xs font-semibold">
+              <span className="text-xl">{action.emoji}</span>
+              <span className="text-[11px] font-semibold leading-tight">
                 {active && action.activeLabel ? action.activeLabel : action.label}
               </span>
               {loading && (
-                <div className="absolute inset-0 flex items-center justify-center rounded-2xl bg-white/60">
-                  <Loader2 className="w-5 h-5 animate-spin text-gray-500" />
+                <div className="absolute inset-0 flex items-center justify-center rounded-xl bg-white/60">
+                  <Loader2 className="w-4 h-4 animate-spin text-gray-500" />
                 </div>
               )}
-              {/* 길게 누르기 힌트 */}
-              <span className="text-[9px] opacity-40 mt-0.5">길게 누르면 옵션</span>
             </button>
           );
         })}

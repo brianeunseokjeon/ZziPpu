@@ -8,12 +8,14 @@
  * 타이머 활동(모유·수면·놀이): 옵션 선택 후 시작.
  */
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { Clock } from "lucide-react";
 import { Dialog } from "@/shared/components/ui/dialog";
 import { useActivityTimerStore } from "@/shared/stores/activityTimerStore";
 import { useQuickSave } from "../hooks/useQuickSave";
 import { useRecordingDefaultsStore } from "@/shared/stores/recordingDefaultsStore";
 import { useUIStore } from "@/shared/stores/uiStore";
+import { nowTimeInput, todayTimeToISO } from "@/lib/date-utils";
 import { FeedingType } from "@/features/feeding/types/feeding";
 
 export type SheetActivity = "formula" | "breast" | "pee" | "poo" | "sleep" | "play";
@@ -31,6 +33,35 @@ const PLAY_TYPES = [
   { value: "sensory_play", label: "감각놀이" },
 ] as const;
 
+/* ─── TimeField ── 어디 눌러도 피커 열림 ── */
+function TimeField({ label, value, onChange }: { label: string; value: string; onChange: (v: string) => void }) {
+  function display(hhmm: string) {
+    if (!hhmm) return "시간 선택";
+    const [h, m] = hhmm.split(":").map(Number);
+    const period = h < 12 ? "오전" : "오후";
+    const hour = h % 12 === 0 ? 12 : h % 12;
+    return `${period} ${hour}:${String(m).padStart(2, "0")}`;
+  }
+  return (
+    <div className="space-y-1">
+      <p className="text-xs text-gray-500 font-medium">{label}</p>
+      <div className="relative">
+        <div className="w-full px-4 py-3 border border-gray-200 rounded-xl bg-white flex items-center justify-between pointer-events-none">
+          <span className="text-sm font-medium text-gray-800">{display(value)}</span>
+          <Clock className="w-4 h-4 text-gray-400" />
+        </div>
+        <input
+          type="time"
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+        />
+      </div>
+    </div>
+  );
+}
+
+
 export function QuickOptionSheet({ activity, onClose, onSaved }: Props) {
   const { activeBabyId } = useUIStore();
   const defaults = useRecordingDefaultsStore();
@@ -43,6 +74,13 @@ export function QuickOptionSheet({ activity, onClose, onSaved }: Props) {
   const [breastSide, setBreastSide] = useState<"left" | "right" | "both">(defaults.breastSide);
   /* 놀이 타입 상태 */
   const [playType, setPlayType] = useState<"tummy_time" | "free_play" | "sensory_play">(defaults.playType);
+  /* 시간 입력 (즉시 저장 활동에만 표시) */
+  const [recordTime, setRecordTime] = useState(nowTimeInput);
+
+  // 시트가 열릴 때마다 현재 KST 시각으로 초기화
+  useEffect(() => {
+    if (activity) setRecordTime(nowTimeInput());
+  }, [activity]);
 
   const title: Record<SheetActivity, string> = {
     formula: "🍼 분유",
@@ -55,27 +93,28 @@ export function QuickOptionSheet({ activity, onClose, onSaved }: Props) {
 
   async function handleSave() {
     if (!activeBabyId || !activity) return;
+    const at = todayTimeToISO(recordTime);
     try {
       switch (activity) {
         case "formula": {
-          await saveFormula(activeBabyId, formulaMl);
+          await saveFormula(activeBabyId, formulaMl, at);
           defaults.setFormulaMl(formulaMl);
           onSaved?.(`분유 ${formulaMl}ml 기록됐어요`);
           break;
         }
         case "breast": {
-          await saveBreast(activeBabyId, breastSide);
+          await saveBreast(activeBabyId, breastSide, at);
           defaults.setBreastSide(breastSide);
           onSaved?.("모유 수유 기록됐어요");
           break;
         }
         case "pee": {
-          await savePee(activeBabyId);
+          await savePee(activeBabyId, at);
           onSaved?.("소변 기록됐어요");
           break;
         }
         case "poo": {
-          await savePoo(activeBabyId);
+          await savePoo(activeBabyId, at);
           onSaved?.("대변 기록됐어요");
           break;
         }
@@ -255,6 +294,11 @@ export function QuickOptionSheet({ activity, onClose, onSaved }: Props) {
               </>
             )}
           </div>
+        )}
+
+        {/* 기록 시간 (즉시 저장 활동에만 표시) */}
+        {(activity === "formula" || activity === "breast" || activity === "pee" || activity === "poo") && (
+          <TimeField label="기록 시간" value={recordTime} onChange={setRecordTime} />
         )}
 
         {/* 저장 버튼 */}
