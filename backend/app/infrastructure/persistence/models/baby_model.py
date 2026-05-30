@@ -1,10 +1,11 @@
 from datetime import date, datetime
 from uuid import UUID
 
-from sqlalchemy import String, Date, DateTime, Integer, Uuid, Text
+from sqlalchemy import String, Date, Integer, Uuid, Text
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.infrastructure.persistence.models.base import Base
+from app.infrastructure.persistence.models.types import UTCDateTime
 
 
 class BabyModel(Base):
@@ -17,4 +18,4 @@ class BabyModel(Base):
     gender: Mapped[str | None] = mapped_column(String(20), nullable=True)
     birth_weight_g: Mapped[int | None] = mapped_column(Integer, nullable=True)
     photo_url: Mapped[str | None] = mapped_column(Text, nullable=True)
-    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    created_at: Mapped[datetime] = mapped_column(UTCDateTime, nullable=False)

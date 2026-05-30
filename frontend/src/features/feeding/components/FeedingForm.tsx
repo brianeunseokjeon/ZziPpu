@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Minus, Plus, Play, Pause, CheckCircle2, RotateCcw } from "lucide-react";
+import { Clock, Minus, Plus, Play, Pause, CheckCircle2, RotateCcw } from "lucide-react";
 import { Button } from "@/shared/components/ui/button";
 import { Input } from "@/shared/components/ui/input";
 import { useActivityTimer, formatElapsed } from "@/shared/hooks/useActivityTimer";
@@ -14,6 +14,12 @@ import { FeedingType } from "../types/feeding";
 import { useUIStore } from "@/shared/stores/uiStore";
 import { ModeToggle } from "@/features/recording/components/ModeToggle";
 import { cn } from "@/lib/utils";
+import {
+  nowTimeInput,
+  todayTimeToISO,
+  applyTimeInput,
+  getDateString,
+} from "@/lib/date-utils";
 
 type Tab = "formula" | "breast";
 type BreastSide = "left" | "right" | "both";
@@ -30,6 +36,43 @@ function metaToBreastSide(meta?: string): BreastSide {
   return "both";
 }
 
+/* ─── TimeField — 어디를 눌러도 네이티브 피커 열리는 시간 입력 ─ */
+function TimeField({
+  label,
+  value,
+  onChange,
+}: {
+  label: string;
+  value: string;
+  onChange: (v: string) => void;
+}) {
+  function displayTime(hhmm: string): string {
+    if (!hhmm) return "시간 선택";
+    const [h, m] = hhmm.split(":").map(Number);
+    const period = h < 12 ? "오전" : "오후";
+    const hour = h % 12 === 0 ? 12 : h % 12;
+    return `${period} ${hour}:${String(m).padStart(2, "0")}`;
+  }
+
+  return (
+    <div className="space-y-1">
+      <p className="text-xs text-gray-500 font-medium">{label}</p>
+      <div className="relative">
+        <div className="w-full px-4 py-3 border border-gray-200 rounded-xl bg-white flex items-center justify-between pointer-events-none">
+          <span className="text-sm font-medium text-gray-800">{displayTime(value)}</span>
+          <Clock className="w-4 h-4 text-gray-400" />
+        </div>
+        <input
+          type="time"
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+        />
+      </div>
+    </div>
+  );
+}
+
 export function FeedingForm() {
   const { activeBabyId } = useUIStore();
   const { mutateAsync: createFeeding, isPending } = useCreateFeeding();
@@ -38,7 +81,6 @@ export function FeedingForm() {
   const breastDefault = useRecordingPreferencesStore((s) => s.defaultModes.feedingBreast);
 
   const [tab, setTab] = useState<Tab>(timer.isActive ? "breast" : "formula");
-  // 분유는 "now" / "manual" 만 의미 있음 (타이머는 모유 전용)
   const [formulaMode, setFormulaMode] = useState<RecordingMode>(
     formulaDefault === "timer" ? "now" : formulaDefault
   );
@@ -62,9 +104,17 @@ export function FeedingForm() {
   );
   // 공통
   const [memo, setMemo] = useState("");
-  const [manualStartedAt, setManualStartedAt] = useState(() =>
-    new Date().toISOString().slice(0, 16)
-  );
+
+  // 시간/날짜 상태 (KST 기준)
+  const [timeStr, setTimeStr] = useState(nowTimeInput);
+  const [dateStr, setDateStr] = useState(() => getDateString(new Date()));
+
+  // SSR 하이드레이션 대응
+  useEffect(() => {
+    setTimeStr(nowTimeInput());
+    setDateStr(getDateString(new Date()));
+  }, []);
+
   const [manualMinutes, setManualMinutes] = useState<number | "">("");
 
   function adjustAmount(delta: number) {
@@ -99,33 +149,36 @@ export function FeedingForm() {
       babyId: activeBabyId,
       feedingType: FeedingType.Formula,
       amountMl,
-      startedAt: new Date().toISOString(),
+      startedAt: todayTimeToISO(timeStr),
       memo: memo || undefined,
     });
     setMemo("");
+    setTimeStr(nowTimeInput());
   }
 
   async function saveFormulaManual() {
-    if (amountMl <= 0 || !manualStartedAt) {
+    if (amountMl <= 0 || !dateStr || !timeStr) {
       alert("수유량과 시간을 입력해주세요");
       return;
     }
+    // dateStr은 KST 날짜 "YYYY-MM-DD", timeStr은 KST "HH:MM"
+    // applyTimeInput은 기준 ISO에서 KST 날짜를 추출하므로, KST 날짜 정오를 기준으로 전달
+    const baseISO = new Date(`${dateStr}T12:00:00+09:00`).toISOString();
     await createFeeding({
       babyId: activeBabyId,
       feedingType: FeedingType.Formula,
       amountMl,
-      startedAt: new Date(manualStartedAt).toISOString(),
+      startedAt: applyTimeInput(baseISO, timeStr),
       memo: memo || undefined,
     });
     setMemo("");
   }
 
   async function saveBreastNow() {
-    // 1탭 — 좌/우/양쪽 + 종료 시간 없음 (옵셔널이라 단발 기록)
     await createFeeding({
       babyId: activeBabyId,
       feedingType: sideToFeedingType(breastSide),
-      startedAt: new Date().toISOString(),
+      startedAt: todayTimeToISO(nowTimeInput()),
       memo: memo || undefined,
     });
     setMemo("");
@@ -157,20 +210,20 @@ export function FeedingForm() {
   }
 
   async function saveBreastManual() {
-    if (!manualStartedAt) {
+    if (!dateStr || !timeStr) {
       alert("시작 시간을 입력해주세요");
       return;
     }
-    // 종료 시간은 옵셔널 — manualMinutes만 있어도 OK
     const durationMinutes =
       manualMinutes !== "" && Number(manualMinutes) > 0
         ? Math.round(Number(manualMinutes))
         : undefined;
+    const baseISO = new Date(`${dateStr}T12:00:00+09:00`).toISOString();
     await createFeeding({
       babyId: activeBabyId,
       feedingType: sideToFeedingType(breastSide),
       durationMinutes,
-      startedAt: new Date(manualStartedAt).toISOString(),
+      startedAt: applyTimeInput(baseISO, timeStr),
       memo: memo || undefined,
     });
     setMemo("");
@@ -250,17 +303,26 @@ export function FeedingForm() {
             </div>
           </div>
 
-          {formulaMode === "manual" && (
-            <div>
-              <p className="text-sm font-medium text-gray-700 mb-1.5">기록 시간</p>
-              <Input
-                type="datetime-local"
-                value={manualStartedAt}
-                max={new Date().toISOString().slice(0, 16)}
-                onChange={(e) => setManualStartedAt(e.target.value)}
-              />
-            </div>
-          )}
+          {/* 시간 입력 — now/manual 모두 표시 */}
+          <div className="space-y-3">
+            {formulaMode === "manual" && (
+              <div>
+                <p className="text-xs text-gray-500 font-medium mb-1">날짜</p>
+                <Input
+                  type="date"
+                  value={dateStr}
+                  max={getDateString(new Date())}
+                  onChange={(e) => setDateStr(e.target.value)}
+                  className="h-11"
+                />
+              </div>
+            )}
+            <TimeField
+              label="기록 시간"
+              value={timeStr}
+              onChange={setTimeStr}
+            />
+          </div>
 
           <div>
             <p className="text-sm font-medium text-gray-700 mb-1.5">메모 (선택)</p>
@@ -379,14 +441,20 @@ export function FeedingForm() {
           {breastMode === "manual" && (
             <div className="space-y-3 bg-gray-50 rounded-2xl p-4 border border-gray-100">
               <div>
-                <p className="text-sm font-medium text-gray-700 mb-1.5">시작 시간</p>
+                <p className="text-xs text-gray-500 font-medium mb-1">날짜</p>
                 <Input
-                  type="datetime-local"
-                  value={manualStartedAt}
-                  max={new Date().toISOString().slice(0, 16)}
-                  onChange={(e) => setManualStartedAt(e.target.value)}
+                  type="date"
+                  value={dateStr}
+                  max={getDateString(new Date())}
+                  onChange={(e) => setDateStr(e.target.value)}
+                  className="h-11"
                 />
               </div>
+              <TimeField
+                label="시작 시간"
+                value={timeStr}
+                onChange={setTimeStr}
+              />
               <div>
                 <p className="text-sm font-medium text-gray-700 mb-1.5">
                   수유 시간 (분) <span className="text-gray-400 text-xs">옵셔널</span>

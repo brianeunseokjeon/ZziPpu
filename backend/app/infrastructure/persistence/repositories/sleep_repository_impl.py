@@ -42,7 +42,7 @@ class SleepRepositoryImpl(SleepRepository):
             select(SleepModel)
             .where(
                 SleepModel.baby_id == baby_id,
-                func.date(SleepModel.started_at) == target_date,
+                func.date(SleepModel.started_at, '+9 hours') == target_date,
             )
             .order_by(SleepModel.started_at)
         )

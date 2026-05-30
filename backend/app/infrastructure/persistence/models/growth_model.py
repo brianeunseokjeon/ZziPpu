@@ -1,10 +1,11 @@
 from datetime import date, datetime
 from uuid import UUID
 
-from sqlalchemy import Date, DateTime, Float, Integer, Text, Uuid
+from sqlalchemy import Date, Float, Integer, Text, Uuid
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.infrastructure.persistence.models.base import Base
+from app.infrastructure.persistence.models.types import UTCDateTime
 
 
 class GrowthModel(Base):
@@ -17,4 +18,4 @@ class GrowthModel(Base):
     height_cm: Mapped[float | None] = mapped_column(Float, nullable=True)
     head_circumference_cm: Mapped[float | None] = mapped_column(Float, nullable=True)
     memo: Mapped[str | None] = mapped_column(Text, nullable=True)
-    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    created_at: Mapped[datetime] = mapped_column(UTCDateTime, nullable=False)

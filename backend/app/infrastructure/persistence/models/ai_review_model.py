@@ -1,10 +1,11 @@
 from datetime import date, datetime
 from uuid import UUID
 
-from sqlalchemy import Date, DateTime, JSON, Text, Uuid
+from sqlalchemy import Date, JSON, Text, Uuid
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.infrastructure.persistence.models.base import Base
+from app.infrastructure.persistence.models.types import UTCDateTime
 
 
 class AIReviewModel(Base):
@@ -24,4 +25,4 @@ class AIReviewModel(Base):
     considerations: Mapped[list] = mapped_column(JSON, nullable=False, default=list)
     concerns: Mapped[list] = mapped_column(JSON, nullable=False, default=list)
     critical_warnings: Mapped[list] = mapped_column(JSON, nullable=False, default=list)
-    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    created_at: Mapped[datetime] = mapped_column(UTCDateTime, nullable=False)

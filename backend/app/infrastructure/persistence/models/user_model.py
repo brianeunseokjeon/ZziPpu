@@ -1,10 +1,11 @@
 from datetime import datetime
 from uuid import UUID
 
-from sqlalchemy import String, DateTime, Uuid
+from sqlalchemy import String, Uuid
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.infrastructure.persistence.models.base import Base
+from app.infrastructure.persistence.models.types import UTCDateTime
 
 
 class UserModel(Base):
@@ -15,4 +16,4 @@ class UserModel(Base):
     phone: Mapped[str | None] = mapped_column(String(32), unique=True, nullable=True, index=True)
     name: Mapped[str | None] = mapped_column(String(100), nullable=True)
     hashed_password: Mapped[str | None] = mapped_column(String(255), nullable=True)
-    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    created_at: Mapped[datetime] = mapped_column(UTCDateTime, nullable=False)

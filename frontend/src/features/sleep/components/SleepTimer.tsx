@@ -9,6 +9,7 @@ import { useRecordingPreferencesStore, type RecordingMode } from "@/shared/store
 import { useCreateSleep } from "../api/sleepApi";
 import { useUIStore } from "@/shared/stores/uiStore";
 import { ModeToggle } from "@/features/recording/components/ModeToggle";
+import { nowDatetimeLocal, datetimeLocalToISO } from "@/lib/date-utils";
 
 /**
  * 수면 기록 폼. 3-mode 토글 + 일시정지/재개 가능한 타이머.
@@ -58,16 +59,16 @@ export function SleepTimer() {
       alert("시작·종료 시간을 모두 입력해주세요");
       return;
     }
-    const startedAt = new Date(manualStartedAt);
-    const endedAt = new Date(manualEndedAt);
-    if (endedAt <= startedAt) {
+    const startedAtISO = datetimeLocalToISO(manualStartedAt);
+    const endedAtISO = datetimeLocalToISO(manualEndedAt);
+    if (new Date(endedAtISO) <= new Date(startedAtISO)) {
       alert("종료 시간이 시작 시간보다 뒤여야 합니다");
       return;
     }
     await createSleep({
       babyId: activeBabyId,
-      startedAt: startedAt.toISOString(),
-      endedAt: endedAt.toISOString(),
+      startedAt: startedAtISO,
+      endedAt: endedAtISO,
       memo: memo || undefined,
     });
     setMemo("");
@@ -198,7 +199,7 @@ export function SleepTimer() {
             <Input
               type="datetime-local"
               value={manualStartedAt}
-              max={new Date().toISOString().slice(0, 16)}
+              max={nowDatetimeLocal()}
               onChange={(e) => setManualStartedAt(e.target.value)}
             />
           </div>
@@ -207,7 +208,7 @@ export function SleepTimer() {
             <Input
               type="datetime-local"
               value={manualEndedAt}
-              max={new Date().toISOString().slice(0, 16)}
+              max={nowDatetimeLocal()}
               onChange={(e) => setManualEndedAt(e.target.value)}
             />
           </div>

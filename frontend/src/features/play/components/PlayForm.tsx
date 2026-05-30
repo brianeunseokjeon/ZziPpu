@@ -12,6 +12,7 @@ import { useUIStore } from "@/shared/stores/uiStore";
 import { PLAY_TYPES } from "@/config/constants";
 import { ModeToggle } from "@/features/recording/components/ModeToggle";
 import { cn } from "@/lib/utils";
+import { nowDatetimeLocal, datetimeLocalToISO } from "@/lib/date-utils";
 
 export function PlayForm() {
   const { activeBabyId } = useUIStore();
@@ -93,25 +94,25 @@ export function PlayForm() {
       alert("시작 시간을 입력해주세요");
       return;
     }
-    const startedAt = new Date(manualStartedAt);
+    const startedAtISO = datetimeLocalToISO(manualStartedAt);
+    const startedAt = new Date(startedAtISO);
     let durationMinutes: number;
     let endedAtISO: string | undefined;
 
     if (manualEndedAt) {
-      const endedAt = new Date(manualEndedAt);
+      endedAtISO = datetimeLocalToISO(manualEndedAt);
+      const endedAt = new Date(endedAtISO);
       durationMinutes = Math.max(1, Math.round((endedAt.getTime() - startedAt.getTime()) / 60000));
-      endedAtISO = endedAt.toISOString();
     } else if (manualDuration !== "" && Number(manualDuration) > 0) {
       durationMinutes = Math.round(Number(manualDuration));
-      const endedAt = new Date(startedAt.getTime() + durationMinutes * 60000);
-      endedAtISO = endedAt.toISOString();
+      endedAtISO = new Date(startedAt.getTime() + durationMinutes * 60000).toISOString();
     } else {
       alert("종료 시간 또는 시간(분)을 입력해주세요");
       return;
     }
 
     await saveRecord({
-      startedAt: startedAt.toISOString(),
+      startedAt: startedAtISO,
       endedAt: endedAtISO,
       durationMinutes,
     });
@@ -233,7 +234,7 @@ export function PlayForm() {
             <Input
               type="datetime-local"
               value={manualStartedAt}
-              max={new Date().toISOString().slice(0, 16)}
+              max={nowDatetimeLocal()}
               onChange={(e) => setManualStartedAt(e.target.value)}
             />
           </div>
@@ -244,7 +245,7 @@ export function PlayForm() {
             <Input
               type="datetime-local"
               value={manualEndedAt}
-              max={new Date().toISOString().slice(0, 16)}
+              max={nowDatetimeLocal()}
               onChange={(e) => setManualEndedAt(e.target.value)}
             />
           </div>

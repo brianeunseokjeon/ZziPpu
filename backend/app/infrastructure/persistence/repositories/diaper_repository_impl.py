@@ -49,7 +49,7 @@ class DiaperRepositoryImpl(DiaperRepository):
             select(DiaperModel)
             .where(
                 DiaperModel.baby_id == baby_id,
-                func.date(DiaperModel.recorded_at) == target_date,
+                func.date(DiaperModel.recorded_at, '+9 hours') == target_date,
             )
             .order_by(DiaperModel.recorded_at)
         )

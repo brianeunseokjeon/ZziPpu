@@ -46,7 +46,7 @@ class PlayRepositoryImpl(PlayRepository):
             select(PlayModel)
             .where(
                 PlayModel.baby_id == baby_id,
-                func.date(PlayModel.started_at) == target_date,
+                func.date(PlayModel.started_at, '+9 hours') == target_date,
             )
             .order_by(PlayModel.started_at)
         )

@@ -8,6 +8,7 @@ import { DiaperType, StoolColor, StoolState } from "../types/diaper";
 import { useUIStore } from "@/shared/stores/uiStore";
 import { STOOL_COLORS, STOOL_STATES } from "@/config/constants";
 import { cn } from "@/lib/utils";
+import { nowDatetimeLocal, datetimeLocalToISO } from "@/lib/date-utils";
 
 export function DiaperForm() {
   const { activeBabyId } = useUIStore();
@@ -17,9 +18,7 @@ export function DiaperForm() {
   const [stoolColor, setStoolColor] = useState<StoolColor | undefined>();
   const [stoolState, setStoolState] = useState<StoolState | undefined>();
   const [memo, setMemo] = useState("");
-  const [occurredAt, setOccurredAt] = useState(() => {
-    return new Date().toISOString().slice(0, 16);
-  });
+  const [occurredAt, setOccurredAt] = useState(() => nowDatetimeLocal());
 
   const hasPoop = type === DiaperType.Poop || type === DiaperType.Both;
 
@@ -29,7 +28,7 @@ export function DiaperForm() {
       diaperType: type,
       stoolColor: hasPoop ? stoolColor : undefined,
       stoolState: hasPoop ? stoolState : undefined,
-      recordedAt: new Date(occurredAt).toISOString(),
+      recordedAt: datetimeLocalToISO(occurredAt),
       memo: memo || undefined,
     });
     setMemo("");
@@ -117,7 +116,7 @@ export function DiaperForm() {
         <Input
           type="datetime-local"
           value={occurredAt}
-          max={new Date().toISOString().slice(0, 16)}
+          max={nowDatetimeLocal()}
           onChange={(e) => setOccurredAt(e.target.value)}
         />
       </div>

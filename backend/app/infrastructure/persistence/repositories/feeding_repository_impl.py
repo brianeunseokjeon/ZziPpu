@@ -49,7 +49,7 @@ class FeedingRepositoryImpl(FeedingRepository):
             select(FeedingModel)
             .where(
                 FeedingModel.baby_id == baby_id,
-                func.date(FeedingModel.started_at) == target_date,
+                func.date(FeedingModel.started_at, '+9 hours') == target_date,
             )
             .order_by(FeedingModel.started_at)
         )

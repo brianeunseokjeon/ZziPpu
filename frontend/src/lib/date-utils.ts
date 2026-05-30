@@ -43,6 +43,21 @@ export function todayTimeToISO(timeStr: string): string {
   return applyTimeInput(new Date().toISOString(), timeStr);
 }
 
+/** 현재 KST 시각 "YYYY-MM-DDTHH:MM" — <input type="datetime-local"> value/max 용 */
+export function nowDatetimeLocal(): string {
+  const kst = toKSTDate(new Date());
+  const p = (n: number) => String(n).padStart(2, "0");
+  return `${kst.getUTCFullYear()}-${p(kst.getUTCMonth() + 1)}-${p(kst.getUTCDate())}T${p(kst.getUTCHours())}:${p(kst.getUTCMinutes())}`;
+}
+
+/** datetime-local 값(KST 벽시계) → UTC ISO */
+export function datetimeLocalToISO(value: string): string {
+  const [d, t] = value.split("T");
+  const [y, mo, da] = d.split("-").map(Number);
+  const [h, mi] = t.split(":").map(Number);
+  return new Date(Date.UTC(y, mo - 1, da, h - 9, mi)).toISOString();
+}
+
 /* ─── 표시용 포맷 ──────────────────────────────────────────── */
 
 /** "오전 4:33" / "오후 2:05" 형식 (KST 강제) */
