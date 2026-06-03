@@ -4,6 +4,7 @@ import {
   useQueryClient,
 } from "@tanstack/react-query";
 import { apiClient } from "@/lib/api-client";
+import { getDateString } from "@/lib/date-utils";
 import type {
   SleepRecord,
   CreateSleepRequest,
@@ -24,6 +25,7 @@ export function useSleepRecords(babyId: string, date: string) {
         `/api/v1/babies/${babyId}/sleeps?date=${date}`
       ),
     enabled: !!babyId,
+    refetchInterval: date === getDateString(new Date()) ? 15000 : false,
   });
 }
 
@@ -73,7 +75,7 @@ export function useCreateSleep() {
     mutationFn: (data: CreateSleepRequest) =>
       apiClient.post<SleepRecord>(`/api/v1/babies/${data.babyId}/sleeps`, data),
     onSettled: (_data, _err, vars) => {
-      const date = vars.startedAt.slice(0, 10);
+      const date = getDateString(vars.startedAt);
       qc.invalidateQueries({ queryKey: sleepKeys.list(vars.babyId, date) });
       qc.invalidateQueries({ queryKey: ["daily-summary"] });
     },

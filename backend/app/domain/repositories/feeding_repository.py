@@ -15,6 +15,10 @@ class FeedingRepository(ABC):
         ...
 
     @abstractmethod
+    async def get_recent(self, baby_id: UUID, limit: int = 12) -> list[Feeding]:
+        ...
+
+    @abstractmethod
     async def save(self, feeding: Feeding) -> Feeding:
         ...
 

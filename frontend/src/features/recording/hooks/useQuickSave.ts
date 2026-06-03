@@ -79,11 +79,23 @@ export function useQuickSave() {
     };
   }
 
+  async function saveBoth(babyId: string, at?: string): Promise<UndoHandle> {
+    const saved = await createDiaper({
+      babyId,
+      diaperType: DiaperType.Both,
+      recordedAt: at ?? new Date().toISOString(),
+    });
+    return {
+      undo: () => deleteDiaper({ babyId, diaperId: saved.id }),
+    };
+  }
+
   return {
     saveFormula,
     saveBreast,
     savePee,
     savePoo,
+    saveBoth,
     isSaving: isSavingFeeding || isSavingDiaper,
   };
 }

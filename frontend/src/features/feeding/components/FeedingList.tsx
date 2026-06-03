@@ -1,11 +1,13 @@
 "use client";
 
-import { Trash2 } from "lucide-react";
+import { useState } from "react";
+import { Trash2, Pencil } from "lucide-react";
 import { useFeedings, useDeleteFeeding } from "../api/feedingApi";
 import { useUIStore } from "@/shared/stores/uiStore";
 import { formatTime } from "@/lib/date-utils";
-import { FeedingType } from "../types/feeding";
+import { Feeding, FeedingType } from "../types/feeding";
 import { Badge } from "@/shared/components/ui/badge";
+import { FeedingEditModal } from "./FeedingEditModal";
 
 function feedingLabel(type: FeedingType): string {
   switch (type) {
@@ -20,6 +22,7 @@ export function FeedingList() {
   const { activeBabyId, selectedDate } = useUIStore();
   const { data: feedings, isLoading } = useFeedings(activeBabyId, selectedDate);
   const { mutate: deleteFeeding } = useDeleteFeeding();
+  const [editing, setEditing] = useState<Feeding | null>(null);
 
   if (isLoading) {
     return (
@@ -45,42 +48,58 @@ export function FeedingList() {
   );
 
   return (
-    <div className="space-y-2">
-      {sorted.map((f) => (
-        <div
-          key={f.id}
-          className="flex items-center justify-between bg-white rounded-2xl px-4 py-3 border border-gray-100"
-        >
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full bg-blue-50 flex items-center justify-center text-xl">
-              🍼
-            </div>
-            <div>
-              <div className="flex items-center gap-2">
-                <Badge variant="feeding">{feedingLabel(f.feedingType)}</Badge>
-                {f.amountMl && (
-                  <span className="text-sm font-semibold text-gray-900">
-                    {f.amountMl}ml
-                  </span>
-                )}
-                {f.durationMinutes && (
-                  <span className="text-sm font-semibold text-gray-900">
-                    {f.durationMinutes}분
-                  </span>
-                )}
-              </div>
-              <p className="text-xs text-gray-400 mt-0.5">{formatTime(f.startedAt)}</p>
-              {f.memo && <p className="text-xs text-gray-500 mt-0.5">{f.memo}</p>}
-            </div>
-          </div>
+    <>
+      <div className="space-y-2">
+        {sorted.map((f) => (
           <button
-            onClick={() => deleteFeeding({ babyId: activeBabyId, feedingId: f.id })}
-            className="p-2 rounded-full hover:bg-red-50 text-gray-300 hover:text-red-400 transition-colors"
+            key={f.id}
+            type="button"
+            onClick={() => setEditing(f)}
+            className="w-full flex items-center justify-between bg-white rounded-2xl px-4 py-3 border border-gray-100 text-left hover:border-blue-200 hover:bg-blue-50/30 active:scale-[0.99] transition-all"
           >
-            <Trash2 className="w-4 h-4" />
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-full bg-blue-50 flex items-center justify-center text-xl">
+                🍼
+              </div>
+              <div>
+                <div className="flex items-center gap-2">
+                  <Badge variant="feeding">{feedingLabel(f.feedingType)}</Badge>
+                  {f.amountMl && (
+                    <span className="text-sm font-semibold text-gray-900">
+                      {f.amountMl}ml
+                    </span>
+                  )}
+                  {f.durationMinutes && (
+                    <span className="text-sm font-semibold text-gray-900">
+                      {f.durationMinutes}분
+                    </span>
+                  )}
+                </div>
+                <p className="text-xs text-gray-400 mt-0.5 flex items-center gap-1">
+                  {formatTime(f.startedAt)}
+                  <Pencil className="w-3 h-3 text-gray-300" />
+                </p>
+                {f.memo && <p className="text-xs text-gray-500 mt-0.5">{f.memo}</p>}
+              </div>
+            </div>
+            <span
+              role="button"
+              tabIndex={-1}
+              onClick={(e) => {
+                e.stopPropagation();
+                deleteFeeding({ babyId: activeBabyId, feedingId: f.id });
+              }}
+              className="p-2 rounded-full hover:bg-red-50 text-gray-300 hover:text-red-400 transition-colors"
+            >
+              <Trash2 className="w-4 h-4" />
+            </span>
           </button>
-        </div>
-      ))}
-    </div>
+        ))}
+      </div>
+
+      {editing && (
+        <FeedingEditModal feeding={editing} onClose={() => setEditing(null)} />
+      )}
+    </>
   );
 }

@@ -98,7 +98,7 @@ async def export_baby_data(
     baby_id: UUID,
     db: DbDep,
     user_id: CurrentUserDep,
-    fmt: str = Query("json", pattern="^(json|csv)$"),
+    fmt: str = Query("json", alias="format", pattern="^(json|csv)$"),
     start_date: date | None = Query(None),
     end_date: date | None = Query(None),
 ) -> Response:

@@ -60,6 +60,16 @@ class SleepRepositoryImpl(SleepRepository):
         model = result.scalar_one_or_none()
         return self._to_entity(model) if model else None
 
+    async def get_recent(self, baby_id: UUID, limit: int = 12) -> list[SleepRecord]:
+        stmt = (
+            select(SleepModel)
+            .where(SleepModel.baby_id == baby_id)
+            .order_by(SleepModel.started_at.desc())
+            .limit(limit)
+        )
+        result = await self._session.execute(stmt)
+        return [self._to_entity(m) for m in result.scalars().all()]
+
     async def save(self, record: SleepRecord) -> SleepRecord:
         model = self._to_model(record)
         self._session.add(model)

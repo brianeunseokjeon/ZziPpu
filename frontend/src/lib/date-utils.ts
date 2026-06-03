@@ -43,6 +43,14 @@ export function todayTimeToISO(timeStr: string): string {
   return applyTimeInput(new Date().toISOString(), timeStr);
 }
 
+/** "YYYY-MM-DD"(KST 날짜) + "HH:MM"(KST 시각) → UTC ISO (과거 날짜 기록 저장용) */
+export function dateTimeToISO(dateStr: string, timeStr: string): string {
+  const [y, mo, da] = dateStr.split("-").map(Number);
+  const [h, m] = timeStr.split(":").map(Number);
+  // KST HH:MM → UTC: subtract 9 hours
+  return new Date(Date.UTC(y, mo - 1, da, h - 9, m)).toISOString();
+}
+
 /** 현재 KST 시각 "YYYY-MM-DDTHH:MM" — <input type="datetime-local"> value/max 용 */
 export function nowDatetimeLocal(): string {
   const kst = toKSTDate(new Date());

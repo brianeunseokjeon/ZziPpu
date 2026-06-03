@@ -1,9 +1,10 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Clock, Minus, Plus, Play, Pause, CheckCircle2, RotateCcw } from "lucide-react";
+import { Minus, Plus, Play, Pause, CheckCircle2, RotateCcw } from "lucide-react";
 import { Button } from "@/shared/components/ui/button";
 import { Input } from "@/shared/components/ui/input";
+import { TimeField } from "@/shared/components/ui/time-field";
 import { useActivityTimer, formatElapsed } from "@/shared/hooks/useActivityTimer";
 import {
   useRecordingPreferencesStore,
@@ -16,13 +17,20 @@ import { ModeToggle } from "@/features/recording/components/ModeToggle";
 import { cn } from "@/lib/utils";
 import {
   nowTimeInput,
-  todayTimeToISO,
   applyTimeInput,
   getDateString,
+  formatDate,
 } from "@/lib/date-utils";
 
 type Tab = "formula" | "breast";
 type BreastSide = "left" | "right" | "both";
+
+/** KST 날짜("YYYY-MM-DD") + KST 시각("HH:MM") → UTC ISO */
+function buildISO(dateStr: string, timeStr: string): string {
+  // 선택된 KST 날짜의 정오를 기준으로 시각만 교체 (날짜 경계 안전)
+  const baseISO = new Date(`${dateStr}T12:00:00+09:00`).toISOString();
+  return applyTimeInput(baseISO, timeStr);
+}
 
 function sideToFeedingType(side: BreastSide): FeedingType {
   if (side === "left") return FeedingType.BreastLeft;
@@ -36,45 +44,8 @@ function metaToBreastSide(meta?: string): BreastSide {
   return "both";
 }
 
-/* ─── TimeField — 어디를 눌러도 네이티브 피커 열리는 시간 입력 ─ */
-function TimeField({
-  label,
-  value,
-  onChange,
-}: {
-  label: string;
-  value: string;
-  onChange: (v: string) => void;
-}) {
-  function displayTime(hhmm: string): string {
-    if (!hhmm) return "시간 선택";
-    const [h, m] = hhmm.split(":").map(Number);
-    const period = h < 12 ? "오전" : "오후";
-    const hour = h % 12 === 0 ? 12 : h % 12;
-    return `${period} ${hour}:${String(m).padStart(2, "0")}`;
-  }
-
-  return (
-    <div className="space-y-1">
-      <p className="text-xs text-gray-500 font-medium">{label}</p>
-      <div className="relative">
-        <div className="w-full px-4 py-3 border border-gray-200 rounded-xl bg-white flex items-center justify-between pointer-events-none">
-          <span className="text-sm font-medium text-gray-800">{displayTime(value)}</span>
-          <Clock className="w-4 h-4 text-gray-400" />
-        </div>
-        <input
-          type="time"
-          value={value}
-          onChange={(e) => onChange(e.target.value)}
-          className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-        />
-      </div>
-    </div>
-  );
-}
-
 export function FeedingForm() {
-  const { activeBabyId } = useUIStore();
+  const { activeBabyId, selectedDate } = useUIStore();
   const { mutateAsync: createFeeding, isPending } = useCreateFeeding();
   const timer = useActivityTimer("feeding");
   const formulaDefault = useRecordingPreferencesStore((s) => s.defaultModes.feedingFormula);
@@ -105,15 +76,19 @@ export function FeedingForm() {
   // 공통
   const [memo, setMemo] = useState("");
 
-  // 시간/날짜 상태 (KST 기준)
+  // 시간/날짜 상태 (KST 기준) — 날짜는 헤더에서 선택한 날짜(selectedDate)를 따른다
   const [timeStr, setTimeStr] = useState(nowTimeInput);
-  const [dateStr, setDateStr] = useState(() => getDateString(new Date()));
+  const [dateStr, setDateStr] = useState(selectedDate);
 
-  // SSR 하이드레이션 대응
+  // SSR 하이드레이션 대응: 시각은 마운트 시 현재로
   useEffect(() => {
     setTimeStr(nowTimeInput());
-    setDateStr(getDateString(new Date()));
   }, []);
+
+  // 헤더에서 날짜를 바꾸면 폼 날짜도 따라가도록 동기화
+  useEffect(() => {
+    setDateStr(selectedDate);
+  }, [selectedDate]);
 
   const [manualMinutes, setManualMinutes] = useState<number | "">("");
 
@@ -149,7 +124,7 @@ export function FeedingForm() {
       babyId: activeBabyId,
       feedingType: FeedingType.Formula,
       amountMl,
-      startedAt: todayTimeToISO(timeStr),
+      startedAt: buildISO(dateStr, timeStr),
       memo: memo || undefined,
     });
     setMemo("");
@@ -161,14 +136,11 @@ export function FeedingForm() {
       alert("수유량과 시간을 입력해주세요");
       return;
     }
-    // dateStr은 KST 날짜 "YYYY-MM-DD", timeStr은 KST "HH:MM"
-    // applyTimeInput은 기준 ISO에서 KST 날짜를 추출하므로, KST 날짜 정오를 기준으로 전달
-    const baseISO = new Date(`${dateStr}T12:00:00+09:00`).toISOString();
     await createFeeding({
       babyId: activeBabyId,
       feedingType: FeedingType.Formula,
       amountMl,
-      startedAt: applyTimeInput(baseISO, timeStr),
+      startedAt: buildISO(dateStr, timeStr),
       memo: memo || undefined,
     });
     setMemo("");
@@ -178,7 +150,7 @@ export function FeedingForm() {
     await createFeeding({
       babyId: activeBabyId,
       feedingType: sideToFeedingType(breastSide),
-      startedAt: todayTimeToISO(nowTimeInput()),
+      startedAt: buildISO(dateStr, nowTimeInput()),
       memo: memo || undefined,
     });
     setMemo("");
@@ -218,12 +190,11 @@ export function FeedingForm() {
       manualMinutes !== "" && Number(manualMinutes) > 0
         ? Math.round(Number(manualMinutes))
         : undefined;
-    const baseISO = new Date(`${dateStr}T12:00:00+09:00`).toISOString();
     await createFeeding({
       babyId: activeBabyId,
       feedingType: sideToFeedingType(breastSide),
       durationMinutes,
-      startedAt: applyTimeInput(baseISO, timeStr),
+      startedAt: buildISO(dateStr, timeStr),
       memo: memo || undefined,
     });
     setMemo("");
@@ -232,6 +203,14 @@ export function FeedingForm() {
 
   return (
     <div className="space-y-5">
+      {/* 선택한 날짜가 오늘이 아니면 기록 대상 날짜를 명확히 표시 */}
+      {dateStr !== getDateString(new Date()) && (
+        <div className="flex items-center gap-2 rounded-xl bg-amber-50 border border-amber-200 px-3 py-2 text-sm text-amber-700">
+          📅 <span className="font-semibold">{formatDate(`${dateStr}T12:00:00+09:00`)}</span>
+          에 기록됩니다
+        </div>
+      )}
+
       {/* 분유/모유 탭 */}
       <div className="flex rounded-xl bg-gray-100 p-1">
         {(["formula", "breast"] as Tab[]).map((t) => (

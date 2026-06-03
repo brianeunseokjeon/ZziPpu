@@ -4,12 +4,19 @@ from uuid import UUID
 
 from fastapi import APIRouter, Depends, Query
 
-from app.application.use_cases.dashboard import GetDailySummaryUseCase
+from app.application.use_cases.dashboard import (
+    GetDailySummaryUseCase,
+    GetPredictionsUseCase,
+)
 from app.presentation.dependencies import (
     CurrentUserDep,
     get_daily_summary_use_case,
+    get_predictions_use_case,
 )
-from app.presentation.schemas.dashboard_schema import DailySummaryResponse
+from app.presentation.schemas.dashboard_schema import (
+    DailySummaryResponse,
+    PredictionResponse,
+)
 
 router = APIRouter(prefix="/babies/{baby_id}/dashboard", tags=["dashboard"])
 
@@ -35,4 +42,23 @@ async def get_daily_summary(
         last_feeding_at=result.last_feeding_at,
         last_diaper_at=result.last_diaper_at,
         last_sleep_at=result.last_sleep_at,
+    )
+
+
+@router.get("/predictions", response_model=PredictionResponse)
+async def get_predictions(
+    baby_id: UUID,
+    user_id: CurrentUserDep,
+    use_case: Annotated[GetPredictionsUseCase, Depends(get_predictions_use_case)],
+) -> PredictionResponse:
+    result = await use_case.execute(baby_id)
+    return PredictionResponse(
+        last_feeding_at=result.last_feeding_at,
+        next_feeding_at=result.next_feeding_at,
+        feeding_interval_minutes=result.feeding_interval_minutes,
+        feeding_based_on=result.feeding_based_on,
+        last_sleep_ended_at=result.last_sleep_ended_at,
+        next_sleep_at=result.next_sleep_at,
+        awake_window_minutes=result.awake_window_minutes,
+        sleep_based_on=result.sleep_based_on,
     )

@@ -17,6 +17,17 @@ class CreateFeedingDTO:
 
 
 @dataclass
+class UpdateFeedingDTO:
+    id: UUID
+    feeding_type: FeedingType
+    started_at: datetime
+    ended_at: datetime | None = None
+    amount_ml: int | None = None
+    duration_minutes: int | None = None
+    memo: str | None = None
+
+
+@dataclass
 class FeedingResponseDTO:
     id: UUID
     baby_id: UUID

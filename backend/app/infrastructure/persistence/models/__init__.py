@@ -12,6 +12,7 @@ from .saved_info_model import SavedInfoModel
 from .growth_model import GrowthModel
 from .vaccination_model import VaccinationModel
 from .otp_model import OtpModel
+from .caregiver_model import BabyCaregiverModel, CaregiverInviteModel
 
 __all__ = [
     "Base",
@@ -28,4 +29,6 @@ __all__ = [
     "GrowthModel",
     "VaccinationModel",
     "OtpModel",
+    "BabyCaregiverModel",
+    "CaregiverInviteModel",
 ]

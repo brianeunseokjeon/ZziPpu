@@ -77,7 +77,12 @@ class ExportBabyDataUseCase:
                     "id": str(m.id),
                     "started_at": m.started_at.isoformat() if m.started_at else None,
                     "ended_at": m.ended_at.isoformat() if m.ended_at else None,
-                    "duration_minutes": m.duration_minutes, "memo": m.memo,
+                    "duration_minutes": (
+                        int((m.ended_at - m.started_at).total_seconds() // 60)
+                        if m.started_at and m.ended_at
+                        else None
+                    ),
+                    "memo": m.memo,
                 }
                 for m in res.scalars().all()
             ]

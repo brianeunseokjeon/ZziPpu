@@ -8,12 +8,13 @@
  */
 
 import { useState } from "react";
-import { Trash2, Loader2, Clock } from "lucide-react";
+import { Trash2, Loader2 } from "lucide-react";
 import { Dialog } from "@/shared/components/ui/dialog";
+import { TimeField } from "@/shared/components/ui/time-field";
 import { useUIStore } from "@/shared/stores/uiStore";
 import { useDeleteFeeding, useCreateFeeding } from "@/features/feeding/api/feedingApi";
 import { useDeleteDiaper, useCreateDiaper } from "@/features/diaper/api/diaperApi";
-import { useDeleteSleep, useCreateSleep } from "@/features/sleep/api/sleepApi";
+import { useDeleteSleep, useCreateSleep, useEndSleep } from "@/features/sleep/api/sleepApi";
 import { useDeletePlay, useCreatePlay } from "@/features/play/api/playApi";
 import { FeedingType } from "@/features/feeding/types/feeding";
 import { DiaperType } from "@/features/diaper/types/diaper";
@@ -23,48 +24,6 @@ import type { TimelineRecord } from "./RecordPopover";
 interface Props {
   record: TimelineRecord | null;
   onClose: () => void;
-}
-
-/* ─── TimeField — 어디를 눌러도 네이티브 피커 열리는 시간 입력 ─ */
-
-function TimeField({
-  label,
-  value,
-  onChange,
-}: {
-  label: string;
-  value: string;
-  onChange: (v: string) => void;
-}) {
-  // 12h → 표시용 "오전/오후 H:MM"
-  function displayTime(hhmm: string): string {
-    if (!hhmm) return "시간 선택";
-    const [h, m] = hhmm.split(":").map(Number);
-    const period = h < 12 ? "오전" : "오후";
-    const hour = h % 12 === 0 ? 12 : h % 12;
-    return `${period} ${hour}:${String(m).padStart(2, "0")}`;
-  }
-
-  return (
-    <div className="space-y-1">
-      <p className="text-xs text-gray-500 font-medium">{label}</p>
-      {/* 눌리는 영역 전체에 투명 input 덮기 */}
-      <div className="relative">
-        {/* 보이는 스타일 박스 */}
-        <div className="w-full px-4 py-3 border border-gray-200 rounded-xl bg-white flex items-center justify-between pointer-events-none">
-          <span className="text-sm font-medium text-gray-800">{displayTime(value)}</span>
-          <Clock className="w-4 h-4 text-gray-400" />
-        </div>
-        {/* 전체 영역을 커버하는 투명 input — 탭 시 네이티브 피커 오픈 */}
-        <input
-          type="time"
-          value={value}
-          onChange={(e) => onChange(e.target.value)}
-          className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-        />
-      </div>
-    </div>
-  );
 }
 
 function diffMinutes(startISO: string, endISO: string): number {
@@ -84,6 +43,8 @@ export function RecordEditSheet({ record, onClose }: Props) {
   const { activeBabyId } = useUIStore();
   const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [addingDiaper, setAddingDiaper] = useState<"pee" | "poo" | "both" | null>(null);
+  const [diaperAddedMsg, setDiaperAddedMsg] = useState<string | null>(null);
 
   const deleteFeeding = useDeleteFeeding();
   const createFeeding = useCreateFeeding();
@@ -91,6 +52,7 @@ export function RecordEditSheet({ record, onClose }: Props) {
   const createDiaper = useCreateDiaper();
   const deleteSleep = useDeleteSleep();
   const createSleep = useCreateSleep();
+  const endSleep = useEndSleep();
   const deletePlay = useDeletePlay();
   const createPlay = useCreatePlay();
 
@@ -179,11 +141,17 @@ export function RecordEditSheet({ record, onClose }: Props) {
         }
         case "sleep": {
           await deleteSleep.mutateAsync({ babyId: activeBabyId, sleepId: record.id });
-          await createSleep.mutateAsync({
+          const created = await createSleep.mutateAsync({
             babyId: activeBabyId,
             startedAt: startISO,
-            endedAt: endISO,
           });
+          if (endISO) {
+            await endSleep.mutateAsync({
+              babyId: activeBabyId,
+              sleepId: created.id,
+              endedAt: endISO,
+            });
+          }
           break;
         }
         case "play": {
@@ -202,6 +170,27 @@ export function RecordEditSheet({ record, onClose }: Props) {
       onClose();
     } finally {
       setSaving(false);
+    }
+  }
+
+  /* ─── 분유 수정 중 배변 빠른 추가 (입력된 시각으로 별도 기록, 저장과 독립) ─── */
+  async function handleAddDiaper(kind: "pee" | "poo" | "both") {
+    if (!activeBabyId || addingDiaper) return;
+    setAddingDiaper(kind);
+    try {
+      const at = applyTimeInput(primaryISO, startTime);
+      const typeMap = { pee: DiaperType.Pee, poo: DiaperType.Poop, both: DiaperType.Both } as const;
+      await createDiaper.mutateAsync({
+        babyId: activeBabyId,
+        diaperType: typeMap[kind],
+        recordedAt: at,
+      });
+      setDiaperAddedMsg(
+        kind === "pee" ? "💧 소변 기록됐어요" : kind === "poo" ? "💩 대변 기록됐어요" : "💧💩 둘다 기록됐어요"
+      );
+      setTimeout(() => setDiaperAddedMsg(null), 2500);
+    } finally {
+      setAddingDiaper(null);
     }
   }
 
@@ -288,6 +277,49 @@ export function RecordEditSheet({ record, onClose }: Props) {
                   }`}
                 >{ml}ml</button>
               ))}
+            </div>
+
+            {/* 배변 빠른 추가 — 시작 시간 필드의 시각으로 즉시 기록 */}
+            <div className="pt-2 border-t border-gray-100 space-y-1.5">
+              <p className="text-xs text-gray-500">이 시각에 배변도 함께 기록</p>
+              <div className="grid grid-cols-3 gap-2">
+                <button
+                  type="button"
+                  onClick={() => handleAddDiaper("pee")}
+                  disabled={!!addingDiaper}
+                  className="flex items-center justify-center gap-1 py-2.5 rounded-xl border-2 border-cyan-200 bg-cyan-50 text-cyan-700 text-xs font-medium disabled:opacity-50"
+                >
+                  {addingDiaper === "pee"
+                    ? <Loader2 className="w-4 h-4 animate-spin" />
+                    : <span>💧</span>}
+                  소변
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleAddDiaper("poo")}
+                  disabled={!!addingDiaper}
+                  className="flex items-center justify-center gap-1 py-2.5 rounded-xl border-2 border-yellow-200 bg-yellow-50 text-yellow-800 text-xs font-medium disabled:opacity-50"
+                >
+                  {addingDiaper === "poo"
+                    ? <Loader2 className="w-4 h-4 animate-spin" />
+                    : <span>💩</span>}
+                  대변
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleAddDiaper("both")}
+                  disabled={!!addingDiaper}
+                  className="flex items-center justify-center gap-1 py-2.5 rounded-xl border-2 border-orange-200 bg-orange-50 text-orange-700 text-xs font-medium disabled:opacity-50"
+                >
+                  {addingDiaper === "both"
+                    ? <Loader2 className="w-4 h-4 animate-spin" />
+                    : <span>💧💩</span>}
+                  둘다
+                </button>
+              </div>
+              {diaperAddedMsg && (
+                <p className="text-xs text-green-600 font-medium text-center">✅ {diaperAddedMsg}</p>
+              )}
             </div>
           </div>
         )}

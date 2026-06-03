@@ -19,6 +19,10 @@ class SleepRepository(ABC):
         ...
 
     @abstractmethod
+    async def get_recent(self, baby_id: UUID, limit: int = 12) -> list[SleepRecord]:
+        ...
+
+    @abstractmethod
     async def save(self, record: SleepRecord) -> SleepRecord:
         ...
 

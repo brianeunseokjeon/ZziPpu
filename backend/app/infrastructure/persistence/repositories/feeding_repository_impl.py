@@ -56,6 +56,16 @@ class FeedingRepositoryImpl(FeedingRepository):
         result = await self._session.execute(stmt)
         return [self._to_entity(m) for m in result.scalars().all()]
 
+    async def get_recent(self, baby_id: UUID, limit: int = 12) -> list[Feeding]:
+        stmt = (
+            select(FeedingModel)
+            .where(FeedingModel.baby_id == baby_id)
+            .order_by(FeedingModel.started_at.desc())
+            .limit(limit)
+        )
+        result = await self._session.execute(stmt)
+        return [self._to_entity(m) for m in result.scalars().all()]
+
     async def save(self, feeding: Feeding) -> Feeding:
         model = self._to_model(feeding)
         self._session.add(model)

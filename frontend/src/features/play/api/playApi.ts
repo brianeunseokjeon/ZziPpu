@@ -4,6 +4,7 @@ import {
   useQueryClient,
 } from "@tanstack/react-query";
 import { apiClient } from "@/lib/api-client";
+import { getDateString } from "@/lib/date-utils";
 import type { PlayRecord, CreatePlayRequest } from "../types/play";
 
 const playKeys = {
@@ -17,6 +18,7 @@ export function usePlayRecords(babyId: string, date: string) {
     queryFn: () =>
       apiClient.get<PlayRecord[]>(`/api/v1/babies/${babyId}/plays?date=${date}`),
     enabled: !!babyId,
+    refetchInterval: date === getDateString(new Date()) ? 15000 : false,
   });
 }
 
@@ -26,7 +28,7 @@ export function useCreatePlay() {
     mutationFn: (data: CreatePlayRequest) =>
       apiClient.post<PlayRecord>(`/api/v1/babies/${data.babyId}/plays`, data),
     onSettled: (_data, _err, vars) => {
-      const date = vars.startedAt.slice(0, 10);
+      const date = getDateString(vars.startedAt);
       qc.invalidateQueries({ queryKey: playKeys.list(vars.babyId, date) });
       qc.invalidateQueries({ queryKey: ["daily-summary"] });
     },

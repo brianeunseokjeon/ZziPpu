@@ -19,6 +19,7 @@ import { API_BASE_URL, MOCK_BABY_ID } from "@/config/constants";
 import ExportModal from "@/features/baby/components/ExportModal";
 import { PhotoUploader } from "@/features/baby/components/PhotoUploader";
 import { LogoutButton } from "@/features/auth/components/LogoutButton";
+import { CaregiverCard } from "@/features/caregiver/components/CaregiverCard";
 import { useRecordingDefaultsStore } from "@/shared/stores/recordingDefaultsStore";
 
 const ML_PRESETS = [60, 80, 100, 120, 150, 180];
@@ -184,6 +185,9 @@ export default function SettingsPage() {
           </button>
         </CardContent>
       </Card>
+
+      {/* 공동 양육자 */}
+      <CaregiverCard />
 
       {/* 건강 관리 */}
       <Card>

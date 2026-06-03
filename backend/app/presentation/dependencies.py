@@ -20,6 +20,7 @@ from app.infrastructure.persistence.repositories import (
     GrowthRepositoryImpl,
     VaccinationRepositoryImpl,
     OtpRepositoryImpl,
+    CaregiverRepositoryImpl,
 )
 from app.infrastructure.sms import get_sms_service
 from app.application.interfaces.sms_service import SmsService
@@ -27,9 +28,11 @@ from app.application.use_cases.auth import RequestOtpUseCase, VerifyOtpUseCase
 from app.infrastructure.ai.claude_service import ClaudeService
 from app.infrastructure.auth.jwt_handler import decode_access_token
 from app.application.use_cases.baby import RegisterBabyUseCase, GetBabyProfileUseCase, UpdateBabyUseCase
+from app.application.use_cases.caregiver import CreateInviteUseCase, JoinByCodeUseCase
 from app.application.use_cases.feeding import (
     CreateFeedingUseCase,
     GetFeedingsUseCase,
+    UpdateFeedingUseCase,
     DeleteFeedingUseCase,
 )
 from app.application.use_cases.diaper import (
@@ -48,7 +51,7 @@ from app.application.use_cases.play import (
     GetPlayRecordsUseCase,
     DeletePlayUseCase,
 )
-from app.application.use_cases.dashboard import GetDailySummaryUseCase
+from app.application.use_cases.dashboard import GetDailySummaryUseCase, GetPredictionsUseCase
 from app.application.use_cases.ai import (
     GenerateDailyReviewUseCase,
     ChatWithPediatricianUseCase,
@@ -100,6 +103,10 @@ def get_baby_repo(db: DbDep) -> BabyRepositoryImpl:
     return BabyRepositoryImpl(db)
 
 
+def get_caregiver_repo(db: DbDep) -> CaregiverRepositoryImpl:
+    return CaregiverRepositoryImpl(db)
+
+
 def get_feeding_repo(db: DbDep) -> FeedingRepositoryImpl:
     return FeedingRepositoryImpl(db)
 
@@ -148,8 +155,23 @@ def get_register_baby_use_case(
 
 def get_baby_profile_use_case(
     baby_repo: Annotated[BabyRepositoryImpl, Depends(get_baby_repo)],
+    caregiver_repo: Annotated[CaregiverRepositoryImpl, Depends(get_caregiver_repo)],
 ) -> GetBabyProfileUseCase:
-    return GetBabyProfileUseCase(baby_repo)
+    return GetBabyProfileUseCase(baby_repo, caregiver_repo)
+
+
+def get_create_invite_use_case(
+    baby_repo: Annotated[BabyRepositoryImpl, Depends(get_baby_repo)],
+    caregiver_repo: Annotated[CaregiverRepositoryImpl, Depends(get_caregiver_repo)],
+) -> CreateInviteUseCase:
+    return CreateInviteUseCase(baby_repo, caregiver_repo)
+
+
+def get_join_by_code_use_case(
+    baby_repo: Annotated[BabyRepositoryImpl, Depends(get_baby_repo)],
+    caregiver_repo: Annotated[CaregiverRepositoryImpl, Depends(get_caregiver_repo)],
+) -> JoinByCodeUseCase:
+    return JoinByCodeUseCase(baby_repo, caregiver_repo)
 
 
 def get_update_baby_use_case(
@@ -169,6 +191,12 @@ def get_get_feedings_use_case(
     feeding_repo: Annotated[FeedingRepositoryImpl, Depends(get_feeding_repo)],
 ) -> GetFeedingsUseCase:
     return GetFeedingsUseCase(feeding_repo)
+
+
+def get_update_feeding_use_case(
+    feeding_repo: Annotated[FeedingRepositoryImpl, Depends(get_feeding_repo)],
+) -> UpdateFeedingUseCase:
+    return UpdateFeedingUseCase(feeding_repo)
 
 
 def get_delete_feeding_use_case(
@@ -244,6 +272,13 @@ def get_daily_summary_use_case(
     play_repo: Annotated[PlayRepositoryImpl, Depends(get_play_repo)],
 ) -> GetDailySummaryUseCase:
     return GetDailySummaryUseCase(feeding_repo, sleep_repo, diaper_repo, play_repo)
+
+
+def get_predictions_use_case(
+    feeding_repo: Annotated[FeedingRepositoryImpl, Depends(get_feeding_repo)],
+    sleep_repo: Annotated[SleepRepositoryImpl, Depends(get_sleep_repo)],
+) -> GetPredictionsUseCase:
+    return GetPredictionsUseCase(feeding_repo, sleep_repo)
 
 
 def get_generate_review_use_case(

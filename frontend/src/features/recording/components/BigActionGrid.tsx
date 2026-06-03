@@ -16,6 +16,7 @@ import { useActivityTimerStore } from "@/shared/stores/activityTimerStore";
 import { useRecordingDefaultsStore } from "@/shared/stores/recordingDefaultsStore";
 import { useQuickSave } from "../hooks/useQuickSave";
 import { QuickOptionSheet, type SheetActivity } from "./QuickOptionSheet";
+import { getDateString, formatDate } from "@/lib/date-utils";
 
 interface ActionDef {
   key: SheetActivity;
@@ -107,10 +108,11 @@ function useInlineToast() {
 /* ─── 메인 ─────────────────────────────────────────────────── */
 
 export function BigActionGrid() {
-  const { activeBabyId } = useUIStore();
+  const { activeBabyId, selectedDate } = useUIStore();
+  const isToday = selectedDate === getDateString(new Date());
   const timerStore = useActivityTimerStore();
   const defaults = useRecordingDefaultsStore();
-  const { saveFormula, saveBreast, savePee, savePoo, isSaving } = useQuickSave();
+  const { saveFormula, savePee, savePoo, isSaving } = useQuickSave();
 
   const [sheetActivity, setSheetActivity] = useState<SheetActivity | null>(null);
   const [savingKey, setSavingKey] = useState<SheetActivity | null>(null);
@@ -135,6 +137,11 @@ export function BigActionGrid() {
   /* ─── 탭 즉시 저장 ─── */
   async function handleTap(key: SheetActivity) {
     if (didLongPress.current || !activeBabyId || savingKey) return;
+    // 과거 날짜 모드: 즉시저장/타이머 대신 시각 입력 시트를 연다
+    if (!isToday) {
+      setSheetActivity(key);
+      return;
+    }
     setSavingKey(key);
     try {
       switch (key) {
@@ -214,9 +221,15 @@ export function BigActionGrid() {
     <div className="space-y-2">
       <h2 className="text-sm font-semibold text-gray-500">빠른 기록</h2>
 
+      {!isToday && (
+        <div className="flex items-center gap-1.5 rounded-xl bg-amber-50 border border-amber-200 px-3 py-2 text-xs text-amber-700">
+          📅 <span className="font-semibold">{formatDate(`${selectedDate}T12:00:00+09:00`)}</span>에 기록 중 · 버튼을 누르면 시각을 입력해요
+        </div>
+      )}
+
       <div className="grid grid-cols-3 gap-2">
         {ACTIONS.map((action) => {
-          const active = isTimerActive(action.key);
+          const active = isToday && isTimerActive(action.key);
           const loading = savingKey === action.key || (isSaving && (action.key === "formula" || action.key === "pee" || action.key === "poo"));
 
           return (
@@ -257,9 +270,11 @@ export function BigActionGrid() {
         </div>
       )}
 
-      {/* 옵션 시트 */}
+      {/* 옵션 시트 — activity가 바뀔 때마다 remount하여 시각 입력 초기화 */}
       <QuickOptionSheet
+        key={sheetActivity ?? "none"}
         activity={sheetActivity}
+        targetDate={selectedDate}
         onClose={() => setSheetActivity(null)}
         onSaved={(msg) => {
           setSheetActivity(null);

@@ -4,6 +4,7 @@ import {
   useQueryClient,
 } from "@tanstack/react-query";
 import { apiClient } from "@/lib/api-client";
+import { getDateString } from "@/lib/date-utils";
 import type { DiaperRecord, CreateDiaperRequest } from "../types/diaper";
 
 const diaperKeys = {
@@ -19,6 +20,7 @@ export function useDiapers(babyId: string, date: string) {
         `/api/v1/babies/${babyId}/diapers?date=${date}`
       ),
     enabled: !!babyId,
+    refetchInterval: date === getDateString(new Date()) ? 15000 : false,
   });
 }
 
@@ -28,7 +30,7 @@ export function useCreateDiaper() {
     mutationFn: (data: CreateDiaperRequest) =>
       apiClient.post<DiaperRecord>(`/api/v1/babies/${data.babyId}/diapers`, data),
     onSettled: (_data, _err, vars) => {
-      const date = vars.recordedAt.slice(0, 10);
+      const date = getDateString(vars.recordedAt);
       qc.invalidateQueries({ queryKey: diaperKeys.list(vars.babyId, date) });
       qc.invalidateQueries({ queryKey: ["daily-summary"] });
     },

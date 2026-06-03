@@ -4,19 +4,25 @@ from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 
-from app.application.dto.feeding_dto import CreateFeedingDTO
+from app.application.dto.feeding_dto import CreateFeedingDTO, UpdateFeedingDTO
 from app.application.use_cases.feeding import (
     CreateFeedingUseCase,
     GetFeedingsUseCase,
+    UpdateFeedingUseCase,
     DeleteFeedingUseCase,
 )
 from app.presentation.dependencies import (
     CurrentUserDep,
     get_create_feeding_use_case,
     get_get_feedings_use_case,
+    get_update_feeding_use_case,
     get_delete_feeding_use_case,
 )
-from app.presentation.schemas.feeding_schema import FeedingCreateRequest, FeedingResponse
+from app.presentation.schemas.feeding_schema import (
+    FeedingCreateRequest,
+    FeedingUpdateRequest,
+    FeedingResponse,
+)
 
 router = APIRouter(prefix="/babies/{baby_id}/feedings", tags=["feedings"])
 
@@ -73,6 +79,40 @@ async def get_feedings(
         )
         for r in results
     ]
+
+
+@router.patch("/{feeding_id}", response_model=FeedingResponse)
+async def update_feeding(
+    baby_id: UUID,
+    feeding_id: UUID,
+    body: FeedingUpdateRequest,
+    user_id: CurrentUserDep,
+    use_case: Annotated[UpdateFeedingUseCase, Depends(get_update_feeding_use_case)],
+) -> FeedingResponse:
+    dto = UpdateFeedingDTO(
+        id=feeding_id,
+        feeding_type=body.feeding_type,
+        started_at=body.started_at,
+        ended_at=body.ended_at,
+        amount_ml=body.amount_ml,
+        duration_minutes=body.duration_minutes,
+        memo=body.memo,
+    )
+    try:
+        result = await use_case.execute(dto)
+    except ValueError as e:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
+    return FeedingResponse(
+        id=result.id,
+        baby_id=result.baby_id,
+        feeding_type=result.feeding_type,
+        started_at=result.started_at,
+        ended_at=result.ended_at,
+        amount_ml=result.amount_ml,
+        duration_minutes=result.duration_minutes,
+        memo=result.memo,
+        created_at=result.created_at,
+    )
 
 
 @router.delete("/{feeding_id}", status_code=status.HTTP_204_NO_CONTENT)

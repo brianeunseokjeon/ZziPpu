@@ -15,6 +15,15 @@ class FeedingCreateRequest(BaseModel):
     memo: str | None = None
 
 
+class FeedingUpdateRequest(BaseModel):
+    feeding_type: FeedingType
+    started_at: datetime
+    ended_at: datetime | None = None
+    amount_ml: int | None = Field(None, gt=0)
+    duration_minutes: int | None = Field(None, gt=0)
+    memo: str | None = None
+
+
 class FeedingResponse(BaseModel):
     id: UUID
     baby_id: UUID

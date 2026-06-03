@@ -8,15 +8,17 @@
  * 타이머 활동(모유·수면·놀이): 옵션 선택 후 시작.
  */
 
-import { useState, useEffect } from "react";
-import { Clock } from "lucide-react";
+import { useState } from "react";
+import { Loader2 } from "lucide-react";
 import { Dialog } from "@/shared/components/ui/dialog";
+import { TimeField } from "@/shared/components/ui/time-field";
 import { useActivityTimerStore } from "@/shared/stores/activityTimerStore";
 import { useQuickSave } from "../hooks/useQuickSave";
 import { useRecordingDefaultsStore } from "@/shared/stores/recordingDefaultsStore";
 import { useUIStore } from "@/shared/stores/uiStore";
-import { nowTimeInput, todayTimeToISO } from "@/lib/date-utils";
-import { FeedingType } from "@/features/feeding/types/feeding";
+import { nowTimeInput, dateTimeToISO, getDateString, formatDate } from "@/lib/date-utils";
+import { useCreateSleep, useEndSleep } from "@/features/sleep/api/sleepApi";
+import { useCreatePlay } from "@/features/play/api/playApi";
 
 export type SheetActivity = "formula" | "breast" | "pee" | "poo" | "sleep" | "play";
 
@@ -24,6 +26,8 @@ interface Props {
   activity: SheetActivity | null;
   onClose: () => void;
   onSaved?: (msg: string) => void;
+  /** 기록 대상 날짜 "YYYY-MM-DD" (KST). 미지정 시 오늘. 오늘이 아니면 과거 모드. */
+  targetDate?: string;
 }
 
 const ML_PRESETS = [60, 80, 100, 120, 150, 180];
@@ -33,40 +37,20 @@ const PLAY_TYPES = [
   { value: "sensory_play", label: "감각놀이" },
 ] as const;
 
-/* ─── TimeField ── 어디 눌러도 피커 열림 ── */
-function TimeField({ label, value, onChange }: { label: string; value: string; onChange: (v: string) => void }) {
-  function display(hhmm: string) {
-    if (!hhmm) return "시간 선택";
-    const [h, m] = hhmm.split(":").map(Number);
-    const period = h < 12 ? "오전" : "오후";
-    const hour = h % 12 === 0 ? 12 : h % 12;
-    return `${period} ${hour}:${String(m).padStart(2, "0")}`;
-  }
-  return (
-    <div className="space-y-1">
-      <p className="text-xs text-gray-500 font-medium">{label}</p>
-      <div className="relative">
-        <div className="w-full px-4 py-3 border border-gray-200 rounded-xl bg-white flex items-center justify-between pointer-events-none">
-          <span className="text-sm font-medium text-gray-800">{display(value)}</span>
-          <Clock className="w-4 h-4 text-gray-400" />
-        </div>
-        <input
-          type="time"
-          value={value}
-          onChange={(e) => onChange(e.target.value)}
-          className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-        />
-      </div>
-    </div>
-  );
-}
 
 
-export function QuickOptionSheet({ activity, onClose, onSaved }: Props) {
+export function QuickOptionSheet({ activity, onClose, onSaved, targetDate }: Props) {
   const { activeBabyId } = useUIStore();
   const defaults = useRecordingDefaultsStore();
   const timerStore = useActivityTimerStore();
-  const { saveFormula, saveBreast, savePee, savePoo, isSaving } = useQuickSave();
+  const { saveFormula, saveBreast, savePee, savePoo, saveBoth, isSaving } = useQuickSave();
+  const { mutateAsync: createSleep, isPending: isSavingSleep } = useCreateSleep();
+  const { mutateAsync: endSleep, isPending: isEndingSleep } = useEndSleep();
+  const { mutateAsync: createPlay, isPending: isSavingPlay } = useCreatePlay();
+
+  // 기록 대상 날짜 (미지정 시 오늘). 오늘이 아니면 과거 모드 → 타이머 대신 시각 직접 입력.
+  const dateStr = targetDate ?? getDateString(new Date());
+  const isPast = dateStr !== getDateString(new Date());
 
   /* 분유 ml 상태 */
   const [formulaMl, setFormulaMl] = useState(defaults.formulaMl);
@@ -74,13 +58,13 @@ export function QuickOptionSheet({ activity, onClose, onSaved }: Props) {
   const [breastSide, setBreastSide] = useState<"left" | "right" | "both">(defaults.breastSide);
   /* 놀이 타입 상태 */
   const [playType, setPlayType] = useState<"tummy_time" | "free_play" | "sensory_play">(defaults.playType);
-  /* 시간 입력 (즉시 저장 활동에만 표시) */
+  /* 시간 입력 (시작 시각) — 시트는 activity별로 remount되므로 초기값으로 충분 */
   const [recordTime, setRecordTime] = useState(nowTimeInput);
-
-  // 시트가 열릴 때마다 현재 KST 시각으로 초기화
-  useEffect(() => {
-    if (activity) setRecordTime(nowTimeInput());
-  }, [activity]);
+  /* 종료 시각 (과거 모드의 수면/놀이 완료 기록용) */
+  const [endTime, setEndTime] = useState("");
+  /* 분유 기록 중 배변 빠른 추가 상태 */
+  const [addingDiaper, setAddingDiaper] = useState<"pee" | "poo" | "both" | null>(null);
+  const [diaperAddedMsg, setDiaperAddedMsg] = useState<string | null>(null);
 
   const title: Record<SheetActivity, string> = {
     formula: "🍼 분유",
@@ -91,9 +75,29 @@ export function QuickOptionSheet({ activity, onClose, onSaved }: Props) {
     play: "🎈 놀이",
   };
 
+  /* 분유 기록 중 배변 빠른 추가 — 기록 시간 필드의 시각으로 즉시 별도 저장 */
+  async function handleAddDiaper(kind: "pee" | "poo" | "both") {
+    if (!activeBabyId || addingDiaper) return;
+    setAddingDiaper(kind);
+    try {
+      const at = dateTimeToISO(dateStr, recordTime);
+      if (kind === "pee") await savePee(activeBabyId, at);
+      else if (kind === "poo") await savePoo(activeBabyId, at);
+      else await saveBoth(activeBabyId, at);
+      setDiaperAddedMsg(
+        kind === "pee" ? "💧 소변 기록됐어요" : kind === "poo" ? "💩 대변 기록됐어요" : "💧💩 둘다 기록됐어요"
+      );
+      setTimeout(() => setDiaperAddedMsg(null), 2500);
+    } catch {
+      /* 실패 무시 */
+    } finally {
+      setAddingDiaper(null);
+    }
+  }
+
   async function handleSave() {
     if (!activeBabyId || !activity) return;
-    const at = todayTimeToISO(recordTime);
+    const at = dateTimeToISO(dateStr, recordTime);
     try {
       switch (activity) {
         case "formula": {
@@ -119,6 +123,20 @@ export function QuickOptionSheet({ activity, onClose, onSaved }: Props) {
           break;
         }
         case "sleep": {
+          if (isPast) {
+            // 과거 모드: 타이머 없이 시작 시각으로 생성 후, 종료 시각이 있으면 종료 처리.
+            // (POST /sleeps 는 started_at 만 받으므로 종료는 /end 로 별도 호출)
+            const created = await createSleep({ babyId: activeBabyId, startedAt: at });
+            if (endTime) {
+              await endSleep({
+                babyId: activeBabyId,
+                sleepId: created.id,
+                endedAt: dateTimeToISO(dateStr, endTime),
+              });
+            }
+            onSaved?.("수면 기록됐어요");
+            break;
+          }
           const existing = timerStore.getSession("sleep");
           if (existing) {
             timerStore.finishSession("sleep");
@@ -130,6 +148,23 @@ export function QuickOptionSheet({ activity, onClose, onSaved }: Props) {
           break;
         }
         case "play": {
+          if (isPast) {
+            // 과거 모드: 시작/종료 시각으로 완료 기록 저장 (duration 계산)
+            const endedAt = endTime ? dateTimeToISO(dateStr, endTime) : undefined;
+            const durationMinutes = endedAt
+              ? Math.max(1, Math.round((new Date(endedAt).getTime() - new Date(at).getTime()) / 60000))
+              : 1;
+            await createPlay({
+              babyId: activeBabyId,
+              playType,
+              durationMinutes,
+              startedAt: at,
+              endedAt,
+            });
+            defaults.setPlayType(playType);
+            onSaved?.(`${PLAY_TYPES.find((p) => p.value === playType)?.label ?? "놀이"} 기록됐어요`);
+            break;
+          }
           const existing = timerStore.getSession("play");
           if (existing) {
             timerStore.finishSession("play");
@@ -153,6 +188,13 @@ export function QuickOptionSheet({ activity, onClose, onSaved }: Props) {
   return (
     <Dialog open={!!activity} onClose={onClose} title={title[activity]}>
       <div className="space-y-5">
+        {/* 과거 날짜 기록 안내 배너 */}
+        {isPast && (
+          <div className="flex items-center gap-1.5 rounded-xl bg-amber-50 border border-amber-200 px-3 py-2 text-xs text-amber-700">
+            📅 <span className="font-semibold">{formatDate(`${dateStr}T12:00:00+09:00`)}</span>에 기록합니다 · 시각을 직접 입력하세요
+          </div>
+        )}
+
         {/* 분유 — ml 슬라이더 + 프리셋 */}
         {activity === "formula" && (
           <div className="space-y-3">
@@ -198,6 +240,49 @@ export function QuickOptionSheet({ activity, onClose, onSaved }: Props) {
                 </button>
               ))}
             </div>
+
+            {/* 배변 빠른 추가 — 기록 시간 필드의 시각으로 즉시 기록 */}
+            <div className="pt-2 border-t border-gray-100 space-y-1.5">
+              <p className="text-xs text-gray-500">이 시각에 배변도 함께 기록</p>
+              <div className="grid grid-cols-3 gap-2">
+                <button
+                  type="button"
+                  onClick={() => handleAddDiaper("pee")}
+                  disabled={!!addingDiaper}
+                  className="flex items-center justify-center gap-1 py-2.5 rounded-xl border-2 border-cyan-200 bg-cyan-50 text-cyan-700 text-xs font-medium disabled:opacity-50"
+                >
+                  {addingDiaper === "pee"
+                    ? <Loader2 className="w-4 h-4 animate-spin" />
+                    : <span>💧</span>}
+                  소변
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleAddDiaper("poo")}
+                  disabled={!!addingDiaper}
+                  className="flex items-center justify-center gap-1 py-2.5 rounded-xl border-2 border-yellow-200 bg-yellow-50 text-yellow-800 text-xs font-medium disabled:opacity-50"
+                >
+                  {addingDiaper === "poo"
+                    ? <Loader2 className="w-4 h-4 animate-spin" />
+                    : <span>💩</span>}
+                  대변
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleAddDiaper("both")}
+                  disabled={!!addingDiaper}
+                  className="flex items-center justify-center gap-1 py-2.5 rounded-xl border-2 border-orange-200 bg-orange-50 text-orange-700 text-xs font-medium disabled:opacity-50"
+                >
+                  {addingDiaper === "both"
+                    ? <Loader2 className="w-4 h-4 animate-spin" />
+                    : <span>💧💩</span>}
+                  둘다
+                </button>
+              </div>
+              {diaperAddedMsg && (
+                <p className="text-xs text-green-600 font-medium text-center">✅ {diaperAddedMsg}</p>
+              )}
+            </div>
           </div>
         )}
 
@@ -236,7 +321,7 @@ export function QuickOptionSheet({ activity, onClose, onSaved }: Props) {
           <div className="text-center space-y-2 py-2">
             <div className="text-4xl">{activity === "pee" ? "💧" : "💩"}</div>
             <p className="text-sm text-gray-600">
-              지금 시각으로 {activity === "pee" ? "소변" : "대변"} 기록할게요.
+              {isPast ? "아래 시각으로" : "지금 시각으로"} {activity === "pee" ? "소변" : "대변"} 기록할게요.
             </p>
             <p className="text-xs text-gray-400">
               색상·상태 등 세부 정보는{" "}
@@ -252,7 +337,9 @@ export function QuickOptionSheet({ activity, onClose, onSaved }: Props) {
         {activity === "sleep" && (
           <div className="text-center space-y-2 py-2">
             <div className="text-4xl">😴</div>
-            {timerStore.getSession("sleep") ? (
+            {isPast ? (
+              <p className="text-sm text-gray-600">시작·종료 시각을 입력해 수면을 기록해요.</p>
+            ) : timerStore.getSession("sleep") ? (
               <p className="text-sm text-gray-600">진행 중인 수면 타이머를 종료할게요.</p>
             ) : (
               <>
@@ -268,7 +355,7 @@ export function QuickOptionSheet({ activity, onClose, onSaved }: Props) {
         {/* 놀이 */}
         {activity === "play" && (
           <div className="space-y-3">
-            {timerStore.getSession("play") ? (
+            {!isPast && timerStore.getSession("play") ? (
               <div className="text-center py-2">
                 <div className="text-4xl mb-2">🎈</div>
                 <p className="text-sm text-gray-600">진행 중인 놀이 타이머를 종료할게요.</p>
@@ -296,18 +383,26 @@ export function QuickOptionSheet({ activity, onClose, onSaved }: Props) {
           </div>
         )}
 
-        {/* 기록 시간 (즉시 저장 활동에만 표시) */}
+        {/* 기록 시간 */}
         {(activity === "formula" || activity === "breast" || activity === "pee" || activity === "poo") && (
           <TimeField label="기록 시간" value={recordTime} onChange={setRecordTime} />
+        )}
+
+        {/* 과거 모드의 수면/놀이: 시작 + 종료 시각 직접 입력 */}
+        {isPast && (activity === "sleep" || activity === "play") && (
+          <div className="space-y-3">
+            <TimeField label="시작 시각" value={recordTime} onChange={setRecordTime} />
+            <TimeField label="종료 시각 (선택)" value={endTime} onChange={setEndTime} />
+          </div>
         )}
 
         {/* 저장 버튼 */}
         <button
           onClick={handleSave}
-          disabled={isSaving}
+          disabled={isSaving || isSavingSleep || isEndingSleep || isSavingPlay}
           className="w-full py-3.5 bg-blue-500 text-white rounded-2xl font-semibold text-sm active:bg-blue-600 disabled:opacity-50 transition-colors"
         >
-          {isSaving ? "저장 중..." : "저장"}
+          {isSaving || isSavingSleep || isEndingSleep || isSavingPlay ? "저장 중..." : "저장"}
         </button>
       </div>
     </Dialog>
