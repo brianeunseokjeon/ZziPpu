@@ -1,6 +1,6 @@
 """YouTube 자막 관련 Pydantic 스키마."""
 
-from pydantic import BaseModel, HttpUrl, field_validator
+from pydantic import BaseModel, field_validator
 
 
 class YouTubeTranscriptRequest(BaseModel):

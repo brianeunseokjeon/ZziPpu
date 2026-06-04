@@ -1,7 +1,7 @@
 from typing import Annotated
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, status
+from fastapi import APIRouter, Depends
 
 from app.application.use_cases.vaccination import (
     GetVaccinationsUseCase,
@@ -9,8 +9,8 @@ from app.application.use_cases.vaccination import (
 )
 from app.presentation.dependencies import (
     CurrentUserDep,
-    get_vaccinations_use_case,
     get_mark_administered_use_case,
+    get_vaccinations_use_case,
 )
 from app.presentation.schemas.vaccination_schema import (
     MarkAdministeredRequest,

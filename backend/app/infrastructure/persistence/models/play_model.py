@@ -1,7 +1,7 @@
 from datetime import datetime
 from uuid import UUID
 
-from sqlalchemy import String, Integer, Text, Uuid
+from sqlalchemy import Integer, String, Text, Uuid
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.infrastructure.persistence.models.base import Base

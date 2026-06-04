@@ -11,7 +11,6 @@ K-DST 6영역: 대근육 / 소근육 / 인지 / 언어 / 사회성 / 자조
 from dataclasses import dataclass, field
 from typing import Literal
 
-
 Priority = Literal["high", "medium", "low"]
 
 

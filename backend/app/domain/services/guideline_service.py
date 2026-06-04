@@ -1,16 +1,15 @@
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 
-from app.domain.guidelines.feeding_guidelines import get_feeding_guideline
-from app.domain.guidelines.sleep_guidelines import get_sleep_guideline
+from app.domain.entities.diaper import DiaperRecord
+from app.domain.entities.feeding import Feeding
+from app.domain.entities.play_record import PlayRecord
+from app.domain.entities.sleep_record import SleepRecord
 from app.domain.guidelines.diaper_guidelines import (
-    get_diaper_guideline,
     get_diaper_guideline_by_months,
 )
+from app.domain.guidelines.feeding_guidelines import get_feeding_guideline
 from app.domain.guidelines.play_guidelines import get_play_guideline
-from app.domain.entities.feeding import Feeding
-from app.domain.entities.sleep_record import SleepRecord
-from app.domain.entities.diaper import DiaperRecord
-from app.domain.entities.play_record import PlayRecord
+from app.domain.guidelines.sleep_guidelines import get_sleep_guideline
 from app.domain.value_objects.feeding_type import FeedingType
 
 

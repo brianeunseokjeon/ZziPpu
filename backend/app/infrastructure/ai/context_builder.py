@@ -1,8 +1,8 @@
 from app.domain.entities.baby import Baby
-from app.domain.entities.feeding import Feeding
-from app.domain.entities.sleep_record import SleepRecord
 from app.domain.entities.diaper import DiaperRecord
+from app.domain.entities.feeding import Feeding
 from app.domain.entities.play_record import PlayRecord
+from app.domain.entities.sleep_record import SleepRecord
 from app.domain.guidelines.developmental_milestones import get_stage_for_age_days
 from app.domain.value_objects.feeding_type import FeedingType
 
@@ -49,7 +49,7 @@ def build_daily_context(
     plays: list[PlayRecord],
 ) -> str:
     lines = [
-        f"아기 정보:",
+        "아기 정보:",
         f"  이름: {baby.name}",
         f"  생후: {baby.age_days}일 ({baby.age_months}개월)",
         "",

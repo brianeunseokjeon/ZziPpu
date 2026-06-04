@@ -1,7 +1,7 @@
 from datetime import datetime, timedelta, timezone
 from uuid import uuid4
 
-from app.application.dto.baby_dto import UpdateBabyDTO, BabyResponseDTO
+from app.application.dto.baby_dto import BabyResponseDTO, UpdateBabyDTO
 from app.domain.entities.vaccination import Vaccination
 from app.domain.guidelines.vaccination_schedule import VACCINATION_SCHEDULE
 from app.domain.repositories.baby_repository import BabyRepository

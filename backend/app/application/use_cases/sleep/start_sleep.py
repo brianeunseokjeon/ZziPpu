@@ -1,7 +1,7 @@
 from datetime import datetime, timezone
 from uuid import uuid4
 
-from app.application.dto.sleep_dto import StartSleepDTO, SleepResponseDTO
+from app.application.dto.sleep_dto import SleepResponseDTO, StartSleepDTO
 from app.domain.entities.sleep_record import SleepRecord
 from app.domain.repositories.sleep_repository import SleepRepository
 

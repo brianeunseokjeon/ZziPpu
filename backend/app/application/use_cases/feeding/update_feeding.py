@@ -1,4 +1,4 @@
-from app.application.dto.feeding_dto import UpdateFeedingDTO, FeedingResponseDTO
+from app.application.dto.feeding_dto import FeedingResponseDTO, UpdateFeedingDTO
 from app.domain.repositories.feeding_repository import FeedingRepository
 
 

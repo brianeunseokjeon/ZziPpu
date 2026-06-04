@@ -1,7 +1,7 @@
 from datetime import datetime, timezone
 from uuid import uuid4
 
-from app.application.dto.baby_dto import CreateBabyDTO, BabyResponseDTO
+from app.application.dto.baby_dto import BabyResponseDTO, CreateBabyDTO
 from app.domain.entities.baby import Baby
 from app.domain.repositories.baby_repository import BabyRepository
 

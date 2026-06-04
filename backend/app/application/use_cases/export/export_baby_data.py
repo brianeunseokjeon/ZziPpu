@@ -4,16 +4,15 @@ import json
 from datetime import date
 from uuid import UUID
 
-from sqlalchemy import select, and_
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.infrastructure.persistence.models.feeding_model import FeedingModel
-from app.infrastructure.persistence.models.sleep_model import SleepModel
 from app.infrastructure.persistence.models.diaper_model import DiaperModel
-from app.infrastructure.persistence.models.play_model import PlayModel
+from app.infrastructure.persistence.models.feeding_model import FeedingModel
 from app.infrastructure.persistence.models.growth_model import GrowthModel
+from app.infrastructure.persistence.models.play_model import PlayModel
+from app.infrastructure.persistence.models.sleep_model import SleepModel
 from app.infrastructure.persistence.models.vaccination_model import VaccinationModel
-from app.infrastructure.persistence.models.ai_review_model import AIReviewModel
 
 
 class ExportBabyDataUseCase:

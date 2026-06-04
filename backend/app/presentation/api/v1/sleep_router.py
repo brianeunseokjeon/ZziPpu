@@ -4,21 +4,21 @@ from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 
-from app.application.dto.sleep_dto import StartSleepDTO, EndSleepDTO
+from app.application.dto.sleep_dto import EndSleepDTO, StartSleepDTO
 from app.application.use_cases.sleep import (
-    StartSleepUseCase,
+    DeleteSleepUseCase,
     EndSleepUseCase,
     GetSleepRecordsUseCase,
-    DeleteSleepUseCase,
+    StartSleepUseCase,
 )
 from app.presentation.dependencies import (
     CurrentUserDep,
-    get_start_sleep_use_case,
+    get_delete_sleep_use_case,
     get_end_sleep_use_case,
     get_get_sleeps_use_case,
-    get_delete_sleep_use_case,
+    get_start_sleep_use_case,
 )
-from app.presentation.schemas.sleep_schema import SleepStartRequest, SleepEndRequest, SleepResponse
+from app.presentation.schemas.sleep_schema import SleepEndRequest, SleepResponse, SleepStartRequest
 
 router = APIRouter(prefix="/babies/{baby_id}/sleeps", tags=["sleeps"])
 

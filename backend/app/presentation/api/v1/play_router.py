@@ -7,14 +7,14 @@ from fastapi import APIRouter, Depends, Query, status
 from app.application.dto.play_dto import CreatePlayDTO
 from app.application.use_cases.play import (
     CreatePlayRecordUseCase,
-    GetPlayRecordsUseCase,
     DeletePlayUseCase,
+    GetPlayRecordsUseCase,
 )
 from app.presentation.dependencies import (
     CurrentUserDep,
     get_create_play_use_case,
-    get_get_plays_use_case,
     get_delete_play_use_case,
+    get_get_plays_use_case,
 )
 from app.presentation.schemas.play_schema import PlayCreateRequest, PlayResponse
 

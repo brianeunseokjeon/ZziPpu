@@ -7,21 +7,21 @@ from fastapi import APIRouter, Depends, HTTPException, Query, status
 from app.application.dto.feeding_dto import CreateFeedingDTO, UpdateFeedingDTO
 from app.application.use_cases.feeding import (
     CreateFeedingUseCase,
+    DeleteFeedingUseCase,
     GetFeedingsUseCase,
     UpdateFeedingUseCase,
-    DeleteFeedingUseCase,
 )
 from app.presentation.dependencies import (
     CurrentUserDep,
     get_create_feeding_use_case,
+    get_delete_feeding_use_case,
     get_get_feedings_use_case,
     get_update_feeding_use_case,
-    get_delete_feeding_use_case,
 )
 from app.presentation.schemas.feeding_schema import (
     FeedingCreateRequest,
-    FeedingUpdateRequest,
     FeedingResponse,
+    FeedingUpdateRequest,
 )
 
 router = APIRouter(prefix="/babies/{baby_id}/feedings", tags=["feedings"])

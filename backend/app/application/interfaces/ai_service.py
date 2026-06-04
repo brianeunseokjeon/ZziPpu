@@ -1,14 +1,13 @@
 from abc import ABC, abstractmethod
 from collections.abc import AsyncIterator
-from uuid import UUID
 
-from app.domain.entities.baby import Baby
-from app.domain.entities.feeding import Feeding
-from app.domain.entities.sleep_record import SleepRecord
-from app.domain.entities.diaper import DiaperRecord
-from app.domain.entities.play_record import PlayRecord
-from app.domain.entities.chat_message import ChatMessage
 from app.application.dto.ai_dto import DailyReviewDTO
+from app.domain.entities.baby import Baby
+from app.domain.entities.chat_message import ChatMessage
+from app.domain.entities.diaper import DiaperRecord
+from app.domain.entities.feeding import Feeding
+from app.domain.entities.play_record import PlayRecord
+from app.domain.entities.sleep_record import SleepRecord
 
 
 class AIService(ABC):

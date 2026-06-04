@@ -8,11 +8,11 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.responses import StreamingResponse
 
 from app.application.use_cases.ai import (
-    GenerateDailyReviewUseCase,
     ChatWithPediatricianUseCase,
-    SaveChatInfoUseCase,
-    ListSavedInfosUseCase,
     DeleteSavedInfoUseCase,
+    GenerateDailyReviewUseCase,
+    ListSavedInfosUseCase,
+    SaveChatInfoUseCase,
 )
 from app.domain.entities.chat_message import ChatMessage
 from app.infrastructure.persistence.repositories import (
@@ -22,19 +22,19 @@ from app.infrastructure.persistence.repositories import (
 from app.presentation.dependencies import (
     CurrentUserDep,
     get_ai_review_repo,
-    get_generate_review_use_case,
-    get_chat_use_case,
-    get_save_info_use_case,
-    get_list_saved_infos_use_case,
-    get_delete_saved_info_use_case,
     get_chat_repo,
+    get_chat_use_case,
+    get_delete_saved_info_use_case,
+    get_generate_review_use_case,
+    get_list_saved_infos_use_case,
+    get_save_info_use_case,
 )
 from app.presentation.schemas.ai_schema import (
+    ChatRequest,
     DailyReviewRequest,
     DailyReviewResponse,
-    ChatRequest,
-    SaveInfoRequest,
     SavedInfoResponse,
+    SaveInfoRequest,
 )
 
 router = APIRouter(prefix="/babies/{baby_id}/ai", tags=["ai"])
