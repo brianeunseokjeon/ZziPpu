@@ -12,7 +12,7 @@ import { Trash2, Loader2 } from "lucide-react";
 import { Dialog } from "@/shared/components/ui/dialog";
 import { TimeField } from "@/shared/components/ui/time-field";
 import { useUIStore } from "@/shared/stores/uiStore";
-import { useDeleteFeeding, useCreateFeeding } from "@/features/feeding/api/feedingApi";
+import { useDeleteFeeding, useUpdateFeeding } from "@/features/feeding/api/feedingApi";
 import { useDeleteDiaper, useCreateDiaper } from "@/features/diaper/api/diaperApi";
 import { useDeleteSleep, useCreateSleep, useEndSleep } from "@/features/sleep/api/sleepApi";
 import { useDeletePlay, useCreatePlay } from "@/features/play/api/playApi";
@@ -47,7 +47,7 @@ export function RecordEditSheet({ record, onClose }: Props) {
   const [diaperAddedMsg, setDiaperAddedMsg] = useState<string | null>(null);
 
   const deleteFeeding = useDeleteFeeding();
-  const createFeeding = useCreateFeeding();
+  const updateFeeding = useUpdateFeeding();
   const deleteDiaper = useDeleteDiaper();
   const createDiaper = useCreateDiaper();
   const deleteSleep = useDeleteSleep();
@@ -100,11 +100,12 @@ export function RecordEditSheet({ record, onClose }: Props) {
 
       switch (record.kind) {
         case "feeding": {
-          await deleteFeeding.mutateAsync({ babyId: activeBabyId, feedingId: record.id });
+          // PATCH 엔드포인트로 in-place 수정 (id 유지 — 삭제/재생성 불필요)
           const isFormula = record.type === "formula";
           if (isFormula) {
-            await createFeeding.mutateAsync({
+            await updateFeeding.mutateAsync({
               babyId: activeBabyId,
+              feedingId: record.id,
               feedingType: FeedingType.Formula,
               amountMl: formulaMl,
               startedAt: startISO,
@@ -115,8 +116,9 @@ export function RecordEditSheet({ record, onClose }: Props) {
               right: FeedingType.BreastRight,
               both: FeedingType.BreastBoth,
             };
-            await createFeeding.mutateAsync({
+            await updateFeeding.mutateAsync({
               babyId: activeBabyId,
+              feedingId: record.id,
               feedingType: typeMap[breastSide],
               startedAt: startISO,
               endedAt: endISO,

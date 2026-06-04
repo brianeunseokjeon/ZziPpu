@@ -4,22 +4,32 @@ import { persist } from "zustand/middleware";
 interface AuthState {
   accessToken: string | null;
   userId: string | null;
-  babyId: string | null;
   isNewUser: boolean;
-  setSession: (s: { accessToken: string; userId: string; babyId: string; isNewUser: boolean }) => void;
+  termsRequired: boolean;
+  setSession: (s: {
+    accessToken: string;
+    userId: string;
+    isNewUser: boolean;
+    termsRequired: boolean;
+  }) => void;
+  setTermsRequired: (v: boolean) => void;
   clear: () => void;
 }
 
+// babyId 는 더 이상 인증 응답에 없음 → core GET /babies 결과를 babyStore 에 저장.
+// (MSA 경계: auth 는 user 신원만, baby 도메인은 core 소유)
 export const useAuthStore = create<AuthState>()(
   persist(
     (set) => ({
       accessToken: null,
       userId: null,
-      babyId: null,
       isNewUser: false,
-      setSession: ({ accessToken, userId, babyId, isNewUser }) =>
-        set({ accessToken, userId, babyId, isNewUser }),
-      clear: () => set({ accessToken: null, userId: null, babyId: null, isNewUser: false }),
+      termsRequired: false,
+      setSession: ({ accessToken, userId, isNewUser, termsRequired }) =>
+        set({ accessToken, userId, isNewUser, termsRequired }),
+      setTermsRequired: (termsRequired) => set({ termsRequired }),
+      clear: () =>
+        set({ accessToken: null, userId: null, isNewUser: false, termsRequired: false }),
     }),
     { name: "muknoljam-auth" }
   )

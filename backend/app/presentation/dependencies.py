@@ -1,70 +1,69 @@
 from typing import Annotated, Optional
 from uuid import UUID
 
-from fastapi import Depends, HTTPException, Request, status
+from fastapi import Depends, Header, HTTPException, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.config import settings
-from app.infrastructure.persistence.database import get_db
-from app.infrastructure.persistence.repositories import (
-    BabyRepositoryImpl,
-    FeedingRepositoryImpl,
-    DiaperRepositoryImpl,
-    SleepRepositoryImpl,
-    PlayRepositoryImpl,
-    AIReviewRepositoryImpl,
-    ChatRepositoryImpl,
-    SavedInfoRepositoryImpl,
-    UserRepositoryImpl,
-    GrowthRepositoryImpl,
-    VaccinationRepositoryImpl,
-    OtpRepositoryImpl,
-    CaregiverRepositoryImpl,
+from app.application.use_cases.ai import (
+    ChatWithPediatricianUseCase,
+    GenerateDailyReviewUseCase,
+    SaveChatInfoUseCase,
 )
-from app.infrastructure.sms import get_sms_service
-from app.application.interfaces.sms_service import SmsService
-from app.application.use_cases.auth import RequestOtpUseCase, VerifyOtpUseCase
-from app.infrastructure.ai.claude_service import ClaudeService
-from app.infrastructure.auth.jwt_handler import decode_access_token
-from app.application.use_cases.baby import RegisterBabyUseCase, GetBabyProfileUseCase, UpdateBabyUseCase
+from app.application.use_cases.baby import (
+    GetBabyProfileUseCase,
+    RegisterBabyUseCase,
+    UpdateBabyUseCase,
+)
 from app.application.use_cases.caregiver import CreateInviteUseCase, JoinByCodeUseCase
-from app.application.use_cases.feeding import (
-    CreateFeedingUseCase,
-    GetFeedingsUseCase,
-    UpdateFeedingUseCase,
-    DeleteFeedingUseCase,
-)
+from app.application.use_cases.dashboard import GetDailySummaryUseCase, GetPredictionsUseCase
 from app.application.use_cases.diaper import (
     CreateDiaperRecordUseCase,
-    GetDiaperRecordsUseCase,
     DeleteDiaperUseCase,
+    GetDiaperRecordsUseCase,
 )
-from app.application.use_cases.sleep import (
-    StartSleepUseCase,
-    EndSleepUseCase,
-    GetSleepRecordsUseCase,
-    DeleteSleepUseCase,
-)
-from app.application.use_cases.play import (
-    CreatePlayRecordUseCase,
-    GetPlayRecordsUseCase,
-    DeletePlayUseCase,
-)
-from app.application.use_cases.dashboard import GetDailySummaryUseCase, GetPredictionsUseCase
-from app.application.use_cases.ai import (
-    GenerateDailyReviewUseCase,
-    ChatWithPediatricianUseCase,
-    SaveChatInfoUseCase,
+from app.application.use_cases.feeding import (
+    CreateFeedingUseCase,
+    DeleteFeedingUseCase,
+    GetFeedingsUseCase,
+    UpdateFeedingUseCase,
 )
 from app.application.use_cases.growth import (
     CreateGrowthRecordUseCase,
-    GetGrowthRecordsUseCase,
     DeleteGrowthRecordUseCase,
+    GetGrowthRecordsUseCase,
+)
+from app.application.use_cases.play import (
+    CreatePlayRecordUseCase,
+    DeletePlayUseCase,
+    GetPlayRecordsUseCase,
+)
+from app.application.use_cases.sleep import (
+    DeleteSleepUseCase,
+    EndSleepUseCase,
+    GetSleepRecordsUseCase,
+    StartSleepUseCase,
 )
 from app.application.use_cases.vaccination import (
     GetVaccinationsUseCase,
     MarkAdministeredUseCase,
+)
+from app.config import settings
+from app.infrastructure.ai.claude_service import ClaudeService
+from app.infrastructure.auth.jwt_handler import decode_access_token
+from app.infrastructure.persistence.database import get_db
+from app.infrastructure.persistence.repositories import (
+    AIReviewRepositoryImpl,
+    BabyRepositoryImpl,
+    CaregiverRepositoryImpl,
+    ChatRepositoryImpl,
+    DiaperRepositoryImpl,
+    FeedingRepositoryImpl,
+    GrowthRepositoryImpl,
+    PlayRepositoryImpl,
+    SavedInfoRepositoryImpl,
+    SleepRepositoryImpl,
+    VaccinationRepositoryImpl,
 )
 
 DEV_USER_ID = UUID("00000000-0000-0000-0000-000000000001")
@@ -133,10 +132,6 @@ def get_chat_repo(db: DbDep) -> ChatRepositoryImpl:
 
 def get_saved_info_repo(db: DbDep) -> SavedInfoRepositoryImpl:
     return SavedInfoRepositoryImpl(db)
-
-
-def get_user_repo(db: DbDep) -> UserRepositoryImpl:
-    return UserRepositoryImpl(db)
 
 
 def get_vaccination_repo(db: DbDep) -> VaccinationRepositoryImpl:
@@ -343,26 +338,14 @@ def get_mark_administered_use_case(
     return MarkAdministeredUseCase(vaccination_repo)
 
 
-# ── OTP / SMS ──────────────────────────────────────────────────────
+# ── 내부 서비스 호출 인증 (auth-service → core) ──────────────────────
 
-def get_otp_repo(db: DbDep) -> OtpRepositoryImpl:
-    return OtpRepositoryImpl(db)
-
-
-def get_sms_service_dep() -> SmsService:
-    return get_sms_service()
-
-
-def get_request_otp_use_case(
-    otp_repo: Annotated[OtpRepositoryImpl, Depends(get_otp_repo)],
-    sms: Annotated[SmsService, Depends(get_sms_service_dep)],
-) -> RequestOtpUseCase:
-    return RequestOtpUseCase(otp_repo, sms)
-
-
-def get_verify_otp_use_case(
-    otp_repo: Annotated[OtpRepositoryImpl, Depends(get_otp_repo)],
-    user_repo: Annotated[UserRepositoryImpl, Depends(get_user_repo)],
-    baby_repo: Annotated[BabyRepositoryImpl, Depends(get_baby_repo)],
-) -> VerifyOtpUseCase:
-    return VerifyOtpUseCase(otp_repo, user_repo, baby_repo)
+def verify_internal_key(
+    x_internal_key: Annotated[Optional[str], Header()] = None,
+) -> None:
+    """auth-service 가 공유 INTERNAL_API_KEY 로 호출하는 내부 엔드포인트 보호."""
+    if not x_internal_key or x_internal_key != settings.INTERNAL_API_KEY:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid internal key",
+        )

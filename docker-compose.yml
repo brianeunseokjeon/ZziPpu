@@ -1,0 +1,49 @@
+# 먹놀잠 로컬 통합 실행 (2서비스 MSA + 프론트).
+# 기본은 서비스별 SQLite 파일. Postgres 전환은 docs/ARCHITECTURE.md 참고.
+#
+# 두 서비스는 SECRET_KEY · INTERNAL_API_KEY 를 **동일한 값**으로 공유해야 한다.
+# 아래 ${...} 는 루트 .env(또는 셸 환경)에서 주입. 미설정 시 dev 기본값 사용.
+
+services:
+  auth-service:
+    build: ./auth-service
+    ports:
+      - "8082:8082"
+    environment:
+      DATABASE_URL: sqlite+aiosqlite:///./auth.db
+      SECRET_KEY: ${SECRET_KEY:-change-me-in-production}
+      ALGORITHM: HS256
+      ACCESS_TOKEN_EXPIRE_MINUTES: "10080"
+      CORS_ORIGINS: '["http://localhost:3000"]'
+      EMAIL_PROVIDER: ${EMAIL_PROVIDER:-console}
+      RESEND_API_KEY: ${RESEND_API_KEY:-}
+      EMAIL_FROM: ${EMAIL_FROM:-먹놀잠 <onboarding@resend.dev>}
+      CORE_URL: http://core-service:8081
+      INTERNAL_API_KEY: ${INTERNAL_API_KEY:-change-me-internal-key}
+      DEV_MODE: ${DEV_MODE:-true}
+
+  core-service:
+    build: ./backend
+    ports:
+      - "8081:8081"
+    environment:
+      DATABASE_URL: sqlite+aiosqlite:///./muknoljam.db
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+      SECRET_KEY: ${SECRET_KEY:-change-me-in-production}
+      ALGORITHM: HS256
+      ACCESS_TOKEN_EXPIRE_MINUTES: "10080"
+      CORS_ORIGINS: '["http://localhost:3000"]'
+      INTERNAL_API_KEY: ${INTERNAL_API_KEY:-change-me-internal-key}
+      DEV_MODE: ${DEV_MODE:-true}
+
+  frontend:
+    build: ./frontend
+    ports:
+      - "3000:3000"
+    environment:
+      NEXT_PUBLIC_API_URL: http://localhost:8081
+      NEXT_PUBLIC_AUTH_URL: http://localhost:8082
+      NEXT_PUBLIC_REQUIRE_AUTH: ${NEXT_PUBLIC_REQUIRE_AUTH:-false}
+    depends_on:
+      - auth-service
+      - core-service

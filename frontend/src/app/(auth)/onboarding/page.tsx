@@ -10,10 +10,16 @@ import { useAuthStore } from "@/features/auth/store/authStore";
 
 type Gender = "male" | "female" | "unknown";
 
+interface CreatedBaby {
+  id: string;
+  name: string;
+  birthDate: string;
+}
+
 export default function OnboardingPage() {
   const router = useRouter();
-  const { babyId, setName, setBirthDate } = useBabyStore();
-  const isNewUser = useAuthStore((s) => s.isNewUser);
+  const { setBabyId, setName, setBirthDate } = useBabyStore();
+  const accessToken = useAuthStore((s) => s.accessToken);
 
   const [name, setNameLocal] = useState("");
   const [birthDate, setBirthDateLocal] = useState("");
@@ -21,9 +27,9 @@ export default function OnboardingPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // 신규 가입자가 아니면 홈으로
-  if (!isNewUser && typeof window !== "undefined") {
-    router.replace("/");
+  // 비로그인 접근 차단
+  if (!accessToken && typeof window !== "undefined") {
+    router.replace("/login");
   }
 
   async function handleSubmit() {
@@ -33,13 +39,15 @@ export default function OnboardingPage() {
 
     setLoading(true);
     try {
-      await apiClient.patch(`/api/v1/babies/${babyId}`, {
+      // 자동 baby 생성 제거됨 → 온보딩에서 POST 로 새로 생성.
+      const baby = await apiClient.post<CreatedBaby>("/api/v1/babies", {
         name: name.trim(),
         birthDate,
         gender: gender === "unknown" ? null : gender,
       });
-      setName(name.trim());
-      setBirthDate(birthDate);
+      setBabyId(baby.id);
+      setName(baby.name);
+      setBirthDate(baby.birthDate);
       router.replace("/");
     } catch (e) {
       setError(e instanceof Error ? e.message : "저장에 실패했습니다.");

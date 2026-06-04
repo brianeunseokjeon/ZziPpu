@@ -12,22 +12,9 @@ class Settings(BaseSettings):
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24 * 7
     DEV_MODE: bool = True
 
-    # ── OTP / 핸드폰 인증 ───────────────────────────────────────────
-    OTP_TTL_SECONDS: int = 300        # 5분
-    OTP_LENGTH: int = 6
-    OTP_MAX_ATTEMPTS: int = 5
-    OTP_COOLDOWN_SECONDS: int = 60    # 같은 phone 재요청 cool-down
-    OTP_HOURLY_PER_PHONE: int = 5
-    OTP_HOURLY_PER_IP: int = 20
-
-    # ── SMS Provider ──────────────────────────────────────────────
-    # "console" : 백엔드 로그에만 출력 (개발용)
-    # "ncp_sens": Naver Cloud Sens SMS
-    SMS_PROVIDER: str = "console"
-    SMS_API_KEY: str | None = None
-    SMS_API_SECRET: str | None = None
-    SMS_SERVICE_ID: str | None = None      # NCP Sens service id
-    SMS_SENDER: str | None = None          # 발신번호 (예: "021234-5678")
+    # ── 내부 서비스 호출 (auth-service → core) ─────────────────────────
+    # auth-service 와 동일한 값을 공유한다. 공동양육자 코드 리딤에 사용.
+    INTERNAL_API_KEY: str = "change-me-internal-key"
 
 
 settings = Settings()

@@ -1,6 +1,6 @@
-from contextlib import asynccontextmanager
 from collections.abc import AsyncIterator
-from datetime import date, datetime, timezone, timedelta
+from contextlib import asynccontextmanager
+from datetime import date, datetime, timedelta, timezone
 from uuid import UUID, uuid4
 
 from fastapi import FastAPI
@@ -8,23 +8,24 @@ from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy import select
 
 from app.config import settings
-from app.infrastructure.persistence.database import engine, AsyncSessionFactory
-from app.infrastructure.persistence.models.base import Base
+from app.domain.guidelines.vaccination_schedule import VACCINATION_SCHEDULE
+from app.infrastructure.persistence.database import AsyncSessionFactory, engine
 from app.infrastructure.persistence.models import (  # noqa: F401 — ensure all models are registered
-    UserModel,
-    BabyModel,
-    FeedingModel,
-    DiaperModel,
-    SleepModel,
-    PlayModel,
     AIReviewModel,
+    BabyModel,
     ChatConversationModel,
     ChatMessageModel,
-    SavedInfoModel,
+    DiaperModel,
+    FeedingModel,
     GrowthModel,
+    PlayModel,
+    SavedInfoModel,
+    SleepModel,
+    UserModel,
     VaccinationModel,
-)
-from app.domain.guidelines.vaccination_schedule import VACCINATION_SCHEDULE
+)  # noqa: F401 — UserModel 은 비활성(불투명 user_id). OTP/SMS 는 auth-service 로 이관됨.
+from app.infrastructure.persistence.models.base import Base
+from app.presentation.api.internal_router import router as internal_router
 from app.presentation.api.v1.router import v1_router
 from app.presentation.middleware.error_handler import ErrorHandlerMiddleware
 
@@ -145,6 +146,7 @@ app.add_middleware(
 app.add_middleware(ErrorHandlerMiddleware)
 
 app.include_router(v1_router)
+app.include_router(internal_router)
 
 
 @app.get("/health")

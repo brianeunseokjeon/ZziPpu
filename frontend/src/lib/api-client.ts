@@ -1,6 +1,9 @@
 import { getAccessToken } from "@/features/auth/store/authStore";
 
+// core-service (아기·기록 등 도메인). 앱 대부분이 사용.
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8081";
+// auth-service (이메일 OTP·약관·코드 로그인). features/auth 만 사용 → 교체 시 격리.
+const AUTH_BASE_URL = process.env.NEXT_PUBLIC_AUTH_URL ?? "http://localhost:8082";
 
 function headers(): Record<string, string> {
   const h: Record<string, string> = { "Content-Type": "application/json" };
@@ -67,39 +70,46 @@ function toBody(body: unknown): string | undefined {
   return JSON.stringify(snakelizeKeys(body));
 }
 
-export const apiClient = {
-  get<T>(path: string): Promise<T> {
-    return fetch(`${API_BASE_URL}${path}`, { headers: headers() }).then((r) => handleResponse<T>(r));
-  },
+function createClient(baseUrl: string) {
+  return {
+    get<T>(path: string): Promise<T> {
+      return fetch(`${baseUrl}${path}`, { headers: headers() }).then((r) => handleResponse<T>(r));
+    },
 
-  post<T>(path: string, body?: unknown): Promise<T> {
-    return fetch(`${API_BASE_URL}${path}`, {
-      method: "POST",
-      headers: headers(),
-      body: toBody(body),
-    }).then((r) => handleResponse<T>(r));
-  },
+    post<T>(path: string, body?: unknown): Promise<T> {
+      return fetch(`${baseUrl}${path}`, {
+        method: "POST",
+        headers: headers(),
+        body: toBody(body),
+      }).then((r) => handleResponse<T>(r));
+    },
 
-  put<T>(path: string, body?: unknown): Promise<T> {
-    return fetch(`${API_BASE_URL}${path}`, {
-      method: "PUT",
-      headers: headers(),
-      body: toBody(body),
-    }).then((r) => handleResponse<T>(r));
-  },
+    put<T>(path: string, body?: unknown): Promise<T> {
+      return fetch(`${baseUrl}${path}`, {
+        method: "PUT",
+        headers: headers(),
+        body: toBody(body),
+      }).then((r) => handleResponse<T>(r));
+    },
 
-  patch<T>(path: string, body?: unknown): Promise<T> {
-    return fetch(`${API_BASE_URL}${path}`, {
-      method: "PATCH",
-      headers: headers(),
-      body: toBody(body),
-    }).then((r) => handleResponse<T>(r));
-  },
+    patch<T>(path: string, body?: unknown): Promise<T> {
+      return fetch(`${baseUrl}${path}`, {
+        method: "PATCH",
+        headers: headers(),
+        body: toBody(body),
+      }).then((r) => handleResponse<T>(r));
+    },
 
-  delete<T>(path: string): Promise<T> {
-    return fetch(`${API_BASE_URL}${path}`, {
-      method: "DELETE",
-      headers: headers(),
-    }).then((r) => handleResponse<T>(r));
-  },
-};
+    delete<T>(path: string): Promise<T> {
+      return fetch(`${baseUrl}${path}`, {
+        method: "DELETE",
+        headers: headers(),
+      }).then((r) => handleResponse<T>(r));
+    },
+  };
+}
+
+// 기본 클라이언트 = core-service.
+export const apiClient = createClient(API_BASE_URL);
+// 인증 전용 클라이언트 = auth-service. features/auth 에서만 import.
+export const authClient = createClient(AUTH_BASE_URL);

@@ -1,22 +1,20 @@
 from fastapi import APIRouter
 
-from app.presentation.api.v1.auth_router import router as auth_router
+from app.presentation.api.v1.ai_router import router as ai_router
 from app.presentation.api.v1.baby_router import router as baby_router
 from app.presentation.api.v1.caregiver_router import router as caregiver_router
-from app.presentation.api.v1.feeding_router import router as feeding_router
-from app.presentation.api.v1.diaper_router import router as diaper_router
-from app.presentation.api.v1.sleep_router import router as sleep_router
-from app.presentation.api.v1.play_router import router as play_router
 from app.presentation.api.v1.dashboard_router import router as dashboard_router
-from app.presentation.api.v1.ai_router import router as ai_router
-from app.presentation.api.v1.growth_router import router as growth_router
-from app.presentation.api.v1.vaccination_router import router as vaccination_router
 from app.presentation.api.v1.development_router import router as development_router
+from app.presentation.api.v1.diaper_router import router as diaper_router
+from app.presentation.api.v1.feeding_router import router as feeding_router
+from app.presentation.api.v1.growth_router import router as growth_router
+from app.presentation.api.v1.play_router import router as play_router
+from app.presentation.api.v1.sleep_router import router as sleep_router
+from app.presentation.api.v1.vaccination_router import router as vaccination_router
 from app.presentation.api.v1.youtube_router import router as youtube_router
 
 v1_router = APIRouter(prefix="/api/v1")
 
-v1_router.include_router(auth_router)
 v1_router.include_router(baby_router)
 v1_router.include_router(caregiver_router)
 v1_router.include_router(feeding_router)

@@ -2,6 +2,7 @@
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+AUTH="$ROOT/auth-service"
 BACKEND="$ROOT/backend"
 FRONTEND="$ROOT/frontend"
 
@@ -16,20 +17,28 @@ err()  { echo -e "${RED}[✗]${NC} $*" >&2; }
 
 # ── .env 체크 ─────────────────────────────────────────────────────────
 if [[ ! -f "$BACKEND/.env" ]]; then
-  warn ".env 파일이 없습니다. $BACKEND/.env.example 을 복사해서 설정하세요."
-  warn "  cp backend/.env.example backend/.env"
+  warn "core .env 가 없습니다.  cp backend/.env.example backend/.env"
   warn "AI 기능은 ANTHROPIC_API_KEY 없이 동작하지 않습니다."
 fi
+if [[ ! -f "$AUTH/.env" ]]; then
+  warn "auth .env 가 없습니다.  cp auth-service/.env.example auth-service/.env"
+fi
+warn "SECRET_KEY · INTERNAL_API_KEY 는 두 서비스에서 동일한 값이어야 합니다."
 
-# ── Python venv ───────────────────────────────────────────────────────
+# ── Python venv (core) ────────────────────────────────────────────────
 if [[ ! -d "$BACKEND/.venv" ]]; then
-  log "Python 가상환경 생성 중..."
+  log "core Python 가상환경 생성 중..."
   python3 -m venv "$BACKEND/.venv"
-  source "$BACKEND/.venv/bin/activate"
-  pip install -q fastapi "uvicorn[standard]" sqlalchemy aiosqlite asyncpg alembic pydantic "pydantic[email]" pydantic-settings anthropic "python-jose[cryptography]" "passlib[bcrypt]" httpx sse-starlette
-  ok "Python 패키지 설치 완료"
-else
-  source "$BACKEND/.venv/bin/activate"
+  "$BACKEND/.venv/bin/pip" install -q fastapi "uvicorn[standard]" sqlalchemy aiosqlite asyncpg alembic "pydantic[email]" pydantic-settings anthropic "python-jose[cryptography]" "passlib[bcrypt]" httpx sse-starlette
+  ok "core 패키지 설치 완료"
+fi
+
+# ── Python venv (auth) ────────────────────────────────────────────────
+if [[ ! -d "$AUTH/.venv" ]]; then
+  log "auth Python 가상환경 생성 중..."
+  python3 -m venv "$AUTH/.venv"
+  "$AUTH/.venv/bin/pip" install -q fastapi "uvicorn[standard]" sqlalchemy aiosqlite asyncpg "pydantic[email]" pydantic-settings "python-jose[cryptography]" httpx
+  ok "auth 패키지 설치 완료"
 fi
 
 # ── Node modules ───────────────────────────────────────────────────────
@@ -47,18 +56,19 @@ kill_port() {
   if [[ -n "$pids" ]]; then
     warn "포트 $port 점유 프로세스(PID $pids) 강제 종료 중..."
     echo "$pids" | xargs kill -9 2>/dev/null || true
-    # 포트가 실제로 해제될 때까지 최대 5초 대기
     local i=0
     while lsof -ti tcp:"$port" &>/dev/null && (( i++ < 10 )); do sleep 0.5; done
     ok "포트 $port 해제 완료"
   fi
 }
+kill_port 8082
 kill_port 8081
 kill_port 3000
 
 # ── 종료 핸들러 ────────────────────────────────────────────────────────
 cleanup() {
   log "서버를 종료합니다..."
+  kill "$AUTH_PID" 2>/dev/null || true
   kill "$BACKEND_PID" 2>/dev/null || true
   kill "$FRONTEND_PID" 2>/dev/null || true
   wait 2>/dev/null
@@ -66,14 +76,20 @@ cleanup() {
 }
 trap cleanup EXIT INT TERM
 
-# ── 백엔드 시작 ────────────────────────────────────────────────────────
-log "백엔드 서버 시작 중... (http://localhost:8081)"
+# ── auth-service 시작 ─────────────────────────────────────────────────
+log "auth-service 시작 중... (http://localhost:8082)"
+cd "$AUTH"
+"$AUTH/.venv/bin/python" -m uvicorn app.main:app --host 0.0.0.0 --port 8082 --reload &
+AUTH_PID=$!
+
+# ── core-service 시작 ─────────────────────────────────────────────────
+log "core-service 시작 중... (http://localhost:8081)"
 cd "$BACKEND"
-python3 -m uvicorn app.main:app --host 0.0.0.0 --port 8081 --reload &
+"$BACKEND/.venv/bin/python" -m uvicorn app.main:app --host 0.0.0.0 --port 8081 --reload &
 BACKEND_PID=$!
 
 # ── 프론트엔드 시작 ────────────────────────────────────────────────────
-log "프론트엔드 서버 시작 중... (http://localhost:3000)"
+log "프론트엔드 시작 중... (http://localhost:3000)"
 cd "$FRONTEND"
 npm run dev -- --port 3000 &
 FRONTEND_PID=$!
@@ -82,9 +98,9 @@ echo ""
 echo -e "${GREEN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
 echo -e "${GREEN}  먹놀잠 서비스가 시작되었습니다 👶${NC}"
 echo -e "${GREEN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
-echo -e "  프론트엔드: ${CYAN}http://localhost:3000${NC}"
-echo -e "  백엔드 API: ${CYAN}http://localhost:8081${NC}"
-echo -e "  API 문서:   ${CYAN}http://localhost:8081/docs${NC}"
+echo -e "  프론트엔드:   ${CYAN}http://localhost:3000${NC}"
+echo -e "  core API:     ${CYAN}http://localhost:8081${NC}  (docs: /docs)"
+echo -e "  auth API:     ${CYAN}http://localhost:8082${NC}  (docs: /docs)"
 echo -e "${GREEN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
 echo -e "  ${YELLOW}Ctrl+C${NC} 로 종료"
 echo ""

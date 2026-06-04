@@ -1,4 +1,1 @@
-from app.application.use_cases.auth.request_otp import RequestOtpUseCase
-from app.application.use_cases.auth.verify_otp import VerifyOtpUseCase, VerifyOtpResult
-
-__all__ = ["RequestOtpUseCase", "VerifyOtpUseCase", "VerifyOtpResult"]
+# 인증(OTP) 유스케이스는 auth-service 로 이관되었다. core 는 JWT 검증만 수행한다.

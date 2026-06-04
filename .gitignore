@@ -16,9 +16,10 @@ node_modules/
 out/
 .turbo/
 
-# IDE
+# IDE / agent
 .vscode/
 .idea/
+.claude/
 *.swp
 *.swo
 .DS_Store
@@ -35,3 +36,9 @@ htmlcov/
 # Environment
 .env.local
 .env.*.local
+
+# Databases (서비스별 로컬 SQLite — 커밋 금지)
+*.db
+*.db-journal
+*.sqlite
+*.sqlite3
