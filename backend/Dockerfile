@@ -7,7 +7,7 @@ RUN pip install --no-cache-dir \
     "fastapi>=0.115" "uvicorn[standard]>=0.30" "sqlalchemy>=2.0" "aiosqlite>=0.20" \
     "asyncpg>=0.29" "alembic>=1.13" "pydantic[email]>=2.7" "pydantic-settings>=2.3" \
     "anthropic>=0.39" "python-jose[cryptography]>=3.3" "passlib[bcrypt]>=1.7" \
-    "httpx>=0.27" "sse-starlette>=2.1"
+    "httpx>=0.27" "sse-starlette>=2.1" "youtube-transcript-api>=0.6"
 
 COPY app ./app
 
