@@ -28,6 +28,9 @@ services:
         value: resend
       - key: CORS_ORIGINS
         value: '["https://zzippu.co.kr","https://www.zzippu.co.kr"]'
+      # Vercel 프리뷰/임시 도메인(*.vercel.app) 허용 — 도메인 연결 전 테스트용
+      - key: CORS_ORIGIN_REGEX
+        value: 'https://.*\.vercel\.app'
       # 아래는 대시보드에서 직접 입력 (sync: false)
       - key: SECRET_KEY
         sync: false
@@ -60,6 +63,9 @@ services:
         value: "false"
       - key: CORS_ORIGINS
         value: '["https://zzippu.co.kr","https://www.zzippu.co.kr"]'
+      # Vercel 프리뷰/임시 도메인(*.vercel.app) 허용 — 도메인 연결 전 테스트용
+      - key: CORS_ORIGIN_REGEX
+        value: 'https://.*\.vercel\.app'
       # 아래는 대시보드에서 직접 입력 (sync: false)
       - key: SECRET_KEY
         sync: false

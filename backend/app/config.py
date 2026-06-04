@@ -6,7 +6,9 @@ class Settings(BaseSettings):
 
     DATABASE_URL: str = "sqlite+aiosqlite:///./muknoljam.db"
     ANTHROPIC_API_KEY: str = ""
+    # 고정 도메인은 정확 일치 목록으로, 동적 프리뷰 도메인(예: Vercel)은 정규식으로 허용.
     CORS_ORIGINS: list[str] = ["http://localhost:3000"]
+    CORS_ORIGIN_REGEX: str | None = None
     SECRET_KEY: str = "change-me-in-production"
     ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24 * 7

@@ -15,7 +15,10 @@ class Settings(BaseSettings):
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24 * 7  # 7일
 
     # --- CORS ---
+    # 고정 도메인은 정확 일치 목록으로, 동적 프리뷰 도메인(예: Vercel)은 정규식으로 허용.
+    # 미설정(None) 시 정규식 매칭 없음 → 기존 동작 그대로.
     CORS_ORIGINS: list[str] = ["http://localhost:3000"]
+    CORS_ORIGIN_REGEX: str | None = None
 
     # --- OTP ---
     OTP_CODE_LENGTH: int = 6
