@@ -11,7 +11,7 @@ import {
   ResponsiveContainer,
 } from "recharts";
 import { useGrowthRecords } from "../api/growthApi";
-import { MOCK_BABY_ID } from "@/config/constants";
+import { useUIStore } from "@/shared/stores/uiStore";
 import { useBabyInfo } from "@/features/baby/hooks/useBabyInfo";
 
 type MetricKey = "weight" | "height" | "head";
@@ -25,7 +25,8 @@ const TABS: { key: MetricKey; label: string; unit: string }[] = [
 export function GrowthChart() {
   const [activeTab, setActiveTab] = useState<MetricKey>("weight");
   const { birthDate } = useBabyInfo();
-  const { data: records, isLoading } = useGrowthRecords(MOCK_BABY_ID);
+  const activeBabyId = useUIStore((s) => s.activeBabyId);
+  const { data: records, isLoading } = useGrowthRecords(activeBabyId);
 
   function getBirthDays(recordedAt: string): number {
     const birth = new Date(birthDate);

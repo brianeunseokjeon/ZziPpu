@@ -4,7 +4,6 @@ import {
   useQueryClient,
 } from "@tanstack/react-query";
 import { apiClient } from "@/lib/api-client";
-import { MOCK_BABY_ID } from "@/config/constants";
 import type { DailyReview, SavedInfo } from "../types/aiReview";
 
 const aiReviewKeys = {
@@ -13,7 +12,7 @@ const aiReviewKeys = {
   savedInfos: (babyId: string) => ["ai-saved-infos", babyId] as const,
 };
 
-export function useGenerateReview(babyId: string = MOCK_BABY_ID, date: string) {
+export function useGenerateReview(babyId: string, date: string) {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: () =>
@@ -27,7 +26,7 @@ export function useGenerateReview(babyId: string = MOCK_BABY_ID, date: string) {
   });
 }
 
-export function useAIReviews(babyId: string = MOCK_BABY_ID) {
+export function useAIReviews(babyId: string) {
   return useQuery({
     queryKey: aiReviewKeys.reviews(babyId),
     queryFn: () =>
@@ -37,7 +36,7 @@ export function useAIReviews(babyId: string = MOCK_BABY_ID) {
   });
 }
 
-export function useSavedInfos(babyId: string = MOCK_BABY_ID) {
+export function useSavedInfos(babyId: string) {
   return useQuery({
     queryKey: aiReviewKeys.savedInfos(babyId),
     queryFn: () =>

@@ -2,7 +2,7 @@
 
 import { useEffect, useRef } from 'react'
 import { RotateCcw } from 'lucide-react'
-import { MOCK_BABY_ID } from '@/config/constants'
+import { useUIStore } from '@/shared/stores/uiStore'
 import {
   useChat,
   ChatMessageBubble,
@@ -12,8 +12,9 @@ import {
 } from '@/features/ai-chat'
 
 export default function AIChatPage() {
+  const activeBabyId = useUIStore((s) => s.activeBabyId)
   const { messages, isStreaming, streamingContent, sendMessage, resetChat } =
-    useChat(MOCK_BABY_ID)
+    useChat(activeBabyId)
   const bottomRef = useRef<HTMLDivElement>(null)
 
   // 메시지 추가 시 자동 스크롤

@@ -3,13 +3,16 @@
 import { useState } from "react";
 import { Download, X } from "lucide-react";
 import { Button } from "@/shared/components/ui/button";
-import { API_BASE_URL, MOCK_BABY_ID } from "@/config/constants";
+import { API_BASE_URL } from "@/config/constants";
+import { useBabyInfo } from "@/features/baby/hooks/useBabyInfo";
+import { getAccessToken } from "@/features/auth/store/authStore";
 
 interface Props {
   onClose: () => void;
 }
 
 export default function ExportModal({ onClose }: Props) {
+  const { babyId } = useBabyInfo();
   const [format, setFormat] = useState<"json" | "csv">("json");
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
@@ -25,8 +28,10 @@ export default function ExportModal({ onClose }: Props) {
     if (endDate) params.append("end_date", endDate);
 
     try {
+      const token = getAccessToken();
       const res = await fetch(
-        `${API_BASE_URL}/api/v1/babies/${MOCK_BABY_ID}/export?${params}`
+        `${API_BASE_URL}/api/v1/babies/${babyId}/export?${params}`,
+        { headers: token ? { Authorization: `Bearer ${token}` } : {} }
       );
       if (!res.ok) throw new Error("내보내기 실패");
 

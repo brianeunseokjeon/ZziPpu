@@ -6,7 +6,7 @@ import { Button } from "@/shared/components/ui/button";
 import { Input } from "@/shared/components/ui/input";
 import { Dialog } from "@/shared/components/ui/dialog";
 import { useMarkAdministered } from "../api/vaccinationApi";
-import { MOCK_BABY_ID } from "@/config/constants";
+import { useUIStore } from "@/shared/stores/uiStore";
 import { formatDate } from "@/lib/date-utils";
 import type { Vaccination } from "../types/vaccination";
 
@@ -44,11 +44,12 @@ export function VaccinationCard({ vaccination: v, onMark }: VaccinationCardProps
   );
   const [hospitalName, setHospitalName] = useState("");
   const { mutate: markAdministered, isPending } = useMarkAdministered();
+  const activeBabyId = useUIStore((s) => s.activeBabyId);
 
   function handleConfirm() {
     markAdministered(
       {
-        babyId: MOCK_BABY_ID,
+        babyId: activeBabyId,
         vaccinationId: v.id,
         data: {
           administeredDate: adminDate,

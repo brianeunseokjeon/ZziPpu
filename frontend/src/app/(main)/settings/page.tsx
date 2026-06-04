@@ -15,7 +15,7 @@ import {
 } from "lucide-react";
 import { Card, CardContent } from "@/shared/components/ui/card";
 import { useBabyInfo } from "@/features/baby/hooks/useBabyInfo";
-import { API_BASE_URL, MOCK_BABY_ID } from "@/config/constants";
+import { apiClient } from "@/lib/api-client";
 import ExportModal from "@/features/baby/components/ExportModal";
 import { PhotoUploader } from "@/features/baby/components/PhotoUploader";
 import { LogoutButton } from "@/features/auth/components/LogoutButton";
@@ -25,7 +25,8 @@ import { useRecordingDefaultsStore } from "@/shared/stores/recordingDefaultsStor
 const ML_PRESETS = [60, 80, 100, 120, 150, 180];
 
 export default function SettingsPage() {
-  const { name, birthDate, ageText, photoUrl, setName, setBirthDate, setPhotoUrl } = useBabyInfo();
+  const { babyId, name, birthDate, ageText, photoUrl, setName, setBirthDate, setPhotoUrl } =
+    useBabyInfo();
   const recordingDefaults = useRecordingDefaultsStore();
 
   const [editingName, setEditingName] = useState(false);
@@ -39,11 +40,7 @@ export default function SettingsPage() {
   async function handlePhotoUpload(base64: string) {
     setPhotoUrl(base64);
     try {
-      await fetch(`${API_BASE_URL}/api/v1/babies/${MOCK_BABY_ID}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ photo_url: base64 }),
-      });
+      await apiClient.patch(`/api/v1/babies/${babyId}`, { photoUrl: base64 });
     } catch {
       // 저장 실패해도 로컬 상태는 유지
     }
@@ -52,11 +49,7 @@ export default function SettingsPage() {
   function saveName() {
     if (nameInput.trim()) {
       setName(nameInput.trim());
-      fetch(`${API_BASE_URL}/api/v1/babies/${MOCK_BABY_ID}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name: nameInput.trim() }),
-      }).catch(() => {});
+      apiClient.patch(`/api/v1/babies/${babyId}`, { name: nameInput.trim() }).catch(() => {});
     }
     setEditingName(false);
   }
@@ -64,11 +57,7 @@ export default function SettingsPage() {
   function saveBirth() {
     if (birthInput) {
       setBirthDate(birthInput);
-      fetch(`${API_BASE_URL}/api/v1/babies/${MOCK_BABY_ID}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ birth_date: birthInput }),
-      }).catch(() => {});
+      apiClient.patch(`/api/v1/babies/${babyId}`, { birthDate: birthInput }).catch(() => {});
     }
     setEditingBirth(false);
   }

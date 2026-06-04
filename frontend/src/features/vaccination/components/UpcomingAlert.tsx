@@ -2,11 +2,12 @@
 
 import { AlertTriangle } from "lucide-react";
 import { useUpcomingVaccinations } from "../api/vaccinationApi";
-import { MOCK_BABY_ID } from "@/config/constants";
+import { useUIStore } from "@/shared/stores/uiStore";
 import { formatDate } from "@/lib/date-utils";
 
 export function UpcomingAlert() {
-  const { data: upcoming } = useUpcomingVaccinations(MOCK_BABY_ID);
+  const activeBabyId = useUIStore((s) => s.activeBabyId);
+  const { data: upcoming } = useUpcomingVaccinations(activeBabyId);
 
   if (!upcoming || upcoming.length === 0) return null;
 

@@ -2,7 +2,7 @@
 
 import { Trash2 } from "lucide-react";
 import { useGrowthRecords, useDeleteGrowthRecord } from "../api/growthApi";
-import { MOCK_BABY_ID } from "@/config/constants";
+import { useUIStore } from "@/shared/stores/uiStore";
 import { formatDate } from "@/lib/date-utils";
 import type { GrowthRecord } from "../types/growth";
 
@@ -21,7 +21,8 @@ function summarize(r: GrowthRecord): string {
 }
 
 export function GrowthList() {
-  const { data: records, isLoading } = useGrowthRecords(MOCK_BABY_ID);
+  const activeBabyId = useUIStore((s) => s.activeBabyId);
+  const { data: records, isLoading } = useGrowthRecords(activeBabyId);
   const { mutate: deleteRecord } = useDeleteGrowthRecord();
 
   if (isLoading) {
@@ -73,7 +74,7 @@ export function GrowthList() {
           </div>
           <button
             onClick={() =>
-              deleteRecord({ babyId: MOCK_BABY_ID, recordId: r.id })
+              deleteRecord({ babyId: activeBabyId, recordId: r.id })
             }
             className="p-2 rounded-full hover:bg-red-50 text-gray-300 hover:text-red-400 transition-colors"
           >

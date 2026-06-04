@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { BookMarked } from "lucide-react";
 import { Card, CardContent } from "@/shared/components/ui/card";
-import { MOCK_BABY_ID } from "@/config/constants";
+import { useUIStore } from "@/shared/stores/uiStore";
 import {
   useSavedInfos,
   useDeleteSavedInfo,
@@ -28,7 +28,8 @@ export default function SavedInfoPage() {
     SavedInfo["category"] | "all"
   >("all");
 
-  const { data: savedInfos = [], isLoading } = useSavedInfos(MOCK_BABY_ID);
+  const activeBabyId = useUIStore((s) => s.activeBabyId);
+  const { data: savedInfos = [], isLoading } = useSavedInfos(activeBabyId);
   const deleteMutation = useDeleteSavedInfo();
 
   const filtered =
@@ -37,7 +38,7 @@ export default function SavedInfoPage() {
       : savedInfos.filter((info) => info.category === activeCategory);
 
   const handleDelete = (id: string) => {
-    deleteMutation.mutate({ babyId: MOCK_BABY_ID, id });
+    deleteMutation.mutate({ babyId: activeBabyId, id });
   };
 
   return (

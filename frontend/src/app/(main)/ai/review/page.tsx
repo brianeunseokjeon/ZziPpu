@@ -3,7 +3,7 @@
 import { Bot, RefreshCw, Sparkles } from "lucide-react";
 import { Card, CardContent } from "@/shared/components/ui/card";
 import { Button } from "@/shared/components/ui/button";
-import { MOCK_BABY_ID } from "@/config/constants";
+import { useUIStore } from "@/shared/stores/uiStore";
 import {
   useGenerateReview,
   useAIReviews,
@@ -28,8 +28,9 @@ function formatKoreanDate(dateStr: string): string {
 
 export default function AIReviewPage() {
   const today = getTodayString();
-  const { data: reviews = [], isLoading: reviewsLoading } = useAIReviews(MOCK_BABY_ID);
-  const generateMutation = useGenerateReview(MOCK_BABY_ID, today);
+  const activeBabyId = useUIStore((s) => s.activeBabyId);
+  const { data: reviews = [], isLoading: reviewsLoading } = useAIReviews(activeBabyId);
+  const generateMutation = useGenerateReview(activeBabyId, today);
 
   const todayReview = reviews.find((r) => r.reviewDate === today);
 

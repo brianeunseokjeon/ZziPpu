@@ -125,13 +125,10 @@ export default function LoginPage() {
         isNewUser: result.isNewUser,
         termsRequired: result.termsRequired,
       });
-      // 코드 로그인은 아기가 이미 연결됨 → babyId 즉시 저장, 온보딩 없음.
+      // 코드 로그인은 아기가 이미 연결됨(온보딩 없음). 즉시 babyId 저장 후,
+      // 약관 통과 시 GET /babies 로 이름까지 채워 정확한 표시를 보장.
       setBabyId(result.babyId);
-      if (result.termsRequired) {
-        router.replace("/terms");
-      } else {
-        router.replace("/");
-      }
+      await routeAfterAuth(result.termsRequired);
     } catch (e) {
       setError(e instanceof Error ? e.message : "코드 확인에 실패했습니다.");
     } finally {

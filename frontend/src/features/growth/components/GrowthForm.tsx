@@ -4,10 +4,11 @@ import { useState } from "react";
 import { Button } from "@/shared/components/ui/button";
 import { Input } from "@/shared/components/ui/input";
 import { useCreateGrowthRecord } from "../api/growthApi";
-import { MOCK_BABY_ID } from "@/config/constants";
+import { useUIStore } from "@/shared/stores/uiStore";
 
 export function GrowthForm() {
   const { mutate: createRecord, isPending } = useCreateGrowthRecord();
+  const activeBabyId = useUIStore((s) => s.activeBabyId);
 
   const [recordedAt, setRecordedAt] = useState(() => {
     const now = new Date();
@@ -24,7 +25,7 @@ export function GrowthForm() {
 
     createRecord(
       {
-        babyId: MOCK_BABY_ID,
+        babyId: activeBabyId,
         data: {
           recorded_at: recordedAt,
           weight_g: weightG ? parseFloat(weightG) : null,

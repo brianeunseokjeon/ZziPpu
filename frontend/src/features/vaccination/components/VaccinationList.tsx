@@ -2,7 +2,7 @@
 
 import { useVaccinations } from "../api/vaccinationApi";
 import { VaccinationCard } from "./VaccinationCard";
-import { MOCK_BABY_ID } from "@/config/constants";
+import { useUIStore } from "@/shared/stores/uiStore";
 import type { Vaccination } from "../types/vaccination";
 
 function groupVaccinations(vaccinations: Vaccination[]) {
@@ -52,7 +52,8 @@ function Section({
 }
 
 export function VaccinationList() {
-  const { data: vaccinations, isLoading } = useVaccinations(MOCK_BABY_ID);
+  const activeBabyId = useUIStore((s) => s.activeBabyId);
+  const { data: vaccinations, isLoading } = useVaccinations(activeBabyId);
 
   if (isLoading) {
     return (

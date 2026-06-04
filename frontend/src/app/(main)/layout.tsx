@@ -8,12 +8,15 @@
  * - 기타 페이지: overflow-y-auto → 페이지 전체 스크롤
  */
 
+import { useEffect } from "react";
 import { usePathname } from "next/navigation";
 import { Header } from "@/shared/components/layout/Header";
 import { BottomTabBar } from "@/shared/components/layout/BottomTabBar";
 import { QuickActionFAB } from "@/shared/components/QuickActionFAB";
 import { AuthGuard } from "@/features/auth/components/AuthGuard";
 import { ActiveSessionBanner } from "@/features/recording/components/ActiveSessionBanner";
+import { useUIStore } from "@/shared/stores/uiStore";
+import { useBabyStore } from "@/features/baby/store/babyStore";
 
 export default function MainLayout({
   children,
@@ -22,6 +25,15 @@ export default function MainLayout({
 }) {
   const pathname = usePathname();
   const isHome = pathname === "/";
+
+  // babyStore(영속) 가 앱 전역 babyId 의 단일 소스.
+  // 데이터 CRUD 컴포넌트들은 uiStore.activeBabyId 를 읽으므로 여기서 동기화한다.
+  // (로그인/온보딩/코드참여가 babyStore.babyId 만 갱신해도 앱 전체가 따라오도록)
+  const babyId = useBabyStore((s) => s.babyId);
+  const setActiveBabyId = useUIStore((s) => s.setActiveBabyId);
+  useEffect(() => {
+    if (babyId) setActiveBabyId(babyId);
+  }, [babyId, setActiveBabyId]);
 
   return (
     <AuthGuard>

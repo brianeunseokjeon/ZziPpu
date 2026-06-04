@@ -10,10 +10,11 @@ import Link from "next/link";
 import { ChevronRight, Syringe } from "lucide-react";
 import { useVaccinations } from "@/features/vaccination/api/vaccinationApi";
 import { formatDate } from "@/lib/date-utils";
-import { MOCK_BABY_ID } from "@/config/constants";
+import { useUIStore } from "@/shared/stores/uiStore";
 
 export function VaccinationScheduleCard() {
-  const { data: allVaccinations } = useVaccinations(MOCK_BABY_ID);
+  const activeBabyId = useUIStore((s) => s.activeBabyId);
+  const { data: allVaccinations } = useVaccinations(activeBabyId);
 
   const allPending = (allVaccinations ?? [])
     .filter((v) => !v.administeredDate)
