@@ -12,4 +12,5 @@ COPY app ./app
 
 EXPOSE 8082
 
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8082"]
+# Render는 $PORT를 주입한다. 로컬/compose에선 미설정 시 8082 사용.
+CMD uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-8082}

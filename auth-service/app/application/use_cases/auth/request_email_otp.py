@@ -27,7 +27,7 @@ def _otp_email_html(code: str) -> str:
     return (
         '<div style="font-family:-apple-system,BlinkMacSystemFont,sans-serif;'
         'max-width:420px;margin:0 auto;padding:24px">'
-        '<h2 style="margin:0 0 8px">먹놀잠 인증번호</h2>'
+        '<h2 style="margin:0 0 8px">찌뿌둥 인증번호</h2>'
         '<p style="color:#555;margin:0 0 16px">아래 6자리 인증번호를 5분 안에 입력해 주세요.</p>'
         f'<div style="font-size:32px;font-weight:700;letter-spacing:8px;'
         f'background:#f1f5f9;border-radius:12px;padding:16px;text-align:center">{code}</div>'
@@ -88,4 +88,4 @@ class RequestEmailOtpUseCase:
         # 5. 이메일 발송
         if settings.DEV_MODE:
             print(f"\n🔑 [DEV EMAIL OTP] email={email}  code={code}\n", flush=True)
-        await self._email.send(email, "[먹놀잠] 인증번호", _otp_email_html(code))
+        await self._email.send(email, "[찌뿌둥] 인증번호", _otp_email_html(code))

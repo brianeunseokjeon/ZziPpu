@@ -11,6 +11,8 @@ from app.application.use_cases.ai import (
     GenerateDailyReviewUseCase,
     ChatWithPediatricianUseCase,
     SaveChatInfoUseCase,
+    ListSavedInfosUseCase,
+    DeleteSavedInfoUseCase,
 )
 from app.domain.entities.chat_message import ChatMessage
 from app.infrastructure.persistence.repositories import (
@@ -23,6 +25,8 @@ from app.presentation.dependencies import (
     get_generate_review_use_case,
     get_chat_use_case,
     get_save_info_use_case,
+    get_list_saved_infos_use_case,
+    get_delete_saved_info_use_case,
     get_chat_repo,
 )
 from app.presentation.schemas.ai_schema import (
@@ -145,12 +149,39 @@ async def save_info(
         category=body.category,
         chat_message_id=body.chat_message_id,
     )
+    return _to_saved_info_response(result)
+
+
+def _to_saved_info_response(info) -> SavedInfoResponse:
     return SavedInfoResponse(
-        id=result.id,
-        baby_id=result.baby_id,
-        title=result.title,
-        content=result.content,
-        category=result.category,
-        chat_message_id=result.chat_message_id,
-        created_at=result.created_at.isoformat(),
+        id=info.id,
+        baby_id=info.baby_id,
+        title=info.title,
+        content=info.content,
+        category=info.category,
+        chat_message_id=info.chat_message_id,
+        created_at=info.created_at.isoformat(),
     )
+
+
+@router.get("/saved-info", response_model=list[SavedInfoResponse])
+async def list_saved_infos(
+    baby_id: UUID,
+    user_id: CurrentUserDep,
+    use_case: Annotated[ListSavedInfosUseCase, Depends(get_list_saved_infos_use_case)],
+) -> list[SavedInfoResponse]:
+    infos = await use_case.execute(baby_id)
+    return [_to_saved_info_response(i) for i in infos]
+
+
+@router.delete("/saved-info/{info_id}", status_code=status.HTTP_204_NO_CONTENT)
+async def delete_saved_info(
+    baby_id: UUID,
+    info_id: UUID,
+    user_id: CurrentUserDep,
+    use_case: Annotated[DeleteSavedInfoUseCase, Depends(get_delete_saved_info_use_case)],
+) -> None:
+    try:
+        await use_case.execute(info_id)
+    except ValueError as e:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))

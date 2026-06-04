@@ -1,0 +1,71 @@
+# Render 블루프린트 — 무료 플랜으로 2개 백엔드(Docker) 배포.
+# 대시보드에서 "New + → Blueprint" → 이 저장소 선택 시 아래 두 서비스가 자동 생성된다.
+#
+# 보안: sync: false 로 표시된 값은 Render 대시보드에서 직접 입력한다(깃에 평문 금지).
+#   - SECRET_KEY / INTERNAL_API_KEY 는 두 서비스에 **반드시 동일한 값**으로 입력.
+#   - DATABASE_URL 은 Neon 의 connection string 을 postgresql+asyncpg://... 형식으로 변환해 입력.
+#
+# 무료 플랜은 15분 무요청 시 sleep → 첫 요청 콜드스타트(수십 초) 발생. 정상.
+
+services:
+  # ── 인증 서비스 (이메일 OTP, JWT 발급) ─────────────────────────────
+  - type: web
+    name: zzippu-auth
+    runtime: docker
+    dockerfilePath: ./auth-service/Dockerfile
+    dockerContext: ./auth-service
+    plan: free
+    healthCheckPath: /health
+    autoDeploy: true
+    envVars:
+      - key: ALGORITHM
+        value: HS256
+      - key: ACCESS_TOKEN_EXPIRE_MINUTES
+        value: "10080"
+      - key: DEV_MODE
+        value: "false"
+      - key: EMAIL_PROVIDER
+        value: resend
+      - key: CORS_ORIGINS
+        value: '["https://zzippu.co.kr","https://www.zzippu.co.kr"]'
+      # 아래는 대시보드에서 직접 입력 (sync: false)
+      - key: SECRET_KEY
+        sync: false
+      - key: INTERNAL_API_KEY
+        sync: false
+      - key: DATABASE_URL
+        sync: false
+      - key: RESEND_API_KEY
+        sync: false
+      - key: EMAIL_FROM
+        sync: false
+      - key: CORE_URL
+        sync: false   # core 서비스의 Render 공개 URL (예: https://zzippu-core.onrender.com)
+
+  # ── 코어 백엔드 (기록/AI, JWT 검증) ───────────────────────────────
+  - type: web
+    name: zzippu-core
+    runtime: docker
+    dockerfilePath: ./backend/Dockerfile
+    dockerContext: ./backend
+    plan: free
+    healthCheckPath: /health
+    autoDeploy: true
+    envVars:
+      - key: ALGORITHM
+        value: HS256
+      - key: ACCESS_TOKEN_EXPIRE_MINUTES
+        value: "10080"
+      - key: DEV_MODE
+        value: "false"
+      - key: CORS_ORIGINS
+        value: '["https://zzippu.co.kr","https://www.zzippu.co.kr"]'
+      # 아래는 대시보드에서 직접 입력 (sync: false)
+      - key: SECRET_KEY
+        sync: false
+      - key: INTERNAL_API_KEY
+        sync: false
+      - key: DATABASE_URL
+        sync: false
+      - key: ANTHROPIC_API_KEY
+        sync: false

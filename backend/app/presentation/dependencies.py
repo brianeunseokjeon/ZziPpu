@@ -7,7 +7,9 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.application.use_cases.ai import (
     ChatWithPediatricianUseCase,
+    DeleteSavedInfoUseCase,
     GenerateDailyReviewUseCase,
+    ListSavedInfosUseCase,
     SaveChatInfoUseCase,
 )
 from app.application.use_cases.baby import (
@@ -302,6 +304,18 @@ def get_save_info_use_case(
     saved_info_repo: Annotated[SavedInfoRepositoryImpl, Depends(get_saved_info_repo)],
 ) -> SaveChatInfoUseCase:
     return SaveChatInfoUseCase(saved_info_repo)
+
+
+def get_list_saved_infos_use_case(
+    saved_info_repo: Annotated[SavedInfoRepositoryImpl, Depends(get_saved_info_repo)],
+) -> ListSavedInfosUseCase:
+    return ListSavedInfosUseCase(saved_info_repo)
+
+
+def get_delete_saved_info_use_case(
+    saved_info_repo: Annotated[SavedInfoRepositoryImpl, Depends(get_saved_info_repo)],
+) -> DeleteSavedInfoUseCase:
+    return DeleteSavedInfoUseCase(saved_info_repo)
 
 
 def get_growth_repo(db: DbDep) -> GrowthRepositoryImpl:
