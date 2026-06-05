@@ -51,46 +51,30 @@ function BabyFallbackIllustration({
 }) {
   const isMale = gender === "male";
   const bgFrom = isMale ? "#bae6fd" : "#fbcfe8"; // sky-200 / pink-200
-  const bgTo = isMale ? "#7dd3fc" : "#f9a8d4"; // sky-300 / pink-300
-  const accent = isMale ? "#38bdf8" : "#f472b6"; // 모자/리본 색
+  const bgTo = isMale ? "#60a5fa" : "#f472b6"; // blue-400 / pink-400
   const gid = `babybg-${gender}`;
 
+  // OS 기본 아기 이모지 + 성별 그라데이션 배경.
+  // SVG <text> 라 컨테이너 크기에 자동 스케일되고, 어떤 환경에서도 깨지지 않는다.
   return (
     <div className={`${sizeClass} rounded-full overflow-hidden`}>
       <svg viewBox="0 0 100 100" className="w-full h-full" role="img" aria-label="아기 기본 이미지">
         <defs>
-          <radialGradient id={gid} cx="50%" cy="40%" r="70%">
+          <radialGradient id={gid} cx="50%" cy="38%" r="75%">
             <stop offset="0%" stopColor={bgFrom} />
             <stop offset="100%" stopColor={bgTo} />
           </radialGradient>
         </defs>
         <rect width="100" height="100" fill={`url(#${gid})`} />
-        {/* 얼굴 */}
-        <circle cx="50" cy="55" r="26" fill="#ffe0c2" />
-        {/* 볼터치 */}
-        <circle cx="38" cy="60" r="4.5" fill="#ffb3a7" opacity="0.7" />
-        <circle cx="62" cy="60" r="4.5" fill="#ffb3a7" opacity="0.7" />
-        {/* 눈 */}
-        <circle cx="42" cy="52" r="2.8" fill="#5b4636" />
-        <circle cx="58" cy="52" r="2.8" fill="#5b4636" />
-        {/* 미소 */}
-        <path d="M43 63 Q50 69 57 63" stroke="#5b4636" strokeWidth="2.2" fill="none" strokeLinecap="round" />
-        {/* 머리 위 장식: 남아=곱슬, 여아=리본 */}
-        {isMale ? (
-          <path
-            d="M50 29 q-6 -8 2 -12 q-2 7 6 6"
-            stroke={accent}
-            strokeWidth="3"
-            fill="none"
-            strokeLinecap="round"
-          />
-        ) : (
-          <g>
-            <path d="M50 30 l-9 -6 l0 12 z" fill={accent} />
-            <path d="M50 30 l9 -6 l0 12 z" fill={accent} />
-            <circle cx="50" cy="30" r="3.2" fill={accent} />
-          </g>
-        )}
+        <text
+          x="50"
+          y="54"
+          fontSize="52"
+          textAnchor="middle"
+          dominantBaseline="central"
+        >
+          👶
+        </text>
       </svg>
     </div>
   );
