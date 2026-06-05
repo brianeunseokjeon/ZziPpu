@@ -7,6 +7,7 @@ from uuid import UUID
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.infrastructure.persistence.db_date_utils import kst_date_expr
 from app.infrastructure.persistence.models.diaper_model import DiaperModel
 from app.infrastructure.persistence.models.feeding_model import FeedingModel
 from app.infrastructure.persistence.models.growth_model import GrowthModel
@@ -32,24 +33,17 @@ class ExportBabyDataUseCase:
         return "application/json", json.dumps(data, ensure_ascii=False, default=str).encode("utf-8")
 
     async def _collect(self, baby_id: UUID, start_date: date | None, end_date: date | None) -> dict:
-        from sqlalchemy import func
-
-        def _date_filter(col):
-            filters = [col == baby_id] if False else []
+        # KST 기준 날짜 범위 필터 (저장은 naive UTC). 모든 쿼리에서 동일 적용.
+        def _apply_range(stmt, col):
             if start_date:
-                filters.append(func.date(col) >= start_date)
+                stmt = stmt.where(kst_date_expr(col) >= start_date)
             if end_date:
-                filters.append(func.date(col) <= end_date)
-            return filters
+                stmt = stmt.where(kst_date_expr(col) <= end_date)
+            return stmt
 
         async def _query_feedings():
             stmt = select(FeedingModel).where(FeedingModel.baby_id == baby_id)
-            if start_date:
-                from sqlalchemy import func as f2
-                stmt = stmt.where(f2.date(FeedingModel.started_at) >= start_date)
-            if end_date:
-                from sqlalchemy import func as f3
-                stmt = stmt.where(f3.date(FeedingModel.started_at) <= end_date)
+            stmt = _apply_range(stmt, FeedingModel.started_at)
             res = await self._session.execute(stmt.order_by(FeedingModel.started_at))
             return [
                 {
@@ -64,12 +58,7 @@ class ExportBabyDataUseCase:
 
         async def _query_sleeps():
             stmt = select(SleepModel).where(SleepModel.baby_id == baby_id)
-            if start_date:
-                from sqlalchemy import func as f2
-                stmt = stmt.where(f2.date(SleepModel.started_at) >= start_date)
-            if end_date:
-                from sqlalchemy import func as f3
-                stmt = stmt.where(f3.date(SleepModel.started_at) <= end_date)
+            stmt = _apply_range(stmt, SleepModel.started_at)
             res = await self._session.execute(stmt.order_by(SleepModel.started_at))
             return [
                 {
@@ -88,12 +77,7 @@ class ExportBabyDataUseCase:
 
         async def _query_diapers():
             stmt = select(DiaperModel).where(DiaperModel.baby_id == baby_id)
-            if start_date:
-                from sqlalchemy import func as f2
-                stmt = stmt.where(f2.date(DiaperModel.recorded_at) >= start_date)
-            if end_date:
-                from sqlalchemy import func as f3
-                stmt = stmt.where(f3.date(DiaperModel.recorded_at) <= end_date)
+            stmt = _apply_range(stmt, DiaperModel.recorded_at)
             res = await self._session.execute(stmt.order_by(DiaperModel.recorded_at))
             return [
                 {
@@ -106,12 +90,7 @@ class ExportBabyDataUseCase:
 
         async def _query_plays():
             stmt = select(PlayModel).where(PlayModel.baby_id == baby_id)
-            if start_date:
-                from sqlalchemy import func as f2
-                stmt = stmt.where(f2.date(PlayModel.started_at) >= start_date)
-            if end_date:
-                from sqlalchemy import func as f3
-                stmt = stmt.where(f3.date(PlayModel.started_at) <= end_date)
+            stmt = _apply_range(stmt, PlayModel.started_at)
             res = await self._session.execute(stmt.order_by(PlayModel.started_at))
             return [
                 {

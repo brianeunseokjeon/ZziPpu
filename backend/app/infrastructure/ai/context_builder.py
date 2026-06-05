@@ -1,3 +1,5 @@
+from datetime import datetime, timedelta, timezone
+
 from app.domain.entities.baby import Baby
 from app.domain.entities.diaper import DiaperRecord
 from app.domain.entities.feeding import Feeding
@@ -5,6 +7,17 @@ from app.domain.entities.play_record import PlayRecord
 from app.domain.entities.sleep_record import SleepRecord
 from app.domain.guidelines.developmental_milestones import get_stage_for_age_days
 from app.domain.value_objects.feeding_type import FeedingType
+
+_KST = timezone(timedelta(hours=9))
+
+
+def _kst_hhmm(dt: datetime | None) -> str:
+    """저장은 naive/aware UTC. AI 컨텍스트엔 KST 'HH:MM' 으로 표기."""
+    if dt is None:
+        return ""
+    if dt.tzinfo is None:
+        dt = dt.replace(tzinfo=timezone.utc)
+    return dt.astimezone(_KST).strftime("%H:%M")
 
 
 def _get_developmental_milestones(age_days: int) -> str:
@@ -58,7 +71,7 @@ def build_daily_context(
 
     if feedings:
         for f in feedings:
-            time_str = f.started_at.strftime("%H:%M")
+            time_str = _kst_hhmm(f.started_at)
             type_map = {
                 FeedingType.FORMULA: "분유",
                 FeedingType.BREAST_LEFT: "모유(왼쪽)",
@@ -80,8 +93,8 @@ def build_daily_context(
     if sleeps:
         total_minutes = 0
         for s in sleeps:
-            start_str = s.started_at.strftime("%H:%M")
-            end_str = s.ended_at.strftime("%H:%M") if s.ended_at else "진행중"
+            start_str = _kst_hhmm(s.started_at)
+            end_str = _kst_hhmm(s.ended_at) if s.ended_at else "진행중"
             dur = s.duration_minutes or 0
             total_minutes += dur
             lines.append(f"  {start_str} ~ {end_str} ({dur}분)")
@@ -94,7 +107,7 @@ def build_daily_context(
     if diapers:
         type_map = {"pee": "소변", "poo": "대변", "both": "소변+대변"}
         for d in diapers:
-            time_str = d.recorded_at.strftime("%H:%M")
+            time_str = _kst_hhmm(d.recorded_at)
             type_label = type_map.get(d.diaper_type.value, d.diaper_type.value)
             color = f"색상:{d.stool_color.value}" if d.stool_color else ""
             state = f"상태:{d.stool_state.value}" if d.stool_state else ""
@@ -110,7 +123,7 @@ def build_daily_context(
     if plays:
         total_play = 0
         for p in plays:
-            start_str = p.started_at.strftime("%H:%M")
+            start_str = _kst_hhmm(p.started_at)
             dur = p.duration_minutes or 0
             total_play += dur
             lines.append(f"  {start_str} - {p.play_type} ({dur}분)")

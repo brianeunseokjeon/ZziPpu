@@ -40,8 +40,9 @@ export function TimelineScrollView() {
   const { activeBabyId } = useUIStore();
 
   // dates: 오래된 순 (index 0 = 가장 오래됨, 마지막 = 오늘)
-  const [oldestOffset, setOldestOffset] = useState(0); // 가장 오래된 날짜 = NdaysAgo
-  const totalDays = oldestOffset + 1; // 0=오늘만, 1=어제+오늘, ...
+  // 초기 6 → 최근 7일(오늘 포함) 로드. 위로 스크롤 시 더 과거 자동 로드.
+  const [oldestOffset, setOldestOffset] = useState(6);
+  const totalDays = oldestOffset + 1; // 6=최근7일, 7=최근8일, ...
 
   // 스크롤 컨테이너 ref
   const containerRef = useRef<HTMLDivElement>(null);
