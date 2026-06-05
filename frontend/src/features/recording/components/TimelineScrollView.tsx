@@ -46,10 +46,15 @@ export function TimelineScrollView() {
 
   // 스크롤 컨테이너 ref
   const containerRef = useRef<HTMLDivElement>(null);
+  // 컨텐츠 래퍼 ref (높이 변화 감지용)
+  const innerRef = useRef<HTMLDivElement>(null);
   // 상단 sentinel ref
   const topSentinelRef = useRef<HTMLDivElement>(null);
   // 각 날짜 섹션 ref (날짜 레이블 추적용)
   const sectionRefs = useRef<Map<string, HTMLDivElement>>(new Map());
+  // 맨 아래(오늘) 고정 여부 — 사용자가 위로 스크롤하기 전까지 true.
+  // 데이터가 비동기로 채워지며 높이가 변해도 오늘에 머물게 한다.
+  const pinnedToBottomRef = useRef(true);
 
   // 플로팅 날짜 레이블
   const [floatingDate, setFloatingDate] = useState(getDateNDaysAgo(0));
@@ -60,15 +65,22 @@ export function TimelineScrollView() {
   const prevScrollHeightRef = useRef<number | null>(null);
   const isLoadingOlder = useRef(false);
 
-  /* ─── 마운트 시 하단(오늘)으로 스크롤 ─── */
+  /* ─── 마운트 시 + 컨텐츠 높이 변화 시 하단(오늘) 고정 ─── */
+  // 7일치 DayTimeline 이 비동기로 로드되며 높이가 계속 늘어난다.
+  // pinnedToBottom 인 동안에는 높이가 바뀔 때마다 다시 맨 아래로 붙여
+  // "항상 오늘이 보이도록" 한다. 사용자가 위로 스크롤하면 고정 해제.
   useEffect(() => {
     const el = containerRef.current;
-    if (!el) return;
-    // 약간의 지연으로 DayTimeline 렌더 후 스크롤
-    const timer = setTimeout(() => {
-      el.scrollTop = el.scrollHeight;
-    }, 100);
-    return () => clearTimeout(timer);
+    const inner = innerRef.current;
+    if (!el || !inner) return;
+
+    const pin = () => {
+      if (pinnedToBottomRef.current) el.scrollTop = el.scrollHeight;
+    };
+    pin();
+    const ro = new ResizeObserver(() => pin());
+    ro.observe(inner);
+    return () => ro.disconnect();
   }, []);
 
   /* ─── prepend 후 스크롤 위치 복원 ─── */
@@ -119,6 +131,10 @@ export function TimelineScrollView() {
     const distFromBottom = el.scrollHeight - el.scrollTop - el.clientHeight;
     setShowScrollToToday(distFromBottom > 200);
 
+    // 사용자가 위로 올리면 하단 고정 해제, 다시 바닥 근처면 재고정
+    if (distFromBottom > 150) pinnedToBottomRef.current = false;
+    else if (distFromBottom < 10) pinnedToBottomRef.current = true;
+
     // 현재 보고 있는 날짜 계산 (스크롤 위치 기반)
     const scrollTop = el.scrollTop;
     let currentDate = getDateNDaysAgo(0); // 기본: 오늘
@@ -131,6 +147,7 @@ export function TimelineScrollView() {
   }, []);
 
   const scrollToToday = useCallback(() => {
+    pinnedToBottomRef.current = true;
     containerRef.current?.scrollTo({ top: containerRef.current.scrollHeight, behavior: "smooth" });
   }, []);
 
@@ -167,6 +184,7 @@ export function TimelineScrollView() {
         onScroll={onScroll}
         className="flex-1 overflow-y-auto overscroll-contain scroll-container"
       >
+       <div ref={innerRef}>
         {/* 상단 sentinel — IntersectionObserver가 감지하면 이전 날짜 로드 */}
         <div ref={topSentinelRef} className="h-px" />
 
@@ -217,6 +235,7 @@ export function TimelineScrollView() {
 
         {/* 스크롤 하단 여백 */}
         <div className="h-4" />
+       </div>
       </div>
     </div>
   );
