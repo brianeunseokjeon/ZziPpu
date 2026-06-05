@@ -77,15 +77,16 @@ export default function LoginPage() {
     }
   }
 
-  async function handleVerifyOtp() {
+  async function handleVerifyOtp(otpCode?: string) {
+    const codeToUse = otpCode ?? code;
     setError(null);
-    if (code.length !== 6) {
+    if (codeToUse.length !== 6) {
       setError("인증번호 6자리를 입력해주세요.");
       return;
     }
     setLoading(true);
     try {
-      const result = await verifyEmailOtp(email.trim(), code);
+      const result = await verifyEmailOtp(email.trim(), codeToUse);
       setSession({
         accessToken: result.accessToken,
         userId: result.userId,
@@ -221,14 +222,18 @@ export default function LoginPage() {
                 maxLength={6}
                 placeholder="000000"
                 value={code}
-                onChange={(e) => setCode(e.target.value.replace(/[^0-9]/g, "").slice(0, 6))}
+                onChange={(e) => {
+                  const val = e.target.value.replace(/[^0-9]/g, "").slice(0, 6);
+                  setCode(val);
+                  if (val.length === 6 && !loading) handleVerifyOtp(val);
+                }}
                 onKeyDown={(e) => e.key === "Enter" && !loading && handleVerifyOtp()}
                 className="mt-1.5 w-full h-14 px-4 rounded-xl border border-gray-200 text-2xl text-center tracking-[0.5em] tabular-nums focus:outline-none focus:ring-2 focus:ring-blue-400"
               />
             </label>
 
             <button
-              onClick={handleVerifyOtp}
+              onClick={() => handleVerifyOtp()}
               disabled={loading || code.length !== 6}
               className="w-full h-12 rounded-xl bg-blue-500 hover:bg-blue-600 disabled:bg-gray-200 disabled:text-gray-400 text-white font-semibold flex items-center justify-center gap-2"
             >
