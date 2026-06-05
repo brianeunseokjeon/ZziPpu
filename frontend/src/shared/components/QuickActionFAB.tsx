@@ -32,7 +32,7 @@ export function QuickActionFAB() {
         />
       )}
 
-      <div className="fixed bottom-20 right-4 z-50 flex flex-col items-end gap-3 pb-[env(safe-area-inset-bottom)]">
+      <div className="fixed bottom-[calc(56px+env(safe-area-inset-bottom)+12px)] right-4 z-50 flex flex-col items-end gap-3">
         {isQuickActionOpen &&
           ACTIONS.map(({ icon: Icon, label, path, color }, i) => (
             <button

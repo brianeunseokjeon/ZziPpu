@@ -5,10 +5,17 @@
   --foreground: #111827;
 }
 
-/* 모바일 앱 기본 — body 자체 스크롤 제거 (앱 셸이 fixed로 뷰포트 점유) */
+/* 모바일 앱 기본 — body 자체 스크롤 제거 (앱 셸이 뷰포트 점유) */
 html, body {
   height: 100%;
   overscroll-behavior: none;
+}
+/* iOS Safari/인앱브라우저: 동적 주소창·툴바를 반영한 실제 보이는 높이.
+   dvh 미지원 환경은 위 100% 폴백을 그대로 사용. */
+@supports (height: 100dvh) {
+  html, body {
+    height: 100dvh;
+  }
 }
 
 body {

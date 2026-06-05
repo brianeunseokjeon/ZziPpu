@@ -37,8 +37,9 @@ export default function MainLayout({
 
   return (
     <AuthGuard>
-      {/* fixed inset-0: 부모 height 체인 무관하게 뷰포트 전체 점유 */}
-      <div className="fixed inset-0 flex flex-col overflow-hidden bg-gray-50">
+      {/* fixed inset-0 유지(인앱브라우저 폴백) + h-[100dvh] 보강:
+          iOS Safari 동적 주소창/툴바를 반영해 하단 UI 가 브라우저 UI 뒤로 안 잘리게 한다. */}
+      <div className="fixed inset-0 h-[100dvh] flex flex-col overflow-hidden bg-gray-50">
         {/* 상단 고정 영역 */}
         <Header />
         <ActiveSessionBanner />
@@ -49,8 +50,8 @@ export default function MainLayout({
             isHome
               ? /* 홈: flex col + overflow-hidden → 타임라인이 자체 스크롤 */
                 "flex-1 min-h-0 max-w-md mx-auto w-full overflow-hidden flex flex-col"
-              : /* 기타: 페이지 전체 스크롤 */
-                "flex-1 min-h-0 max-w-md mx-auto w-full overflow-y-auto overscroll-contain scroll-container px-4 py-4"
+              : /* 기타: 페이지 전체 스크롤 (하단 safe-area 여백으로 콘텐츠가 잘리지 않게) */
+                "flex-1 min-h-0 max-w-md mx-auto w-full overflow-y-auto overscroll-contain scroll-container px-4 py-4 pb-[calc(env(safe-area-inset-bottom)+16px)]"
           }
         >
           {children}
