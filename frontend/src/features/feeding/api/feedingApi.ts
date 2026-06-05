@@ -7,6 +7,7 @@ import {
 import { apiClient } from "@/lib/api-client";
 import { getDateString } from "@/lib/date-utils";
 import { optimisticDeleteOptions } from "@/shared/lib/optimisticDelete";
+import { optimisticUpdateOptions } from "@/shared/lib/optimisticUpdate";
 import type { Feeding, CreateFeedingRequest, FeedingType } from "../types/feeding";
 
 const feedingKeys = {
@@ -76,10 +77,22 @@ export function useUpdateFeeding() {
         `/api/v1/babies/${babyId}/feedings/${feedingId}`,
         rest
       ),
-    onSettled: () => {
-      qc.invalidateQueries({ queryKey: feedingKeys.all });
-      qc.invalidateQueries({ queryKey: ["daily-summary"] });
-    },
+    // 낙관적 수정: 저장 즉시 타임라인의 해당 항목 교체, 실패 시 롤백+토스트
+    ...optimisticUpdateOptions<UpdateFeedingRequest>({
+      qc,
+      listKey: feedingKeys.all,
+      getId: (v) => v.feedingId,
+      applyPatch: (item, v) => ({
+        ...item,
+        feedingType: v.feedingType,
+        startedAt: v.startedAt,
+        endedAt: v.endedAt,
+        amountMl: v.amountMl,
+        durationMinutes: v.durationMinutes,
+        memo: v.memo,
+      }),
+      alsoInvalidate: [["daily-summary"]],
+    }),
   });
 }
 

@@ -19,6 +19,7 @@ import { useDeletePlay, useCreatePlay } from "@/features/play/api/playApi";
 import { FeedingType } from "@/features/feeding/types/feeding";
 import { DiaperType } from "@/features/diaper/types/diaper";
 import { isoToTimeInput, applyTimeInput } from "@/lib/date-utils";
+import { toast } from "@/shared/stores/toastStore";
 import type { TimelineRecord } from "./RecordPopover";
 
 interface Props {
@@ -41,7 +42,6 @@ const PLAY_TYPES = [
 
 export function RecordEditSheet({ record, onClose }: Props) {
   const { activeBabyId } = useUIStore();
-  const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [addingDiaper, setAddingDiaper] = useState<"pee" | "poo" | "both" | null>(null);
   const [diaperAddedMsg, setDiaperAddedMsg] = useState<string | null>(null);
@@ -90,89 +90,90 @@ export function RecordEditSheet({ record, onClose }: Props) {
 
   if (!record || !activeBabyId) return null;
 
-  /* ─── 저장 (삭제 → 재생성) ─── */
-  async function handleSave() {
+  /* ─── 저장 ───
+   * 사용자 경험: 저장을 누르면 시트를 **즉시 닫아** 다른 작업을 막지 않는다.
+   * 실제 서버 처리는 백그라운드에서 진행(내부 순차는 await 로 보장).
+   * - feeding: PATCH(낙관적 업데이트) → 타임라인 즉시 반영
+   * - diaper/sleep/play: 삭제→재생성 순차(레이스 방지 위해 await 유지)
+   * 실패 시 토스트로 안내(낙관적 캐시는 자동 롤백).
+   */
+  function handleSave() {
     if (!record || !activeBabyId) return;
-    setSaving(true);
-    try {
-      const startISO = applyTimeInput(primaryISO, startTime);
-      const endISO = endTime ? applyTimeInput(primaryISO, endTime) : undefined;
+    const rec = record;
+    const baby = activeBabyId;
+    const startISO = applyTimeInput(primaryISO, startTime);
+    const endISO = endTime ? applyTimeInput(primaryISO, endTime) : undefined;
 
-      switch (record.kind) {
-        case "feeding": {
-          // PATCH 엔드포인트로 in-place 수정 (id 유지 — 삭제/재생성 불필요)
-          const isFormula = record.type === "formula";
-          if (isFormula) {
-            await updateFeeding.mutateAsync({
-              babyId: activeBabyId,
-              feedingId: record.id,
-              feedingType: FeedingType.Formula,
-              amountMl: formulaMl,
-              startedAt: startISO,
-            });
-          } else {
-            const typeMap: Record<string, FeedingType> = {
-              left: FeedingType.BreastLeft,
-              right: FeedingType.BreastRight,
-              both: FeedingType.BreastBoth,
+    onClose(); // 즉시 닫기 — 사용자 차단 해제
+
+    void (async () => {
+      try {
+        switch (rec.kind) {
+          case "feeding": {
+            if (rec.type === "formula") {
+              await updateFeeding.mutateAsync({
+                babyId: baby,
+                feedingId: rec.id,
+                feedingType: FeedingType.Formula,
+                amountMl: formulaMl,
+                startedAt: startISO,
+              });
+            } else {
+              const typeMap: Record<string, FeedingType> = {
+                left: FeedingType.BreastLeft,
+                right: FeedingType.BreastRight,
+                both: FeedingType.BreastBoth,
+              };
+              await updateFeeding.mutateAsync({
+                babyId: baby,
+                feedingId: rec.id,
+                feedingType: typeMap[breastSide],
+                startedAt: startISO,
+                endedAt: endISO,
+                durationMinutes: endISO ? diffMinutes(startISO, endISO) : undefined,
+              });
+            }
+            break;
+          }
+          case "diaper": {
+            await deleteDiaper.mutateAsync({ babyId: baby, diaperId: rec.id });
+            const typeMap: Record<string, DiaperType> = {
+              pee: DiaperType.Pee,
+              poo: DiaperType.Poop,
+              both: DiaperType.Both,
             };
-            await updateFeeding.mutateAsync({
-              babyId: activeBabyId,
-              feedingId: record.id,
-              feedingType: typeMap[breastSide],
+            await createDiaper.mutateAsync({
+              babyId: baby,
+              diaperType: typeMap[diaperType],
+              recordedAt: startISO,
+            });
+            break;
+          }
+          case "sleep": {
+            await deleteSleep.mutateAsync({ babyId: baby, sleepId: rec.id });
+            const created = await createSleep.mutateAsync({ babyId: baby, startedAt: startISO });
+            if (endISO) {
+              await endSleep.mutateAsync({ babyId: baby, sleepId: created.id, endedAt: endISO });
+            }
+            break;
+          }
+          case "play": {
+            await deletePlay.mutateAsync({ babyId: baby, playId: rec.id });
+            const duration = endISO ? Math.max(1, diffMinutes(startISO, endISO)) : 0;
+            await createPlay.mutateAsync({
+              babyId: baby,
+              playType,
+              durationMinutes: duration,
               startedAt: startISO,
               endedAt: endISO,
-              durationMinutes: endISO ? diffMinutes(startISO, endISO) : undefined,
             });
+            break;
           }
-          break;
         }
-        case "diaper": {
-          await deleteDiaper.mutateAsync({ babyId: activeBabyId, diaperId: record.id });
-          const typeMap: Record<string, DiaperType> = {
-            pee: DiaperType.Pee,
-            poo: DiaperType.Poop,
-            both: DiaperType.Both,
-          };
-          await createDiaper.mutateAsync({
-            babyId: activeBabyId,
-            diaperType: typeMap[diaperType],
-            recordedAt: startISO,
-          });
-          break;
-        }
-        case "sleep": {
-          await deleteSleep.mutateAsync({ babyId: activeBabyId, sleepId: record.id });
-          const created = await createSleep.mutateAsync({
-            babyId: activeBabyId,
-            startedAt: startISO,
-          });
-          if (endISO) {
-            await endSleep.mutateAsync({
-              babyId: activeBabyId,
-              sleepId: created.id,
-              endedAt: endISO,
-            });
-          }
-          break;
-        }
-        case "play": {
-          await deletePlay.mutateAsync({ babyId: activeBabyId, playId: record.id });
-          const duration = endISO ? Math.max(1, diffMinutes(startISO, endISO)) : 0;
-          await createPlay.mutateAsync({
-            babyId: activeBabyId,
-            playType,
-            durationMinutes: duration,
-            startedAt: startISO,
-            endedAt: endISO,
-          });
-          break;
-        }
+      } catch {
+        toast("수정하지 못했어요. 잠시 후 다시 시도해 주세요.", "error");
       }
-      onClose();
-    } finally {
-      setSaving(false);
-    }
+    })();
   }
 
   /* ─── 분유 수정 중 배변 빠른 추가 (입력된 시각으로 별도 기록, 저장과 독립) ─── */
@@ -412,7 +413,7 @@ export function RecordEditSheet({ record, onClose }: Props) {
         <div className="flex gap-2 pt-1">
           <button
             onClick={handleDelete}
-            disabled={deleting || saving}
+            disabled={deleting}
             className="flex items-center justify-center gap-1.5 px-4 py-3 bg-red-50 text-red-500 rounded-xl text-sm font-medium disabled:opacity-50"
           >
             {deleting
@@ -422,10 +423,10 @@ export function RecordEditSheet({ record, onClose }: Props) {
           </button>
           <button
             onClick={handleSave}
-            disabled={saving || deleting}
+            disabled={deleting}
             className="flex-1 py-3 bg-blue-500 text-white rounded-xl text-sm font-semibold disabled:opacity-50"
           >
-            {saving ? "저장 중..." : "저장"}
+            저장
           </button>
         </div>
       </div>
