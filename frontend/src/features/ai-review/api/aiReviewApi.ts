@@ -4,6 +4,7 @@ import {
   useQueryClient,
 } from "@tanstack/react-query";
 import { apiClient } from "@/lib/api-client";
+import { optimisticDeleteOptions } from "@/shared/lib/optimisticDelete";
 import type { DailyReview, SavedInfo } from "../types/aiReview";
 
 const aiReviewKeys = {
@@ -50,8 +51,10 @@ export function useDeleteSavedInfo() {
   return useMutation({
     mutationFn: ({ babyId, id }: { babyId: string; id: string }) =>
       apiClient.delete<void>(`/api/v1/babies/${babyId}/ai/saved-info/${id}`),
-    onSuccess: (_data, vars) => {
-      qc.invalidateQueries({ queryKey: aiReviewKeys.savedInfos(vars.babyId) });
-    },
+    ...optimisticDeleteOptions<{ babyId: string; id: string }>({
+      qc,
+      listKey: ["ai-saved-infos"],
+      getId: (v) => v.id,
+    }),
   });
 }

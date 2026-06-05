@@ -5,6 +5,7 @@ import {
 } from "@tanstack/react-query";
 import { apiClient } from "@/lib/api-client";
 import { getDateString } from "@/lib/date-utils";
+import { optimisticDeleteOptions } from "@/shared/lib/optimisticDelete";
 import type {
   SleepRecord,
   CreateSleepRequest,
@@ -87,9 +88,11 @@ export function useDeleteSleep() {
   return useMutation({
     mutationFn: ({ babyId, sleepId }: { babyId: string; sleepId: string }) =>
       apiClient.delete<void>(`/api/v1/babies/${babyId}/sleeps/${sleepId}`),
-    onSettled: () => {
-      qc.invalidateQueries({ queryKey: sleepKeys.all });
-      qc.invalidateQueries({ queryKey: ["daily-summary"] });
-    },
+    ...optimisticDeleteOptions<{ babyId: string; sleepId: string }>({
+      qc,
+      listKey: sleepKeys.all,
+      getId: (v) => v.sleepId,
+      alsoInvalidate: [["daily-summary"]],
+    }),
   });
 }

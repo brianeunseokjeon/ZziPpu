@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiClient } from "@/lib/api-client";
+import { optimisticDeleteOptions } from "@/shared/lib/optimisticDelete";
 import type { GrowthRecord, CreateGrowthRequest } from "../types/growth";
 
 const growthKeys = {
@@ -46,8 +47,10 @@ export function useDeleteGrowthRecord() {
       apiClient.delete<void>(
         `/api/v1/babies/${babyId}/growth/${recordId}`
       ),
-    onSettled: () => {
-      qc.invalidateQueries({ queryKey: growthKeys.all });
-    },
+    ...optimisticDeleteOptions<{ babyId: string; recordId: string }>({
+      qc,
+      listKey: growthKeys.all,
+      getId: (v) => v.recordId,
+    }),
   });
 }

@@ -5,6 +5,7 @@ import {
 } from "@tanstack/react-query";
 import { apiClient } from "@/lib/api-client";
 import { getDateString } from "@/lib/date-utils";
+import { optimisticDeleteOptions } from "@/shared/lib/optimisticDelete";
 import type { DiaperRecord, CreateDiaperRequest } from "../types/diaper";
 
 const diaperKeys = {
@@ -42,9 +43,11 @@ export function useDeleteDiaper() {
   return useMutation({
     mutationFn: ({ babyId, diaperId }: { babyId: string; diaperId: string }) =>
       apiClient.delete<void>(`/api/v1/babies/${babyId}/diapers/${diaperId}`),
-    onSettled: () => {
-      qc.invalidateQueries({ queryKey: diaperKeys.all });
-      qc.invalidateQueries({ queryKey: ["daily-summary"] });
-    },
+    ...optimisticDeleteOptions<{ babyId: string; diaperId: string }>({
+      qc,
+      listKey: diaperKeys.all,
+      getId: (v) => v.diaperId,
+      alsoInvalidate: [["daily-summary"]],
+    }),
   });
 }

@@ -5,6 +5,7 @@ import {
 } from "@tanstack/react-query";
 import { apiClient } from "@/lib/api-client";
 import { getDateString } from "@/lib/date-utils";
+import { optimisticDeleteOptions } from "@/shared/lib/optimisticDelete";
 import type { Feeding, CreateFeedingRequest, FeedingType } from "../types/feeding";
 
 const feedingKeys = {
@@ -85,9 +86,11 @@ export function useDeleteFeeding() {
   return useMutation({
     mutationFn: ({ babyId, feedingId }: { babyId: string; feedingId: string }) =>
       apiClient.delete<void>(`/api/v1/babies/${babyId}/feedings/${feedingId}`),
-    onSettled: () => {
-      qc.invalidateQueries({ queryKey: feedingKeys.all });
-      qc.invalidateQueries({ queryKey: ["daily-summary"] });
-    },
+    ...optimisticDeleteOptions<{ babyId: string; feedingId: string }>({
+      qc,
+      listKey: feedingKeys.all,
+      getId: (v) => v.feedingId,
+      alsoInvalidate: [["daily-summary"]],
+    }),
   });
 }

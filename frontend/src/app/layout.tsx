@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { QueryProvider } from "@/providers/QueryProvider";
+import { Toaster } from "@/shared/components/Toaster";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -16,6 +17,7 @@ export default function RootLayout({
     <html lang="ko" className="h-full">
       <body className="min-h-full bg-gray-50 antialiased">
         <QueryProvider>{children}</QueryProvider>
+        <Toaster />
       </body>
     </html>
   );

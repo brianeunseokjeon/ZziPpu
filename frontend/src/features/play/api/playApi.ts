@@ -5,6 +5,7 @@ import {
 } from "@tanstack/react-query";
 import { apiClient } from "@/lib/api-client";
 import { getDateString } from "@/lib/date-utils";
+import { optimisticDeleteOptions } from "@/shared/lib/optimisticDelete";
 import type { PlayRecord, CreatePlayRequest } from "../types/play";
 
 const playKeys = {
@@ -40,9 +41,11 @@ export function useDeletePlay() {
   return useMutation({
     mutationFn: ({ babyId, playId }: { babyId: string; playId: string }) =>
       apiClient.delete<void>(`/api/v1/babies/${babyId}/plays/${playId}`),
-    onSettled: () => {
-      qc.invalidateQueries({ queryKey: playKeys.all });
-      qc.invalidateQueries({ queryKey: ["daily-summary"] });
-    },
+    ...optimisticDeleteOptions<{ babyId: string; playId: string }>({
+      qc,
+      listKey: playKeys.all,
+      getId: (v) => v.playId,
+      alsoInvalidate: [["daily-summary"]],
+    }),
   });
 }
