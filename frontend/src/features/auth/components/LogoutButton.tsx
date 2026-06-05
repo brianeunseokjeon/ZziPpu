@@ -2,15 +2,17 @@
 
 import { LogOut } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useAuthStore } from "@/features/auth/store/authStore";
+import { useQueryClient } from "@tanstack/react-query";
+import { resetSession } from "@/shared/lib/resetSession";
 
 export function LogoutButton() {
   const router = useRouter();
-  const clear = useAuthStore((s) => s.clear);
+  const queryClient = useQueryClient();
 
   function handleLogout() {
     if (!confirm("로그아웃 하시겠어요?")) return;
-    clear();
+    // 토큰·아기정보·캐시 전부 초기화 (다음 사용자에게 잔존 방지)
+    resetSession(queryClient);
     router.replace("/login");
   }
 

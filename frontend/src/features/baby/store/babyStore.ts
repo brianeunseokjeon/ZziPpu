@@ -18,22 +18,28 @@ interface BabyState {
   update: (
     partial: Partial<Pick<BabyState, "name" | "birthDate" | "gender" | "photoUrl">>
   ) => void;
+  reset: () => void;
 }
+
+const INITIAL_BABY = {
+  babyId: MOCK_BABY_ID,
+  name: "우리 아기",
+  birthDate: MOCK_BIRTH_DATE,
+  gender: "male" as BabyGender,
+  photoUrl: null as string | null,
+};
 
 export const useBabyStore = create<BabyState>()(
   persist(
     (set) => ({
-      babyId: MOCK_BABY_ID,
-      name: "우리 아기",
-      birthDate: MOCK_BIRTH_DATE,
-      gender: "male",
-      photoUrl: null,
+      ...INITIAL_BABY,
       setBabyId: (babyId) => set({ babyId }),
       setName: (name) => set({ name }),
       setBirthDate: (birthDate) => set({ birthDate }),
       setGender: (gender) => set({ gender }),
       setPhotoUrl: (photoUrl) => set({ photoUrl }),
       update: (partial) => set(partial),
+      reset: () => set({ ...INITIAL_BABY }),
     }),
     { name: "muknoljam-baby" }
   )
