@@ -78,9 +78,17 @@ export function TimelineScrollView() {
       if (pinnedToBottomRef.current) el.scrollTop = el.scrollHeight;
     };
     pin();
+    // ① 컨텐츠 높이 변화(데이터 로드)마다 즉시 재고정
     const ro = new ResizeObserver(() => pin());
     ro.observe(inner);
-    return () => ro.disconnect();
+    // ② 백업: 초기 2초간 주기적으로 최하단 유지 (ResizeObserver 가 놓치는 느린 로딩 커버)
+    const interval = setInterval(pin, 150);
+    const stop = setTimeout(() => clearInterval(interval), 2000);
+    return () => {
+      ro.disconnect();
+      clearInterval(interval);
+      clearTimeout(stop);
+    };
   }, []);
 
   /* ─── prepend 후 스크롤 위치 복원 ─── */

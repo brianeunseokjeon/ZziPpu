@@ -9,7 +9,7 @@ import { addDays, subDays } from "date-fns";
 
 export function Header() {
   const { selectedDate, setSelectedDate } = useUIStore();
-  const { ageText, photoUrl, gender } = useBabyInfo();
+  const { name, ageText, photoUrl, gender } = useBabyInfo();
 
   const dateObj = new Date(selectedDate + "T00:00:00");
   const isToday = selectedDate === getDateString(new Date());
@@ -37,7 +37,7 @@ export function Header() {
             <BabyAvatar photoUrl={photoUrl} gender={gender} sizeClass="w-8 h-8" />
           </div>
           <div className="flex flex-col leading-tight">
-            <span className="text-base font-bold text-gray-900">찌뿌둥</span>
+            <span className="text-base font-bold text-gray-900">{name}</span>
             <span className="text-xs text-gray-400">{ageText}</span>
           </div>
         </div>
