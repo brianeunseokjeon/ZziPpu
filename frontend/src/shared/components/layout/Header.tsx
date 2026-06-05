@@ -4,11 +4,12 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useUIStore } from "@/shared/stores/uiStore";
 import { formatDate, getDateString } from "@/lib/date-utils";
 import { useBabyInfo } from "@/features/baby/hooks/useBabyInfo";
+import { BabyAvatar } from "@/shared/components/BabyAvatar";
 import { addDays, subDays } from "date-fns";
 
 export function Header() {
   const { selectedDate, setSelectedDate } = useUIStore();
-  const { ageText, photoUrl } = useBabyInfo();
+  const { ageText, photoUrl, gender } = useBabyInfo();
 
   const dateObj = new Date(selectedDate + "T00:00:00");
   const isToday = selectedDate === getDateString(new Date());
@@ -32,13 +33,8 @@ export function Header() {
       <div className="max-w-md mx-auto px-4 h-14 flex items-center justify-between gap-2">
         <div className="flex items-center gap-2">
           {/* 아기 아바타 */}
-          <div className="w-8 h-8 rounded-full overflow-hidden border border-blue-100 bg-gradient-to-br from-blue-200 to-purple-200 flex items-center justify-center flex-shrink-0">
-            {photoUrl ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img src={photoUrl} alt="아기" className="w-full h-full object-cover" />
-            ) : (
-              <span className="text-base">👶</span>
-            )}
+          <div className="flex-shrink-0">
+            <BabyAvatar photoUrl={photoUrl} gender={gender} sizeClass="w-8 h-8" />
           </div>
           <div className="flex flex-col leading-tight">
             <span className="text-base font-bold text-gray-900">찌뿌둥</span>

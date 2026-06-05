@@ -26,7 +26,7 @@ import { useRecordingDefaultsStore } from "@/shared/stores/recordingDefaultsStor
 const ML_PRESETS = [60, 80, 100, 120, 150, 180];
 
 export default function SettingsPage() {
-  const { babyId, name, birthDate, ageText, photoUrl, setName, setBirthDate, setPhotoUrl } =
+  const { babyId, name, birthDate, gender, ageText, photoUrl, setName, setBirthDate, setPhotoUrl } =
     useBabyInfo();
   const recordingDefaults = useRecordingDefaultsStore();
 
@@ -70,7 +70,7 @@ export default function SettingsPage() {
         <CardContent className="pt-4">
           <div className="flex items-center gap-4">
             <div className="flex flex-col items-center gap-1">
-              <PhotoUploader currentUrl={photoUrl} onUpload={handlePhotoUpload} />
+              <PhotoUploader currentUrl={photoUrl} gender={gender} onUpload={handlePhotoUpload} />
               <span className="text-xs text-gray-400">사진 변경</span>
             </div>
             <div>

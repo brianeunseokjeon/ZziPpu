@@ -5,6 +5,7 @@ interface BabySummary {
   id: string;
   name: string;
   birthDate: string;
+  gender?: "male" | "female";
   photoUrl?: string | null;
 }
 
@@ -19,6 +20,7 @@ export async function resolveLandingAfterTerms(): Promise<string> {
     const b = babies[0];
     useBabyStore.getState().update({ name: b.name, birthDate: b.birthDate });
     useBabyStore.getState().setBabyId(b.id);
+    if (b.gender) useBabyStore.getState().setGender(b.gender);
     if (b.photoUrl !== undefined) useBabyStore.getState().setPhotoUrl(b.photoUrl ?? null);
     return "/";
   }
