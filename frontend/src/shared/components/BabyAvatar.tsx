@@ -22,7 +22,11 @@ export function BabyAvatar({ photoUrl, gender = "male", sizeClass = "w-20 h-20" 
   // photoUrl 이 바뀌면 broken 상태 초기화
   useEffect(() => setBroken(false), [photoUrl]);
 
-  const showPhoto = !!photoUrl && !broken;
+  // 명백히 손상된 data URL(예: 테스트용 짧은 base64)은 img 시도 없이 바로 fallback.
+  // data:image 의 base64 본문이 충분히 길어야 실제 이미지로 간주.
+  const looksValidDataUrl =
+    !!photoUrl && (!photoUrl.startsWith("data:") || photoUrl.length > 100);
+  const showPhoto = looksValidDataUrl && !broken;
 
   if (showPhoto) {
     return (
@@ -30,7 +34,7 @@ export function BabyAvatar({ photoUrl, gender = "male", sizeClass = "w-20 h-20" 
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src={photoUrl!}
-          alt="아기 사진"
+          alt=""
           className="w-full h-full object-cover"
           onError={() => setBroken(true)}
         />

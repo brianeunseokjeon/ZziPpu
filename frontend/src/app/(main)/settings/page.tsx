@@ -3,7 +3,6 @@
 import { useState } from "react";
 import Link from "next/link";
 import {
-  Baby,
   Palette,
   Info,
   ChevronRight,
@@ -65,10 +64,11 @@ export default function SettingsPage() {
 
   return (
     <div className="space-y-4">
-      {/* 아기 프로필 카드 */}
+      {/* 아기 프로필 + 정보 편집 (통합) */}
       <Card>
         <CardContent className="pt-4">
-          <div className="flex items-center gap-4">
+          {/* 사진 + 이름/나이 */}
+          <div className="flex items-center gap-4 pb-3 border-b border-gray-50">
             <div className="flex flex-col items-center gap-1">
               <PhotoUploader currentUrl={photoUrl} gender={gender} onUpload={handlePhotoUpload} />
               <span className="text-xs text-gray-400">사진 변경</span>
@@ -76,18 +76,7 @@ export default function SettingsPage() {
             <div>
               <p className="font-bold text-gray-900 text-lg">{name}</p>
               <p className="text-sm text-gray-500">{ageText}</p>
-              <p className="text-xs text-gray-400 mt-0.5">생일: {birthDate}</p>
             </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* 아기 정보 편집 */}
-      <Card>
-        <CardContent className="pt-4">
-          <div className="flex items-center gap-2 mb-3">
-            <Baby className="w-4 h-4 text-gray-500" />
-            <h3 className="text-sm font-semibold text-gray-700">아기 정보</h3>
           </div>
 
           {/* 이름 편집 */}
