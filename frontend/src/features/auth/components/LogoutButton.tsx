@@ -7,23 +7,23 @@ import { useAuthStore } from "@/features/auth/store/authStore";
 export function LogoutButton() {
   const router = useRouter();
   const clear = useAuthStore((s) => s.clear);
-  const accessToken = useAuthStore((s) => s.accessToken);
-
-  // 토큰이 없으면 (DEV_MODE 등) 버튼 숨김
-  if (!accessToken) return null;
 
   function handleLogout() {
+    if (!confirm("로그아웃 하시겠어요?")) return;
     clear();
     router.replace("/login");
   }
 
+  // 설정 페이지는 인증 보호 영역이므로 항상 노출한다.
   return (
     <button
       onClick={handleLogout}
-      className="w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-gray-50 hover:bg-gray-100 text-gray-600 text-sm font-medium"
+      className="w-full flex items-center justify-between py-3 px-1 rounded-xl hover:bg-red-50 transition-colors"
     >
-      <LogOut className="w-4 h-4" />
-      로그아웃
+      <div className="flex items-center gap-2.5">
+        <LogOut className="w-4 h-4 text-red-500" />
+        <span className="text-sm font-medium text-red-600">로그아웃</span>
+      </div>
     </button>
   );
 }

@@ -12,6 +12,7 @@ import {
   Check,
   X,
   Download,
+  LogOut,
 } from "lucide-react";
 import { Card, CardContent } from "@/shared/components/ui/card";
 import { useBabyInfo } from "@/features/baby/hooks/useBabyInfo";
@@ -283,8 +284,16 @@ export default function SettingsPage() {
         </CardContent>
       </Card>
 
-      {/* 로그아웃 */}
-      <LogoutButton />
+      {/* 계정 */}
+      <Card>
+        <CardContent className="pt-4">
+          <div className="flex items-center gap-2 mb-3">
+            <LogOut className="w-4 h-4 text-gray-500" />
+            <h3 className="text-sm font-semibold text-gray-700">계정</h3>
+          </div>
+          <LogoutButton />
+        </CardContent>
+      </Card>
 
       {showExport && <ExportModal onClose={() => setShowExport(false)} />}
     </div>
