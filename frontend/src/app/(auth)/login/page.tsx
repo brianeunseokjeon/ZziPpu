@@ -63,13 +63,18 @@ export default function LoginPage() {
   }
 
   // 검증 성공 후 공통 흐름: 약관 필요하면 /terms, 아니면 babies 확인.
+  // resolveLandingAfterTerms 실패 시 /onboarding 으로 fallback (네트워크 오류 방어).
   async function routeAfterAuth(termsRequired: boolean) {
     if (termsRequired) {
       router.replace("/terms");
       return;
     }
-    const dest = await resolveLandingAfterTerms();
-    router.replace(dest);
+    try {
+      const dest = await resolveLandingAfterTerms();
+      router.replace(dest);
+    } catch {
+      router.replace("/onboarding");
+    }
   }
 
   async function handleVerifyOtp() {

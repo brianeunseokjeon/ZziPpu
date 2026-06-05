@@ -62,8 +62,12 @@ export default function TermsPage() {
         terms.filter((t) => checked[t.type]).map((t) => ({ type: t.type, version: t.version }))
       );
       setTermsRequired(false);
-      const dest = await resolveLandingAfterTerms();
-      router.replace(dest);
+      try {
+        const dest = await resolveLandingAfterTerms();
+        router.replace(dest);
+      } catch {
+        router.replace("/onboarding");
+      }
     } catch (e) {
       setError(e instanceof Error ? e.message : "동의 처리에 실패했습니다.");
     } finally {
