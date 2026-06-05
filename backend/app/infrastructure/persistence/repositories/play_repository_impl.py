@@ -6,6 +6,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.domain.entities.play_record import PlayRecord
 from app.domain.repositories.play_repository import PlayRepository
+from app.infrastructure.persistence.db_date_utils import kst_date_eq
 from app.infrastructure.persistence.models.play_model import PlayModel
 
 
@@ -46,7 +47,7 @@ class PlayRepositoryImpl(PlayRepository):
             select(PlayModel)
             .where(
                 PlayModel.baby_id == baby_id,
-                func.date(PlayModel.started_at, '+9 hours') == target_date,
+                kst_date_eq(PlayModel.started_at, target_date),
             )
             .order_by(PlayModel.started_at)
         )

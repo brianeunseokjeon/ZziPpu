@@ -9,6 +9,7 @@ from app.domain.repositories.diaper_repository import DiaperRepository
 from app.domain.value_objects.diaper_type import DiaperType
 from app.domain.value_objects.stool_color import StoolColor
 from app.domain.value_objects.stool_state import StoolState
+from app.infrastructure.persistence.db_date_utils import kst_date_eq
 from app.infrastructure.persistence.models.diaper_model import DiaperModel
 
 
@@ -49,7 +50,7 @@ class DiaperRepositoryImpl(DiaperRepository):
             select(DiaperModel)
             .where(
                 DiaperModel.baby_id == baby_id,
-                func.date(DiaperModel.recorded_at, '+9 hours') == target_date,
+                kst_date_eq(DiaperModel.recorded_at, target_date),
             )
             .order_by(DiaperModel.recorded_at)
         )

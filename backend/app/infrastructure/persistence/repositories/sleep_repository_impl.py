@@ -6,6 +6,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.domain.entities.sleep_record import SleepRecord
 from app.domain.repositories.sleep_repository import SleepRepository
+from app.infrastructure.persistence.db_date_utils import kst_date_eq
 from app.infrastructure.persistence.models.sleep_model import SleepModel
 
 
@@ -42,7 +43,7 @@ class SleepRepositoryImpl(SleepRepository):
             select(SleepModel)
             .where(
                 SleepModel.baby_id == baby_id,
-                func.date(SleepModel.started_at, '+9 hours') == target_date,
+                kst_date_eq(SleepModel.started_at, target_date),
             )
             .order_by(SleepModel.started_at)
         )

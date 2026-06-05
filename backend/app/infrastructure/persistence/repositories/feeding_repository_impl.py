@@ -7,6 +7,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.domain.entities.feeding import Feeding
 from app.domain.repositories.feeding_repository import FeedingRepository
 from app.domain.value_objects.feeding_type import FeedingType
+from app.infrastructure.persistence.db_date_utils import kst_date_eq
 from app.infrastructure.persistence.models.feeding_model import FeedingModel
 
 
@@ -49,7 +50,7 @@ class FeedingRepositoryImpl(FeedingRepository):
             select(FeedingModel)
             .where(
                 FeedingModel.baby_id == baby_id,
-                func.date(FeedingModel.started_at, '+9 hours') == target_date,
+                kst_date_eq(FeedingModel.started_at, target_date),
             )
             .order_by(FeedingModel.started_at)
         )
