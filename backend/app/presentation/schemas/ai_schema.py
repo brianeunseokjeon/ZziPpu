@@ -27,6 +27,8 @@ class DailyReviewResponse(BaseModel):
 class ChatRequest(BaseModel):
     conversation_id: UUID | None = None
     message: str = Field(..., min_length=1)
+    # 상담 기준 날짜 (헤더에서 선택한 날짜). 기본값 today 로 기존 호환 유지.
+    chat_date: date = Field(default_factory=date.today)
 
 
 class ChatResponse(BaseModel):

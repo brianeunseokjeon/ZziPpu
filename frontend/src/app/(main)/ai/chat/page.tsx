@@ -11,10 +11,16 @@ import {
   QuickQuestions,
 } from '@/features/ai-chat'
 
+function formatKoreanDate(dateStr: string): string {
+  const d = new Date(dateStr + 'T00:00:00')
+  return d.toLocaleDateString('ko-KR', { month: 'long', day: 'numeric', weekday: 'short' })
+}
+
 export default function AIChatPage() {
   const activeBabyId = useUIStore((s) => s.activeBabyId)
+  const selectedDate = useUIStore((s) => s.selectedDate)
   const { messages, isStreaming, streamingContent, sendMessage, resetChat } =
-    useChat(activeBabyId)
+    useChat(activeBabyId, selectedDate)
   const bottomRef = useRef<HTMLDivElement>(null)
 
   // 메시지 추가 시 자동 스크롤
@@ -32,7 +38,7 @@ export default function AIChatPage() {
           <span className="text-xl">🩺</span>
           <div>
             <h1 className="text-base font-semibold text-gray-900">AI 소아과 상담</h1>
-            <p className="text-xs text-gray-400">전문 소아과 지식 기반 AI 상담</p>
+            <p className="text-xs text-gray-400">{formatKoreanDate(selectedDate)} 기준 기록 상담</p>
           </div>
         </div>
         {hasMessages && (

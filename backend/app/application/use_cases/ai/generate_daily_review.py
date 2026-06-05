@@ -59,7 +59,9 @@ class GenerateDailyReviewUseCase:
         diapers = await self._diaper_repo.get_by_baby_and_date(baby_id, review_date)
         plays = await self._play_repo.get_by_baby_and_date(baby_id, review_date)
 
-        dto = await self._ai_service.generate_review(baby, feedings, sleeps, diapers, plays)
+        dto = await self._ai_service.generate_review(
+            baby, feedings, sleeps, diapers, plays, review_date
+        )
 
         review = AIReview(
             id=uuid4(),

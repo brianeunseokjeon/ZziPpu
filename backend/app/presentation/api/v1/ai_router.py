@@ -97,6 +97,7 @@ async def chat_with_pediatrician(
             baby_id=baby_id,
             conversation_id=body.conversation_id,
             user_message=body.message,
+            chat_date=body.chat_date,
         )
     except ValueError as e:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))

@@ -1,10 +1,23 @@
 'use client'
 
+import { useEffect, useRef } from 'react'
 import { API_BASE_URL } from '@/config/constants'
 import { useChatStore } from '../store/chatStore'
 
-export function useChat(babyId: string) {
+export function useChat(babyId: string, chatDate: string) {
   const store = useChatStore()
+  const resetChat = useChatStore((s) => s.resetChat)
+
+  // 날짜가 바뀌면 대화를 초기화 (날짜별 컨텍스트 오염 방지). 스트리밍 중엔 보류.
+  const prevDateRef = useRef(chatDate)
+  useEffect(() => {
+    if (prevDateRef.current !== chatDate) {
+      if (!useChatStore.getState().isStreaming) {
+        resetChat()
+        prevDateRef.current = chatDate
+      }
+    }
+  }, [chatDate, resetChat])
 
   const sendMessage = async (message: string) => {
     if (store.isStreaming) return
@@ -34,6 +47,7 @@ export function useChat(babyId: string) {
           body: JSON.stringify({
             message,
             conversation_id: store.conversationId ?? undefined,
+            chat_date: chatDate,
           }),
         }
       )

@@ -296,8 +296,14 @@ def get_chat_use_case(
     baby_repo: Annotated[BabyRepositoryImpl, Depends(get_baby_repo)],
     chat_repo: Annotated[ChatRepositoryImpl, Depends(get_chat_repo)],
     ai_service: Annotated[ClaudeService, Depends(get_claude_service)],
+    feeding_repo: Annotated[FeedingRepositoryImpl, Depends(get_feeding_repo)],
+    sleep_repo: Annotated[SleepRepositoryImpl, Depends(get_sleep_repo)],
+    diaper_repo: Annotated[DiaperRepositoryImpl, Depends(get_diaper_repo)],
+    play_repo: Annotated[PlayRepositoryImpl, Depends(get_play_repo)],
 ) -> ChatWithPediatricianUseCase:
-    return ChatWithPediatricianUseCase(baby_repo, chat_repo, ai_service)
+    return ChatWithPediatricianUseCase(
+        baby_repo, chat_repo, ai_service, feeding_repo, sleep_repo, diaper_repo, play_repo
+    )
 
 
 def get_save_info_use_case(

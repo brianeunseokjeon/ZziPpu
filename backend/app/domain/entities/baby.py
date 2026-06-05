@@ -26,3 +26,14 @@ class Baby:
         if today.day < self.birth_date.day:
             months -= 1
         return max(0, months)
+
+    def age_days_at(self, target_date: date) -> int:
+        """target_date 기준 생후 일수 (한국식: 생일 당일 = 1일)."""
+        return (target_date - self.birth_date).days + 1
+
+    def age_months_at(self, target_date: date) -> int:
+        """target_date 기준 생후 개월 수."""
+        months = (target_date.year - self.birth_date.year) * 12 + (target_date.month - self.birth_date.month)
+        if target_date.day < self.birth_date.day:
+            months -= 1
+        return max(0, months)

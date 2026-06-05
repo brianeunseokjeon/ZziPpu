@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta, timezone
+from datetime import date, datetime, timedelta, timezone
 
 from app.domain.entities.baby import Baby
 from app.domain.entities.diaper import DiaperRecord
@@ -60,11 +60,15 @@ def build_daily_context(
     sleeps: list[SleepRecord],
     diapers: list[DiaperRecord],
     plays: list[PlayRecord],
+    review_date: date | None = None,
 ) -> str:
+    # review_date 가 주어지면 그날 기준 나이로 표기 (없으면 오늘 기준).
+    age_days = baby.age_days_at(review_date) if review_date else baby.age_days
+    age_months = baby.age_months_at(review_date) if review_date else baby.age_months
     lines = [
         "아기 정보:",
         f"  이름: {baby.name}",
-        f"  생후: {baby.age_days}일 ({baby.age_months}개월)",
+        f"  생후: {age_days}일 ({age_months}개월)",
         "",
         "수유 기록:",
     ]
@@ -134,12 +138,17 @@ def build_daily_context(
     return "\n".join(lines)
 
 
-def build_chat_context(baby: Baby) -> str:
-    milestones = _get_developmental_milestones(baby.age_days)
+def build_chat_context(baby: Baby, chat_date: date) -> str:
+    # 상담 기준 날짜의 생후 일수/개월로 컨텍스트 구성 (헤더에서 과거 날짜 선택 시 그날 기준).
+    age_days = baby.age_days_at(chat_date)
+    age_months = baby.age_months_at(chat_date)
+    milestones = _get_developmental_milestones(age_days)
+    date_str = chat_date.strftime("%Y년 %m월 %d일")
     return (
         f"【현재 상담 중인 아기 정보】\n"
         f"이름: {baby.name}\n"
-        f"생후: {baby.age_days}일 ({baby.age_months}개월)\n\n"
+        f"상담 기준 날짜: {date_str}\n"
+        f"생후: {age_days}일 ({age_months}개월)\n\n"
         f"{milestones}\n\n"
-        f"※ 반드시 이 아기의 나이(생후 {baby.age_days}일)에 맞는 조언을 해주세요."
+        f"※ 반드시 이 아기의 나이(생후 {age_days}일, {date_str} 기준)에 맞는 조언을 해주세요."
     )

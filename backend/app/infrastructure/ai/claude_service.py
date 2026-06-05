@@ -29,14 +29,17 @@ class ClaudeService(AIService):
         sleeps: list[SleepRecord],
         diapers: list[DiaperRecord],
         plays: list[PlayRecord],
+        review_date: date,
     ) -> DailyReviewDTO:
-        context = build_daily_context(baby, feedings, sleeps, diapers, plays)
-        prompt = build_daily_review_prompt(context, age_days=baby.age_days)
+        age_days = baby.age_days_at(review_date)
+        age_months = baby.age_months_at(review_date)
+        context = build_daily_context(baby, feedings, sleeps, diapers, plays, review_date)
+        prompt = build_daily_review_prompt(context, age_days=age_days)
 
         message = await self._client.messages.create(
             model="claude-haiku-4-5",
             max_tokens=4096,
-            system=f"당신은 신생아 및 영아 전문 소아과 의사입니다. 생후 {baby.age_days}일({baby.age_months}개월) 아기의 기록을 검토합니다. JSON 형식으로만 응답하세요.",
+            system=f"당신은 신생아 및 영아 전문 소아과 의사입니다. 생후 {age_days}일({age_months}개월) 아기의 기록을 검토합니다. JSON 형식으로만 응답하세요.",
             messages=[{"role": "user", "content": prompt}],
         )
 
@@ -56,7 +59,7 @@ class ClaudeService(AIService):
 
         return DailyReviewDTO(
             baby_id=baby.id,
-            review_date=date.today(),
+            review_date=review_date,
             feeding_analysis=data.get("feeding_analysis", "수유 데이터를 분석할 수 없습니다."),
             sleep_analysis=data.get("sleep_analysis", "수면 데이터를 분석할 수 없습니다."),
             diaper_analysis=data.get("diaper_analysis", "배변 데이터를 분석할 수 없습니다."),
@@ -75,9 +78,19 @@ class ClaudeService(AIService):
         baby: Baby,
         conversation_history: list[ChatMessage],
         user_message: str,
+        chat_date: date,
+        feedings: list[Feeding],
+        sleeps: list[SleepRecord],
+        diapers: list[DiaperRecord],
+        plays: list[PlayRecord],
     ) -> AsyncIterator[str]:
-        baby_context = build_chat_context(baby)
-        system_prompt = f"{PEDIATRICIAN_SYSTEM_PROMPT}\n\n{baby_context}"
+        baby_context = build_chat_context(baby, chat_date)
+        # 해당 날짜 기록을 컨텍스트에 포함 → "오늘 기록 어때?" 류 질문에 답변 가능
+        daily_records = build_daily_context(baby, feedings, sleeps, diapers, plays, chat_date)
+        system_prompt = (
+            f"{PEDIATRICIAN_SYSTEM_PROMPT}\n\n{baby_context}\n\n"
+            f"【{chat_date.strftime('%Y년 %m월 %d일')}의 기록】\n{daily_records}"
+        )
 
         messages = []
         for msg in conversation_history:

@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
 from collections.abc import AsyncIterator
+from datetime import date
 
 from app.application.dto.ai_dto import DailyReviewDTO
 from app.domain.entities.baby import Baby
@@ -19,6 +20,7 @@ class AIService(ABC):
         sleeps: list[SleepRecord],
         diapers: list[DiaperRecord],
         plays: list[PlayRecord],
+        review_date: date,
     ) -> DailyReviewDTO:
         ...
 
@@ -28,5 +30,10 @@ class AIService(ABC):
         baby: Baby,
         conversation_history: list[ChatMessage],
         user_message: str,
+        chat_date: date,
+        feedings: list[Feeding],
+        sleeps: list[SleepRecord],
+        diapers: list[DiaperRecord],
+        plays: list[PlayRecord],
     ) -> AsyncIterator[str]:
         ...
