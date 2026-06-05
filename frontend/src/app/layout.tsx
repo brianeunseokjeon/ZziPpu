@@ -3,7 +3,7 @@ import { QueryProvider } from "@/providers/QueryProvider";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "먹놀잠 - 신생아 육아 기록",
+  title: "찌뿌둥 - 신생아 육아 기록",
   description: "신생아 수유, 수면, 배변, 놀이를 간편하게 기록하세요",
 };
 

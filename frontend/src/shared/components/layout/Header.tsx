@@ -41,7 +41,7 @@ export function Header() {
             )}
           </div>
           <div className="flex flex-col leading-tight">
-            <span className="text-base font-bold text-gray-900">먹놀잠</span>
+            <span className="text-base font-bold text-gray-900">찌뿌둥</span>
             <span className="text-xs text-gray-400">{ageText}</span>
           </div>
         </div>

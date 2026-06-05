@@ -279,7 +279,7 @@ export default function SettingsPage() {
           </div>
           <div className="text-sm text-gray-500 space-y-1">
             <p>버전: 1.2.0</p>
-            <p>먹놀잠 - 신생아 육아 기록</p>
+            <p>찌뿌둥 - 신생아 육아 기록</p>
           </div>
         </CardContent>
       </Card>

@@ -140,7 +140,7 @@ export default function LoginPage() {
     <div className="space-y-6">
       <div className="text-center">
         <div className="text-5xl mb-3">👶</div>
-        <h1 className="text-2xl font-bold text-gray-900">먹놀잠</h1>
+        <h1 className="text-2xl font-bold text-gray-900">찌뿌둥</h1>
         <p className="text-sm text-gray-500 mt-1">신생아 육아 기록</p>
       </div>
 
