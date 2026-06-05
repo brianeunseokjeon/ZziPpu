@@ -2,6 +2,7 @@ import {
   useQuery,
   useMutation,
   useQueryClient,
+  keepPreviousData,
 } from "@tanstack/react-query";
 import { apiClient } from "@/lib/api-client";
 import { getDateString } from "@/lib/date-utils";
@@ -19,7 +20,8 @@ export function usePlayRecords(babyId: string, date: string) {
     queryFn: () =>
       apiClient.get<PlayRecord[]>(`/api/v1/babies/${babyId}/plays?date=${date}`),
     enabled: !!babyId,
-    refetchInterval: date === getDateString(new Date()) ? 15000 : false,
+    refetchInterval: date === getDateString(new Date()) ? 30000 : false,
+    placeholderData: keepPreviousData,
   });
 }
 

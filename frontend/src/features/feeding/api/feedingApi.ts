@@ -2,6 +2,7 @@ import {
   useQuery,
   useMutation,
   useQueryClient,
+  keepPreviousData,
 } from "@tanstack/react-query";
 import { apiClient } from "@/lib/api-client";
 import { getDateString } from "@/lib/date-utils";
@@ -20,7 +21,8 @@ export function useFeedings(babyId: string, date: string) {
     queryFn: () =>
       apiClient.get<Feeding[]>(`/api/v1/babies/${babyId}/feedings?date=${date}`),
     enabled: !!babyId,
-    refetchInterval: date === getDateString(new Date()) ? 15000 : false,
+    refetchInterval: date === getDateString(new Date()) ? 30000 : false,
+    placeholderData: keepPreviousData,
   });
 }
 

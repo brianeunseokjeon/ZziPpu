@@ -155,8 +155,20 @@ export function DayTimeline({ babyId, date }: Props) {
 
   const groups = groupByMinute(flatItems);
 
+  // 초기 로딩(이전 데이터 없음)에만 스켈레톤. keepPreviousData 로 날짜 전환 시엔
+  // 이전 데이터가 유지되므로 isLoading=false → 깜빡임 없이 부드럽게 교체된다.
   if (isLoading) {
-    return <div className="py-6 text-center text-xs text-gray-300">불러오는 중...</div>;
+    return (
+      <div className="py-3 px-1 space-y-2.5 animate-pulse">
+        {[0, 1, 2].map((i) => (
+          <div key={i} className="flex items-center gap-2.5">
+            <div className="w-10 h-3 rounded bg-gray-100" />
+            <div className="w-2 h-2 rounded-full bg-gray-200" />
+            <div className="h-3 rounded bg-gray-100" style={{ width: `${50 + i * 12}%` }} />
+          </div>
+        ))}
+      </div>
+    );
   }
 
   if (isEmpty) {
