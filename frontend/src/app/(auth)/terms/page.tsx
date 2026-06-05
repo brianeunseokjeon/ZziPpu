@@ -11,7 +11,6 @@ import { Dialog } from "@/shared/components/ui/dialog";
 
 export default function TermsPage() {
   const router = useRouter();
-  const accessToken = useAuthStore((s) => s.accessToken);
   const setTermsRequired = useAuthStore((s) => s.setTermsRequired);
 
   const [terms, setTerms] = useState<TermDoc[]>([]);
@@ -21,10 +20,14 @@ export default function TermsPage() {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // 비로그인 접근 차단
+  // 비로그인 접근 차단 (단, localStorage 복원 완료 후에만 판단 — 새로고침 시 오리다이렉트 방지)
   useEffect(() => {
-    if (!accessToken) router.replace("/login");
-  }, [accessToken, router]);
+    const check = () => {
+      if (!useAuthStore.getState().accessToken) router.replace("/login");
+    };
+    if (useAuthStore.persist.hasHydrated()) check();
+    return useAuthStore.persist.onFinishHydration(check);
+  }, [router]);
 
   useEffect(() => {
     let alive = true;
