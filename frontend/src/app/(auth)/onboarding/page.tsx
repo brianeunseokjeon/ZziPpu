@@ -1,12 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Loader2 } from "lucide-react";
 
 import { apiClient } from "@/lib/api-client";
 import { useBabyStore } from "@/features/baby/store/babyStore";
 import { useAuthStore } from "@/features/auth/store/authStore";
+import { useAuthHydrated } from "@/features/auth/hooks/useAuthHydrated";
 
 type Gender = "male" | "female" | "unknown";
 
@@ -20,6 +21,7 @@ export default function OnboardingPage() {
   const router = useRouter();
   const { setBabyId, setName, setBirthDate } = useBabyStore();
   const accessToken = useAuthStore((s) => s.accessToken);
+  const hydrated = useAuthHydrated();
 
   const [name, setNameLocal] = useState("");
   const [birthDate, setBirthDateLocal] = useState("");
@@ -27,10 +29,11 @@ export default function OnboardingPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // 비로그인 접근 차단
-  if (!accessToken && typeof window !== "undefined") {
-    router.replace("/login");
-  }
+  // 비로그인 접근 차단 — 단, localStorage 복원(hydration) 완료 후에만 판단.
+  // (복원 전 토큰 null 오판 시 새로고침/백그라운드 복귀마다 로그인이 풀림)
+  useEffect(() => {
+    if (hydrated && !accessToken) router.replace("/login");
+  }, [hydrated, accessToken, router]);
 
   async function handleSubmit() {
     setError(null);
@@ -57,6 +60,15 @@ export default function OnboardingPage() {
   }
 
   const today = new Date().toISOString().slice(0, 10);
+
+  // 복원 전 또는 미인증(리다이렉트 대기) 중엔 로딩 표시 (깜빡임/풀림 방지)
+  if (!hydrated || !accessToken) {
+    return (
+      <div className="flex justify-center py-20">
+        <Loader2 className="w-6 h-6 animate-spin text-gray-300" />
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">

@@ -1,9 +1,10 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Loader2 } from "lucide-react";
 import { useAuthStore } from "@/features/auth/store/authStore";
+import { useAuthHydrated } from "@/features/auth/hooks/useAuthHydrated";
 
 /**
  * 클라이언트 인증 가드. `(main)` 레이아웃에서 children을 감싼다.
@@ -17,13 +18,8 @@ export function AuthGuard({ children }: { children: React.ReactNode }) {
   const accessToken = useAuthStore((s) => s.accessToken);
   const requireAuth = process.env.NEXT_PUBLIC_REQUIRE_AUTH === "true";
 
-  // localStorage 복원 완료 여부
-  const [hydrated, setHydrated] = useState(false);
-  useEffect(() => {
-    if (useAuthStore.persist.hasHydrated()) setHydrated(true);
-    const unsub = useAuthStore.persist.onFinishHydration(() => setHydrated(true));
-    return unsub;
-  }, []);
+  // localStorage 복원 완료 여부 (공통 훅)
+  const hydrated = useAuthHydrated();
 
   useEffect(() => {
     if (!hydrated) return; // 복원 전엔 판단 보류 (조기 리다이렉트 방지)
