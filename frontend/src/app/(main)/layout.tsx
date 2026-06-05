@@ -12,7 +12,6 @@ import { useEffect } from "react";
 import { usePathname } from "next/navigation";
 import { Header } from "@/shared/components/layout/Header";
 import { BottomTabBar } from "@/shared/components/layout/BottomTabBar";
-import { QuickActionFAB } from "@/shared/components/QuickActionFAB";
 import { AuthGuard } from "@/features/auth/components/AuthGuard";
 import { ActiveSessionBanner } from "@/features/recording/components/ActiveSessionBanner";
 import { useUIStore } from "@/shared/stores/uiStore";
@@ -59,7 +58,6 @@ export default function MainLayout({
 
         {/* 하단 고정 영역 */}
         <BottomTabBar />
-        <QuickActionFAB />
       </div>
     </AuthGuard>
   );
