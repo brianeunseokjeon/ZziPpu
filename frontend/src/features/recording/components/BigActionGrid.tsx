@@ -219,8 +219,6 @@ export function BigActionGrid() {
 
   return (
     <div className="space-y-2">
-      <h2 className="text-sm font-semibold text-gray-500">빠른 기록</h2>
-
       {!isToday && (
         <div className="flex items-center gap-1.5 rounded-xl bg-amber-50 border border-amber-200 px-3 py-2 text-xs text-amber-700">
           📅 <span className="font-semibold">{formatDate(`${selectedDate}T12:00:00+09:00`)}</span>에 기록 중 · 버튼을 누르면 시각을 입력해요

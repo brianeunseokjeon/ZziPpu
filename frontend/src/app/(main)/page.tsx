@@ -15,11 +15,7 @@
 import { ArrowLeft } from "lucide-react";
 import { useUIStore } from "@/shared/stores/uiStore";
 import { getDateString, formatDate } from "@/lib/date-utils";
-import { MilestoneBanner } from "@/features/baby/components/MilestoneBanner";
-import { NextFeedingCard } from "@/features/dashboard/components/NextFeedingCard";
-import { QuickRepeatRow } from "@/features/recording/components/QuickRepeatRow";
 import { BigActionGrid } from "@/features/recording/components/BigActionGrid";
-import { VoiceCommandHero } from "@/features/recording/components/VoiceCommandHero";
 import { TimelineScrollView } from "@/features/recording/components/TimelineScrollView";
 import { DayTimeline } from "@/features/recording/components/DayTimeline";
 
@@ -59,13 +55,9 @@ export default function HomePage() {
   /* ── 오늘(기본) 뷰 ── */
   return (
     <div className="flex-1 flex flex-col overflow-hidden min-h-0">
-      {/* ── 고정 상단: 빠른 기록 버튼 ── */}
-      <div className="flex-shrink-0 px-4 pt-3 pb-2 space-y-2.5 bg-gray-50 border-b border-gray-100">
-        <MilestoneBanner />
-        <NextFeedingCard />
-        <QuickRepeatRow />
+      {/* ── 고정 상단: 빠른 기록 버튼 (심플) ── */}
+      <div className="flex-shrink-0 px-4 pt-3 pb-2 bg-gray-50 border-b border-gray-100">
         <BigActionGrid />
-        <VoiceCommandHero />
       </div>
 
       {/* ── 기록 타임라인 (채팅형 스크롤) ── */}
