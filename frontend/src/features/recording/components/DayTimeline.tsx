@@ -125,7 +125,8 @@ function groupByMinute(items: FlatItem[]): Group[] {
   for (const g of map.values()) {
     g.items.sort((a, b) => a.catOrder - b.catOrder || a.ts - b.ts);
   }
-  return Array.from(map.values()).sort((a, b) => a.ts - b.ts);
+  // 그룹은 최신 시각 먼저 (내림차순) — 피드형 표시
+  return Array.from(map.values()).sort((a, b) => b.ts - a.ts);
 }
 
 /* ─── 메인 ─────────────────────────────────────────────── */

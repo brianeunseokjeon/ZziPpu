@@ -7,6 +7,7 @@ import {
 import { apiClient } from "@/lib/api-client";
 import { getDateString } from "@/lib/date-utils";
 import { optimisticDeleteOptions } from "@/shared/lib/optimisticDelete";
+import { optimisticCreateOptions } from "@/shared/lib/optimisticCreate";
 import type { PlayRecord, CreatePlayRequest } from "../types/play";
 
 const playKeys = {
@@ -30,11 +31,21 @@ export function useCreatePlay() {
   return useMutation({
     mutationFn: (data: CreatePlayRequest) =>
       apiClient.post<PlayRecord>(`/api/v1/babies/${data.babyId}/plays`, data),
-    onSettled: (_data, _err, vars) => {
-      const date = getDateString(vars.startedAt);
-      qc.invalidateQueries({ queryKey: playKeys.list(vars.babyId, date) });
-      qc.invalidateQueries({ queryKey: ["daily-summary"] });
-    },
+    ...optimisticCreateOptions<CreatePlayRequest, PlayRecord>({
+      qc,
+      listKeyForDate: (v) => playKeys.list(v.babyId, getDateString(v.startedAt)),
+      buildOptimistic: (v, tempId) => ({
+        id: tempId,
+        babyId: v.babyId,
+        playType: v.playType,
+        durationMinutes: v.durationMinutes,
+        startedAt: v.startedAt,
+        endedAt: v.endedAt,
+        memo: v.memo,
+        createdAt: "",
+      }),
+      alsoInvalidate: [["daily-summary"]],
+    }),
   });
 }
 

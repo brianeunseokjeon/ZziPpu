@@ -7,6 +7,7 @@ import {
 import { apiClient } from "@/lib/api-client";
 import { getDateString } from "@/lib/date-utils";
 import { optimisticDeleteOptions } from "@/shared/lib/optimisticDelete";
+import { optimisticCreateOptions } from "@/shared/lib/optimisticCreate";
 import type {
   SleepRecord,
   CreateSleepRequest,
@@ -77,11 +78,19 @@ export function useCreateSleep() {
   return useMutation({
     mutationFn: (data: CreateSleepRequest) =>
       apiClient.post<SleepRecord>(`/api/v1/babies/${data.babyId}/sleeps`, data),
-    onSettled: (_data, _err, vars) => {
-      const date = getDateString(vars.startedAt);
-      qc.invalidateQueries({ queryKey: sleepKeys.list(vars.babyId, date) });
-      qc.invalidateQueries({ queryKey: ["daily-summary"] });
-    },
+    ...optimisticCreateOptions<CreateSleepRequest, SleepRecord>({
+      qc,
+      listKeyForDate: (v) => sleepKeys.list(v.babyId, getDateString(v.startedAt)),
+      buildOptimistic: (v, tempId) => ({
+        id: tempId,
+        babyId: v.babyId,
+        startedAt: v.startedAt,
+        endedAt: v.endedAt,
+        memo: v.memo,
+        createdAt: new Date().toISOString(),
+      }),
+      alsoInvalidate: [["daily-summary"]],
+    }),
   });
 }
 
