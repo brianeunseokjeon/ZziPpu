@@ -1,81 +1,12 @@
 "use client";
 
-import { useState } from "react";
-import { Scale, Check, X, Pencil, Info } from "lucide-react";
+import { Info } from "lucide-react";
 import { Card, CardContent } from "@/shared/components/ui/card";
 import { useUIStore } from "@/shared/stores/uiStore";
 import { useDailySummary } from "../api/dashboardApi";
-import { useGrowthRecords, useCreateGrowthRecord } from "@/features/growth/api/growthApi";
+import { useGrowthRecords } from "@/features/growth/api/growthApi";
+import { WeightInline } from "@/features/growth/components/WeightInline";
 import { calcFeedingGuideline, STATUS_META } from "../lib/feedingGuideline";
-
-/** 체중 인라인 입력/표시 (kg 단위 입력 → g 저장). */
-function WeightInline({
-  babyId,
-  weightG,
-}: {
-  babyId: string;
-  weightG: number | null;
-}) {
-  const create = useCreateGrowthRecord();
-  const [editing, setEditing] = useState(false);
-  const [val, setVal] = useState("");
-
-  function save() {
-    const kg = parseFloat(val);
-    if (!kg || kg <= 0 || kg > 50) return;
-    create.mutate({
-      babyId,
-      data: { recorded_at: new Date().toISOString(), weight_g: Math.round(kg * 1000) },
-    });
-    setEditing(false);
-    setVal("");
-  }
-
-  if (editing) {
-    return (
-      <div className="flex items-center gap-1.5">
-        <input
-          type="number"
-          inputMode="decimal"
-          step="0.01"
-          value={val}
-          onChange={(e) => setVal(e.target.value)}
-          onKeyDown={(e) => e.key === "Enter" && save()}
-          placeholder="예: 4.20"
-          autoFocus
-          className="w-20 text-sm border border-gray-200 rounded-lg px-2 py-1 text-right focus:outline-none focus:ring-2 focus:ring-blue-400"
-        />
-        <span className="text-xs text-gray-400">kg</span>
-        <button onClick={save} className="p-1 text-green-500 hover:bg-green-50 rounded">
-          <Check className="w-4 h-4" />
-        </button>
-        <button onClick={() => setEditing(false)} className="p-1 text-gray-400 hover:bg-gray-50 rounded">
-          <X className="w-4 h-4" />
-        </button>
-      </div>
-    );
-  }
-
-  return (
-    <button
-      onClick={() => {
-        setVal(weightG ? (weightG / 1000).toFixed(2) : "");
-        setEditing(true);
-      }}
-      className="flex items-center gap-1.5 text-sm text-gray-600 hover:bg-gray-50 rounded-lg px-2 py-1 transition-colors"
-    >
-      <Scale className="w-3.5 h-3.5 text-gray-400" />
-      {weightG ? (
-        <>
-          <span className="font-semibold text-gray-800">{(weightG / 1000).toFixed(2)}kg</span>
-          <Pencil className="w-3 h-3 text-gray-300" />
-        </>
-      ) : (
-        <span className="text-blue-500 font-medium">체중 입력</span>
-      )}
-    </button>
-  );
-}
 
 export function FeedingAdequacyCard() {
   const { activeBabyId, selectedDate } = useUIStore();
@@ -162,7 +93,8 @@ export function FeedingAdequacyCard() {
           <p className="text-[11px] text-amber-700 leading-relaxed">
             본 권장량은 체중 1kg당 150~180ml/일 기준 일반 가이드입니다. 모유·혼합수유 여부, 아기 개별
             식욕에 따라 ±20% 차이는 정상이에요. AAP(미국소아과학회) 권장 1일 최대 약 960ml 이내. 체중
-            증가 추이가 정상이면 식욕에 맞춰 조절하고, 의문점은 소아과 상담을 권합니다.
+            증가 추이가 정상이면 식욕에 맞춰 조절하고, 의문점은 소아과 상담을 권합니다.{" "}
+            <span className="font-medium">AAP(미국소아과학회)·HealthyChildren.org 기준. 의학적 진단이 아닌 참고용입니다.</span>
           </p>
         </div>
       </CardContent>

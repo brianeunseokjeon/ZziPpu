@@ -21,6 +21,8 @@ import { PhotoUploader } from "@/features/baby/components/PhotoUploader";
 import { LogoutButton } from "@/features/auth/components/LogoutButton";
 import { CaregiverCard } from "@/features/caregiver/components/CaregiverCard";
 import { useRecordingDefaultsStore } from "@/shared/stores/recordingDefaultsStore";
+import { WeightInline } from "@/features/growth/components/WeightInline";
+import { useGrowthRecords } from "@/features/growth/api/growthApi";
 
 const ML_PRESETS = [60, 80, 100, 120, 150, 180];
 
@@ -36,6 +38,12 @@ export default function SettingsPage() {
   const [birthInput, setBirthInput] = useState(birthDate);
 
   const [showExport, setShowExport] = useState(false);
+
+  const { data: growthRecords } = useGrowthRecords(babyId ?? "");
+  const latestWeightG =
+    growthRecords
+      ?.filter((r) => r.weight_g != null)
+      .sort((a, b) => b.recorded_at.localeCompare(a.recorded_at))[0]?.weight_g ?? null;
 
   async function handlePhotoUpload(base64: string) {
     setPhotoUrl(base64);
@@ -111,7 +119,7 @@ export default function SettingsPage() {
           </div>
 
           {/* 생일 편집 */}
-          <div className="py-3 px-1">
+          <div className="py-3 px-1 border-b border-gray-50">
             <p className="text-xs text-gray-400 mb-1">생년월일</p>
             {editingBirth ? (
               <div className="flex items-center gap-2">
@@ -138,6 +146,12 @@ export default function SettingsPage() {
                 <ChevronRight className="w-4 h-4 text-gray-300" />
               </button>
             )}
+          </div>
+
+          {/* 현재 체중 (growth record SSOT) */}
+          <div className="py-3 px-1">
+            <p className="text-xs text-gray-400 mb-1">현재 체중</p>
+            {babyId && <WeightInline babyId={babyId} weightG={latestWeightG} />}
           </div>
         </CardContent>
       </Card>

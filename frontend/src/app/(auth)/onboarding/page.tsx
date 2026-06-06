@@ -26,6 +26,7 @@ export default function OnboardingPage() {
   const [name, setNameLocal] = useState("");
   const [birthDate, setBirthDateLocal] = useState("");
   const [gender, setGender] = useState<Gender>("unknown");
+  const [birthWeightKg, setBirthWeightKg] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -40,6 +41,14 @@ export default function OnboardingPage() {
     if (!name.trim()) return setError("아기 이름을 입력해주세요.");
     if (!birthDate) return setError("생년월일을 입력해주세요.");
 
+    const birthWeightG =
+      birthWeightKg.trim() !== ""
+        ? Math.round(parseFloat(birthWeightKg) * 1000)
+        : null;
+    if (birthWeightG !== null && (isNaN(birthWeightG) || birthWeightG <= 0 || birthWeightG > 15000)) {
+      return setError("출생 체중은 0~15kg 범위로 입력해주세요.");
+    }
+
     setLoading(true);
     try {
       // 자동 baby 생성 제거됨 → 온보딩에서 POST 로 새로 생성.
@@ -47,10 +56,22 @@ export default function OnboardingPage() {
         name: name.trim(),
         birthDate,
         gender: gender === "unknown" ? null : gender,
+        ...(birthWeightG != null ? { birthWeightG } : {}),
       });
       setBabyId(baby.id);
       setName(baby.name);
       setBirthDate(baby.birthDate);
+
+      // 출생 체중 → growth record (대시보드 SSOT 동기화). 실패해도 온보딩을 막지 않음.
+      if (birthWeightG != null) {
+        apiClient
+          .post(`/api/v1/babies/${baby.id}/growth`, {
+            recorded_at: birthDate,
+            weight_g: birthWeightG,
+          })
+          .catch(() => {});
+      }
+
       router.replace("/");
     } catch (e) {
       setError(e instanceof Error ? e.message : "저장에 실패했습니다.");
@@ -101,6 +122,27 @@ export default function OnboardingPage() {
             onChange={(e) => setBirthDateLocal(e.target.value)}
             className="mt-1.5 w-full h-12 px-4 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-400"
           />
+        </label>
+
+        <label className="block">
+          <span className="text-sm font-medium text-gray-700">
+            출생 체중{" "}
+            <span className="text-gray-400 font-normal text-xs">(선택)</span>
+          </span>
+          <div className="mt-1.5 flex items-center gap-2">
+            <input
+              type="number"
+              inputMode="decimal"
+              step="0.01"
+              min="0"
+              max="15"
+              placeholder="예: 3.30"
+              value={birthWeightKg}
+              onChange={(e) => setBirthWeightKg(e.target.value)}
+              className="flex-1 h-12 px-4 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-400"
+            />
+            <span className="text-sm text-gray-500 pr-1">kg</span>
+          </div>
         </label>
 
         <div>

@@ -1,9 +1,14 @@
 /**
  * 체중 기반 1일 분유 권장량 가이드 (소아과 일반 기준).
  *
- * 근거(사용자 제공 / AAP 미국소아과학회 일반 가이드):
- * - 체중 1kg당 150~180ml/일
- * - 1일 총량 상한(cap) 약 960ml (체중 6kg 초과 영아도 적용)
+ * 출처(Source):
+ * - AAP(미국소아과학회) / HealthyChildren.org
+ *   "Amount and Schedule of Baby Formula Feedings"
+ *   https://www.healthychildren.org/English/ages-stages/baby/formula-feeding/Pages/Amount-and-Schedule-of-Formula-Feedings.aspx
+ *
+ * 근거(AAP 일반 가이드):
+ * - 체중 1파운드당 약 2.5oz/일 (≈ 체중 1kg당 약 165ml/일, 임상 범위 150~180ml/일)
+ * - 1일 총량 상한(cap) 약 32oz (~960ml) — 체중 6kg 초과 영아도 적용
  * - 모유·혼합수유 여부, 개별 식욕에 따라 ±20% 차이는 정상
  *
  * ⚠️ 의학적 진단이 아니라 참고용 가이드. 분유(formula) 측정량 기준이며

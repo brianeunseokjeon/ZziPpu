@@ -122,3 +122,8 @@ export function getDateString(date: Date | string): string {
   const da = String(kst.getUTCDate()).padStart(2, "0");
   return `${y}-${mo}-${da}`;
 }
+
+/** 오늘 KST 날짜 "YYYY-MM-DD" — Pydantic date 필드 전송용 */
+export function todayDateString(): string {
+  return getDateString(new Date());
+}
