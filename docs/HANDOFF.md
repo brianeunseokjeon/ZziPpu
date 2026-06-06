@@ -1,6 +1,6 @@
 # 찌뿌둥(ZziPpu) 인계 문서 — 미적용/제안/이슈
 
-> 최종 업데이트: 2026-06-06. context clear 대비 작성. 다음 세션은 이 문서부터 읽고 이어가면 된다.
+> 최종 업데이트: 2026-06-06 (2차). context clear 대비 작성. 다음 세션은 이 문서부터 읽고 이어가면 된다.
 > 신생아 육아 기록 + AI 소아과 리뷰 서비스. MSA(프론트 + auth + core).
 
 ---
@@ -99,6 +99,14 @@
 - `features/recording/components/QuickRepeatRow.tsx` + `hooks/useLastRecord.ts`
 - `features/recording/components/VoiceCommandHero.tsx`
 - `shared/components/QuickActionFAB.tsx`, `VoiceMicButton.tsx` (음성 재설계 시 재사용 가능)
+
+---
+
+## 6-b. 완료 (2026-06-06 2차, commit 799cd2b)
+
+- 타임라인 역순: 최신 기록이 제일 위(피드형). DayTimeline 내부도 최신 분 우선.
+- SafeArea: Dialog `pb-safe` + `globals.css @utility pb-safe`. 사파리 저장버튼 해결.
+- 낙관적 업데이트: `optimisticCreate.ts` 헬퍼 + diaper/sleep/play create에 적용. 편집 시 깜빡임 없음.
 
 ---
 
