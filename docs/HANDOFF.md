@@ -1,7 +1,41 @@
 # 찌뿌둥(ZziPpu) 인계 문서 — 미적용/제안/이슈
 
-> 최종 업데이트: 2026-06-05. context clear 대비 작성. 다음 세션은 이 문서부터 읽고 이어가면 된다.
+> 최종 업데이트: 2026-06-06. context clear 대비 작성. 다음 세션은 이 문서부터 읽고 이어가면 된다.
 > 신생아 육아 기록 + AI 소아과 리뷰 서비스. MSA(프론트 + auth + core).
+
+---
+
+## 🔥 최우선 다음 작업 (대시보드 수유량 적정성 — 사용자 직접 요청, 미완)
+
+> 직전에 `FeedingAdequacyCard`(대시보드 수유량 적정성, commit e206765)를 만들었으나 아래 3가지가 남음.
+> **사용자 지시: "이거 다 에이전트끼리 의논해줘" → 멀티에이전트 회의(Workflow) 후 진행할 것.**
+
+### (1) 🐛 체중 입력이 안 되는 버그 [최우선]
+- 위치: `frontend/src/features/dashboard/components/FeedingAdequacyCard.tsx` 의 `WeightInline` → `useCreateGrowthRecord().mutate({ babyId, data: { recorded_at: new Date().toISOString(), weight_g } })`
+- **진단 포인트**:
+  - 기존 정상 동작하는 `frontend/src/features/growth/components/GrowthForm.tsx` 가 `recorded_at` 을 **어떤 형식**으로 보내는지 비교 (날짜 `YYYY-MM-DD` vs datetime ISO). 백엔드 `CreateGrowthRequest`(`backend/app/presentation/schemas/growth_schema.py`?)가 `recorded_at` 을 `date` 로 받으면 `toISOString()`(datetime) 은 422 가능.
+  - api-client `snakelizeKeys` 는 camelCase만 snake 변환 — `data` 의 키가 이미 snake(`recorded_at`,`weight_g`)라 그대로 전송됨(정상). 단 중첩/형식 재확인.
+  - 브라우저 콘솔/네트워크 탭에서 POST `/growth` 응답코드 확인 (422/400/500).
+  - input `type=number` 값 바인딩·`save()` 호출 자체가 되는지도 확인.
+
+### (2) 체중 입력 위치 추가 — 설정 + 온보딩
+- 사용자: "체중 입력은 **설정쪽에 있고, 온보딩에도** 있어야 할 것 같아."
+- **설정**: `frontend/src/app/(main)/settings/page.tsx` 아기 정보 통합 카드에 체중 입력/표시 행 추가 (이름·생일 편집 옆). 최신 체중 = `useGrowthRecords()[0].weight_g`.
+- **온보딩**: `frontend/src/app/(auth)/onboarding/page.tsx` 에 출생 체중 입력 추가 → baby `birth_weight_g` 또는 첫 growth record 로 저장. (baby 생성 시 birth_weight_g 필드 이미 있음 — `BabyCreateRequest` 에 `birth_weight_g` 포함되는지 확인)
+- 대시보드 인라인 입력과 **동일 데이터 소스(growth)** 로 동기화되게.
+
+### (3) ⚠️ AAP 권장 수유량 문구 — 실제 자료 검증 후 재작성
+- 사용자: "지금 문구는 다른 서비스에서 쓰는 문구다. **실제 AAP(또는 한국소아과학회)가 어떻게 권장하는지 검색**해서 정확히 다시 적어라."
+- 현재 `FeedingAdequacyCard` 면책 문구 + `feedingGuideline.ts` 의 150~180ml/kg·960ml cap 수치를 **1차 출처(AAP/대한소아청소년과학회/healthychildren.org)** 로 검증.
+  - WebSearch 로 "AAP infant formula feeding amount per day", "healthychildren.org formula feeding amount by weight", "대한소아청소년과학회 영아 수유량" 등 확인.
+  - 일반 인용 수치: AAP/healthychildren.org 는 보통 **2.5 oz(약 75ml) per pound per day, 1일 최대 약 32oz(≈960ml)** 로 안내 (≈165ml/kg/일). 출처와 정확한 표현을 확인 후 수치·문구·출처표기 갱신.
+  - 의학 정보이므로 **출처 명시 + "참고용, 진단 아님, 소아과 상담" 면책 유지**.
+
+### 진행 방식
+1. **멀티에이전트 회의(Workflow)**: ① 체중입력 버그 디버거 ② 설정/온보딩 체중입력 설계 ③ AAP 자료 리서치(WebSearch 포함) → 통합 검수.
+2. 회의 결과로 수정 → 빌드 → 커밋 → 배포.
+
+---
 
 ---
 
