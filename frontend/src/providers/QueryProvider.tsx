@@ -20,10 +20,11 @@ export function QueryProvider({ children }: { children: React.ReactNode }) {
       new QueryClient({
         defaultOptions: {
           queries: {
-            staleTime: 30 * 1000, // 30s fresh → 이후 background refetch
+            staleTime: 30 * 1000,    // 30s fresh → 이후 background refetch
             gcTime: 30 * 60 * 1000, // 30분 캐시 보존 (탭 이동 후 즉시 복원)
             retry: 1,
-            refetchOnWindowFocus: false,
+            // 공유 계정 실시간 동기화: 앱 포그라운드 복귀 시 즉시 재조회
+            refetchOnWindowFocus: true,
           },
         },
       })
