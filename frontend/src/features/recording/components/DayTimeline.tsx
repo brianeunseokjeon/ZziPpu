@@ -17,7 +17,7 @@ import { useState } from "react";
 import { Pencil } from "lucide-react";
 import { useDayRecords } from "../hooks/useDayRecords";
 import { RecordEditSheet } from "./RecordEditSheet";
-import { formatTime, formatDuration } from "@/lib/date-utils";
+import { formatTime, formatDuration, todayDateString } from "@/lib/date-utils";
 import type { TimelineRecord } from "./RecordPopover";
 
 interface Props {
@@ -176,16 +176,26 @@ export function DayTimeline({ babyId, date }: Props) {
     return <div className="py-6 text-center text-xs text-gray-300">이 날의 기록이 없어요</div>;
   }
 
+  // 오늘 날짜인 경우 첫 번째 그룹(가장 최신 기록)을 강조 표시
+  const isToday = date === todayDateString();
+
   return (
     <>
       <div className="divide-y divide-gray-50">
-        {groups.map((group) => {
+        {groups.map((group, groupIndex) => {
+          const isNewest = isToday && groupIndex === 0;
           const timeStr = formatTime(new Date(group.ts));
           return (
-            <div key={group.minuteKey} className="flex gap-3 px-4 py-2">
+            <div
+              key={group.minuteKey}
+              className={`flex gap-3 px-4 py-2.5 ${isNewest ? "bg-blue-50/70 border-l-[3px] border-blue-400" : ""}`}
+            >
               {/* 시간 — 그룹 상단 정렬 */}
-              <div className="w-16 flex-shrink-0 text-[11px] text-gray-400 font-mono leading-[1.8rem] select-none">
+              <div className={`w-16 flex-shrink-0 font-mono leading-[1.8rem] select-none ${isNewest ? "text-[11px] text-blue-500 font-bold" : "text-[11px] text-gray-400"}`}>
                 {timeStr}
+                {isNewest && (
+                  <div className="text-[9px] text-blue-400 font-medium leading-tight -mt-0.5">최신</div>
+                )}
               </div>
 
               {/* 활동 목록 (카테고리 순 세로 배열) */}
@@ -196,8 +206,10 @@ export function DayTimeline({ babyId, date }: Props) {
                     className="flex items-center justify-between min-h-[1.8rem]"
                   >
                     <div className="flex items-center gap-2 flex-1">
-                      <span className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${item.dot}`} />
-                      <span className="text-sm text-gray-800">{item.label}</span>
+                      <span className={`rounded-full flex-shrink-0 ${item.dot} ${isNewest ? "w-2 h-2" : "w-1.5 h-1.5"}`} />
+                      <span className={`text-sm ${isNewest ? "text-gray-900 font-semibold" : "text-gray-800"}`}>
+                        {item.label}
+                      </span>
                     </div>
                     <button
                       onClick={() => setEditRecord(item.record)}
