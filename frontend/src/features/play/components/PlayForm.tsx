@@ -13,6 +13,7 @@ import { PLAY_TYPES } from "@/config/constants";
 import { ModeToggle } from "@/features/recording/components/ModeToggle";
 import { cn } from "@/lib/utils";
 import { nowDatetimeLocal, datetimeLocalToISO } from "@/lib/date-utils";
+import { toast } from "@/shared/stores/toastStore";
 
 export function PlayForm() {
   const { activeBabyId } = useUIStore();
@@ -49,18 +50,22 @@ export function PlayForm() {
     endedAt?: string;
     durationMinutes: number;
   }) {
-    await createPlay({
-      babyId: activeBabyId,
-      playType,
-      durationMinutes: args.durationMinutes,
-      startedAt: args.startedAt,
-      endedAt: args.endedAt,
-      memo: memo || undefined,
-    });
-    setMemo("");
-    setManualStartedAt("");
-    setManualEndedAt("");
-    setManualDuration("");
+    try {
+      await createPlay({
+        babyId: activeBabyId,
+        playType,
+        durationMinutes: args.durationMinutes,
+        startedAt: args.startedAt,
+        endedAt: args.endedAt,
+        memo: memo || undefined,
+      });
+      setMemo("");
+      setManualStartedAt("");
+      setManualEndedAt("");
+      setManualDuration("");
+    } catch {
+      toast("저장하지 못했어요. 잠시 후 다시 시도해 주세요.", "error");
+    }
   }
 
   // === 모드별 핸들러 ===
@@ -124,7 +129,7 @@ export function PlayForm() {
 
       {/* 놀이 종류 — 모든 모드 공통 */}
       <div>
-        <p className="text-sm font-medium text-gray-700 mb-2">놀이 종류</p>
+        <p className="text-sm font-medium text-gray-700 mb-2">터미타임 종류</p>
         <div className="flex gap-3">
           {PLAY_TYPES.map(({ value, label, emoji }) => (
             <button

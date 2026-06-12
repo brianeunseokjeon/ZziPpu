@@ -231,7 +231,7 @@ export function RecordEditSheet({ record, onClose }: Props) {
     poo: "💩 대변 수정",
     both: "💧💩 배변 수정",
     sleep: "😴 수면 수정",
-    play: "🎈 놀이 수정",
+    play: "🎈 터미타임 수정",
   };
 
   const title =
@@ -373,7 +373,7 @@ export function RecordEditSheet({ record, onClose }: Props) {
         {/* ── 놀이 종류 ── */}
         {record.kind === "play" && (
           <div className="space-y-2">
-            <p className="text-xs text-gray-500">놀이 종류</p>
+            <p className="text-xs text-gray-500">터미타임 종류</p>
             <div className="grid grid-cols-3 gap-2">
               {PLAY_TYPES.map(({ value, label }) => (
                 <button

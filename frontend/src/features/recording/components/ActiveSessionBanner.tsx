@@ -48,7 +48,7 @@ const TYPE_INFO: Record<
   { label: string; emoji: string; href: string; activeBg: string }
 > = {
   sleep: { label: "수면", emoji: "😴", href: "/record/sleep", activeBg: "bg-purple-50 border-purple-200" },
-  play: { label: "놀이", emoji: "🤸", href: "/record/play", activeBg: "bg-green-50 border-green-200" },
+  play: { label: "터미타임", emoji: "🤸", href: "/record/play", activeBg: "bg-green-50 border-green-200" },
   feeding: { label: "수유", emoji: "🍼", href: "/record/feeding", activeBg: "bg-blue-50 border-blue-200" },
 };
 

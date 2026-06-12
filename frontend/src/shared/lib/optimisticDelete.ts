@@ -34,12 +34,14 @@ export function optimisticDeleteOptions<TVars>(opts: {
   } = opts;
 
   return {
-    onMutate: async (vars: TVars) => {
+    onMutate: (vars: TVars) => {
       const id = getId(vars);
-      await qc.cancelQueries({ queryKey: listKey });
+      // cancelQueries는 fire-and-forget — await 하지 않아야 UI가 동기적으로 즉시 업데이트됨.
+      // (await 하면 마이크로태스크 지연이 생겨 삭제 버튼 누른 뒤 UI가 잠깐 남아있는 것처럼 보임)
+      qc.cancelQueries({ queryKey: listKey });
       // prefix 매칭되는 모든 list 캐시 스냅샷 저장
       const snapshots = qc.getQueriesData<{ id: string }[]>({ queryKey: listKey });
-      // 각 캐시에서 해당 항목 제거 (날짜 키를 몰라도 전체에서 제거)
+      // 각 캐시에서 해당 항목 즉시 제거
       qc.setQueriesData<{ id: string }[]>({ queryKey: listKey }, (old) =>
         Array.isArray(old) ? old.filter((item) => item.id !== id) : old
       );

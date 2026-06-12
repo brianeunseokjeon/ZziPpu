@@ -1,4 +1,5 @@
 import { getAccessToken } from "@/features/auth/store/authStore";
+import { forceReauthRedirect } from "@/shared/lib/resetSession";
 
 // core-service (아기·기록 등 도메인). 앱 대부분이 사용.
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8081";
@@ -42,7 +43,12 @@ function snakelizeKeys(obj: unknown): unknown {
   return obj;
 }
 
-async function handleResponse<T>(res: Response): Promise<T> {
+async function handleResponse<T>(
+  res: Response,
+  onUnauthorized?: () => void
+): Promise<T> {
+  // 토큰 만료/무효 → 빈 화면 대신 로그인 화면으로. (core 클라이언트에서만 활성)
+  if (res.status === 401 && onUnauthorized) onUnauthorized();
   if (!res.ok) {
     let detail: string = res.statusText;
     try {
@@ -70,10 +76,11 @@ function toBody(body: unknown): string | undefined {
   return JSON.stringify(snakelizeKeys(body));
 }
 
-function createClient(baseUrl: string) {
+function createClient(baseUrl: string, onUnauthorized?: () => void) {
+  const handle = <T>(r: Response) => handleResponse<T>(r, onUnauthorized);
   return {
     get<T>(path: string): Promise<T> {
-      return fetch(`${baseUrl}${path}`, { headers: headers() }).then((r) => handleResponse<T>(r));
+      return fetch(`${baseUrl}${path}`, { headers: headers() }).then(handle<T>);
     },
 
     post<T>(path: string, body?: unknown): Promise<T> {
@@ -81,7 +88,7 @@ function createClient(baseUrl: string) {
         method: "POST",
         headers: headers(),
         body: toBody(body),
-      }).then((r) => handleResponse<T>(r));
+      }).then(handle<T>);
     },
 
     put<T>(path: string, body?: unknown): Promise<T> {
@@ -89,7 +96,7 @@ function createClient(baseUrl: string) {
         method: "PUT",
         headers: headers(),
         body: toBody(body),
-      }).then((r) => handleResponse<T>(r));
+      }).then(handle<T>);
     },
 
     patch<T>(path: string, body?: unknown): Promise<T> {
@@ -97,19 +104,20 @@ function createClient(baseUrl: string) {
         method: "PATCH",
         headers: headers(),
         body: toBody(body),
-      }).then((r) => handleResponse<T>(r));
+      }).then(handle<T>);
     },
 
     delete<T>(path: string): Promise<T> {
       return fetch(`${baseUrl}${path}`, {
         method: "DELETE",
         headers: headers(),
-      }).then((r) => handleResponse<T>(r));
+      }).then(handle<T>);
     },
   };
 }
 
-// 기본 클라이언트 = core-service.
-export const apiClient = createClient(API_BASE_URL);
-// 인증 전용 클라이언트 = auth-service. features/auth 에서만 import.
+// 기본 클라이언트 = core-service. 401(토큰 만료/무효) 시 로그인 화면으로 보낸다.
+export const apiClient = createClient(API_BASE_URL, forceReauthRedirect);
+// 인증 전용 클라이언트 = auth-service. 로그인/OTP 흐름은 자체적으로 에러를 다루므로
+// 401 자동 리다이렉트를 걸지 않는다(잘못된 인증번호 입력 등을 로그인 이동으로 오인 방지).
 export const authClient = createClient(AUTH_BASE_URL);

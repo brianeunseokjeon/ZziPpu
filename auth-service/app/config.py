@@ -12,7 +12,7 @@ class Settings(BaseSettings):
     # --- JWT (core-service 와 동일값이어야 함) ---
     SECRET_KEY: str = "change-me-in-production"
     ALGORITHM: str = "HS256"
-    ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24 * 7  # 7일
+    ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24 * 365  # 1년 (한 번 로그인하면 계속 유지)
 
     # --- CORS ---
     # 고정 도메인은 정확 일치 목록으로, 동적 프리뷰 도메인(예: Vercel)은 정규식으로 허용.

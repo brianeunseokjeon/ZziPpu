@@ -75,7 +75,7 @@ function sleepLabel(s: { durationMinutes?: number | null; endedAt?: string | nul
 
 function playLabel(p: { playType: string; durationMinutes: number; endedAt?: string | null }): string {
   const names: Record<string, string> = { tummy_time: "터미타임", free_play: "자유놀이", sensory_play: "감각놀이" };
-  const name = names[p.playType] ?? "놀이";
+  const name = names[p.playType] ?? "터미타임";
   if (p.endedAt && p.durationMinutes > 0) return `${name} (${formatDuration(p.durationMinutes)})`;
   return `${name} 시작`;
 }

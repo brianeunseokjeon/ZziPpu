@@ -23,8 +23,14 @@ body {
   color: var(--foreground);
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
   -webkit-tap-highlight-color: transparent;
-  /* iOS 모멘텀 스크롤은 각 스크롤 컨테이너에서 처리 */
-  touch-action: manipulation;
+  /* pan-x pan-y: 스크롤은 허용하되 핀치줌 차단 (manipulation은 핀치줌 허용) */
+  touch-action: pan-x pan-y;
+}
+
+html {
+  /* html 레벨에서도 pan-x pan-y — 자식 요소의 touch-action이 pinch-zoom을 추가해도
+     ancestor가 허용하지 않으면 최종적으로 차단됨 */
+  touch-action: pan-x pan-y;
 }
 
 /* 스크롤 컨테이너 기본 설정 */
@@ -37,9 +43,15 @@ body {
   box-sizing: border-box;
 }
 
-/* 버튼 터치 딜레이 제거 (300ms → 즉시) */
+/* 버튼 터치 딜레이 제거 (300ms → 즉시). manipulation이지만
+   html/body가 pan-x pan-y이므로 ancestor 교집합으로 핀치줌은 여전히 차단됨 */
 button, a, [role="button"] {
   touch-action: manipulation;
+}
+
+/* iOS Safari: 입력 폰트 16px 미만 시 자동 줌인 방지 */
+input, textarea, select {
+  font-size: max(16px, 1em);
 }
 
 @utility pb-safe {

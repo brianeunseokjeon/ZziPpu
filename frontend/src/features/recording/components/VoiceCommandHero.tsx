@@ -66,7 +66,7 @@ export function VoiceCommandHero() {
             babyId: activeBabyId,
             playType: type === "play" ? (cmd.meta?.playType ?? defaults.playType) : undefined,
           });
-          const labels: Record<string, string> = { sleep: "수면", play: "놀이", feeding: "모유 수유" };
+          const labels: Record<string, string> = { sleep: "수면", play: "터미타임", feeding: "모유 수유" };
           showResult({ kind: "ok", msg: `${labels[type] ?? type} 타이머 시작됐어요` });
           return;
         }
@@ -74,7 +74,7 @@ export function VoiceCommandHero() {
         if (cmd.action === "finish") {
           const type = cmd.activity ?? "play";
           timerStore.finishSession(type);
-          const labels: Record<string, string> = { sleep: "수면", play: "놀이", feeding: "모유 수유" };
+          const labels: Record<string, string> = { sleep: "수면", play: "터미타임", feeding: "모유 수유" };
           showResult({ kind: "ok", msg: `${labels[type] ?? type} 종료됐어요` });
           return;
         }

@@ -66,8 +66,8 @@ export default function OnboardingPage() {
       if (birthWeightG != null) {
         apiClient
           .post(`/api/v1/babies/${baby.id}/growth`, {
-            recorded_at: birthDate,
-            weight_g: birthWeightG,
+            recordedAt: birthDate,
+            weightG: birthWeightG,
           })
           .catch(() => {});
       }

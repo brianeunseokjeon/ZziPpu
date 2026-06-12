@@ -89,7 +89,7 @@ export function VoiceMicButton() {
 
   const labelMap: Record<ActivityType, string> = {
     sleep: "수면",
-    play: "놀이",
+    play: "터미타임",
     feeding: "수유",
   };
 

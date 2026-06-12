@@ -42,8 +42,8 @@ export default function SettingsPage() {
   const { data: growthRecords } = useGrowthRecords(babyId ?? "");
   const latestWeightG =
     growthRecords
-      ?.filter((r) => r.weight_g != null)
-      .sort((a, b) => b.recorded_at.localeCompare(a.recorded_at))[0]?.weight_g ?? null;
+      ?.filter((r) => r.weightG != null)
+      .sort((a, b) => b.recordedAt.localeCompare(a.recordedAt))[0]?.weightG ?? null;
 
   async function handlePhotoUpload(base64: string) {
     setPhotoUrl(base64);

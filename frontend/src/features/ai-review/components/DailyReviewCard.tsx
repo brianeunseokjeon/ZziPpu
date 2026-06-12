@@ -47,7 +47,7 @@ const SECTIONS = [
   },
   {
     key: "playAnalysis" as const,
-    label: "놀이",
+    label: "터미타임",
     emoji: "🤸",
     bg: "bg-green-50",
     border: "border-green-200",

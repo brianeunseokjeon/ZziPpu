@@ -11,7 +11,7 @@ class Settings(BaseSettings):
     CORS_ORIGIN_REGEX: str | None = None
     SECRET_KEY: str = "change-me-in-production"
     ALGORITHM: str = "HS256"
-    ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24 * 7
+    ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24 * 365  # 1년 (auth-service 와 동일)
     DEV_MODE: bool = True
 
     # ── 내부 서비스 호출 (auth-service → core) ─────────────────────────

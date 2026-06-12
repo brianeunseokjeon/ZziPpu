@@ -13,10 +13,10 @@ function formatWeight(g: number | null): string | null {
 
 function summarize(r: GrowthRecord): string {
   const parts: string[] = [];
-  if (r.weight_g !== null) parts.push(formatWeight(r.weight_g)!);
-  if (r.height_cm !== null) parts.push(`${r.height_cm}cm`);
-  if (r.head_circumference_cm !== null)
-    parts.push(`머리 ${r.head_circumference_cm}cm`);
+  if (r.weightG !== null) parts.push(formatWeight(r.weightG)!);
+  if (r.heightCm !== null) parts.push(`${r.heightCm}cm`);
+  if (r.headCircumferenceCm !== null)
+    parts.push(`머리 ${r.headCircumferenceCm}cm`);
   return parts.join(" · ") || "-";
 }
 
@@ -46,7 +46,7 @@ export function GrowthList() {
 
   const sorted = [...records].sort(
     (a, b) =>
-      new Date(b.recorded_at).getTime() - new Date(a.recorded_at).getTime()
+      new Date(b.recordedAt).getTime() - new Date(a.recordedAt).getTime()
   );
 
   return (
@@ -65,7 +65,7 @@ export function GrowthList() {
                 {summarize(r)}
               </p>
               <p className="text-xs text-gray-400 mt-0.5">
-                {formatDate(r.recorded_at)}
+                {formatDate(r.recordedAt)}
               </p>
               {r.memo && (
                 <p className="text-xs text-gray-500 mt-0.5">{r.memo}</p>

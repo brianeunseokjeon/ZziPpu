@@ -27,10 +27,10 @@ export function GrowthForm() {
       {
         babyId: activeBabyId,
         data: {
-          recorded_at: recordedAt,
-          weight_g: weightG ? parseFloat(weightG) : null,
-          height_cm: heightCm ? parseFloat(heightCm) : null,
-          head_circumference_cm: headCm ? parseFloat(headCm) : null,
+          recordedAt: recordedAt,
+          weightG: weightG ? parseFloat(weightG) : null,
+          heightCm: heightCm ? parseFloat(heightCm) : null,
+          headCircumferenceCm: headCm ? parseFloat(headCm) : null,
           memo: memo || null,
         },
       },

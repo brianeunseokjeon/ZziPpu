@@ -16,6 +16,7 @@ import { useActivityTimerStore } from "@/shared/stores/activityTimerStore";
 import { useRecordingDefaultsStore } from "@/shared/stores/recordingDefaultsStore";
 import { useQuickSave } from "../hooks/useQuickSave";
 import { QuickOptionSheet, type SheetActivity } from "./QuickOptionSheet";
+import { SleepManualSheet } from "@/features/sleep/components/SleepManualSheet";
 import { getDateString, formatDate } from "@/lib/date-utils";
 
 interface ActionDef {
@@ -80,8 +81,8 @@ const ACTIONS: ActionDef[] = [
   {
     key: "play",
     emoji: "🎈",
-    label: "놀이 시작",
-    activeLabel: "놀이 종료",
+    label: "터미타임 시작",
+    activeLabel: "터미타임 종료",
     activeBg: "bg-green-100 border-green-300",
     idleBg: "bg-green-50 border-green-100",
     activeText: "text-green-800",
@@ -116,6 +117,7 @@ export function BigActionGrid() {
 
   const [sheetActivity, setSheetActivity] = useState<SheetActivity | null>(null);
   const [savingKey, setSavingKey] = useState<SheetActivity | null>(null);
+  const [sleepManualOpen, setSleepManualOpen] = useState(false);
   const { toast, show: showToast } = useInlineToast();
 
   /* ─── 길게 누르기 감지 ─── */
@@ -126,7 +128,8 @@ export function BigActionGrid() {
     didLongPress.current = false;
     longPressTimer.current = setTimeout(() => {
       didLongPress.current = true;
-      setSheetActivity(key);
+      if (key === "sleep") setSleepManualOpen(true);
+      else setSheetActivity(key);
     }, 500);
   }, []);
 
@@ -190,13 +193,13 @@ export function BigActionGrid() {
           const existing = timerStore.getSession("play");
           if (existing) {
             timerStore.finishSession("play");
-            showToast("놀이 타이머 종료됐어요");
+            showToast("터미타임 타이머 종료됐어요");
           } else {
             timerStore.startSession("play", {
               babyId: activeBabyId,
               playType: defaults.playType,
             });
-            showToast("놀이 타이머 시작됐어요");
+            showToast("터미타임 타이머 시작됐어요");
           }
           break;
         }
@@ -278,6 +281,13 @@ export function BigActionGrid() {
           setSheetActivity(null);
           showToast(msg);
         }}
+      />
+
+      <SleepManualSheet
+        key={sleepManualOpen ? "open" : "closed"}
+        open={sleepManualOpen}
+        onClose={() => setSleepManualOpen(false)}
+        onSaved={(msg) => { setSleepManualOpen(false); showToast(msg); }}
       />
     </div>
   );

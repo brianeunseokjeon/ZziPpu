@@ -21,6 +21,7 @@ import {
   getDateString,
   formatDate,
 } from "@/lib/date-utils";
+import { toast } from "@/shared/stores/toastStore";
 
 type Tab = "formula" | "breast";
 type BreastSide = "left" | "right" | "both";
@@ -115,55 +116,34 @@ export function FeedingForm() {
 
   // === 저장 ===
 
+  const ERR = "저장하지 못했어요. 잠시 후 다시 시도해 주세요.";
+
   async function saveFormulaNow() {
-    if (amountMl <= 0) {
-      alert("수유량을 입력해주세요");
-      return;
-    }
-    await createFeeding({
-      babyId: activeBabyId,
-      feedingType: FeedingType.Formula,
-      amountMl,
-      startedAt: buildISO(dateStr, timeStr),
-      memo: memo || undefined,
-    });
-    setMemo("");
-    setTimeStr(nowTimeInput());
+    if (amountMl <= 0) { alert("수유량을 입력해주세요"); return; }
+    try {
+      await createFeeding({ babyId: activeBabyId, feedingType: FeedingType.Formula, amountMl, startedAt: buildISO(dateStr, timeStr), memo: memo || undefined });
+      setMemo(""); setTimeStr(nowTimeInput());
+    } catch { toast(ERR, "error"); }
   }
 
   async function saveFormulaManual() {
-    if (amountMl <= 0 || !dateStr || !timeStr) {
-      alert("수유량과 시간을 입력해주세요");
-      return;
-    }
-    await createFeeding({
-      babyId: activeBabyId,
-      feedingType: FeedingType.Formula,
-      amountMl,
-      startedAt: buildISO(dateStr, timeStr),
-      memo: memo || undefined,
-    });
-    setMemo("");
+    if (amountMl <= 0 || !dateStr || !timeStr) { alert("수유량과 시간을 입력해주세요"); return; }
+    try {
+      await createFeeding({ babyId: activeBabyId, feedingType: FeedingType.Formula, amountMl, startedAt: buildISO(dateStr, timeStr), memo: memo || undefined });
+      setMemo("");
+    } catch { toast(ERR, "error"); }
   }
 
   async function saveBreastNow() {
-    await createFeeding({
-      babyId: activeBabyId,
-      feedingType: sideToFeedingType(breastSide),
-      startedAt: buildISO(dateStr, nowTimeInput()),
-      memo: memo || undefined,
-    });
-    setMemo("");
+    try {
+      await createFeeding({ babyId: activeBabyId, feedingType: sideToFeedingType(breastSide), startedAt: buildISO(dateStr, nowTimeInput()), memo: memo || undefined });
+      setMemo("");
+    } catch { toast(ERR, "error"); }
   }
 
   function handleTimerStart() {
     timer.start({
-      feedingType:
-        breastSide === "left"
-          ? "breast_left"
-          : breastSide === "right"
-          ? "breast_right"
-          : "breast_both",
+      feedingType: breastSide === "left" ? "breast_left" : breastSide === "right" ? "breast_right" : "breast_both",
       babyId: activeBabyId,
     });
   }
@@ -171,34 +151,19 @@ export function FeedingForm() {
   async function handleTimerFinish() {
     const finished = timer.finish();
     if (!finished) return;
-    await createFeeding({
-      babyId: activeBabyId,
-      feedingType: sideToFeedingType(breastSide),
-      durationMinutes: finished.durationMinutes,
-      startedAt: finished.startedAt.toISOString(),
-      memo: memo || undefined,
-    });
-    setMemo("");
+    try {
+      await createFeeding({ babyId: activeBabyId, feedingType: sideToFeedingType(breastSide), durationMinutes: finished.durationMinutes, startedAt: finished.startedAt.toISOString(), memo: memo || undefined });
+      setMemo("");
+    } catch { toast(ERR, "error"); }
   }
 
   async function saveBreastManual() {
-    if (!dateStr || !timeStr) {
-      alert("시작 시간을 입력해주세요");
-      return;
-    }
-    const durationMinutes =
-      manualMinutes !== "" && Number(manualMinutes) > 0
-        ? Math.round(Number(manualMinutes))
-        : undefined;
-    await createFeeding({
-      babyId: activeBabyId,
-      feedingType: sideToFeedingType(breastSide),
-      durationMinutes,
-      startedAt: buildISO(dateStr, timeStr),
-      memo: memo || undefined,
-    });
-    setMemo("");
-    setManualMinutes("");
+    if (!dateStr || !timeStr) { alert("시작 시간을 입력해주세요"); return; }
+    const durationMinutes = manualMinutes !== "" && Number(manualMinutes) > 0 ? Math.round(Number(manualMinutes)) : undefined;
+    try {
+      await createFeeding({ babyId: activeBabyId, feedingType: sideToFeedingType(breastSide), durationMinutes, startedAt: buildISO(dateStr, timeStr), memo: memo || undefined });
+      setMemo(""); setManualMinutes("");
+    } catch { toast(ERR, "error"); }
   }
 
   return (

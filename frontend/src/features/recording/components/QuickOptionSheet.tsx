@@ -72,7 +72,7 @@ export function QuickOptionSheet({ activity, onClose, onSaved, targetDate }: Pro
     pee: "💧 소변",
     poo: "💩 대변",
     sleep: "😴 수면",
-    play: "🎈 놀이",
+    play: "🎈 터미타임",
   };
 
   /* 분유 기록 중 배변 빠른 추가 — 기록 시간 필드의 시각으로 즉시 별도 저장 */
@@ -162,17 +162,17 @@ export function QuickOptionSheet({ activity, onClose, onSaved, targetDate }: Pro
               endedAt,
             });
             defaults.setPlayType(playType);
-            onSaved?.(`${PLAY_TYPES.find((p) => p.value === playType)?.label ?? "놀이"} 기록됐어요`);
+            onSaved?.(`${PLAY_TYPES.find((p) => p.value === playType)?.label ?? "터미타임"} 기록됐어요`);
             break;
           }
           const existing = timerStore.getSession("play");
           if (existing) {
             timerStore.finishSession("play");
-            onSaved?.("놀이 타이머 종료됐어요");
+            onSaved?.("터미타임 타이머 종료됐어요");
           } else {
             timerStore.startSession("play", { babyId: activeBabyId, playType });
             defaults.setPlayType(playType);
-            onSaved?.(`${PLAY_TYPES.find((p) => p.value === playType)?.label ?? "놀이"} 시작됐어요`);
+            onSaved?.(`${PLAY_TYPES.find((p) => p.value === playType)?.label ?? "터미타임"} 시작됐어요`);
           }
           break;
         }
@@ -358,11 +358,11 @@ export function QuickOptionSheet({ activity, onClose, onSaved, targetDate }: Pro
             {!isPast && timerStore.getSession("play") ? (
               <div className="text-center py-2">
                 <div className="text-4xl mb-2">🎈</div>
-                <p className="text-sm text-gray-600">진행 중인 놀이 타이머를 종료할게요.</p>
+                <p className="text-sm text-gray-600">진행 중인 터미타임 타이머를 종료할게요.</p>
               </div>
             ) : (
               <>
-                <p className="text-sm text-gray-600 text-center">어떤 놀이를 할까요?</p>
+                <p className="text-sm text-gray-600 text-center">어떤 터미타임을 할까요?</p>
                 <div className="grid grid-cols-3 gap-2">
                   {PLAY_TYPES.map(({ value, label }) => (
                     <button

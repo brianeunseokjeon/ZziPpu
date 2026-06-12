@@ -45,18 +45,18 @@ export function GrowthChart() {
 
   const sorted = [...(records ?? [])].sort(
     (a, b) =>
-      new Date(a.recorded_at).getTime() - new Date(b.recorded_at).getTime()
+      new Date(a.recordedAt).getTime() - new Date(b.recordedAt).getTime()
   );
 
   const chartData = sorted
     .map((r) => {
-      const dayNum = getBirthDays(r.recorded_at);
+      const dayNum = getBirthDays(r.recordedAt);
       const raw =
         activeTab === "weight"
-          ? r.weight_g
+          ? r.weightG
           : activeTab === "height"
-          ? r.height_cm
-          : r.head_circumference_cm;
+          ? r.heightCm
+          : r.headCircumferenceCm;
 
       if (raw === null || raw === undefined) return null;
 

@@ -13,8 +13,8 @@ export function FeedingAdequacyCard() {
   const { data: summary } = useDailySummary(activeBabyId, selectedDate);
   const { data: records } = useGrowthRecords(activeBabyId);
 
-  const latest = records?.find((r) => r.weight_g != null);
-  const weightG = latest?.weight_g ?? null;
+  const latest = records?.find((r) => r.weightG != null);
+  const weightG = latest?.weightG ?? null;
   const actualMl = summary?.totalFeedingMl ?? 0;
 
   const g = calcFeedingGuideline(weightG, actualMl);

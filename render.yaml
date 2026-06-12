@@ -21,7 +21,7 @@ services:
       - key: ALGORITHM
         value: HS256
       - key: ACCESS_TOKEN_EXPIRE_MINUTES
-        value: "10080"
+        value: "525600"
       - key: DEV_MODE
         value: "false"
       - key: EMAIL_PROVIDER
@@ -58,7 +58,7 @@ services:
       - key: ALGORITHM
         value: HS256
       - key: ACCESS_TOKEN_EXPIRE_MINUTES
-        value: "10080"
+        value: "525600"
       - key: DEV_MODE
         value: "false"
       - key: CORS_ORIGINS

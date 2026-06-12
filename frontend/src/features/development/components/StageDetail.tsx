@@ -101,7 +101,7 @@ export function StageDetail({ stage, previousLabel, nextLabel, onPrev, onNext, i
         <div className="flex items-start gap-2 text-sm">
           <Gamepad2 className="w-4 h-4 text-green-500 flex-shrink-0 mt-0.5" />
           <div>
-            <span className="font-medium text-gray-700">놀이 </span>
+            <span className="font-medium text-gray-700">터미타임 </span>
             <span className="text-gray-600">{stage.playSummary}</span>
           </div>
         </div>

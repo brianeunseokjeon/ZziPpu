@@ -31,7 +31,7 @@ export function PlayList() {
     return (
       <div className="text-center py-10 text-gray-400">
         <p className="text-4xl mb-2">🎈</p>
-        <p className="text-sm">오늘 놀이 기록이 없어요</p>
+        <p className="text-sm">오늘 터미타임 기록이 없어요</p>
       </div>
     );
   }

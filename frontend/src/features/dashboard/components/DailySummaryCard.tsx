@@ -88,7 +88,7 @@ export function DailySummaryCard() {
             emoji="🤸"
             label="터미타임"
             value={s.tummyTimeMinutes > 0 ? formatDuration(s.tummyTimeMinutes) : "-"}
-            sub={`놀이 ${s.totalPlayMinutes > 0 ? formatDuration(s.totalPlayMinutes) : "0분"}`}
+            sub={`터미타임 ${s.totalPlayMinutes > 0 ? formatDuration(s.totalPlayMinutes) : "0분"}`}
             color="bg-green-50"
           />
         </div>

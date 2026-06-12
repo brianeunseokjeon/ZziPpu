@@ -117,7 +117,7 @@ export function RecordPopover({ record, onClose }: Props) {
       break;
     }
     case "play": {
-      title = PLAY_LABEL[record.playType] ?? "🎈 놀이";
+      title = PLAY_LABEL[record.playType] ?? "🎈 터미타임";
       timeText = `${formatTime(record.startedAt)}${record.endedAt ? ` ~ ${formatTime(record.endedAt)}` : ""}`;
       details = (
         <div className="space-y-1 text-sm text-gray-700">

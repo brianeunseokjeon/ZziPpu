@@ -45,13 +45,17 @@ export function SleepTimer() {
   async function handleTimerFinish() {
     const finished = timer.finish();
     if (!finished) return;
-    await createSleep({
-      babyId: activeBabyId,
-      startedAt: finished.startedAt.toISOString(),
-      endedAt: finished.endedAt.toISOString(),
-      memo: memo || undefined,
-    });
-    setMemo("");
+    try {
+      await createSleep({
+        babyId: activeBabyId,
+        startedAt: finished.startedAt.toISOString(),
+        endedAt: finished.endedAt.toISOString(),
+        memo: memo || undefined,
+      });
+      setMemo("");
+    } catch {
+      // onError 토스트 처리
+    }
   }
 
   async function handleManualSave() {
@@ -65,15 +69,19 @@ export function SleepTimer() {
       alert("종료 시간이 시작 시간보다 뒤여야 합니다");
       return;
     }
-    await createSleep({
-      babyId: activeBabyId,
-      startedAt: startedAtISO,
-      endedAt: endedAtISO,
-      memo: memo || undefined,
-    });
-    setMemo("");
-    setManualStartedAt("");
-    setManualEndedAt("");
+    try {
+      await createSleep({
+        babyId: activeBabyId,
+        startedAt: startedAtISO,
+        endedAt: endedAtISO,
+        memo: memo || undefined,
+      });
+      setMemo("");
+      setManualStartedAt("");
+      setManualEndedAt("");
+    } catch {
+      // onError 토스트 처리
+    }
   }
 
   const isSleeping = timer.isActive && !timer.isPaused;

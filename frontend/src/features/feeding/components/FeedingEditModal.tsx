@@ -1,12 +1,12 @@
 "use client";
 
 import { useState } from "react";
-import { Minus, Plus } from "lucide-react";
+import { Minus, Plus, Trash2 } from "lucide-react";
 import { Dialog } from "@/shared/components/ui/dialog";
 import { Button } from "@/shared/components/ui/button";
 import { Input } from "@/shared/components/ui/input";
 import { TimeField } from "@/shared/components/ui/time-field";
-import { useUpdateFeeding } from "../api/feedingApi";
+import { useUpdateFeeding, useDeleteFeeding } from "../api/feedingApi";
 import { Feeding, FeedingType } from "../types/feeding";
 import {
   isoToTimeInput,
@@ -40,6 +40,7 @@ export function FeedingEditModal({
   onClose: () => void;
 }) {
   const { mutateAsync: updateFeeding, isPending } = useUpdateFeeding();
+  const { mutate: deleteFeeding } = useDeleteFeeding();
 
   const [timeStr, setTimeStr] = useState(() => isoToTimeInput(feeding.startedAt));
   const [dateStr, setDateStr] = useState(() => getDateString(feeding.startedAt));
@@ -53,6 +54,11 @@ export function FeedingEditModal({
 
   const isFormula = feeding.feedingType === FeedingType.Formula;
 
+  function handleDelete() {
+    onClose();
+    deleteFeeding({ babyId: feeding.babyId, feedingId: feeding.id });
+  }
+
   async function handleSave() {
     // 선택된 KST 날짜 정오를 기준으로 시간만 교체 → UTC ISO
     const baseISO = new Date(`${dateStr}T12:00:00+09:00`).toISOString();
@@ -63,16 +69,20 @@ export function FeedingEditModal({
       ? Math.max(1, parseInt(durationInput, 10))
       : undefined;
 
-    await updateFeeding({
-      babyId: feeding.babyId,
-      feedingId: feeding.id,
-      feedingType: feeding.feedingType,
-      startedAt,
-      amountMl: isFormula ? amountMl : undefined,
-      durationMinutes: isFormula ? undefined : durationMinutes,
-      memo: memo.trim() || undefined,
-    });
-    onClose();
+    try {
+      await updateFeeding({
+        babyId: feeding.babyId,
+        feedingId: feeding.id,
+        feedingType: feeding.feedingType,
+        startedAt,
+        amountMl: isFormula ? amountMl : undefined,
+        durationMinutes: isFormula ? undefined : durationMinutes,
+        memo: memo.trim() || undefined,
+      });
+      onClose();
+    } catch {
+      // optimisticUpdateOptions.onError 가 이미 에러 토스트 처리 — 여기서 중복 토스트 금지
+    }
   }
 
   return (
@@ -181,14 +191,15 @@ export function FeedingEditModal({
         </div>
 
         <div className="flex gap-2 pt-1">
-          <Button variant="outline" onClick={onClose} className="flex-1 h-12">
-            취소
-          </Button>
-          <Button
-            onClick={handleSave}
-            disabled={isPending}
-            className="flex-1 h-12 bg-blue-500 hover:bg-blue-600"
+          <button
+            type="button"
+            onClick={handleDelete}
+            className="p-3 rounded-xl border border-red-200 text-red-400 hover:bg-red-50 active:bg-red-100 transition-colors flex-shrink-0"
           >
+            <Trash2 className="w-5 h-5" />
+          </button>
+          <Button variant="outline" onClick={onClose} className="flex-1 h-12">취소</Button>
+          <Button onClick={handleSave} disabled={isPending} className="flex-1 h-12 bg-blue-500 hover:bg-blue-600">
             {isPending ? "저장 중..." : "수정 완료"}
           </Button>
         </div>

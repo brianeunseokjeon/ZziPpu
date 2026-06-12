@@ -8,7 +8,7 @@ export default function PlayPage() {
         <PlayForm />
       </div>
       <div>
-        <h3 className="text-sm font-semibold text-gray-500 mb-2">오늘 놀이 기록</h3>
+        <h3 className="text-sm font-semibold text-gray-500 mb-2">오늘 터미타임 기록</h3>
         <PlayList />
       </div>
     </div>

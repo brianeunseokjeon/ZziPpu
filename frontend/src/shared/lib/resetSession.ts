@@ -24,3 +24,20 @@ export function resetSession(queryClient: QueryClient) {
     window.localStorage.removeItem("zzippu-query-cache");
   }
 }
+
+/**
+ * 토큰 만료/무효(서버 401)로 세션이 끊겼을 때 호출. `queryClient` 핸들이 없는
+ * 저수준 계층(api-client 인터셉터)에서도 쓸 수 있도록 분리했다.
+ *
+ * 사용자별 상태를 비우고 로그인 화면으로 보낸다(전체 새로고침 → in-memory 캐시도 소멸).
+ * 이미 /login 이면 리다이렉트하지 않아 무한 루프를 막는다.
+ */
+export function forceReauthRedirect() {
+  if (typeof window === "undefined") return;
+  useAuthStore.getState().clear();
+  useBabyStore.getState().reset();
+  window.localStorage.removeItem("zzippu-query-cache");
+  if (window.location.pathname !== "/login") {
+    window.location.href = "/login";
+  }
+}
