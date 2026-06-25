@@ -8,6 +8,7 @@ import { apiClient } from "@/lib/api-client";
 import { getDateString } from "@/lib/date-utils";
 import { optimisticDeleteOptions } from "@/shared/lib/optimisticDelete";
 import { optimisticUpdateOptions } from "@/shared/lib/optimisticUpdate";
+import { mutationKeys } from "@/shared/lib/mutationRegistry";
 import type { Feeding, CreateFeedingRequest, FeedingType } from "../types/feeding";
 
 const feedingKeys = {
@@ -27,34 +28,17 @@ export function useFeedings(babyId: string, date: string) {
   });
 }
 
+/**
+ * 수유 기록 생성.
+ *
+ * 전송·낙관적 갱신·재시도·오프라인 복원 정책은 모두 mutationRegistry 의
+ * setMutationDefaults 에 등록돼 있다(콜드스타트/오프라인 기록유실 방어).
+ * 여기선 동일 mutationKey 만 지정해 그 기본 정의를 상속한다 —
+ * 그래야 앱 재시작 후 복원된 mutation 도 같은 방식으로 재전송된다.
+ */
 export function useCreateFeeding() {
-  const qc = useQueryClient();
-  return useMutation({
-    mutationFn: (data: CreateFeedingRequest) =>
-      apiClient.post<Feeding>(`/api/v1/babies/${data.babyId}/feedings`, data),
-    onMutate: async (newFeeding) => {
-      const date = getDateString(newFeeding.startedAt);
-      const key = feedingKeys.list(newFeeding.babyId, date);
-      await qc.cancelQueries({ queryKey: key });
-      const prev = qc.getQueryData<Feeding[]>(key);
-      if (prev) {
-        qc.setQueryData<Feeding[]>(key, [
-          { ...newFeeding, id: `temp-${Date.now()}`, createdAt: new Date().toISOString() },
-          ...prev,
-        ]);
-      }
-      return { prev, key };
-    },
-    onError: (_err, _vars, ctx) => {
-      if (ctx?.prev !== undefined) {
-        qc.setQueryData(ctx.key, ctx.prev);
-      }
-    },
-    onSettled: (_data, _err, vars) => {
-      const date = getDateString(vars.startedAt);
-      qc.invalidateQueries({ queryKey: feedingKeys.list(vars.babyId, date) });
-      qc.invalidateQueries({ queryKey: ["daily-summary"] });
-    },
+  return useMutation<Feeding, Error, CreateFeedingRequest>({
+    mutationKey: mutationKeys.createFeeding,
   });
 }
 
