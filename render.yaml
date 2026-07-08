@@ -1,53 +1,20 @@
-# Render 블루프린트 — 무료 플랜으로 2개 백엔드(Docker) 배포.
-# 대시보드에서 "New + → Blueprint" → 이 저장소 선택 시 아래 두 서비스가 자동 생성된다.
+# Render 블루프린트 — 무료 플랜으로 통합 단일 백엔드(Docker) 배포.
+# auth-service + core(backend)를 단일 프로세스로 통합 → Render 무료 750h/월로 24/7 가동.
+#
+# 대시보드에서 "New + → Blueprint" → 이 저장소 선택 시 아래 1개 서비스가 자동 생성된다.
 #
 # 보안: sync: false 로 표시된 값은 Render 대시보드에서 직접 입력한다(깃에 평문 금지).
-#   - SECRET_KEY / INTERNAL_API_KEY 는 두 서비스에 **반드시 동일한 값**으로 입력.
-#   - DATABASE_URL 은 Neon 의 connection string 을 postgresql+asyncpg://... 형식으로 변환해 입력.
+#   - SECRET_KEY: JWT 서명 키. auth(발급)/core(검증) 모두 동일값 사용.
+#   - DATABASE_URL: core DB (Neon PostgreSQL, postgresql+asyncpg://...)
+#   - AUTH_DATABASE_URL: auth DB (별도 Neon PostgreSQL 또는 같은 DB의 별도 스키마 가능)
 #
-# 무료 플랜은 15분 무요청 시 sleep → 첫 요청 콜드스타트(수십 초) 발생. 정상.
+# keep-warm: Render cron job 또는 외부 UptimeRobot 등으로 /health를 5분마다 호출하면
+# 무료 플랜에서도 콜드스타트 없이 24/7 운영 가능.
 
 services:
-  # ── 인증 서비스 (이메일 OTP, JWT 발급) ─────────────────────────────
+  # ── 통합 백엔드 (core + auth, 단일 프로세스) ────────────────────────
   - type: web
-    name: zzippu-auth
-    runtime: docker
-    dockerfilePath: ./auth-service/Dockerfile
-    dockerContext: ./auth-service
-    plan: free
-    healthCheckPath: /health
-    autoDeploy: true
-    envVars:
-      - key: ALGORITHM
-        value: HS256
-      - key: ACCESS_TOKEN_EXPIRE_MINUTES
-        value: "525600"
-      - key: DEV_MODE
-        value: "false"
-      - key: EMAIL_PROVIDER
-        value: resend
-      - key: CORS_ORIGINS
-        value: '["https://zzippu.co.kr","https://www.zzippu.co.kr"]'
-      # Vercel 프리뷰/임시 도메인(*.vercel.app) 허용 — 도메인 연결 전 테스트용
-      - key: CORS_ORIGIN_REGEX
-        value: 'https://.*\.vercel\.app'
-      # 아래는 대시보드에서 직접 입력 (sync: false)
-      - key: SECRET_KEY
-        sync: false
-      - key: INTERNAL_API_KEY
-        sync: false
-      - key: DATABASE_URL
-        sync: false
-      - key: RESEND_API_KEY
-        sync: false
-      - key: EMAIL_FROM
-        sync: false
-      - key: CORE_URL
-        sync: false   # core 서비스의 Render 공개 URL (예: https://zzippu-core.onrender.com)
-
-  # ── 코어 백엔드 (기록/AI, JWT 검증) ───────────────────────────────
-  - type: web
-    name: zzippu-core
+    name: zzippu-api
     runtime: docker
     dockerfilePath: ./backend/Dockerfile
     dockerContext: ./backend
@@ -55,23 +22,48 @@ services:
     healthCheckPath: /health
     autoDeploy: true
     envVars:
+      # ── 공통 ────────────────────────────────────────────────────────
       - key: ALGORITHM
         value: HS256
       - key: ACCESS_TOKEN_EXPIRE_MINUTES
         value: "525600"
       - key: DEV_MODE
         value: "false"
+
+      # ── CORS ─────────────────────────────────────────────────────────
       - key: CORS_ORIGINS
         value: '["https://zzippu.co.kr","https://www.zzippu.co.kr"]'
-      # Vercel 프리뷰/임시 도메인(*.vercel.app) 허용 — 도메인 연결 전 테스트용
+      # Vercel 프리뷰/임시 도메인(*.vercel.app) 허용
       - key: CORS_ORIGIN_REGEX
         value: 'https://.*\.vercel\.app'
-      # 아래는 대시보드에서 직접 입력 (sync: false)
+
+      # ── auth_svc 이메일 ───────────────────────────────────────────────
+      - key: EMAIL_PROVIDER
+        value: resend
+
+      # ── auth_svc CORE_URL (자기 자신 — 통합이므로 localhost 또는 서비스 URL) ──
+      # 통합 프로세스에서 httpx self-call 이 발생. 같은 서비스이므로 Render 공개 URL을 입력.
+      # 예: https://zzippu-api.onrender.com
+      - key: CORE_URL
+        sync: false
+
+      # ── 대시보드에서 직접 입력 (sync: false) ─────────────────────────
       - key: SECRET_KEY
         sync: false
       - key: INTERNAL_API_KEY
         sync: false
+
+      # core DB (기록/AI/아기)
       - key: DATABASE_URL
         sync: false
+
+      # auth DB (users/OTP/terms) — core와 분리된 별도 엔진
+      - key: AUTH_DATABASE_URL
+        sync: false
+
       - key: ANTHROPIC_API_KEY
+        sync: false
+      - key: RESEND_API_KEY
+        sync: false
+      - key: EMAIL_FROM
         sync: false

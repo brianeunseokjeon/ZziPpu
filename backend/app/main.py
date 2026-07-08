@@ -29,6 +29,25 @@ from app.presentation.api.internal_router import router as internal_router
 from app.presentation.api.v1.router import v1_router
 from app.presentation.middleware.error_handler import ErrorHandlerMiddleware
 
+# ── auth_svc (통합) ──────────────────────────────────────────────────────────
+from app.auth_svc.config import settings as auth_settings
+from app.auth_svc.infrastructure.persistence.database import (
+    AsyncSessionFactory as AuthAsyncSessionFactory,
+    engine as auth_engine,
+)
+from app.auth_svc.infrastructure.persistence.models.base import Base as AuthBase
+from app.auth_svc.infrastructure.persistence.models import (  # noqa: F401 — register auth models
+    EmailOtpModel,
+    TermModel,
+    TermsAgreementModel,
+    UserModel as AuthUserModel,
+)
+from app.auth_svc.infrastructure.persistence.repositories.terms_repository_impl import (
+    TermsRepositoryImpl as AuthTermsRepositoryImpl,
+)
+from app.auth_svc.infrastructure.terms.seed import seed_terms
+from app.auth_svc.presentation.api.v1.router import v1_router as auth_v1_router
+
 DEV_USER_ID = UUID("00000000-0000-0000-0000-000000000001")
 DEV_BABY_ID = UUID("00000000-0000-0000-0000-000000000002")
 
@@ -119,26 +138,42 @@ async def _migrate_sqlite() -> None:
 
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncIterator[None]:
+    # ── core DB init ─────────────────────────────────────────────────────────
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
     await _migrate_sqlite()
     if settings.DEV_MODE:
         await _seed_dev_data()
+
+    # ── auth_svc DB init ─────────────────────────────────────────────────────
+    async with auth_engine.begin() as conn:
+        await conn.run_sync(AuthBase.metadata.create_all)
+    # 약관 seed (마크다운 → terms upsert)
+    async with AuthAsyncSessionFactory() as session:
+        await seed_terms(AuthTermsRepositoryImpl(session))
+        await session.commit()
+
     yield
+
     await engine.dispose()
+    await auth_engine.dispose()
 
 
 app = FastAPI(
-    title="먹놀잠 API",
-    description="신생아 육아 기록 서비스 API",
-    version="1.0.0",
+    title="먹놀잠 API (통합)",
+    description="신생아 육아 기록 서비스 API — core + auth 통합 단일 프로세스",
+    version="2.0.0",
     lifespan=lifespan,
 )
 
+# CORS: core + auth 양쪽 origins 합집합
+_cors_origins = list(dict.fromkeys(settings.CORS_ORIGINS + auth_settings.CORS_ORIGINS))
+_cors_origin_regex = settings.CORS_ORIGIN_REGEX or auth_settings.CORS_ORIGIN_REGEX
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=settings.CORS_ORIGINS,
-    allow_origin_regex=settings.CORS_ORIGIN_REGEX,
+    allow_origins=_cors_origins,
+    allow_origin_regex=_cors_origin_regex,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -148,8 +183,9 @@ app.add_middleware(ErrorHandlerMiddleware)
 
 app.include_router(v1_router)
 app.include_router(internal_router)
+app.include_router(auth_v1_router)  # auth: /api/v1/auth/*, /api/v1/auth/terms, /api/v1/auth/code
 
 
 @app.get("/health")
 async def health_check() -> dict:
-    return {"status": "ok"}
+    return {"status": "ok", "service": "muknoljam-unified"}
