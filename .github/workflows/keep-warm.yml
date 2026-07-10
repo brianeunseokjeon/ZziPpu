@@ -10,7 +10,7 @@ name: keep-warm
 
 on:
   schedule:
-    - cron: "*/10 * * * *" # 매 10분 (Render 15분 sleep 전에 깨움)
+    - cron: "*/3 * * * *" # 매 3분 (임시 스톱갭 — GitHub 예약은 실제로는 지연·누락됨. 제대로된 keep-warm은 UptimeRobot/cron-job.org로 후속 교체 예정)
   workflow_dispatch: {} # 수동 실행 버튼
 
 jobs:
