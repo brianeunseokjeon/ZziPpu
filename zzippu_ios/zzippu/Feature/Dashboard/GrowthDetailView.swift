@@ -37,7 +37,8 @@ struct GrowthDetailView: View {
                                 .font(theme.typography.caption)
                                 .foregroundStyle(theme.color.textSecondary.color)
                             Text(vm.latestValueText)
-                                .font(.system(size: 32, weight: .bold, design: .rounded))
+                                .font(theme.typography.display)
+                                .dsDynamicTypeCap()
                                 .foregroundStyle(theme.color.textPrimary.color)
                         }
                         Spacer()

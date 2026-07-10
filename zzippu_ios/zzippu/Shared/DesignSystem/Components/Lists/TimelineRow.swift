@@ -38,17 +38,17 @@ public struct TimelineItemRow: View {
     @Environment(\.theme) private var theme
 
     public var body: some View {
-        HStack(spacing: theme.space.stackGapMd) {
+        HStack(spacing: theme.space.stackGapSm) {
             // Mono time
             Text(time)
                 .font(theme.typography.mono)
                 .foregroundStyle(theme.color.textSecondary.color)
                 .frame(width: 48, alignment: .trailing)
 
-            // Dot
+            // Dot (10pt — 왜소한 점 → 또렷한 색 마커)
             Circle()
                 .fill(dotColor)
-                .frame(width: 8, height: 8)
+                .frame(width: theme.component.timelineDotSize, height: theme.component.timelineDotSize)
 
             // Label
             Text(label)
@@ -61,7 +61,7 @@ public struct TimelineItemRow: View {
                 DSIconButton(systemName: "pencil", action: onEdit)
             }
         }
-        .padding(.horizontal, theme.space.componentPaddingX)
+        // 좌우 패딩은 섹션(screenPaddingX)이 담당 — 이중 패딩(32pt) 제거.
         .frame(minHeight: 44)
     }
 }

@@ -511,6 +511,7 @@ private struct BigActionButton: View {
     let action: () -> Void
 
     @Environment(\.theme) private var theme
+    @State private var isPressed = false
 
     var body: some View {
         Button(action: action) {
@@ -525,16 +526,28 @@ private struct BigActionButton: View {
             .frame(maxWidth: .infinity)
             .padding(.vertical, theme.space.md)
             .background(
-                RoundedRectangle(cornerRadius: theme.radius.control, style: .continuous)
+                RoundedRectangle(cornerRadius: theme.radius.controlLg, style: .continuous)
                     .fill(theme.color.tint(for: kind).color)
+                    // press 시 도메인 색 tint를 살짝 진하게(피드백).
+                    .overlay(
+                        RoundedRectangle(cornerRadius: theme.radius.controlLg, style: .continuous)
+                            .fill(theme.color.solid(for: kind).color.opacity(isPressed ? 0.12 : 0))
+                    )
             )
             .overlay(
-                RoundedRectangle(cornerRadius: theme.radius.control, style: .continuous)
+                RoundedRectangle(cornerRadius: theme.radius.controlLg, style: .continuous)
                     .stroke(theme.color.solid(for: kind).color,
                             lineWidth: isActive ? 2 : 0)
             )
+            .scaleEffect(isPressed ? 0.97 : 1.0)
+            .animation(.easeOut(duration: 0.12), value: isPressed)
         }
         .buttonStyle(.plain)
+        .simultaneousGesture(
+            DragGesture(minimumDistance: 0)
+                .onChanged { _ in isPressed = true }
+                .onEnded   { _ in isPressed = false }
+        )
     }
 }
 

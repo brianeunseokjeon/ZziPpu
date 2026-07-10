@@ -24,8 +24,10 @@ public struct DSCardModifier: ViewModifier {
             .background(bgColor)
             .clipShape(RoundedRectangle(cornerRadius: theme.component.card.radius, style: .continuous))
             .overlay(
+                // 테두리 OR 그림자 택일: 라이트=투명(그림자 부양), 다크=얇은 border.
+                // cardBorder(light=.clear, dark=border)로 이중 처리 제거.
                 RoundedRectangle(cornerRadius: theme.component.card.radius, style: .continuous)
-                    .stroke(theme.color.border.color, lineWidth: style == .plain ? 1 : 0)
+                    .stroke(theme.color.cardBorder.color, lineWidth: style == .sunken ? 0 : 1)
             )
             .dsShadow(style == .sunken ? PrimitiveShadow.shadowNone : theme.component.card.shadow)
             .scaleEffect(style == .interactive && isPressed ? 0.98 : 1.0)

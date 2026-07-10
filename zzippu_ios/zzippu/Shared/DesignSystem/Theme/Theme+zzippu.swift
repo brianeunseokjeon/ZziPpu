@@ -16,15 +16,18 @@ extension Theme {
             surface:         sc.surface,
             surfaceElevated: sc.surfaceElevated,
             surfaceSunken:   sc.surfaceSunken,
-            primary:         sc.primary,
-            primaryPressed:  sc.primaryPressed,
-            onPrimary:       sc.onPrimary,
-            primaryTint:     sc.primaryTint,
+            primary:           sc.primary,
+            primaryPressed:    sc.primaryPressed,
+            onPrimary:         sc.onPrimary,
+            primaryTint:       sc.primaryTint,
+            primaryDisabledBg: sc.primaryDisabledBg,
+            onPrimaryDisabled: sc.onPrimaryDisabled,
             textPrimary:     sc.textPrimary,
             textSecondary:   sc.textSecondary,
             textTertiary:    sc.textTertiary,
             border:          sc.border,
             borderStrong:    sc.borderStrong,
+            cardBorder:      DynamicColor(light: .clear, dark: sc.border.dark),
             divider:         sc.divider,
             scrim:           sc.scrim,
             statusSuccessFg:     sc.statusSuccessFg,
@@ -101,10 +104,11 @@ extension Theme {
 
         // MARK: Radius
         let radius = ThemeRadius(
-            control: 12,
-            card:    16,
-            sheet:   24,
-            pill:    9999
+            control:   PrimitiveScale.radiusMd,
+            controlLg: PrimitiveScale.radiusControlLg,
+            card:      PrimitiveScale.radiusLg,
+            sheet:     PrimitiveScale.radiusXl,
+            pill:      PrimitiveScale.radiusFull
         )
 
         // MARK: Shadow
@@ -133,27 +137,32 @@ extension Theme {
                 heightLg:       56,
                 minWidth:       44,
                 paddingXMd:     20,
-                radius:         12,
+                radius:         PrimitiveScale.radiusMd,
+                radiusLg:       PrimitiveScale.radiusControlLg,
                 disabledOpacity: 0.5
             ),
             card: ComponentCardTokens(
                 padding: 20,
-                radius:  16,
+                radius:  PrimitiveScale.radiusLg,
                 shadow:  PrimitiveShadow.shadowSm
             ),
             input: ComponentInputTokens(
                 height:   44,
                 paddingX: 16,
-                radius:   12
+                radius:   PrimitiveScale.radiusMd
             ),
             chip: ComponentChipTokens(
-                paddingX: 12,
+                paddingX: PrimitiveScale.space3_5,
                 height:   44,
                 radius:   9999
             ),
             iconButtonSize:      44,
             emptyStatePaddingY:  24,
-            sectionHeaderPaddingY: 8
+            sectionHeaderPaddingY: 8,
+            statusPillPaddingX:  PrimitiveScale.space3,
+            statusPillPaddingY:  PrimitiveScale.space1_5,
+            timelineDotSize:     PrimitiveScale.sizeDotMd,
+            timelineDotSizeIdle: PrimitiveScale.sizeDotSm
         )
 
         return Theme(

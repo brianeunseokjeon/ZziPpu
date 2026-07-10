@@ -31,7 +31,8 @@ struct NextFeedingCard: View {
 
                     if let nextAt = prediction.nextFeedingAt {
                         Text(nextAt, format: .dateTime.hour().minute())
-                            .font(.system(size: 28, weight: .bold, design: .rounded))
+                            .font(theme.typography.display)
+                            .dsDynamicTypeCap()
                             .foregroundStyle(theme.color.textPrimary.color)
                     } else {
                         Text("예측 없음")
@@ -84,7 +85,8 @@ struct FeedingAdequacyCard: View {
 
                 HStack(alignment: .firstTextBaseline, spacing: 4) {
                     Text("\(totalMl)")
-                        .font(.system(size: 32, weight: .bold, design: .rounded))
+                        .font(theme.typography.display)
+                        .dsDynamicTypeCap()
                         .foregroundStyle(theme.color.textPrimary.color)
                     Text("ml")
                         .font(theme.typography.body)

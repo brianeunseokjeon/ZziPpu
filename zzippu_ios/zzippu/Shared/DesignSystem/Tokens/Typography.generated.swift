@@ -9,20 +9,20 @@ import SwiftUI
 // Dynamic Type 유지: TextStyle 매핑. display/mono는 상한(.xxLarge) 적용.
 
 struct SemanticTypography {
-    /// display: textStyle=.largeTitle, weight=.regular, dynamicTypeSize ≤ .xxLarge
-    let display: Font = .system(.largeTitle).weight(.regular)
+    /// display: textStyle=.largeTitle, weight=.bold, design=.rounded, dynamicTypeSize ≤ .xxLarge
+    let display: Font = .system(.largeTitle, design: .rounded).weight(.bold)
 
-    /// title: textStyle=.title3, weight=.regular
-    let title: Font = .system(.title3).weight(.regular)
+    /// title: textStyle=.title3, weight=.semibold
+    let title: Font = .system(.title3).weight(.semibold)
 
-    /// headline: textStyle=.headline, weight=.regular
-    let headline: Font = .system(.headline).weight(.regular)
+    /// headline: textStyle=.headline, weight=.semibold
+    let headline: Font = .system(.headline).weight(.semibold)
 
     /// body: textStyle=.body, weight=.regular
     let body: Font = .system(.body).weight(.regular)
 
-    /// bodyStrong: textStyle=.body, weight=.regular
-    let bodyStrong: Font = .system(.body).weight(.regular)
+    /// bodyStrong: textStyle=.body, weight=.semibold
+    let bodyStrong: Font = .system(.body).weight(.semibold)
 
     /// callout: textStyle=.callout, weight=.regular
     let callout: Font = .system(.callout).weight(.regular)
@@ -30,14 +30,15 @@ struct SemanticTypography {
     /// caption: textStyle=.caption, weight=.regular
     let caption: Font = .system(.caption).weight(.regular)
 
-    /// captionStrong: textStyle=.caption, weight=.regular
-    let captionStrong: Font = .system(.caption).weight(.regular)
+    /// captionStrong: textStyle=.caption, weight=.semibold
+    let captionStrong: Font = .system(.caption).weight(.semibold)
 
-    /// label: textStyle=.caption2, weight=.regular
-    let label: Font = .system(.caption2).weight(.regular)
+    /// label: textStyle=.caption2, weight=.medium, tracking=+0.3
+    let label: Font = .system(.caption2).weight(.medium)
+    let labelTracking: CGFloat = 0.3
 
-    /// mono: textStyle=.caption2, weight=.regular, dynamicTypeSize ≤ .xxLarge
-    let mono: Font = .system(.caption2, design: .monospaced).weight(.regular)
+    /// mono: textStyle=.caption2, weight=.medium, design=.monospaced, dynamicTypeSize ≤ .xxLarge
+    let mono: Font = .system(.caption2, design: .monospaced).weight(.medium)
 
 }
 

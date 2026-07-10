@@ -17,15 +17,17 @@ struct LoginView: View {
                     .font(.system(size: 56))
                     .foregroundStyle(theme.color.primary.color)
 
+                // display 토큰이 이제 .bold+rounded — 수동 .fontWeight 불필요.
                 Text("찌뿌둥")
                     .font(theme.typography.display)
-                    .fontWeight(.bold)
+                    .dsDynamicTypeCap()
 
                 Text("신생아 육아 기록")
                     .font(theme.typography.callout)
                     .foregroundStyle(theme.color.textSecondary.color)
             }
-            .padding(.bottom, 56)
+            // 로고블록↔필드 간격 32(xl) — 입력 그룹을 시각적으로 묶음.
+            .padding(.bottom, theme.space.xl)
 
             // 이메일 입력
             DSTextField(
@@ -36,19 +38,21 @@ struct LoginView: View {
             )
             .autocorrectionDisabled()
             .textInputAutocapitalization(.never)
-            .padding(.horizontal, theme.space.lg)
+            .padding(.horizontal, theme.space.screenPaddingX)
 
-            Spacer().frame(height: theme.space.xl)
+            // 필드↔버튼 16(md) — 그룹 결속.
+            Spacer().frame(height: theme.space.md)
 
             // OTP 요청 버튼
             DSButton(
                 "인증코드 받기",
+                size: .lg,
                 isLoading: vm.isLoading
             ) {
                 vm.requestOtp()
             }
             .disabled(!vm.isEmailValid)
-            .padding(.horizontal, theme.space.lg)
+            .padding(.horizontal, theme.space.screenPaddingX)
 
             Spacer()
         }

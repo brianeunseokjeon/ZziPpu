@@ -55,6 +55,8 @@ public struct DSButtonStyle: ButtonStyle {
 
     public func makeBody(configuration: Configuration) -> some View {
         let pressed = configuration.isPressed
+        // lg 사이즈(56pt)는 각짐 완화용 control-lg(16) 라운드.
+        let radius = size == .lg ? theme.component.button.radiusLg : theme.component.button.radius
 
         configuration.label
             .font(size.font)
@@ -63,34 +65,43 @@ public struct DSButtonStyle: ButtonStyle {
             .frame(height: size.height)
             .foregroundStyle(fgColor(pressed: pressed))
             .background(
-                RoundedRectangle(cornerRadius: theme.component.button.radius, style: .continuous)
+                RoundedRectangle(cornerRadius: radius, style: .continuous)
                     .fill(bgColor(pressed: pressed))
                     .overlay(
-                        RoundedRectangle(cornerRadius: theme.component.button.radius, style: .continuous)
+                        RoundedRectangle(cornerRadius: radius, style: .continuous)
                             .stroke(borderColor(pressed: pressed), lineWidth: variant == .tertiary ? 1.5 : 0)
                     )
             )
-            .opacity(isEnabled ? 1.0 : theme.component.button.disabledOpacity)
             .scaleEffect(pressed ? 0.97 : 1.0)
             .animation(.easeOut(duration: 0.12), value: pressed)
     }
 
     // MARK: Colors
 
+    // 비활성: opacity 곱셈 폐기 → 중립 회색 배경/전경 토큰(WCAG 저대비 신호).
     private func bgColor(pressed: Bool) -> Color {
+        guard isEnabled else {
+            switch variant {
+            case .tertiary: return .clear
+            default:        return theme.color.primaryDisabledBg.color
+            }
+        }
         switch variant {
         case .primary:
             return pressed ? theme.color.primaryPressed.color : theme.color.primary.color
         case .secondary:
-            return theme.color.surfaceSunken.color
+            // 프레스 시 살짝 진하게(borderStrong) — 눌림 피드백.
+            return pressed ? theme.color.borderStrong.color : theme.color.surfaceSunken.color
         case .tertiary:
-            return .clear
+            // 프레스 시 옅은 primaryTint 채움.
+            return pressed ? theme.color.primaryTint.color : .clear
         case .destructive:
-            return theme.color.statusDangerSolid.color
+            return pressed ? theme.color.statusDangerFg.color : theme.color.statusDangerSolid.color
         }
     }
 
     private func fgColor(pressed: Bool) -> Color {
+        guard isEnabled else { return theme.color.onPrimaryDisabled.color }
         switch variant {
         case .primary, .destructive:
             return theme.color.onPrimary.color
@@ -103,7 +114,8 @@ public struct DSButtonStyle: ButtonStyle {
 
     private func borderColor(pressed: Bool) -> Color {
         guard variant == .tertiary else { return .clear }
-        return theme.color.borderStrong.color
+        guard isEnabled else { return theme.color.border.color }
+        return pressed ? theme.color.primary.color : theme.color.borderStrong.color
     }
 }
 

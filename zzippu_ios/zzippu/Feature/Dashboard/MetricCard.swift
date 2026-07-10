@@ -38,7 +38,8 @@ struct MetricCard: View {
 
                 // 큰 숫자
                 Text(value)
-                    .font(.system(size: 28, weight: .bold, design: .rounded))
+                    .font(theme.typography.display)
+                    .dsDynamicTypeCap()
                     .foregroundStyle(theme.color.textPrimary.color)
                     .lineLimit(1)
                     .minimumScaleFactor(0.7)
@@ -99,7 +100,10 @@ struct GrowthMetricCard: View {
                             .font(theme.typography.caption)
                             .foregroundStyle(theme.color.textTertiary.color)
                         Text(weight)
-                            .font(.system(size: 22, weight: .bold, design: .rounded))
+                            .font(theme.typography.display)
+                            .dsDynamicTypeCap()
+                            .minimumScaleFactor(0.6)
+                            .lineLimit(1)
                             .foregroundStyle(theme.color.textPrimary.color)
                     }
                     VStack(alignment: .leading, spacing: 2) {
@@ -107,7 +111,10 @@ struct GrowthMetricCard: View {
                             .font(theme.typography.caption)
                             .foregroundStyle(theme.color.textTertiary.color)
                         Text(height)
-                            .font(.system(size: 22, weight: .bold, design: .rounded))
+                            .font(theme.typography.display)
+                            .dsDynamicTypeCap()
+                            .minimumScaleFactor(0.6)
+                            .lineLimit(1)
                             .foregroundStyle(theme.color.textPrimary.color)
                     }
                 }

@@ -63,12 +63,15 @@ public struct DSTextField: View {
             .focused($isFocused)
             .frame(height: theme.component.input.height)
             .padding(.horizontal, theme.component.input.paddingX)
-            .background(theme.color.surface.color)
+            // 채움형 필드: idle=surfaceSunken, focus 시 옅은 primaryTint로 가시성↑.
+            .background(fieldBg)
             .clipShape(RoundedRectangle(cornerRadius: theme.component.input.radius, style: .continuous))
             .overlay(
+                // idle엔 테두리 없음 — focus/error 시에만 링 표시(밋밋한 박스 탈피).
                 RoundedRectangle(cornerRadius: theme.component.input.radius, style: .continuous)
-                    .stroke(borderColor, lineWidth: 1.5)
+                    .stroke(borderColor, lineWidth: showRing ? 1.5 : 0)
             )
+            .animation(.easeOut(duration: 0.15), value: isFocused)
             .disabled(isDisabled)
             .opacity(isDisabled ? 0.5 : 1)
 
@@ -83,10 +86,22 @@ public struct DSTextField: View {
 
     // MARK: Border color
 
+    private var isError: Bool {
+        if case .error = state { return true }
+        return false
+    }
+
+    /// 링(테두리)은 focus 또는 error 상태에서만 표시.
+    private var showRing: Bool { isFocused || isError }
+
+    private var fieldBg: Color {
+        isFocused ? theme.color.primaryTint.color : theme.color.surfaceSunken.color
+    }
+
     private var borderColor: Color {
-        if case .error = state { return theme.color.statusDangerSolid.color }
-        if isFocused           { return theme.color.primary.color }
-        return theme.color.borderStrong.color
+        if isError   { return theme.color.statusDangerSolid.color }
+        if isFocused { return theme.color.primary.color }
+        return .clear
     }
 
     private var isDisabled: Bool {

@@ -18,6 +18,8 @@ struct SemanticColorTokens {
     let primaryPressed: DynamicColor = DynamicColor(light: Color(hex: 0x2563EB), dark: Color(hex: 0x1D4ED8))
     let onPrimary: DynamicColor = DynamicColor(light: .white, dark: .white)
     let primaryTint: DynamicColor = DynamicColor(light: Color(hex: 0xEFF6FF), dark: Color(hex: 0x1D4ED8))
+    let primaryDisabledBg: DynamicColor = DynamicColor(light: Color(hex: 0xE5E7EB), dark: Color(hex: 0x374151))
+    let onPrimaryDisabled: DynamicColor = DynamicColor(light: Color(hex: 0x9CA3AF), dark: Color(hex: 0x6B7280))
     let textPrimary: DynamicColor = DynamicColor(light: Color(hex: 0x111827), dark: Color(hex: 0xF9FAFB))
     let textSecondary: DynamicColor = DynamicColor(light: Color(hex: 0x6B7280), dark: Color(hex: 0x9CA3AF))
     let textTertiary: DynamicColor = DynamicColor(light: Color(hex: 0x9CA3AF), dark: Color(hex: 0x6B7280))

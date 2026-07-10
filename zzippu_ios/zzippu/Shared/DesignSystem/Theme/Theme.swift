@@ -14,10 +14,12 @@ struct ThemeColor {
     let surfaceSunken:   DynamicColor
 
     // MARK: Primary
-    let primary:        DynamicColor
-    let primaryPressed: DynamicColor
-    let onPrimary:      DynamicColor
-    let primaryTint:    DynamicColor
+    let primary:           DynamicColor
+    let primaryPressed:    DynamicColor
+    let onPrimary:         DynamicColor
+    let primaryTint:       DynamicColor
+    let primaryDisabledBg: DynamicColor
+    let onPrimaryDisabled: DynamicColor
 
     // MARK: Text
     let textPrimary:   DynamicColor
@@ -27,6 +29,7 @@ struct ThemeColor {
     // MARK: Border / Divider
     let border:       DynamicColor
     let borderStrong: DynamicColor
+    let cardBorder:   DynamicColor  // 라이트=투명(그림자로 부양), 다크=얇은 border
     let divider:      DynamicColor
     let scrim:        DynamicColor
 
@@ -178,10 +181,11 @@ struct ThemeSpace {
 // MARK: - ThemeRadius
 
 struct ThemeRadius {
-    let control: CGFloat  // 12
-    let card:    CGFloat  // 16
-    let sheet:   CGFloat  // 24
-    let pill:    CGFloat  // 9999
+    let control:   CGFloat  // 12  (44pt 컨트롤)
+    let controlLg: CGFloat  // 16  (56pt 대형 버튼·BigActionButton)
+    let card:      CGFloat  // 16
+    let sheet:     CGFloat  // 24
+    let pill:      CGFloat  // 9999
 }
 
 // MARK: - ThemeShadow
@@ -212,7 +216,8 @@ struct ComponentButtonTokens {
     let heightLg:      CGFloat
     let minWidth:      CGFloat
     let paddingXMd:    CGFloat
-    let radius:        CGFloat
+    let radius:        CGFloat  // 12 (sm/md)
+    let radiusLg:      CGFloat  // 16 (lg — 56pt)
     let disabledOpacity: Double
 }
 
@@ -242,6 +247,10 @@ struct ComponentTokens {
     let iconButtonSize: CGFloat
     let emptyStatePaddingY: CGFloat
     let sectionHeaderPaddingY: CGFloat
+    let statusPillPaddingX: CGFloat  // 12
+    let statusPillPaddingY: CGFloat  // 6
+    let timelineDotSize:     CGFloat // 10
+    let timelineDotSizeIdle: CGFloat // 8
 }
 
 // MARK: - Theme

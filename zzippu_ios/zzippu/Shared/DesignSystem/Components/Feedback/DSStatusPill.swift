@@ -20,8 +20,8 @@ public struct DSStatusPill: View {
         Text(text)
             .font(theme.typography.captionStrong)
             .foregroundStyle(colors.fg.color)
-            .padding(.horizontal, 12)
-            .padding(.vertical, 4)
+            .padding(.horizontal, theme.component.statusPillPaddingX)
+            .padding(.vertical, theme.component.statusPillPaddingY)
             .background(colors.bg.color)
             .clipShape(Capsule())
     }

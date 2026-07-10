@@ -193,7 +193,15 @@ walk_sem_color(tokens.semantic.color, []);
 const semTypo = {};
 for (const [name, entry] of Object.entries(tokens.semantic.typography)) {
   if (name.startsWith('$')) continue;
-  semTypo[name] = deep_resolve(entry.value, tokens);
+  // deep_resolve stops at plain objects (no light/dark); typography values are
+  // {size, weight, lineHeight, ...} whose leaves are still "{primitive...}" refs.
+  // Resolve each field individually so weight/size become concrete values.
+  const raw = entry.value;
+  const resolved = {};
+  for (const [field, v] of Object.entries(raw)) {
+    resolved[field] = deep_resolve(v, tokens);
+  }
+  semTypo[name] = resolved;
 }
 
 // ─────────────────────────────────────────────
@@ -346,20 +354,30 @@ for (const [name, val] of Object.entries(semTypo)) {
   const isMono = name === 'mono' || (val.family && val.family.includes('monospace'));
   const isDisplayOrMono = name === 'display' || name === 'mono';
 
+  // design: display uses .rounded (큰 숫자 통일), mono uses .monospaced.
+  const design = name === 'display' ? '.rounded' : (isMono ? '.monospaced' : null);
+
   let fontExpr;
-  if (isMono) {
-    fontExpr = `.system(${textStyle}, design: .monospaced).weight(${weight})`;
-  } else if (name === 'bodyStrong') {
-    fontExpr = `.system(${textStyle}).weight(${weight})`;
-  } else if (name === 'captionStrong') {
-    fontExpr = `.system(${textStyle}).weight(${weight})`;
+  if (design) {
+    fontExpr = `.system(${textStyle}, design: ${design}).weight(${weight})`;
   } else {
     fontExpr = `.system(${textStyle}).weight(${weight})`;
   }
+  // label: +0.3 tracking (자간) — 소형 라벨 가독·정돈.
+  const tracking = name === 'label';
 
-  let comment = `/// ${name}: textStyle=${textStyle}, weight=${weight}${isDisplayOrMono ? ', dynamicTypeSize ≤ .xxLarge' : ''}`;
+  let comment = `/// ${name}: textStyle=${textStyle}, weight=${weight}`
+    + `${design ? `, design=${design}` : ''}`
+    + `${tracking ? ', tracking=+0.3' : ''}`
+    + `${isDisplayOrMono ? ', dynamicTypeSize ≤ .xxLarge' : ''}`;
   typoSwift += `    ${comment}\n`;
-  typoSwift += `    let ${name}: Font = ${fontExpr}\n\n`;
+  if (tracking) {
+    // Font 자체엔 tracking API가 없어 별도 상수 + 헬퍼로 노출.
+    typoSwift += `    let ${name}: Font = ${fontExpr}\n`;
+    typoSwift += `    let ${name}Tracking: CGFloat = 0.3\n\n`;
+  } else {
+    typoSwift += `    let ${name}: Font = ${fontExpr}\n\n`;
+  }
 }
 typoSwift += '}\n\n';
 typoSwift += `extension SemanticTypography {

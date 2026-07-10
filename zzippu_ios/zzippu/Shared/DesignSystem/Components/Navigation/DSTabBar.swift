@@ -34,14 +34,14 @@ private struct DSTabBarItemView: View {
                     .font(.system(size: 22, weight: isActive ? .semibold : .regular))
                     .foregroundStyle(isActive
                         ? theme.color.primary.color
-                        : theme.color.textTertiary.color
+                        : theme.color.textSecondary.color
                     )
 
                 Text(item.label)
                     .font(theme.typography.label)
                     .foregroundStyle(isActive
                         ? theme.color.primary.color
-                        : theme.color.textTertiary.color
+                        : theme.color.textSecondary.color
                     )
             }
             .frame(maxWidth: .infinity)

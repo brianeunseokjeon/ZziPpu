@@ -39,7 +39,7 @@ public struct DSListRow<Leading: View, Content: View, Trailing: View>: View {
             case .navigable:
                 Image(systemName: "chevron.right")
                     .font(.system(size: 13, weight: .semibold))
-                    .foregroundStyle(theme.color.textTertiary.color)
+                    .foregroundStyle(theme.color.textSecondary.color)
             case .withTrailing:
                 trailing
             }
