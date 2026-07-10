@@ -1,0 +1,145 @@
+// Shared/DesignSystem/Components/Navigation/AppHeader.swift
+// 앱 헤더: [아바타][이름/나이]  ·····  [< 날짜 >]
+// sticky, safe-area 상단. 날짜 네비(어제/오늘/다음, 오늘이면 다음 비활성).
+// BabyAvatar + DSIconButton 재사용.
+// baby 파라미터: DesignSystem 내부 표시용 struct (도메인 엔티티 비의존).
+
+import SwiftUI
+
+// MARK: - AppHeaderBaby (DS 내부 표시용 뷰 모델 구조체)
+
+/// DesignSystem 순수성 유지: 도메인 Baby 엔티티 직접 의존 금지.
+/// 피처가 자신의 Baby 엔티티 → AppHeaderBaby 로 변환해 주입.
+public struct AppHeaderBaby {
+    public let name:        String
+    public let birthDate:   Date
+    public let gender:      BabyGender
+    public let photoURL:    URL?
+
+    public init(
+        name:      String,
+        birthDate: Date,
+        gender:    BabyGender = .unknown,
+        photoURL:  URL? = nil
+    ) {
+        self.name      = name
+        self.birthDate = birthDate
+        self.gender    = gender
+        self.photoURL  = photoURL
+    }
+}
+
+// MARK: - AppHeader
+
+public struct AppHeader: View {
+    public let baby:         AppHeaderBaby
+    @Binding public var selectedDate: Date
+    public let onDateChange: (Date) -> Void
+
+    public init(
+        baby:         AppHeaderBaby,
+        selectedDate: Binding<Date>,
+        onDateChange: @escaping (Date) -> Void
+    ) {
+        self.baby          = baby
+        self._selectedDate = selectedDate
+        self.onDateChange  = onDateChange
+    }
+
+    @Environment(\.theme) private var theme
+
+    private var isToday: Bool {
+        Calendar.current.isDateInToday(selectedDate)
+    }
+
+    private var ageText: String {
+        let days = Calendar.current.dateComponents([.day], from: baby.birthDate, to: Date()).day ?? 0
+        if days < 30 {
+            return "+\(days)일"
+        } else {
+            let months = Calendar.current.dateComponents([.month], from: baby.birthDate, to: Date()).month ?? 0
+            return "+\(months)개월"
+        }
+    }
+
+    private var dateText: String {
+        if isToday { return "오늘" }
+        let fmt = DateFormatter()
+        fmt.locale = Locale(identifier: "ko_KR")
+        fmt.dateFormat = "M월 d일"
+        return fmt.string(from: selectedDate)
+    }
+
+    public var body: some View {
+        HStack(spacing: theme.space.stackGapMd) {
+            // Avatar + name/age
+            BabyAvatar(photoURL: baby.photoURL, gender: baby.gender, size: .sm)
+
+            VStack(alignment: .leading, spacing: 1) {
+                Text(baby.name)
+                    .font(theme.typography.bodyStrong)
+                    .foregroundStyle(theme.color.textPrimary.color)
+                Text(ageText)
+                    .font(theme.typography.caption)
+                    .foregroundStyle(theme.color.textSecondary.color)
+            }
+
+            Spacer()
+
+            // Date navigation
+            HStack(spacing: 0) {
+                DSIconButton(systemName: "chevron.left") {
+                    let prev = Calendar.current.date(byAdding: .day, value: -1, to: selectedDate) ?? selectedDate
+                    selectedDate = prev
+                    onDateChange(prev)
+                }
+
+                Text(dateText)
+                    .font(theme.typography.captionStrong)
+                    .foregroundStyle(theme.color.textPrimary.color)
+                    .frame(minWidth: 52, alignment: .center)
+
+                DSIconButton(systemName: "chevron.right") {
+                    guard !isToday else { return }
+                    let next = Calendar.current.date(byAdding: .day, value: 1, to: selectedDate) ?? selectedDate
+                    selectedDate = next
+                    onDateChange(next)
+                }
+                .opacity(isToday ? 0.3 : 1.0)
+                .disabled(isToday)
+            }
+        }
+        .padding(.horizontal, theme.space.screenPaddingX)
+        .frame(height: 56)
+        .background(theme.color.surface.color)
+        .overlay(alignment: .bottom) {
+            Rectangle()
+                .fill(theme.color.divider.color)
+                .frame(height: 1)
+        }
+    }
+}
+
+// MARK: - Preview
+
+private struct AppHeaderPreview: View {
+    @State private var date = Date()
+
+    let baby = AppHeaderBaby(
+        name:      "아람이",
+        birthDate: Calendar.current.date(byAdding: .day, value: -42, to: Date()) ?? Date(),
+        gender:    .male
+    )
+
+    var body: some View {
+        VStack(spacing: 0) {
+            AppHeader(baby: baby, selectedDate: $date, onDateChange: { _ in })
+            Spacer()
+        }
+        .environment(\.theme, .zzippu)
+    }
+}
+
+#Preview("AppHeader") {
+    AppHeaderPreview()
+}

@@ -33,6 +33,15 @@ NEW_FILES = %w[
   Shared/DesignSystem/Components/Feedback/DSBadge.swift
   Shared/DesignSystem/Components/Lists/DSSectionHeader.swift
   Shared/DesignSystem/Components/Lists/DSEmptyState.swift
+  Shared/DesignSystem/Components/Lists/DSListRow.swift
+  Shared/DesignSystem/Components/Lists/TimelineRow.swift
+  Shared/DesignSystem/Components/Overlays/DSBottomSheet.swift
+  Shared/DesignSystem/Components/Feedback/ToastCenter.swift
+  Shared/DesignSystem/Components/Feedback/DSGaugeBar.swift
+  Shared/DesignSystem/Components/Media/BabyAvatar.swift
+  Shared/DesignSystem/Components/Navigation/DSTabBar.swift
+  Shared/DesignSystem/Components/Navigation/AppHeader.swift
+  Shared/DesignSystem/Components/Inputs/DSNumberStepper.swift
 ].freeze
 
 project = Xcodeproj::Project.open(PROJECT_PATH)
