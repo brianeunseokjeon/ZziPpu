@@ -17,6 +17,7 @@
 		0A180E9EBEEB04A62807CFBF /* TimelineRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 564683EA7CFADAF8CDE9F79B /* TimelineRow.swift */; };
 		0A6148EDD28CE4033A786C80 /* BabyDTO.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8340E850D26BB1D74C4A2CAA /* BabyDTO.swift */; };
 		0A7EABB8F5B1D177812748AE /* PlayRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = A27D7EAF97AE5D79252FEF82 /* PlayRepository.swift */; };
+		0AE7AECE07018A8576557DBD /* BundleGuidelineRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4BE1855070F3794B47BB366D /* BundleGuidelineRepository.swift */; };
 		0B776B47EEA75B98AD7E1AFC /* ShareSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2EFD722E2D53031EBAE5837A /* ShareSheet.swift */; };
 		0DCC66F5603F592F112146CC /* OnboardingViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB29328896FFE322C5D2A2B6 /* OnboardingViewModel.swift */; };
 		1342EEF1B57E5AA3A29C1F9A /* DiaperType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 734CF29084606CB53760BC23 /* DiaperType.swift */; };
@@ -42,6 +43,7 @@
 		284D275F363C97ECB2C59C9D /* RemoteDiaperRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = EAC64E3B6ACF98DA0422C9EE /* RemoteDiaperRepository.swift */; };
 		2869F885B067312F71276390 /* SleepMapper.swift in Sources */ = {isa = PBXBuildFile; fileRef = C3A12FF2E001BD284C472953 /* SleepMapper.swift */; };
 		2B9137A800A5EC187FCECC17 /* FeedingInputSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 62F5F367CC0FE94A12D61890 /* FeedingInputSheet.swift */; };
+		2E81D3F0A2067770155884C6 /* pediatric_guidelines.json in Resources */ = {isa = PBXBuildFile; fileRef = 7CA691FDE2EF6CED2F40EA87 /* pediatric_guidelines.json */; };
 		2F8C5CD010E08F492502DED6 /* DiaperViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = C6D2FA2E832505E2571BACE4 /* DiaperViewModel.swift */; };
 		30C37A9CE9991E330EDEB97E /* Feeding.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C316709D85EEE3F919AE448 /* Feeding.swift */; };
 		334D0350B7903B22F50C026D /* ComputeDashboardSummaryUseCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = B4858A6EEF050640F3C98D07 /* ComputeDashboardSummaryUseCase.swift */; };
@@ -53,6 +55,7 @@
 		36735540E2C7768C2C0B095F /* DevelopmentRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = DF1D700F66EE62EDE0D278B3 /* DevelopmentRepository.swift */; };
 		379B0BFC2CC2F2F1E127BB45 /* DiaperInputSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20668740BDF1EFCB382A9A97 /* DiaperInputSheet.swift */; };
 		38F7F605BF27B4CF539423DC /* DSTextField.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1927104D7EC8A00CC8D943FC /* DSTextField.swift */; };
+		3C2C5F2D49262D4708B7971E /* DSDisclaimerCaption.swift in Sources */ = {isa = PBXBuildFile; fileRef = 44B90CF02498087E4EF2542B /* DSDisclaimerCaption.swift */; };
 		3CACEA50589834E34C73F343 /* DSGaugeBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 15218DAD74298A15AF785A8B /* DSGaugeBar.swift */; };
 		3E8628E7EA7E78B4D8E78021 /* RemoteDashboardRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40911B8DA1EF545615441B8F /* RemoteDashboardRepository.swift */; };
 		3F30A2A2C7203BF2581D6A8C /* VaccinationDTO.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB80B6331AAA33F2B625093A /* VaccinationDTO.swift */; };
@@ -63,6 +66,7 @@
 		46F0180C10B15746AE2B4CCC /* DevelopmentStage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 665122C5F11382581CEA0FE6 /* DevelopmentStage.swift */; };
 		47FD1B667883F34F17E45B8B /* DiaperDTO.swift in Sources */ = {isa = PBXBuildFile; fileRef = 502281F745E8C0CDF53EE122 /* DiaperDTO.swift */; };
 		4B6F7D8B391DE3B25E8AF9F7 /* Color+Hex.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2AEA429545D9F2DB9583AC6E /* Color+Hex.swift */; };
+		4FBD7F8215493B6937F4DCB4 /* RangeBandChart.swift in Sources */ = {isa = PBXBuildFile; fileRef = 105BA5A4800E331279400182 /* RangeBandChart.swift */; };
 		50F73733D5156FD4B0985FC0 /* Theme+zzippu.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3788FF8F194F5CF3DBEF255A /* Theme+zzippu.swift */; };
 		50F90CF3D1BDB027896BE6E8 /* RemoteGrowthRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3A5351BE5211F50B5AFF621E /* RemoteGrowthRepository.swift */; };
 		51ADB7FBB220B199EC38DC34 /* BabyProfileViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48E20F807D60A41C79B61A89 /* BabyProfileViewModel.swift */; };
@@ -76,6 +80,7 @@
 		5B4CD6B035191FA6F83A5E44 /* SessionState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 036CF36678A053C3DB145BDC /* SessionState.swift */; };
 		5C0669B9B35F2EB7EF5AAE90 /* GrowthMapper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 869D35FB41B35E590E5F7157 /* GrowthMapper.swift */; };
 		5C530D710EB01E074F21CD59 /* SleepViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6EFB11E405BF9DA251D23AF /* SleepViewModel.swift */; };
+		6093B533A61555D2B7080D9D /* PediatricGuideline.swift in Sources */ = {isa = PBXBuildFile; fileRef = 574481ADFD8ED7E01AADBD69 /* PediatricGuideline.swift */; };
 		629A6495023D3B2FC6B88158 /* PlayRecord.swift in Sources */ = {isa = PBXBuildFile; fileRef = D8F024E57C284CD5CD07116D /* PlayRecord.swift */; };
 		632FEE4DA151AEEF3385924E /* RemoteVaccinationRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A98363E0AB8DD6B90CF2C43 /* RemoteVaccinationRepository.swift */; };
 		63771E264A2C9991CA5F6A64 /* VaccinationRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 140E4D00F9FC2774D872B6BA /* VaccinationRepository.swift */; };
@@ -90,10 +95,14 @@
 		6CEB1E39229F5A703F675D9D /* GrowthDTO.swift in Sources */ = {isa = PBXBuildFile; fileRef = BF449EC34B66065FA3FDCFE5 /* GrowthDTO.swift */; };
 		6D09DD029EDAAA9F34617C0F /* CaregiverRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = C5E6E7E8A577D08AC211BB7F /* CaregiverRepository.swift */; };
 		6E05E18CF231F34B749CE031 /* DevelopmentViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC241B57F9B896477724FC6F /* DevelopmentViewModel.swift */; };
+		6E8A3894CF729FE356BF4843 /* who_growth_weight_boy.json in Resources */ = {isa = PBXBuildFile; fileRef = 4255C581698465DEB655CE81 /* who_growth_weight_boy.json */; };
+		719A1AEF745E481899ECB069 /* DomainInsight.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2DE7101621317FD16031294 /* DomainInsight.swift */; };
 		71A4D6C72A30D211DC76265C /* DiaperMapper.swift in Sources */ = {isa = PBXBuildFile; fileRef = BEEAB43AF153B171E135890A /* DiaperMapper.swift */; };
 		7606BF2525D016D0AF8B79E7 /* DashboardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 08CA2CCB34272F21A6F934BF /* DashboardView.swift */; };
 		76871AD9715074E6111227B5 /* Baby.swift in Sources */ = {isa = PBXBuildFile; fileRef = B3AF575A40C09CC2E16FB452 /* Baby.swift */; };
 		7822B75A37C66252E4055D0F /* RemoteFeedingDataSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2D49E7F6D7D91051EEA5D767 /* RemoteFeedingDataSource.swift */; };
+		7A93C22C4D59F7BE1F1B6530 /* who_growth_weight_girl.json in Resources */ = {isa = PBXBuildFile; fileRef = 3D6ADB230FC5F7066A9E8071 /* who_growth_weight_girl.json */; };
+		7EC79D79A4F14E5810757FA0 /* GuidelineRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0874B4E4D94E1D2CEE82E85 /* GuidelineRepository.swift */; };
 		7F837E564B3F6E55AB1667B2 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 64D450C96E4C4CA2F67849E7 /* SettingsView.swift */; };
 		80B78F7A0F2F933EED1227B9 /* DynamicColor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 11C5275F0A4564465AA8E687 /* DynamicColor.swift */; };
 		837B311B5B38E5243629C3C3 /* RemoteBabyRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8DA5EBB3AAE3F6297E463E8D /* RemoteBabyRepository.swift */; };
@@ -122,6 +131,7 @@
 		AB24EA15EB80A6C6E4EA98D7 /* SleepRecord.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8AB367D535416C42DBA06D6C /* SleepRecord.swift */; };
 		AC453B903112BAA43B7D9DB8 /* PlayDTO.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6D2751E5038B51444550AD65 /* PlayDTO.swift */; };
 		AC76D41EFA2622DAB1A477EB /* SaveDiaperUseCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9F2099E28FC13F347F86EFC /* SaveDiaperUseCase.swift */; };
+		B54B6106D2D020F544647AB8 /* EvaluateInsightsUseCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = B70CA639B37513701C1E39FA /* EvaluateInsightsUseCase.swift */; };
 		B61681F61E86A9AB68AE3B86 /* Vaccination.swift in Sources */ = {isa = PBXBuildFile; fileRef = 046BBD6EE0B74130611A76F0 /* Vaccination.swift */; };
 		BA956E62959602826CE418CD /* SparklineChart.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41958C109B68743DFEC0BF74 /* SparklineChart.swift */; };
 		BDBBA8BB09B269445217629E /* FeedingViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 12AFFEF8457AD64BEC2555EE /* FeedingViewModel.swift */; };
@@ -149,11 +159,13 @@
 		DDD587C8F47A5F3C600637DB /* DSNumberStepper.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9D7E9BCC3D0269738853326 /* DSNumberStepper.swift */; };
 		DE7CF49CC71C9C7146DDD96E /* APIClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9DAF399357A8600551960BA3 /* APIClient.swift */; };
 		E11B4A471A97A80F7223D8E0 /* GrowthViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63AFBBB40633397B444604BE /* GrowthViewModel.swift */; };
+		E1DDA3578FC9194C2A099BD0 /* InsightRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0BC56F438465C84BCFA0613B /* InsightRow.swift */; };
 		E55C477C3E412A33B3BF783C /* AuthRemoteDataSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = 462279624CC6352D8362F327 /* AuthRemoteDataSource.swift */; };
 		E5CC0FE63924828EEA9C7997 /* HomeViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3DCB48126456D01CA517AC82 /* HomeViewModel.swift */; };
 		E6891422AD8083153A30D501 /* SaveSleepUseCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = DCFF8FF117EEABBDEE84C4D7 /* SaveSleepUseCase.swift */; };
 		E7947006F5DFCAC2CA4047A9 /* DiaperRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8D99E4EBFB60B2E1E16C24B /* DiaperRepository.swift */; };
 		E7CC68FFE9D64A147E184A73 /* RemotePlayDataSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = C723460CF9DA8ABDBD0A0D81 /* RemotePlayDataSource.swift */; };
+		E881245F458D5C5A794427F9 /* AnalysisCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0A84670C6CDDDBBFB60369B3 /* AnalysisCard.swift */; };
 		E9041C5333C24614E875D4DB /* RemoteSleepRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C89B7C446944FE978DC1309 /* RemoteSleepRepository.swift */; };
 		EBE681EB4A466D8AB1480086 /* VaccinationContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6D4DF6AA22B1C02BEADDF6C7 /* VaccinationContentView.swift */; };
 		ED0F782E365309A461C421A2 /* RemoteDiaperDataSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = D97800D6658488B86ED341F3 /* RemoteDiaperDataSource.swift */; };
@@ -193,8 +205,11 @@
 		07C32E7ED9D8C426DA51FB92 /* BabyMapper.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = BabyMapper.swift; path = Network/Mappers/BabyMapper.swift; sourceTree = "<group>"; };
 		08CA2CCB34272F21A6F934BF /* DashboardView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DashboardView.swift; sourceTree = "<group>"; };
 		0A790C8145B8840974514CEC /* DevelopmentDTO.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = DevelopmentDTO.swift; path = Network/DTOs/DevelopmentDTO.swift; sourceTree = "<group>"; };
+		0A84670C6CDDDBBFB60369B3 /* AnalysisCard.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AnalysisCard.swift; sourceTree = "<group>"; };
 		0BC021245A4DC5B0E7EF54B3 /* KeychainTokenStore.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = KeychainTokenStore.swift; sourceTree = "<group>"; };
+		0BC56F438465C84BCFA0613B /* InsightRow.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = InsightRow.swift; sourceTree = "<group>"; };
 		0E423FC5865E6316007A1299 /* RemoteDevelopmentRepository.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = RemoteDevelopmentRepository.swift; sourceTree = "<group>"; };
+		105BA5A4800E331279400182 /* RangeBandChart.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = RangeBandChart.swift; sourceTree = "<group>"; };
 		11C5275F0A4564465AA8E687 /* DynamicColor.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DynamicColor.swift; sourceTree = "<group>"; };
 		12AFFEF8457AD64BEC2555EE /* FeedingViewModel.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = FeedingViewModel.swift; path = FeedingViewModel.swift; sourceTree = "<group>"; };
 		140E4D00F9FC2774D872B6BA /* VaccinationRepository.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = VaccinationRepository.swift; sourceTree = "<group>"; };
@@ -237,10 +252,13 @@
 		3A5351BE5211F50B5AFF621E /* RemoteGrowthRepository.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = RemoteGrowthRepository.swift; sourceTree = "<group>"; };
 		3B3A120ABFD48850B4441677 /* LoginView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = LoginView.swift; sourceTree = "<group>"; };
 		3C55B7A9BE3E6BE911111D64 /* RemoteSleepDataSource.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = RemoteSleepDataSource.swift; path = Network/DataSources/RemoteSleepDataSource.swift; sourceTree = "<group>"; };
+		3D6ADB230FC5F7066A9E8071 /* who_growth_weight_girl.json */ = {isa = PBXFileReference; includeInIndex = 1; path = who_growth_weight_girl.json; sourceTree = "<group>"; };
 		3DCB48126456D01CA517AC82 /* HomeViewModel.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = HomeViewModel.swift; sourceTree = "<group>"; };
 		3DD65B1970206F01A77B4967 /* SaveFeedingUseCase.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = SaveFeedingUseCase.swift; path = SaveFeedingUseCase.swift; sourceTree = "<group>"; };
 		40911B8DA1EF545615441B8F /* RemoteDashboardRepository.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = RemoteDashboardRepository.swift; sourceTree = "<group>"; };
 		41958C109B68743DFEC0BF74 /* SparklineChart.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SparklineChart.swift; sourceTree = "<group>"; };
+		4255C581698465DEB655CE81 /* who_growth_weight_boy.json */ = {isa = PBXFileReference; includeInIndex = 1; path = who_growth_weight_boy.json; sourceTree = "<group>"; };
+		44B90CF02498087E4EF2542B /* DSDisclaimerCaption.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DSDisclaimerCaption.swift; sourceTree = "<group>"; };
 		461B2AD016FE8779CEBA3C4E /* DiaperRecord.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DiaperRecord.swift; sourceTree = "<group>"; };
 		462279624CC6352D8362F327 /* AuthRemoteDataSource.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AuthRemoteDataSource.swift; sourceTree = "<group>"; };
 		465ED0CC3B1DCBA09A985137 /* DashboardDTO.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = DashboardDTO.swift; path = Network/DTOs/DashboardDTO.swift; sourceTree = "<group>"; };
@@ -250,6 +268,7 @@
 		4A4CB70DFEB907BFAF984313 /* DSCard.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DSCard.swift; sourceTree = "<group>"; };
 		4B562555BB31FD54A731C53B /* PlayViewModel.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PlayViewModel.swift; sourceTree = "<group>"; };
 		4B67ACE9657FD37CDD25556C /* AuthConfig.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AuthConfig.swift; sourceTree = "<group>"; };
+		4BE1855070F3794B47BB366D /* BundleGuidelineRepository.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = BundleGuidelineRepository.swift; sourceTree = "<group>"; };
 		4C0BAC34C6D8F8D56FE60D54 /* PlayMapper.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = PlayMapper.swift; path = Network/Mappers/PlayMapper.swift; sourceTree = "<group>"; };
 		4C89B7C446944FE978DC1309 /* RemoteSleepRepository.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = RemoteSleepRepository.swift; sourceTree = "<group>"; };
 		4D5CD5D64393B98F64FD21AA /* Motion.generated.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = Motion.generated.swift; sourceTree = "<group>"; };
@@ -260,6 +279,7 @@
 		502281F745E8C0CDF53EE122 /* DiaperDTO.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = DiaperDTO.swift; path = Network/DTOs/DiaperDTO.swift; sourceTree = "<group>"; };
 		53AC5F4C5E9A32DC59575998 /* OtpView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = OtpView.swift; sourceTree = "<group>"; };
 		564683EA7CFADAF8CDE9F79B /* TimelineRow.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = TimelineRow.swift; sourceTree = "<group>"; };
+		574481ADFD8ED7E01AADBD69 /* PediatricGuideline.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PediatricGuideline.swift; sourceTree = "<group>"; };
 		58C3DDC56C3FB9C79CF22891 /* BabyProfileView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = BabyProfileView.swift; sourceTree = "<group>"; };
 		5903311178AA9DB6CE12A6AB /* DSEmptyState.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DSEmptyState.swift; sourceTree = "<group>"; };
 		5A44EE147EB48348167C189D /* SettingsViewModel.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SettingsViewModel.swift; sourceTree = "<group>"; };
@@ -283,6 +303,7 @@
 		7AE63A49D75373F2DC84608A /* GrowthRepository.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = GrowthRepository.swift; sourceTree = "<group>"; };
 		7BED2A76C40FDFD4111AC2C6 /* CaregiverMapper.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = CaregiverMapper.swift; path = Network/Mappers/CaregiverMapper.swift; sourceTree = "<group>"; };
 		7C316709D85EEE3F919AE448 /* Feeding.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = Feeding.swift; path = Feeding.swift; sourceTree = "<group>"; };
+		7CA691FDE2EF6CED2F40EA87 /* pediatric_guidelines.json */ = {isa = PBXFileReference; includeInIndex = 1; path = pediatric_guidelines.json; sourceTree = "<group>"; };
 		7D0349BA2B5565612AA9E478 /* PrimitiveColors.generated.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PrimitiveColors.generated.swift; sourceTree = "<group>"; };
 		7E6F4322F8A48C775C715387 /* Milestone.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = Milestone.swift; sourceTree = "<group>"; };
 		80064DAC2E5FC1960E840826 /* TermDoc.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = TermDoc.swift; sourceTree = "<group>"; };
@@ -309,10 +330,13 @@
 		AB29328896FFE322C5D2A2B6 /* OnboardingViewModel.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = OnboardingViewModel.swift; sourceTree = "<group>"; };
 		AC241B57F9B896477724FC6F /* DevelopmentViewModel.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DevelopmentViewModel.swift; sourceTree = "<group>"; };
 		AC5E5BB66C303191729CAD07 /* AuthViewModel.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AuthViewModel.swift; sourceTree = "<group>"; };
+		B0874B4E4D94E1D2CEE82E85 /* GuidelineRepository.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = GuidelineRepository.swift; sourceTree = "<group>"; };
+		B2DE7101621317FD16031294 /* DomainInsight.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DomainInsight.swift; sourceTree = "<group>"; };
 		B3AF575A40C09CC2E16FB452 /* Baby.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = Baby.swift; sourceTree = "<group>"; };
 		B4858A6EEF050640F3C98D07 /* ComputeDashboardSummaryUseCase.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ComputeDashboardSummaryUseCase.swift; sourceTree = "<group>"; };
 		B5245F3E41B8AC858E9CCBBA /* DSSectionHeader.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DSSectionHeader.swift; sourceTree = "<group>"; };
 		B6EFB11E405BF9DA251D23AF /* SleepViewModel.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SleepViewModel.swift; sourceTree = "<group>"; };
+		B70CA639B37513701C1E39FA /* EvaluateInsightsUseCase.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = EvaluateInsightsUseCase.swift; sourceTree = "<group>"; };
 		B9D471E90AC7CF6BF84018A5 /* GrowthDetailView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = GrowthDetailView.swift; sourceTree = "<group>"; };
 		B9F2099E28FC13F347F86EFC /* SaveDiaperUseCase.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SaveDiaperUseCase.swift; sourceTree = "<group>"; };
 		BE6BD1EAD898C4CBDB103D4D /* DailySummary.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DailySummary.swift; sourceTree = "<group>"; };
@@ -404,6 +428,17 @@
 			);
 			name = Inputs;
 			path = Inputs;
+			sourceTree = "<group>";
+		};
+		0EC6E6F07594B30704FE27DF /* Guidelines */ = {
+			isa = PBXGroup;
+			children = (
+				7CA691FDE2EF6CED2F40EA87 /* pediatric_guidelines.json */,
+				4255C581698465DEB655CE81 /* who_growth_weight_boy.json */,
+				3D6ADB230FC5F7066A9E8071 /* who_growth_weight_girl.json */,
+			);
+			name = Guidelines;
+			path = Guidelines;
 			sourceTree = "<group>";
 		};
 		10331B1D9357A2EEBEA8F6CA /* Tokens */ = {
@@ -534,6 +569,7 @@
 				DF1D700F66EE62EDE0D278B3 /* DevelopmentRepository.swift */,
 				140E4D00F9FC2774D872B6BA /* VaccinationRepository.swift */,
 				C5E6E7E8A577D08AC211BB7F /* CaregiverRepository.swift */,
+				B0874B4E4D94E1D2CEE82E85 /* GuidelineRepository.swift */,
 			);
 			name = Repositories;
 			path = Repositories;
@@ -590,6 +626,7 @@
 				5903311178AA9DB6CE12A6AB /* DSEmptyState.swift */,
 				26E4683E293686E7A97CAFDE /* DSListRow.swift */,
 				564683EA7CFADAF8CDE9F79B /* TimelineRow.swift */,
+				0BC56F438465C84BCFA0613B /* InsightRow.swift */,
 			);
 			name = Lists;
 			path = Lists;
@@ -635,6 +672,15 @@
 			);
 			name = Domain;
 			path = Domain;
+			sourceTree = "<group>";
+		};
+		6A2AE9C4C16D2AAC37752B97 /* Content */ = {
+			isa = PBXGroup;
+			children = (
+				4BE1855070F3794B47BB366D /* BundleGuidelineRepository.swift */,
+			);
+			name = Content;
+			path = Content;
 			sourceTree = "<group>";
 		};
 		74ED637FB35F11AB1487F279 /* Play */ = {
@@ -739,6 +785,7 @@
 			isa = PBXGroup;
 			children = (
 				88A4849E3C418BCB8DF70E4B /* BabyAvatar.swift */,
+				105BA5A4800E331279400182 /* RangeBandChart.swift */,
 			);
 			name = Media;
 			path = Media;
@@ -764,6 +811,7 @@
 				28DC2E03620FB1804D341F67 /* SavePlayUseCase.swift */,
 				B4858A6EEF050640F3C98D07 /* ComputeDashboardSummaryUseCase.swift */,
 				EBD887C3EF6E11003BEE3EE8 /* ComputeTrendUseCase.swift */,
+				B70CA639B37513701C1E39FA /* EvaluateInsightsUseCase.swift */,
 			);
 			name = UseCases;
 			path = UseCases;
@@ -797,6 +845,15 @@
 			);
 			name = Development;
 			path = Development;
+			sourceTree = "<group>";
+		};
+		BE52E95429D4C202CAFB2AB7 /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				0EC6E6F07594B30704FE27DF /* Guidelines */,
+			);
+			name = Resources;
+			path = Resources;
 			sourceTree = "<group>";
 		};
 		BFA7020D7B21A2FA80FAAAB2 /* Persistence */ = {
@@ -856,6 +913,8 @@
 				046BBD6EE0B74130611A76F0 /* Vaccination.swift */,
 				72B38D485AAB242759A838D2 /* CaregiverInvite.swift */,
 				D06F39AB4E617AB598817C1B /* CaregiverMember.swift */,
+				574481ADFD8ED7E01AADBD69 /* PediatricGuideline.swift */,
+				B2DE7101621317FD16031294 /* DomainInsight.swift */,
 			);
 			name = Entities;
 			path = Entities;
@@ -875,6 +934,7 @@
 			isa = PBXGroup;
 			children = (
 				4A4CB70DFEB907BFAF984313 /* DSCard.swift */,
+				0A84670C6CDDDBBFB60369B3 /* AnalysisCard.swift */,
 			);
 			name = Containers;
 			path = Containers;
@@ -942,6 +1002,7 @@
 				94D1BF2EABC2F47645E26B45 /* DSBadge.swift */,
 				22A5DB23AF1D70998F4AD9FE /* ToastCenter.swift */,
 				15218DAD74298A15AF785A8B /* DSGaugeBar.swift */,
+				44B90CF02498087E4EF2542B /* DSDisclaimerCaption.swift */,
 			);
 			name = Feedback;
 			path = Feedback;
@@ -963,6 +1024,7 @@
 			children = (
 				A59A28CEF4637F337F93AEA8 /* Extensions */,
 				2558BE443BC6154CDB3CA118 /* DesignSystem */,
+				BE52E95429D4C202CAFB2AB7 /* Resources */,
 			);
 			name = Shared;
 			path = Shared;
@@ -975,6 +1037,7 @@
 				EECEA1FD0454C6B849882DF6 /* Repositories */,
 				98BA5A7AAAFE29E8F256DCBB /* Auth */,
 				53782F50BDE5B47A2BF7F677 /* Network */,
+				6A2AE9C4C16D2AAC37752B97 /* Content */,
 			);
 			name = Data;
 			path = Data;
@@ -1086,6 +1149,9 @@
 			files = (
 				1F1215802FFE889600F02CA5 /* Preview Assets.xcassets in Resources */,
 				1F12157D2FFE889600F02CA5 /* Assets.xcassets in Resources */,
+				2E81D3F0A2067770155884C6 /* pediatric_guidelines.json in Resources */,
+				6E8A3894CF729FE356BF4843 /* who_growth_weight_boy.json in Resources */,
+				7A93C22C4D59F7BE1F1B6530 /* who_growth_weight_girl.json in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1265,6 +1331,15 @@
 				A59B2F06922AA56FA568044B /* BabyProfileView.swift in Sources */,
 				D5E59E293CD34B1F808DEE6E /* CaregiverView.swift in Sources */,
 				9E54881E0BE1D72A0BFE6B96 /* RecordEditSheet.swift in Sources */,
+				6093B533A61555D2B7080D9D /* PediatricGuideline.swift in Sources */,
+				719A1AEF745E481899ECB069 /* DomainInsight.swift in Sources */,
+				7EC79D79A4F14E5810757FA0 /* GuidelineRepository.swift in Sources */,
+				B54B6106D2D020F544647AB8 /* EvaluateInsightsUseCase.swift in Sources */,
+				0AE7AECE07018A8576557DBD /* BundleGuidelineRepository.swift in Sources */,
+				3C2C5F2D49262D4708B7971E /* DSDisclaimerCaption.swift in Sources */,
+				E1DDA3578FC9194C2A099BD0 /* InsightRow.swift in Sources */,
+				E881245F458D5C5A794427F9 /* AnalysisCard.swift in Sources */,
+				4FBD7F8215493B6937F4DCB4 /* RangeBandChart.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

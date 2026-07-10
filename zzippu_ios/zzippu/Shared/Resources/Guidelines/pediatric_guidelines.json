@@ -1,0 +1,33 @@
+{
+  "version": "2026-07",
+  "disclaimer": "참고용 가이드입니다. 의학적 진단이 아니며 개인차는 정상입니다. 이상이 있으면 소아과 상담을 권장드려요.",
+  "feeding": {
+    "mlPerKgMin": 150,
+    "mlPerKgMax": 180,
+    "dailyCapMl": 960,
+    "tolerance": 0.20,
+    "source": "AAP / HealthyChildren.org — Amount and Schedule of Formula Feedings",
+    "note": "분유(formula) 기준. 모유수유는 양 측정이 어려워 비교에서 제외."
+  },
+  "sleep": [
+    { "minM": 0,  "maxM": 4,  "minH": 14, "maxH": 17, "label": "신생아" },
+    { "minM": 4,  "maxM": 12, "minH": 12, "maxH": 16, "label": "영아" },
+    { "minM": 12, "maxM": 24, "minH": 11, "maxH": 14, "label": "유아" }
+  ],
+  "diaper": [
+    { "minM": 0, "maxM": 1,  "peeMin": 6, "poopMin": 3, "poopMax": 12, "label": "생후 1주~1개월" },
+    { "minM": 1, "maxM": 6,  "peeMin": 6, "poopMin": 1, "poopMax": 8,  "label": "1~6개월" },
+    { "minM": 6, "maxM": 24, "peeMin": 5, "poopMin": 1, "poopMax": 4,  "label": "6개월+" }
+  ],
+  "tummyTime": [
+    { "minM": 0, "maxM": 2,  "minMin": 5,  "targetMin": 15 },
+    { "minM": 2, "maxM": 4,  "minMin": 20, "targetMin": 30 },
+    { "minM": 4, "maxM": 6,  "minMin": 30, "targetMin": 60 },
+    { "minM": 6, "maxM": 24, "minMin": 60, "targetMin": 90 }
+  ],
+  "sources": {
+    "sleep": "NSF 2015 (Hirshkowitz) / AASM 2016 (Paruthi) / WHO 2019",
+    "diaper": "AAP HealthyChildren — Diapering / 대한소아청소년과학회 일반 가이드 (참고용, 공식 상한 없음)",
+    "growth": "WHO Child Growth Standards 2006 (0–24m) L/M/S 백분위"
+  }
+}
