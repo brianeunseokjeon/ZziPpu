@@ -30,7 +30,21 @@ struct OtpView: View {
                     .foregroundStyle(theme.color.textSecondary.color)
                     .multilineTextAlignment(.center)
             }
-            .padding(.bottom, 48)
+            .padding(.bottom, theme.space.lg)
+
+            // 재전송 카운트다운 타이머 (3:00 → 0, 명시적 표시)
+            VStack(spacing: theme.space.xs) {
+                Label(vm.resendTimerText, systemImage: "clock")
+                    .font(theme.typography.title)
+                    .monospacedDigit()
+                    .foregroundStyle(
+                        vm.canResend ? theme.color.textTertiary.color : theme.color.primary.color
+                    )
+                Text(vm.canResend ? "인증코드가 만료됐어요 — 재전송해 주세요" : "재전송까지 남은 시간")
+                    .font(theme.typography.caption)
+                    .foregroundStyle(theme.color.textSecondary.color)
+            }
+            .padding(.bottom, theme.space.lg)
 
             // OTP 입력 필드
             DSTextField(
@@ -63,10 +77,14 @@ struct OtpView: View {
 
             // 재전송 / 뒤로
             HStack(spacing: theme.space.md) {
-                Button("코드 재전송") { vm.resendOtp() }
-                    .font(theme.typography.caption)
-                    .foregroundStyle(theme.color.primary.color)
-                    .disabled(vm.isLoading)
+                Button(vm.canResend ? "코드 재전송" : "\(vm.resendTimerText) 후 재전송") {
+                    vm.resendOtp()
+                }
+                .font(theme.typography.caption)
+                .foregroundStyle(
+                    vm.canResend ? theme.color.primary.color : theme.color.textTertiary.color
+                )
+                .disabled(!vm.canResend)
 
                 Text("·")
                     .foregroundStyle(theme.color.textSecondary.color)
