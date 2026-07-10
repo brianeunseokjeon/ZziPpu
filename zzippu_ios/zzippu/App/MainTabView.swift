@@ -5,6 +5,7 @@ import SwiftUI
 
 struct MainTabView: View {
     @Environment(AppContainer.self) private var container
+    @Environment(\.theme) private var theme
 
     var body: some View {
         TabView {
@@ -37,14 +38,8 @@ struct MainTabView: View {
     }
 
     private func placeholderView(_ title: String, _ subtitle: String) -> some View {
-        VStack(spacing: AppSpacing.sm) {
-            Text(title)
-                .font(AppTypography.title2)
-            Text(subtitle)
-                .font(AppTypography.caption)
-                .foregroundStyle(AppColor.textSecondary)
-        }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .background(AppColor.background)
+        DSEmptyState(icon: "clock", message: "\(title)\n\(subtitle)")
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .background(theme.color.background.color)
     }
 }

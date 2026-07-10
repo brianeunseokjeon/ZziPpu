@@ -5,6 +5,7 @@ import SwiftUI
 
 struct TermsAgreementView: View {
     @Environment(AppContainer.self) private var container
+    @Environment(\.theme) private var theme
     @State private var vm: TermsViewModel?
 
     var body: some View {
@@ -14,7 +15,7 @@ struct TermsAgreementView: View {
             } else {
                 ProgressView()
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
-                    .background(AppColor.background)
+                    .background(theme.color.background.color)
             }
         }
         .task {
@@ -35,6 +36,7 @@ struct TermsAgreementView: View {
 
 private struct TermsContent: View {
     @Bindable var vm: TermsViewModel
+    @Environment(\.theme) private var theme
 
     var body: some View {
         NavigationStack {
@@ -46,14 +48,17 @@ private struct TermsContent: View {
                             "전체 동의",
                             systemImage: vm.allAgreed ? "checkmark.circle.fill" : "circle"
                         )
-                        .font(AppTypography.body.weight(.semibold))
-                        .foregroundStyle(vm.allAgreed ? AppColor.primary : AppColor.textSecondary)
+                        .font(theme.typography.body.weight(.semibold))
+                        .foregroundStyle(vm.allAgreed ? theme.color.primary.color : theme.color.textSecondary.color)
                     }
                     Spacer()
                 }
-                .padding(AppSpacing.md)
-                .background(AppColor.surface, in: RoundedRectangle(cornerRadius: 12))
-                .padding([.horizontal, .top], AppSpacing.md)
+                .padding(theme.space.md)
+                .background(
+                    theme.color.surface.color,
+                    in: RoundedRectangle(cornerRadius: theme.radius.control)
+                )
+                .padding([.horizontal, .top], theme.space.md)
 
                 // 개별 약관 목록
                 if vm.isLoading {
@@ -73,24 +78,16 @@ private struct TermsContent: View {
                 }
 
                 // 동의 완료 버튼
-                Button(action: { Task { await vm.agreeAndContinue() } }) {
-                    Group {
-                        if vm.isSubmitting {
-                            ProgressView().tint(.white)
-                        } else {
-                            Text("동의하고 시작하기")
-                                .font(AppTypography.body)
-                                .fontWeight(.semibold)
-                        }
-                    }
-                    .frame(maxWidth: .infinity)
-                    .frame(height: 54)
+                DSButton(
+                    "동의하고 시작하기",
+                    isLoading: vm.isSubmitting
+                ) {
+                    Task { await vm.agreeAndContinue() }
                 }
-                .buttonStyle(.borderedProminent)
-                .disabled(!vm.canProceed || vm.isSubmitting)
-                .padding(AppSpacing.md)
+                .disabled(!vm.canProceed)
+                .padding(theme.space.md)
             }
-            .background(AppColor.background)
+            .background(theme.color.background.color)
             .navigationTitle("서비스 이용약관")
             .navigationBarTitleDisplayMode(.inline)
         }
@@ -115,12 +112,13 @@ private struct TermRow: View {
     let isAgreed: Bool
     let onToggle: () -> Void
     let onDetail: () -> Void
+    @Environment(\.theme) private var theme
 
     var body: some View {
         HStack {
             Button(action: onToggle) {
                 Image(systemName: isAgreed ? "checkmark.circle.fill" : "circle")
-                    .foregroundStyle(isAgreed ? AppColor.primary : AppColor.textSecondary)
+                    .foregroundStyle(isAgreed ? theme.color.primary.color : theme.color.textSecondary.color)
                     .font(.title3)
             }
             .buttonStyle(.plain)
@@ -129,16 +127,16 @@ private struct TermRow: View {
                 HStack(spacing: 4) {
                     if term.required {
                         Text("[필수]")
-                            .font(AppTypography.caption)
-                            .foregroundStyle(AppColor.primary)
+                            .font(theme.typography.caption)
+                            .foregroundStyle(theme.color.primary.color)
                             .fontWeight(.semibold)
                     } else {
                         Text("[선택]")
-                            .font(AppTypography.caption)
-                            .foregroundStyle(AppColor.textSecondary)
+                            .font(theme.typography.caption)
+                            .foregroundStyle(theme.color.textSecondary.color)
                     }
                     Text(term.title)
-                        .font(AppTypography.body)
+                        .font(theme.typography.body)
                 }
             }
 
@@ -146,8 +144,8 @@ private struct TermRow: View {
 
             Button(action: onDetail) {
                 Image(systemName: "chevron.right")
-                    .font(AppTypography.caption)
-                    .foregroundStyle(AppColor.textSecondary)
+                    .font(theme.typography.caption)
+                    .foregroundStyle(theme.color.textSecondary.color)
             }
             .buttonStyle(.plain)
         }
@@ -160,14 +158,15 @@ private struct TermRow: View {
 private struct TermDetailSheet: View {
     let term: TermDoc
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.theme) private var theme
 
     var body: some View {
         NavigationStack {
             ScrollView {
                 Text(term.content)
-                    .font(AppTypography.caption)
-                    .foregroundStyle(AppColor.textPrimary)
-                    .padding(AppSpacing.md)
+                    .font(theme.typography.caption)
+                    .foregroundStyle(theme.color.textPrimary.color)
+                    .padding(theme.space.md)
             }
             .navigationTitle(term.title)
             .navigationBarTitleDisplayMode(.inline)

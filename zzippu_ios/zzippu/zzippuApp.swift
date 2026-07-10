@@ -6,12 +6,17 @@ import SwiftUI
 @main
 struct zzippuApp: App {
     @State private var appContainer = AppContainer()
+    @State private var toastCenter = ToastCenter()
 
     var body: some Scene {
         WindowGroup {
             AppRootView()
                 .environment(appContainer)
                 .environment(\.theme, .zzippu)
+                .environment(toastCenter)
+                .overlay(alignment: .bottom) {
+                    ToastHost()
+                }
         }
     }
 }

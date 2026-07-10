@@ -5,6 +5,7 @@ import SwiftUI
 
 struct BabyOnboardingView: View {
     @Environment(AppContainer.self) private var container
+    @Environment(\.theme) private var theme
     @State private var vm: OnboardingViewModel?
 
     var body: some View {
@@ -14,7 +15,7 @@ struct BabyOnboardingView: View {
             } else {
                 ProgressView()
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
-                    .background(AppColor.background)
+                    .background(theme.color.background.color)
             }
         }
         .task {
@@ -41,37 +42,37 @@ struct BabyOnboardingView: View {
 
 private struct OnboardingContent: View {
     @Bindable var vm: OnboardingViewModel
+    @Environment(\.theme) private var theme
 
     var body: some View {
         NavigationStack {
             ScrollView {
-                VStack(spacing: AppSpacing.xl) {
+                VStack(spacing: theme.space.xl) {
                     // 헤더
-                    VStack(spacing: AppSpacing.sm) {
+                    VStack(spacing: theme.space.sm) {
                         Image(systemName: "figure.and.child.holdinghands")
                             .font(.system(size: 48))
-                            .foregroundStyle(AppColor.primary)
+                            .foregroundStyle(theme.color.primary.color)
 
                         Text("아기 정보 등록")
-                            .font(AppTypography.title2)
+                            .font(theme.typography.headline)
                             .fontWeight(.bold)
 
                         Text("기록을 시작하기 위해 아기 정보를 입력해 주세요.")
-                            .font(AppTypography.subheadline)
-                            .foregroundStyle(AppColor.textSecondary)
+                            .font(theme.typography.callout)
+                            .foregroundStyle(theme.color.textSecondary.color)
                             .multilineTextAlignment(.center)
                     }
-                    .padding(.top, AppSpacing.xl)
+                    .padding(.top, theme.space.xl)
 
                     // 입력 폼
-                    VStack(spacing: AppSpacing.lg) {
+                    VStack(spacing: theme.space.lg) {
                         // 이름
-                        FormField(label: "아이 이름 *") {
-                            TextField("예: 준서", text: $vm.babyName)
-                                .font(AppTypography.title3)
-                                .padding(AppSpacing.md)
-                                .background(AppColor.surface, in: RoundedRectangle(cornerRadius: 12))
-                        }
+                        DSTextField(
+                            label: "아이 이름 *",
+                            placeholder: "예: 준서",
+                            text: $vm.babyName
+                        )
 
                         // 생년월일
                         FormField(label: "생년월일") {
@@ -83,9 +84,12 @@ private struct OnboardingContent: View {
                             )
                             .labelsHidden()
                             .datePickerStyle(.compact)
-                            .padding(AppSpacing.md)
+                            .padding(theme.space.md)
                             .frame(maxWidth: .infinity, alignment: .leading)
-                            .background(AppColor.surface, in: RoundedRectangle(cornerRadius: 12))
+                            .background(
+                                theme.color.surface.color,
+                                in: RoundedRectangle(cornerRadius: theme.radius.control)
+                            )
                         }
 
                         // 성별
@@ -104,42 +108,34 @@ private struct OnboardingContent: View {
                             note: vm.birthWeightValidation
                         ) {
                             HStack {
-                                TextField("예: 3.2", text: $vm.birthWeightKgText)
-                                    .keyboardType(.decimalPad)
-                                    .font(AppTypography.title3)
-                                    .padding(AppSpacing.md)
-                                    .background(AppColor.surface, in: RoundedRectangle(cornerRadius: 12))
+                                DSTextField(
+                                    placeholder: "예: 3.2",
+                                    text: $vm.birthWeightKgText,
+                                    keyboardType: .decimalPad
+                                )
 
                                 Text("kg")
-                                    .font(AppTypography.body)
-                                    .foregroundStyle(AppColor.textSecondary)
+                                    .font(theme.typography.body)
+                                    .foregroundStyle(theme.color.textSecondary.color)
                                     .frame(width: 32)
                             }
                         }
                     }
-                    .padding(.horizontal, AppSpacing.lg)
+                    .padding(.horizontal, theme.space.lg)
 
                     // 저장 버튼
-                    Button(action: vm.save) {
-                        Group {
-                            if vm.isLoading {
-                                ProgressView().tint(.white)
-                            } else {
-                                Text("시작하기")
-                                    .font(AppTypography.body)
-                                    .fontWeight(.semibold)
-                            }
-                        }
-                        .frame(maxWidth: .infinity)
-                        .frame(height: 54)
+                    DSButton(
+                        "시작하기",
+                        isLoading: vm.isLoading
+                    ) {
+                        vm.save()
                     }
-                    .buttonStyle(.borderedProminent)
-                    .disabled(!vm.isFormValid || vm.birthWeightValidation != nil || vm.isLoading)
-                    .padding(.horizontal, AppSpacing.lg)
-                    .padding(.bottom, AppSpacing.xl)
+                    .disabled(!vm.isFormValid || vm.birthWeightValidation != nil)
+                    .padding(.horizontal, theme.space.lg)
+                    .padding(.bottom, theme.space.xl)
                 }
             }
-            .background(AppColor.background)
+            .background(theme.color.background.color)
             .navigationBarTitleDisplayMode(.inline)
         }
         .alert("오류", isPresented: Binding(
@@ -159,18 +155,19 @@ private struct FormField<Content: View>: View {
     let label: String
     var note: String? = nil
     @ViewBuilder let content: () -> Content
+    @Environment(\.theme) private var theme
 
     var body: some View {
-        VStack(alignment: .leading, spacing: AppSpacing.xs) {
+        VStack(alignment: .leading, spacing: theme.space.xs) {
             Text(label)
-                .font(AppTypography.caption)
-                .foregroundStyle(AppColor.textSecondary)
+                .font(theme.typography.caption)
+                .foregroundStyle(theme.color.textSecondary.color)
 
             content()
 
             if let note {
                 Text(note)
-                    .font(AppTypography.caption)
+                    .font(theme.typography.caption)
                     .foregroundStyle(.red)
             }
         }

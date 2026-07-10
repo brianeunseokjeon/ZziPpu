@@ -4,6 +4,7 @@ import SwiftUI
 
 struct HomeView: View {
     @Environment(AppContainer.self) private var container
+    @Environment(\.theme) private var theme
     @State private var showFeedingSheet = false
     @State private var selectedDate: Date = .now
 
@@ -16,10 +17,11 @@ struct HomeView: View {
                 Divider()
 
                 // placeholder: 타임라인은 Feeding 슬라이스 이후 추가
-                Text("타임라인은 다음 슬라이스에서 추가됩니다")
-                    .font(AppTypography.caption)
-                    .foregroundStyle(AppColor.textSecondary)
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                DSEmptyState(
+                    icon: "clock",
+                    message: "타임라인은 다음 슬라이스에서 추가됩니다"
+                )
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
             }
             .navigationTitle("먹놀잠")
             .navigationBarTitleDisplayMode(.large)
@@ -31,8 +33,8 @@ struct HomeView: View {
     }
 
     private var actionGrid: some View {
-        LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: AppSpacing.md) {
-            ActionButton(title: "수유", systemImage: "drop.fill", color: AppColor.formula) {
+        LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: theme.space.md) {
+            ActionButton(title: "수유", systemImage: "drop.fill", color: theme.color.domainFeedingFormulaSolid.color) {
                 showFeedingSheet = true
             }
             ActionButton(title: "수면", systemImage: "moon.fill", color: .indigo) {
@@ -45,7 +47,7 @@ struct HomeView: View {
                 // 다음 슬라이스
             }
         }
-        .padding(AppSpacing.md)
+        .padding(theme.space.md)
     }
 }
 
@@ -56,21 +58,22 @@ private struct ActionButton: View {
     let systemImage: String
     let color: Color
     let action: () -> Void
+    @Environment(\.theme) private var theme
 
     var body: some View {
         Button(action: action) {
-            VStack(spacing: AppSpacing.sm) {
+            VStack(spacing: theme.space.sm) {
                 Image(systemName: systemImage)
                     .font(.system(size: 32))
                     .foregroundStyle(color)
                 Text(title)
-                    .font(AppTypography.headline)
-                    .foregroundStyle(AppColor.textPrimary)
+                    .font(theme.typography.headline)
+                    .foregroundStyle(theme.color.textPrimary.color)
             }
             .frame(maxWidth: .infinity)
-            .padding(AppSpacing.lg)
-            .background(AppColor.surface)
-            .clipShape(RoundedRectangle(cornerRadius: 16))
+            .padding(theme.space.lg)
         }
+        .buttonStyle(.plain)
+        .dsCard(style: .interactive)
     }
 }

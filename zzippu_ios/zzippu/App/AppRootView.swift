@@ -87,52 +87,40 @@ struct AppRootView: View {
 private struct BabyLoadErrorView: View {
     let retry: () async -> Void
     @State private var isRetrying = false
+    @Environment(\.theme) private var theme
 
     var body: some View {
-        VStack(spacing: AppSpacing.md) {
-            Image(systemName: "wifi.exclamationmark")
-                .font(.system(size: 52))
-                .foregroundStyle(AppColor.textSecondary)
-            Text("데이터를 불러오지 못했어요")
-                .font(AppTypography.headline)
-            Text("잠시 후 다시 시도해 주세요.")
-                .font(AppTypography.subheadline)
-                .foregroundStyle(AppColor.textSecondary)
-            Button {
-                Task {
-                    isRetrying = true
-                    await retry()
-                    isRetrying = false
-                }
-            } label: {
-                if isRetrying {
-                    ProgressView().tint(.white)
-                } else {
-                    Text("다시 시도").fontWeight(.semibold)
-                }
+        DSEmptyState(
+            icon: "wifi.exclamationmark",
+            message: "데이터를 불러오지 못했어요\n잠시 후 다시 시도해 주세요.",
+            actionLabel: isRetrying ? "..." : "다시 시도"
+        ) {
+            Task {
+                isRetrying = true
+                await retry()
+                isRetrying = false
             }
-            .buttonStyle(.borderedProminent)
-            .disabled(isRetrying)
-            .padding(.top, AppSpacing.sm)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .background(AppColor.background)
+        .background(theme.color.background.color)
     }
 }
 
 // MARK: - Splash View
 
 private struct SplashView: View {
+    @Environment(\.theme) private var theme
+
     var body: some View {
-        VStack(spacing: AppSpacing.md) {
+        VStack(spacing: theme.space.md) {
             Image(systemName: "moon.stars.fill")
                 .font(.system(size: 72))
-                .foregroundStyle(AppColor.primary)
+                .foregroundStyle(theme.color.primary.color)
             Text("찌뿌둥")
-                .font(AppTypography.largeTitle)
+                .font(theme.typography.display)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .background(AppColor.background)
+        .background(theme.color.background.color)
     }
 }
 
@@ -141,6 +129,7 @@ private struct SplashView: View {
 /// 로그인 흐름 컨테이너 (LoginView ↔ OtpView 전환 + onSessionRestored 처리)
 private struct AuthFlowView: View {
     @Environment(AppContainer.self) private var container
+    @Environment(\.theme) private var theme
     @State private var vm: AuthViewModel?
 
     var body: some View {
@@ -159,7 +148,7 @@ private struct AuthFlowView: View {
             } else {
                 ProgressView()
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
-                    .background(AppColor.background)
+                    .background(theme.color.background.color)
             }
         }
         .task {

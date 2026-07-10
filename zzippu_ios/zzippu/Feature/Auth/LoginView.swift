@@ -5,67 +5,54 @@ import SwiftUI
 
 struct LoginView: View {
     @Bindable var vm: AuthViewModel
+    @Environment(\.theme) private var theme
 
     var body: some View {
         VStack(spacing: 0) {
             Spacer()
 
             // 앱 로고/타이틀 영역
-            VStack(spacing: AppSpacing.sm) {
+            VStack(spacing: theme.space.sm) {
                 Image(systemName: "moon.stars.fill")
                     .font(.system(size: 56))
-                    .foregroundStyle(AppColor.primary)
+                    .foregroundStyle(theme.color.primary.color)
 
                 Text("찌뿌둥")
-                    .font(AppTypography.largeTitle)
+                    .font(theme.typography.display)
                     .fontWeight(.bold)
 
                 Text("신생아 육아 기록")
-                    .font(AppTypography.subheadline)
-                    .foregroundStyle(AppColor.textSecondary)
+                    .font(theme.typography.callout)
+                    .foregroundStyle(theme.color.textSecondary.color)
             }
             .padding(.bottom, 56)
 
             // 이메일 입력
-            VStack(alignment: .leading, spacing: AppSpacing.sm) {
-                Text("이메일")
-                    .font(AppTypography.caption)
-                    .foregroundStyle(AppColor.textSecondary)
+            DSTextField(
+                label: "이메일",
+                placeholder: "이메일 주소 입력",
+                text: $vm.email,
+                keyboardType: .emailAddress
+            )
+            .autocorrectionDisabled()
+            .textInputAutocapitalization(.never)
+            .padding(.horizontal, theme.space.lg)
 
-                TextField("이메일 주소 입력", text: $vm.email)
-                    .font(AppTypography.body)
-                    .keyboardType(.emailAddress)
-                    .autocorrectionDisabled()
-                    .textInputAutocapitalization(.never)
-                    .padding(AppSpacing.md)
-                    .background(AppColor.surface, in: RoundedRectangle(cornerRadius: 12))
-            }
-            .padding(.horizontal, AppSpacing.lg)
-
-            Spacer().frame(height: AppSpacing.xl)
+            Spacer().frame(height: theme.space.xl)
 
             // OTP 요청 버튼
-            Button(action: vm.requestOtp) {
-                Group {
-                    if vm.isLoading {
-                        ProgressView()
-                            .tint(.white)
-                    } else {
-                        Text("인증코드 받기")
-                            .font(AppTypography.body)
-                            .fontWeight(.semibold)
-                    }
-                }
-                .frame(maxWidth: .infinity)
-                .frame(height: 54)
+            DSButton(
+                "인증코드 받기",
+                isLoading: vm.isLoading
+            ) {
+                vm.requestOtp()
             }
-            .buttonStyle(.borderedProminent)
-            .disabled(!vm.isEmailValid || vm.isLoading)
-            .padding(.horizontal, AppSpacing.lg)
+            .disabled(!vm.isEmailValid)
+            .padding(.horizontal, theme.space.lg)
 
             Spacer()
         }
-        .background(AppColor.background)
+        .background(theme.color.background.color)
         .alert("오류", isPresented: Binding(
             get: { vm.errorMessage != nil },
             set: { if !$0 { vm.errorMessage = nil } }

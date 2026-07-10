@@ -5,95 +5,81 @@ import SwiftUI
 
 struct OtpView: View {
     @Bindable var vm: AuthViewModel
+    @Environment(\.theme) private var theme
 
     var body: some View {
         VStack(spacing: 0) {
             Spacer()
 
             // 헤더
-            VStack(spacing: AppSpacing.sm) {
+            VStack(spacing: theme.space.sm) {
                 Image(systemName: "envelope.badge.fill")
                     .font(.system(size: 48))
-                    .foregroundStyle(AppColor.primary)
+                    .foregroundStyle(theme.color.primary.color)
 
                 Text("인증코드 확인")
-                    .font(AppTypography.title2)
+                    .font(theme.typography.headline)
                     .fontWeight(.bold)
 
                 Text(vm.email)
-                    .font(AppTypography.subheadline)
-                    .foregroundStyle(AppColor.textSecondary)
+                    .font(theme.typography.callout)
+                    .foregroundStyle(theme.color.textSecondary.color)
 
                 Text("로 6자리 인증코드를 보냈어요.")
-                    .font(AppTypography.caption)
-                    .foregroundStyle(AppColor.textSecondary)
+                    .font(theme.typography.caption)
+                    .foregroundStyle(theme.color.textSecondary.color)
                     .multilineTextAlignment(.center)
             }
             .padding(.bottom, 48)
 
             // OTP 입력 필드
-            VStack(alignment: .leading, spacing: AppSpacing.sm) {
-                Text("인증코드 (6자리)")
-                    .font(AppTypography.caption)
-                    .foregroundStyle(AppColor.textSecondary)
-
-                TextField("000000", text: $vm.otpCode)
-                    .font(.system(size: 32, weight: .bold, design: .monospaced))
-                    .keyboardType(.numberPad)
-                    .multilineTextAlignment(.center)
-                    .tracking(8)
-                    .onChange(of: vm.otpCode) { _, newVal in
-                        // 최대 6자리 제한
-                        if newVal.count > 6 {
-                            vm.otpCode = String(newVal.prefix(6))
-                        }
-                        // 숫자만 허용
-                        vm.otpCode = newVal.filter(\.isNumber)
-                    }
-                    .padding(AppSpacing.md)
-                    .background(AppColor.surface, in: RoundedRectangle(cornerRadius: 12))
+            DSTextField(
+                label: "인증코드 (6자리)",
+                placeholder: "000000",
+                text: $vm.otpCode,
+                keyboardType: .numberPad
+            )
+            .onChange(of: vm.otpCode) { _, newVal in
+                // 최대 6자리 제한
+                if newVal.count > 6 {
+                    vm.otpCode = String(newVal.prefix(6))
+                }
+                // 숫자만 허용
+                vm.otpCode = newVal.filter(\.isNumber)
             }
-            .padding(.horizontal, AppSpacing.lg)
+            .padding(.horizontal, theme.space.lg)
 
-            Spacer().frame(height: AppSpacing.xl)
+            Spacer().frame(height: theme.space.xl)
 
             // 확인 버튼
-            Button(action: vm.verifyOtp) {
-                Group {
-                    if vm.isLoading {
-                        ProgressView().tint(.white)
-                    } else {
-                        Text("확인")
-                            .font(AppTypography.body)
-                            .fontWeight(.semibold)
-                    }
-                }
-                .frame(maxWidth: .infinity)
-                .frame(height: 54)
+            DSButton(
+                "확인",
+                isLoading: vm.isLoading
+            ) {
+                vm.verifyOtp()
             }
-            .buttonStyle(.borderedProminent)
-            .disabled(!vm.isOtpValid || vm.isLoading)
-            .padding(.horizontal, AppSpacing.lg)
+            .disabled(!vm.isOtpValid)
+            .padding(.horizontal, theme.space.lg)
 
             // 재전송 / 뒤로
-            HStack(spacing: AppSpacing.md) {
+            HStack(spacing: theme.space.md) {
                 Button("코드 재전송") { vm.resendOtp() }
-                    .font(AppTypography.caption)
-                    .foregroundStyle(AppColor.primary)
+                    .font(theme.typography.caption)
+                    .foregroundStyle(theme.color.primary.color)
                     .disabled(vm.isLoading)
 
                 Text("·")
-                    .foregroundStyle(AppColor.textSecondary)
+                    .foregroundStyle(theme.color.textSecondary.color)
 
                 Button("이메일 변경") { vm.backToLogin() }
-                    .font(AppTypography.caption)
-                    .foregroundStyle(AppColor.textSecondary)
+                    .font(theme.typography.caption)
+                    .foregroundStyle(theme.color.textSecondary.color)
             }
-            .padding(.top, AppSpacing.md)
+            .padding(.top, theme.space.md)
 
             Spacer()
         }
-        .background(AppColor.background)
+        .background(theme.color.background.color)
         .alert("오류", isPresented: Binding(
             get: { vm.errorMessage != nil },
             set: { if !$0 { vm.errorMessage = nil } }

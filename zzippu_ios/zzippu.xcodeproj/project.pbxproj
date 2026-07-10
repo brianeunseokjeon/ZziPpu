@@ -16,7 +16,6 @@
 		0A6148EDD28CE4033A786C80 /* BabyDTO.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8340E850D26BB1D74C4A2CAA /* BabyDTO.swift */; };
 		0DCC66F5603F592F112146CC /* OnboardingViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB29328896FFE322C5D2A2B6 /* OnboardingViewModel.swift */; };
 		15816DA16E6B4BF0D18CBC20 /* AppContainer.swift in Sources */ = {isa = PBXBuildFile; fileRef = DC6116370C00CA56076813B3 /* AppContainer.swift */; };
-		16D1772E4D18106B895D7B68 /* AppColor.swift in Sources */ = {isa = PBXBuildFile; fileRef = CF008D2836212A8C92FB0134 /* AppColor.swift */; };
 		1853F231279C13D9DE1D3BFE /* Motion.generated.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D5CD5D64393B98F64FD21AA /* Motion.generated.swift */; };
 		185773B3CBADA1229AC35B98 /* DSTabBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4EAA4BDA7B549959F0982AB /* DSTabBar.swift */; };
 		18AB13FFE64B867521B4FB96 /* BabyAvatar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 88A4849E3C418BCB8DF70E4B /* BabyAvatar.swift */; };
@@ -42,7 +41,6 @@
 		3FB0E376733089F51D908DBE /* FeedingMapper.swift in Sources */ = {isa = PBXBuildFile; fileRef = A92B0E4985B7B7E16061A073 /* FeedingMapper.swift */; };
 		435542E9111E97A042B502AF /* SaveFeedingUseCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3DD65B1970206F01A77B4967 /* SaveFeedingUseCase.swift */; };
 		457908137F9833EF26324992 /* PrimitiveColors.generated.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7D0349BA2B5565612AA9E478 /* PrimitiveColors.generated.swift */; };
-		48377666430898F45BC82CCB /* AppSpacing.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6C46EF0B3AE07FF43964E22A /* AppSpacing.swift */; };
 		4B6F7D8B391DE3B25E8AF9F7 /* Color+Hex.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2AEA429545D9F2DB9583AC6E /* Color+Hex.swift */; };
 		50F73733D5156FD4B0985FC0 /* Theme+zzippu.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3788FF8F194F5CF3DBEF255A /* Theme+zzippu.swift */; };
 		50F90CF3D1BDB027896BE6E8 /* RemoteGrowthRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3A5351BE5211F50B5AFF621E /* RemoteGrowthRepository.swift */; };
@@ -61,7 +59,6 @@
 		80B78F7A0F2F933EED1227B9 /* DynamicColor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 11C5275F0A4564465AA8E687 /* DynamicColor.swift */; };
 		837B311B5B38E5243629C3C3 /* RemoteBabyRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8DA5EBB3AAE3F6297E463E8D /* RemoteBabyRepository.swift */; };
 		84024EA2C3D78463CDC2FF4A /* DSEmptyState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5903311178AA9DB6CE12A6AB /* DSEmptyState.swift */; };
-		8824D4BC4CAA5028195CB2C5 /* AppTypography.swift in Sources */ = {isa = PBXBuildFile; fileRef = 99919BBCD424921FE6CC727B /* AppTypography.swift */; };
 		8BDF0D41A0EBF8BE9A775E57 /* OtpView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 53AC5F4C5E9A32DC59575998 /* OtpView.swift */; };
 		8BF23724E0D84AD82CB96C47 /* Theme.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20A1B4DFCE9B542AAEA92808 /* Theme.swift */; };
 		8CFEFEE091745EE3282E69F2 /* DSSectionHeader.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5245F3E41B8AC858E9CCBBA /* DSSectionHeader.swift */; };
@@ -159,7 +156,6 @@
 		5E10F1609A4E959470A7B664 /* RemoteBabyDataSource.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = RemoteBabyDataSource.swift; path = Network/DataSources/RemoteBabyDataSource.swift; sourceTree = "<group>"; };
 		62F5F367CC0FE94A12D61890 /* FeedingInputSheet.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = FeedingInputSheet.swift; path = FeedingInputSheet.swift; sourceTree = "<group>"; };
 		6519A1126295CD014E06AC4F /* MainTabView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = MainTabView.swift; path = MainTabView.swift; sourceTree = "<group>"; };
-		6C46EF0B3AE07FF43964E22A /* AppSpacing.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = AppSpacing.swift; path = AppSpacing.swift; sourceTree = "<group>"; };
 		6EA6678CDA6E85155283D437 /* AuthSession.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AuthSession.swift; sourceTree = "<group>"; };
 		6ED0B541A872DC7DFC8495E0 /* Typography.generated.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = Typography.generated.swift; sourceTree = "<group>"; };
 		7AE63A49D75373F2DC84608A /* GrowthRepository.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = GrowthRepository.swift; sourceTree = "<group>"; };
@@ -174,7 +170,6 @@
 		944C2512A90ABEED4AA5E150 /* DSButton.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DSButton.swift; sourceTree = "<group>"; };
 		94D1BF2EABC2F47645E26B45 /* DSBadge.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DSBadge.swift; sourceTree = "<group>"; };
 		97C9C2D4F6C93F92F5D1E2ED /* GrowthRecord.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = GrowthRecord.swift; sourceTree = "<group>"; };
-		99919BBCD424921FE6CC727B /* AppTypography.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = AppTypography.swift; path = AppTypography.swift; sourceTree = "<group>"; };
 		9DAF399357A8600551960BA3 /* APIClient.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = APIClient.swift; path = Network/APIClient.swift; sourceTree = "<group>"; };
 		A03E7FF4C92BF8917D4687F0 /* DSIconButton.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DSIconButton.swift; sourceTree = "<group>"; };
 		A27FD59AFCABD2B6BDD8FB09 /* BabyRepository.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = BabyRepository.swift; sourceTree = "<group>"; };
@@ -190,7 +185,6 @@
 		C29CC0BC8A917EC1B7BCF0B8 /* PrimitiveScale.generated.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PrimitiveScale.generated.swift; sourceTree = "<group>"; };
 		C396CC363258B9C2C84B1443 /* SemanticColors.generated.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SemanticColors.generated.swift; sourceTree = "<group>"; };
 		C9D7E9BCC3D0269738853326 /* DSNumberStepper.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DSNumberStepper.swift; sourceTree = "<group>"; };
-		CF008D2836212A8C92FB0134 /* AppColor.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = AppColor.swift; path = AppColor.swift; sourceTree = "<group>"; };
 		D34E89B0D2617C8B8E629352 /* AuthRepository.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AuthRepository.swift; sourceTree = "<group>"; };
 		D4EAA4BDA7B549959F0982AB /* DSTabBar.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DSTabBar.swift; sourceTree = "<group>"; };
 		D5970445AE2A0C60AA51E950 /* FeedingRepository.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = FeedingRepository.swift; path = FeedingRepository.swift; sourceTree = "<group>"; };
@@ -339,9 +333,6 @@
 		2558BE443BC6154CDB3CA118 /* DesignSystem */ = {
 			isa = PBXGroup;
 			children = (
-				CF008D2836212A8C92FB0134 /* AppColor.swift */,
-				6C46EF0B3AE07FF43964E22A /* AppSpacing.swift */,
-				99919BBCD424921FE6CC727B /* AppTypography.swift */,
 				CF71AC8B9C0CF8C1EB9A5499 /* Foundation */,
 				1E2C741AC6B92B24267F5372 /* Theme */,
 				10331B1D9357A2EEBEA8F6CA /* Tokens */,
@@ -829,9 +820,6 @@
 				345D55D6A9F5031ECAFA8BB6 /* FeedingRepository.swift in Sources */,
 				435542E9111E97A042B502AF /* SaveFeedingUseCase.swift in Sources */,
 				FF3417C96429D55E89C07F10 /* Date+.swift in Sources */,
-				16D1772E4D18106B895D7B68 /* AppColor.swift in Sources */,
-				48377666430898F45BC82CCB /* AppSpacing.swift in Sources */,
-				8824D4BC4CAA5028195CB2C5 /* AppTypography.swift in Sources */,
 				BDBBA8BB09B269445217629E /* FeedingViewModel.swift in Sources */,
 				2B9137A800A5EC187FCECC17 /* FeedingInputSheet.swift in Sources */,
 				9B8725CB28BE230EDEB377F8 /* HomeView.swift in Sources */,
