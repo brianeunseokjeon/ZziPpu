@@ -1,7 +1,7 @@
 // App/MainTabView.swift
-// T1: DSTabBar 기반 4탭 셸.
+// T1/T3: DSTabBar 기반 4탭 셸.
 //   0 홈     house.fill          → HomeView (기능)
-//   1 대시보드 heart.text.square.fill → DSEmptyState placeholder
+//   1 대시보드 heart.text.square.fill → DashboardView (T3)
 //   2 발달    figure.child        → DSEmptyState placeholder
 //   3 설정    gearshape.fill      → DSEmptyState placeholder
 // selectedDate는 탭 전환해도 유지 (홈·대시보드 공유 예정).
@@ -32,7 +32,8 @@ struct MainTabView: View {
                     .allowsHitTesting(selection == 0)
 
                 if selection == 1 {
-                    placeholderView("대시보드", systemImage: "heart.text.square.fill")
+                    DashboardView()
+                        .environment(container)
                 } else if selection == 2 {
                     placeholderView("발달", systemImage: "figure.child")
                 } else if selection == 3 {

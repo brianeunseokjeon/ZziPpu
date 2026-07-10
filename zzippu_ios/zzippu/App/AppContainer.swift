@@ -8,13 +8,14 @@ import Observation
 final class AppContainer {
 
     // MARK: - Repositories (Domain 프로토콜 타입으로 보관)
-    let feedingRepository: FeedingRepository
-    let babyRepository: BabyRepository
-    let growthRepository: GrowthRepository
-    let authRepository: AuthRepository
-    let sleepRepository: SleepRepository
-    let diaperRepository: DiaperRepository
-    let playRepository: PlayRepository
+    let feedingRepository:   FeedingRepository
+    let babyRepository:      BabyRepository
+    let growthRepository:    GrowthRepository
+    let authRepository:      AuthRepository
+    let sleepRepository:     SleepRepository
+    let diaperRepository:    DiaperRepository
+    let playRepository:      PlayRepository
+    let dashboardRepository: DashboardRepository
 
     // MARK: - Session State (라우팅 전용)
     let sessionState: SessionState
@@ -36,9 +37,10 @@ final class AppContainer {
             remote: AuthRemoteDataSource(),
             tokenStore: KeychainTokenStore()
         )
-        self.sleepRepository  = RemoteSleepRepository(api: api)
-        self.diaperRepository = RemoteDiaperRepository(api: api)
-        self.playRepository   = RemotePlayRepository(api: api)
+        self.sleepRepository     = RemoteSleepRepository(api: api)
+        self.diaperRepository    = RemoteDiaperRepository(api: api)
+        self.playRepository      = RemotePlayRepository(api: api)
+        self.dashboardRepository = RemoteDashboardRepository(api: api)
         self.sessionState = SessionState()
     }
 
