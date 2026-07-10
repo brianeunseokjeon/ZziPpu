@@ -1,36 +1,68 @@
 // Feature/Home/HomeView.swift
-// T2 홈 기록허브:
-//   ActiveSessionBanner (진행중 수면 배너)
-//   BigActionGrid (4 버튼: 수유/수면/기저귀/놀이 모두 연결)
-//   통합 타임라인 (수유+수면+기저귀+놀이 시각 기준 통합 정렬)
+// 홈 — 웹(page.tsx / BigActionGrid / TimelineScrollView / DayTimeline) 재현.
+//   • 상단 고정: 6버튼 퀵기록(분유·모유·소변·대변·수면시작·터미타임시작)
+//   • 하단: 여러 날 스크롤 피드(날짜 섹션: 오늘/어제/그제/"N월 N일 (요일)"), 아래로 과거 로드(최대 60일)
+//   • 과거 날짜 선택 시 단일 일자 포커스 뷰
+//   • 활성 세션(수면/터미타임)은 버튼이 "종료"로 전환.
+// DS 컴포넌트(AppHeader/TimelineGroupView/TimelineItemRow/DSCard/DSBottomSheet/DSEmptyState) + theme 토큰만 사용.
 
 import SwiftUI
 
 struct HomeView: View {
     @Environment(AppContainer.self) private var container
     @Environment(ToastCenter.self)  private var toastCenter
-    @Environment(\.theme)          private var theme
+    @Environment(\.theme)           private var theme
 
     @State private var vm: HomeViewModel?
-    @State private var showFeedingSheet = false
-    @State private var showSleepSheet   = false
-    @State private var showDiaperSheet  = false
-    @State private var showPlaySheet    = false
+
+    // 상세 입력 시트 (모유 / 대변 / 과거 날짜 입력)
+    @State private var feedingSheetType: FeedingType? = nil   // 모유 상세
+    @State private var showBreastSheet  = false
+    @State private var showDiaperSheet  = false               // 대변 상세
+    @State private var showFeedingSheet = false               // 과거 분유
+    @State private var showSleepSheet   = false               // 과거 수면
+    @State private var showPlaySheet    = false               // 과거 터미타임
 
     var body: some View {
         NavigationStack {
             if let vm {
                 HomeContentView(
                     vm: vm,
-                    showFeedingSheet: $showFeedingSheet,
-                    showSleepSheet:   $showSleepSheet,
-                    showDiaperSheet:  $showDiaperSheet,
-                    showPlaySheet:    $showPlaySheet
+                    onAction: { handleAction($0, vm: vm) }
                 )
-                // Feeding Sheet
+                .dsBottomSheet(
+                    isPresented: $showBreastSheet,
+                    options: .init(title: "모유 기록", detents: [.medium, .large])
+                ) {
+                    FeedingInputSheet(
+                        isPresented: $showBreastSheet,
+                        onSaved: { feeding in
+                            Task { @MainActor in
+                                await vm.saveFeeding(feeding)
+                                toastCenter.show(.init(message: "모유 기록 완료!", variant: .success))
+                            }
+                        }
+                    )
+                    .environment(container)
+                }
+                .dsBottomSheet(
+                    isPresented: $showDiaperSheet,
+                    options: .init(title: "대변 기록", detents: [.medium, .large])
+                ) {
+                    DiaperInputSheet(
+                        isPresented: $showDiaperSheet,
+                        onSaved: { diaper in
+                            Task { @MainActor in
+                                await vm.saveDiaper(diaper)
+                                toastCenter.show(.init(message: "대변 기록 완료!", variant: .success))
+                            }
+                        }
+                    )
+                    .environment(container)
+                }
                 .dsBottomSheet(
                     isPresented: $showFeedingSheet,
-                    options: .init(title: "수유 기록", detents: [.medium, .large])
+                    options: .init(title: "분유 기록", detents: [.medium, .large])
                 ) {
                     FeedingInputSheet(
                         isPresented: $showFeedingSheet,
@@ -43,7 +75,6 @@ struct HomeView: View {
                     )
                     .environment(container)
                 }
-                // Sleep Sheet
                 .dsBottomSheet(
                     isPresented: $showSleepSheet,
                     options: .init(title: "수면 기록", detents: [.medium])
@@ -53,39 +84,22 @@ struct HomeView: View {
                         onSaved: { sleep in
                             Task { @MainActor in
                                 await vm.saveSleep(sleep)
-                                toastCenter.show(.init(message: "수면 시작!", variant: .success))
+                                toastCenter.show(.init(message: "수면 기록 완료!", variant: .success))
                             }
                         }
                     )
                     .environment(container)
                 }
-                // Diaper Sheet
-                .dsBottomSheet(
-                    isPresented: $showDiaperSheet,
-                    options: .init(title: "기저귀 기록", detents: [.medium, .large])
-                ) {
-                    DiaperInputSheet(
-                        isPresented: $showDiaperSheet,
-                        onSaved: { diaper in
-                            Task { @MainActor in
-                                await vm.saveDiaper(diaper)
-                                toastCenter.show(.init(message: "기저귀 기록 완료!", variant: .success))
-                            }
-                        }
-                    )
-                    .environment(container)
-                }
-                // Play Sheet
                 .dsBottomSheet(
                     isPresented: $showPlaySheet,
-                    options: .init(title: "놀이 기록", detents: [.medium, .large])
+                    options: .init(title: "터미타임 기록", detents: [.medium, .large])
                 ) {
                     PlayInputSheet(
                         isPresented: $showPlaySheet,
                         onSaved: { play in
                             Task { @MainActor in
                                 await vm.savePlay(play)
-                                toastCenter.show(.init(message: "놀이 기록 완료!", variant: .success))
+                                toastCenter.show(.init(message: "터미타임 기록 완료!", variant: .success))
                             }
                         }
                     )
@@ -109,27 +123,69 @@ struct HomeView: View {
                 )
                 vm = newVM
                 newVM.loadActiveBaby()
-                newVM.loadAll()
+                newVM.loadInitial()
+            }
+        }
+    }
+
+    // MARK: - 버튼 액션 라우팅
+
+    private func handleAction(_ action: HomeAction, vm: HomeViewModel) {
+        // 과거 날짜 포커스 모드: 모든 버튼이 시각 입력 시트를 연다 (웹 동작).
+        if vm.isFocusingPast {
+            switch action {
+            case .formula:                 showFeedingSheet = true
+            case .breast:                  showBreastSheet  = true
+            case .pee, .poo:               showDiaperSheet  = true
+            case .sleep:                   showSleepSheet   = true
+            case .play:                    showPlaySheet    = true
+            }
+            return
+        }
+
+        switch action {
+        case .formula:
+            Task { @MainActor in
+                let msg = await vm.quickSaveFormula()
+                toastCenter.show(.init(message: msg, variant: .success))
+            }
+        case .breast:
+            showBreastSheet = true
+        case .pee:
+            Task { @MainActor in
+                let msg = await vm.quickSavePee()
+                toastCenter.show(.init(message: msg, variant: .success))
+            }
+        case .poo:
+            showDiaperSheet = true
+        case .sleep:
+            Task { @MainActor in
+                let msg = await vm.toggleSleep()
+                toastCenter.show(.init(message: msg, variant: .success))
+            }
+        case .play:
+            Task { @MainActor in
+                let msg = await vm.togglePlay()
+                toastCenter.show(.init(message: msg, variant: .success))
             }
         }
     }
 }
 
+// MARK: - HomeAction
+
+enum HomeAction { case formula, breast, pee, poo, sleep, play }
+
 // MARK: - HomeContentView
 
 private struct HomeContentView: View {
     @Bindable var vm: HomeViewModel
-    @Binding var showFeedingSheet: Bool
-    @Binding var showSleepSheet:   Bool
-    @Binding var showDiaperSheet:  Bool
-    @Binding var showPlaySheet:    Bool
+    let onAction: (HomeAction) -> Void
 
-    @Environment(ToastCenter.self) private var toastCenter
-    @Environment(\.theme)         private var theme
+    @Environment(\.theme) private var theme
 
     var body: some View {
         VStack(spacing: 0) {
-            // AppHeader
             if let baby = vm.activeBaby {
                 AppHeader(
                     baby: baby.toHeaderBaby(),
@@ -140,44 +196,10 @@ private struct HomeContentView: View {
                 AppHeaderPlaceholder()
             }
 
-            ScrollView {
-                VStack(spacing: 0) {
-                    // 진행중 수면 배너
-                    if let active = vm.activeSleepSession {
-                        ActiveSessionBanner(
-                            sleep: active,
-                            onEnd: {
-                                vm.endActiveSleep()
-                                toastCenter.show(.init(message: "수면 종료!", variant: .success))
-                            }
-                        )
-                        .padding(.horizontal, theme.space.screenPaddingX)
-                        .padding(.top, theme.space.md)
-                    }
-
-                    // BigActionGrid
-                    BigActionGrid(
-                        showFeedingSheet: $showFeedingSheet,
-                        showSleepSheet:   $showSleepSheet,
-                        showDiaperSheet:  $showDiaperSheet,
-                        showPlaySheet:    $showPlaySheet,
-                        hasActiveSleep:   vm.activeSleepSession != nil
-                    )
-                    .padding(theme.space.md)
-
-                    Divider()
-                        .padding(.horizontal, theme.space.screenPaddingX)
-
-                    // 통합 타임라인
-                    UnifiedTimeline(
-                        items: vm.timelineItems,
-                        isLoading: vm.isLoading,
-                        onDelete: { item in
-                            deleteItem(item)
-                        }
-                    )
-                    .padding(.vertical, theme.space.sm)
-                }
+            if vm.isFocusingPast {
+                PastFocusView(vm: vm, onAction: onAction)
+            } else {
+                TodayView(vm: vm, onAction: onAction)
             }
         }
         .background(theme.color.background.color)
@@ -191,246 +213,198 @@ private struct HomeContentView: View {
             Text(vm.errorMessage ?? "")
         }
     }
+}
 
-    private func deleteItem(_ item: TimelineItem) {
-        // domainKind로 어느 도메인 삭제인지 판별
-        switch item.domainKind {
-        case .feedingFormula, .feedingBreastLeft, .feedingBreastRight,
-             .feedingBreastBoth, .feedingSolids:
-            if let f = vm.feedings.first(where: { $0.id == item.id }) {
-                vm.deleteFeeding(f)
+// MARK: - TodayView (고정 상단 그리드 + 여러 날 스크롤 피드)
+
+private struct TodayView: View {
+    @Bindable var vm: HomeViewModel
+    let onAction: (HomeAction) -> Void
+
+    @Environment(\.theme) private var theme
+
+    var body: some View {
+        VStack(spacing: 0) {
+            // ── 고정 상단: 6버튼 ──
+            BigActionGrid(
+                hasActiveSleep: vm.activeSleepSession != nil,
+                hasActivePlay:  vm.activePlaySession != nil,
+                onAction: onAction
+            )
+            .padding(.horizontal, theme.space.screenPaddingX)
+            .padding(.top, theme.space.sm)
+            .padding(.bottom, theme.space.sm)
+            .background(theme.color.surface.color)
+            .overlay(alignment: .bottom) {
+                Rectangle().fill(theme.color.divider.color).frame(height: 1)
             }
-        case .sleep:
-            if let s = vm.sleeps.first(where: { $0.id == item.id }) {
-                vm.deleteSleep(s)
+
+            // ── 여러 날 스크롤 피드 ──
+            ScrollView {
+                LazyVStack(spacing: 0, pinnedViews: [.sectionHeaders]) {
+                    ForEach(vm.loadedDays, id: \.self) { day in
+                        Section {
+                            DayTimelineSection(vm: vm, day: day)
+                        } header: {
+                            DateSectionHeader(day: day)
+                        }
+                    }
+
+                    if vm.reachedMaxDays {
+                        Text("최대 \(HomeViewModel.maxDays)일 전까지 표시됩니다")
+                            .font(theme.typography.caption)
+                            .foregroundStyle(theme.color.textTertiary.color)
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, theme.space.md)
+                    } else {
+                        // 하단 sentinel — 나타나면 과거 하루 append
+                        Color.clear
+                            .frame(height: 1)
+                            .onAppear { vm.loadOlderDay() }
+                    }
+                }
+                .padding(.bottom, theme.space.lg)
             }
-        case .diaperPee, .diaperPoop, .diaperBoth:
-            if let d = vm.diapers.first(where: { $0.id == item.id }) {
-                vm.deleteDiaper(d)
-            }
-        case .play:
-            if let p = vm.plays.first(where: { $0.id == item.id }) {
-                vm.deletePlay(p)
-            }
+            .background(theme.color.background.color)
         }
     }
 }
 
-// MARK: - ActiveSessionBanner
+// MARK: - PastFocusView (과거 날짜 단일 일자)
 
-private struct ActiveSessionBanner: View {
-    let sleep: SleepRecord
-    let onEnd: () -> Void
+private struct PastFocusView: View {
+    @Bindable var vm: HomeViewModel
+    let onAction: (HomeAction) -> Void
 
-    @State private var elapsed: Int = 0
     @Environment(\.theme) private var theme
 
     var body: some View {
-        HStack(spacing: theme.space.sm) {
-            Circle()
-                .fill(theme.color.domainSleepSolid.color)
-                .frame(width: 8, height: 8)
-                .overlay(
-                    Circle()
-                        .stroke(theme.color.domainSleepSolid.color.opacity(0.3), lineWidth: 4)
-                        .scaleEffect(1.8)
+        VStack(spacing: 0) {
+            VStack(spacing: theme.space.sm) {
+                // 과거 기록 안내 배너
+                HStack(spacing: theme.space.xs) {
+                    Text("📅")
+                    Text("\(vm.selectedDate.relativeLabel)에 기록 중 · 버튼을 누르면 시각을 입력해요")
+                        .font(theme.typography.caption)
+                        .foregroundStyle(theme.color.statusWarningFg.color)
+                    Spacer()
+                    Button {
+                        vm.changeDate(Date())
+                    } label: {
+                        HStack(spacing: 2) {
+                            Image(systemName: "arrow.left").font(.system(size: 11, weight: .semibold))
+                            Text("오늘로").font(theme.typography.captionStrong)
+                        }
+                        .foregroundStyle(theme.color.primary.color)
+                    }
+                    .buttonStyle(.plain)
+                }
+                .padding(.horizontal, theme.space.componentPaddingX)
+                .padding(.vertical, theme.space.sm)
+                .background(theme.color.statusWarningBg.color)
+                .clipShape(RoundedRectangle(cornerRadius: theme.radius.control, style: .continuous))
+
+                BigActionGrid(
+                    hasActiveSleep: false,
+                    hasActivePlay:  false,
+                    onAction: onAction
                 )
-
-            Text("수면 중 · 경과 \(elapsed)분")
-                .font(theme.typography.bodyStrong)
-                .foregroundStyle(theme.color.textPrimary.color)
-
-            Spacer()
-
-            DSButton("종료", variant: .secondary, size: .sm) {
-                onEnd()
             }
-        }
-        .padding(.horizontal, theme.space.componentPaddingX)
-        .padding(.vertical, theme.space.componentPaddingY)
-        .background(theme.color.domainSleepTint.color)
-        .clipShape(RoundedRectangle(cornerRadius: theme.radius.control, style: .continuous))
-        .onAppear { elapsed = sleep.elapsedMinutes() }
-        .onReceive(Timer.publish(every: 60, on: .main, in: .common).autoconnect()) { _ in
-            elapsed = sleep.elapsedMinutes()
+            .padding(.horizontal, theme.space.screenPaddingX)
+            .padding(.vertical, theme.space.sm)
+            .background(theme.color.surface.color)
+            .overlay(alignment: .bottom) {
+                Rectangle().fill(theme.color.divider.color).frame(height: 1)
+            }
+
+            ScrollView {
+                DayTimelineSection(vm: vm, day: Calendar.current.startOfDay(for: vm.selectedDate))
+                    .padding(.bottom, theme.space.lg)
+            }
+            .background(theme.color.background.color)
         }
     }
 }
 
-// MARK: - AppHeader Placeholder
+// MARK: - DateSectionHeader (오늘/어제/그제/"N월 N일 (요일)")
 
-private struct AppHeaderPlaceholder: View {
+private struct DateSectionHeader: View {
+    let day: Date
     @Environment(\.theme) private var theme
 
+    private var isToday: Bool { Calendar.current.isDateInToday(day) }
+
+    private var label: String {
+        let cal = Calendar.current
+        if cal.isDateInToday(day)     { return "오늘" }
+        if cal.isDateInYesterday(day) { return "어제" }
+        if let two = cal.date(byAdding: .day, value: -2, to: cal.startOfDay(for: Date())),
+           cal.isDate(day, inSameDayAs: two) { return "그제" }
+        let fmt = DateFormatter()
+        fmt.locale = Locale(identifier: "ko_KR")
+        fmt.dateFormat = "M월 d일 (E)"
+        return fmt.string(from: day)
+    }
+
     var body: some View {
-        HStack {
-            Circle()
-                .fill(theme.color.surfaceSunken.color)
-                .frame(width: 32, height: 32)
-            VStack(alignment: .leading, spacing: 2) {
-                RoundedRectangle(cornerRadius: 4)
-                    .fill(theme.color.surfaceSunken.color)
-                    .frame(width: 64, height: 14)
-                RoundedRectangle(cornerRadius: 4)
-                    .fill(theme.color.surfaceSunken.color)
-                    .frame(width: 40, height: 10)
-            }
+        HStack(spacing: theme.space.xs) {
+            Text(label)
+                .font(theme.typography.captionStrong)
+                .foregroundStyle(isToday ? theme.color.primary.color : theme.color.textSecondary.color)
             Spacer()
         }
         .padding(.horizontal, theme.space.screenPaddingX)
-        .frame(height: 56)
-        .background(theme.color.surface.color)
+        .padding(.vertical, theme.space.sm)
+        .frame(maxWidth: .infinity)
+        .background(theme.color.surface.color.opacity(0.97))
         .overlay(alignment: .bottom) {
-            Rectangle()
-                .fill(theme.color.divider.color)
-                .frame(height: 1)
+            Rectangle().fill(theme.color.divider.color).frame(height: 1)
         }
     }
 }
 
-// MARK: - BigActionGrid
+// MARK: - DayTimelineSection (단일 일자 타임라인)
 
-private struct BigActionGrid: View {
-    @Binding var showFeedingSheet: Bool
-    @Binding var showSleepSheet:   Bool
-    @Binding var showDiaperSheet:  Bool
-    @Binding var showPlaySheet:    Bool
-    let hasActiveSleep: Bool
-
-    @Environment(\.theme) private var theme
-
-    var body: some View {
-        LazyVGrid(
-            columns: [GridItem(.flexible()), GridItem(.flexible())],
-            spacing: theme.space.md
-        ) {
-            BigActionButton(
-                emoji: "🍼",
-                title: "수유",
-                color: theme.color.domainFeedingFormulaSolid.color,
-                tint:  theme.color.domainFeedingFormulaTint.color
-            ) {
-                showFeedingSheet = true
-            }
-
-            BigActionButton(
-                emoji: hasActiveSleep ? "⏹️" : "😴",
-                title: hasActiveSleep ? "수면중" : "수면",
-                color: theme.color.domainSleepSolid.color,
-                tint:  theme.color.domainSleepTint.color,
-                isActive: hasActiveSleep
-            ) {
-                showSleepSheet = true
-            }
-
-            BigActionButton(
-                emoji: "💧",
-                title: "기저귀",
-                color: theme.color.domainDiaperPeeSolid.color,
-                tint:  theme.color.domainDiaperPeeTint.color
-            ) {
-                showDiaperSheet = true
-            }
-
-            BigActionButton(
-                emoji: "🤸",
-                title: "놀이",
-                color: theme.color.domainPlaySolid.color,
-                tint:  theme.color.domainPlayTint.color
-            ) {
-                showPlaySheet = true
-            }
-        }
-    }
-}
-
-// MARK: - BigActionButton
-
-private struct BigActionButton: View {
-    let emoji:    String
-    let title:    String
-    let color:    Color
-    let tint:     Color
-    var isActive: Bool = false
-    let action:   () -> Void
-
-    @Environment(\.theme) private var theme
-
-    var body: some View {
-        Button(action: action) {
-            VStack(spacing: theme.space.sm) {
-                Text(emoji)
-                    .font(.system(size: 36))
-                Text(title)
-                    .font(theme.typography.headline)
-                    .foregroundStyle(color)
-                if isActive {
-                    Text("진행중")
-                        .font(theme.typography.caption)
-                        .foregroundStyle(color.opacity(0.8))
-                }
-            }
-            .frame(maxWidth: .infinity)
-            .padding(.vertical, theme.space.lg)
-        }
-        .buttonStyle(.plain)
-        .dsCard(style: .interactive)
-        .overlay(
-            isActive ? RoundedRectangle(cornerRadius: theme.radius.card, style: .continuous)
-                .stroke(color, lineWidth: 2) : nil
-        )
-    }
-}
-
-// MARK: - UnifiedTimeline
-
-private struct UnifiedTimeline: View {
-    let items: [TimelineItem]
-    let isLoading: Bool
-    let onDelete: (TimelineItem) -> Void
+private struct DayTimelineSection: View {
+    @Bindable var vm: HomeViewModel
+    let day: Date
 
     @Environment(\.theme) private var theme
     @State private var deleteTarget: TimelineItem? = nil
 
-    var body: some View {
-        VStack(spacing: 0) {
-            DSSectionHeader(title: "오늘 기록")
+    private var isToday: Bool { Calendar.current.isDateInToday(day) }
 
-            if isLoading {
+    var body: some View {
+        let items = vm.timelineItems(for: day)
+
+        Group {
+            if vm.isLoading(for: day) && items.isEmpty {
                 ProgressView()
-                    .frame(maxWidth: .infinity, minHeight: 80)
+                    .frame(maxWidth: .infinity, minHeight: 60)
             } else if items.isEmpty {
-                DSEmptyState(
-                    icon: "list.bullet",
-                    message: "이 날의 기록이 없어요"
-                )
-                .padding(.vertical, theme.space.lg)
+                DSEmptyState(icon: "list.bullet", message: "이 날의 기록이 없어요")
+                    .padding(.vertical, theme.space.md)
             } else {
-                LazyVStack(spacing: 0) {
-                    ForEach(Array(items.enumerated()), id: \.element.id) { index, item in
-                        TimelineGroupView(
-                            variant: index == 0 ? .highlighted : .normal
-                        ) {
-                            TimelineItemRow(
-                                time:     item.time.timeString,
-                                label:    item.label,
-                                dotColor: theme.color.solid(for: item.domainKind).color,
-                                onEdit:   nil
-                            )
-                            .swipeActions(edge: .trailing, allowsFullSwipe: false) {
-                                Button(role: .destructive) {
-                                    deleteTarget = item
-                                } label: {
-                                    Label("삭제", systemImage: "trash")
-                                }
+                ForEach(Array(items.enumerated()), id: \.element.id) { index, item in
+                    TimelineGroupView(
+                        variant: (isToday && index == 0) ? .highlighted : .normal
+                    ) {
+                        TimelineItemRow(
+                            time:     item.time.timeString,
+                            label:    item.label,
+                            dotColor: theme.color.solid(for: item.domainKind).color,
+                            onEdit:   nil
+                        )
+                        .swipeActions(edge: .trailing, allowsFullSwipe: false) {
+                            Button(role: .destructive) { deleteTarget = item } label: {
+                                Label("삭제", systemImage: "trash")
                             }
                         }
-                        .padding(.horizontal, theme.space.screenPaddingX)
+                    }
+                    .padding(.horizontal, theme.space.screenPaddingX)
 
-                        if index < items.count - 1 {
-                            Divider()
-                                .padding(.horizontal, theme.space.screenPaddingX)
-                        }
+                    if index < items.count - 1 {
+                        Divider().padding(.horizontal, theme.space.screenPaddingX)
                     }
                 }
             }
@@ -444,12 +418,101 @@ private struct UnifiedTimeline: View {
             titleVisibility: .visible
         ) {
             Button("삭제", role: .destructive) {
-                if let target = deleteTarget {
-                    onDelete(target)
-                    deleteTarget = nil
-                }
+                if let t = deleteTarget { vm.delete(t, on: day); deleteTarget = nil }
             }
             Button("취소", role: .cancel) { deleteTarget = nil }
+        }
+    }
+}
+
+// MARK: - BigActionGrid (6버튼 3열 x 2행)
+
+private struct BigActionGrid: View {
+    let hasActiveSleep: Bool
+    let hasActivePlay:  Bool
+    let onAction: (HomeAction) -> Void
+
+    @Environment(\.theme) private var theme
+
+    var body: some View {
+        LazyVGrid(
+            columns: Array(repeating: GridItem(.flexible(), spacing: theme.space.sm), count: 3),
+            spacing: theme.space.sm
+        ) {
+            BigActionButton(emoji: "🍼", label: "분유", kind: .feedingFormula) { onAction(.formula) }
+            BigActionButton(emoji: "🤱", label: "모유", kind: .feedingBreastBoth) { onAction(.breast) }
+            BigActionButton(emoji: "💧", label: "소변", kind: .diaperPee) { onAction(.pee) }
+            BigActionButton(emoji: "💩", label: "대변", kind: .diaperPoop) { onAction(.poo) }
+            BigActionButton(
+                emoji: "😴",
+                label: hasActiveSleep ? "수면 종료" : "수면 시작",
+                kind: .sleep, isActive: hasActiveSleep
+            ) { onAction(.sleep) }
+            BigActionButton(
+                emoji: "🎈",
+                label: hasActivePlay ? "터미타임 종료" : "터미타임 시작",
+                kind: .play, isActive: hasActivePlay
+            ) { onAction(.play) }
+        }
+    }
+}
+
+// MARK: - BigActionButton
+
+private struct BigActionButton: View {
+    let emoji: String
+    let label: String
+    let kind:  DomainKind
+    var isActive: Bool = false
+    let action: () -> Void
+
+    @Environment(\.theme) private var theme
+
+    var body: some View {
+        Button(action: action) {
+            VStack(spacing: theme.space.xs) {
+                Text(emoji).font(.system(size: 22))
+                Text(label)
+                    .font(theme.typography.captionStrong)
+                    .foregroundStyle(theme.color.solid(for: kind).color)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.8)
+            }
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, theme.space.md)
+            .background(
+                RoundedRectangle(cornerRadius: theme.radius.control, style: .continuous)
+                    .fill(theme.color.tint(for: kind).color)
+            )
+            .overlay(
+                RoundedRectangle(cornerRadius: theme.radius.control, style: .continuous)
+                    .stroke(theme.color.solid(for: kind).color,
+                            lineWidth: isActive ? 2 : 0)
+            )
+        }
+        .buttonStyle(.plain)
+    }
+}
+
+// MARK: - AppHeader Placeholder
+
+private struct AppHeaderPlaceholder: View {
+    @Environment(\.theme) private var theme
+
+    var body: some View {
+        HStack {
+            Circle().fill(theme.color.surfaceSunken.color).frame(width: 32, height: 32)
+            VStack(alignment: .leading, spacing: 2) {
+                RoundedRectangle(cornerRadius: 4).fill(theme.color.surfaceSunken.color).frame(width: 64, height: 14)
+                RoundedRectangle(cornerRadius: 4).fill(theme.color.surfaceSunken.color).frame(width: 40, height: 10)
+            }
+            Spacer()
+        }
+        .padding(.horizontal, theme.space.screenPaddingX)
+        .frame(height: 56)
+        .background(theme.color.surface.color)
+        .overlay(alignment: .bottom) {
+            Rectangle().fill(theme.color.divider.color).frame(height: 1)
         }
     }
 }
@@ -457,17 +520,15 @@ private struct UnifiedTimeline: View {
 // MARK: - Previews
 
 #Preview("HomeView — 라이트") {
-    let container = AppContainer()
-    return HomeView()
-        .environment(container)
+    HomeView()
+        .environment(AppContainer())
         .environment(\.theme, .zzippu)
         .environment(ToastCenter())
 }
 
 #Preview("HomeView — 다크") {
-    let container = AppContainer()
-    return HomeView()
-        .environment(container)
+    HomeView()
+        .environment(AppContainer())
         .environment(\.theme, .zzippu)
         .environment(ToastCenter())
         .preferredColorScheme(.dark)

@@ -53,13 +53,13 @@ public struct AppHeader: View {
     }
 
     private var ageText: String {
-        let days = Calendar.current.dateComponents([.day], from: baby.birthDate, to: Date()).day ?? 0
-        if days < 30 {
-            return "+\(days)일"
-        } else {
-            let months = Calendar.current.dateComponents([.month], from: baby.birthDate, to: Date()).month ?? 0
-            return "+\(months)개월"
-        }
+        // 웹 getAgeDays()와 일치: 태어난 날 당일 = 생후 1일.
+        // 날짜(자정) 기준으로 일수를 세고 +1.
+        let cal = Calendar.current
+        let birth = cal.startOfDay(for: baby.birthDate)
+        let today = cal.startOfDay(for: Date())
+        let days = (cal.dateComponents([.day], from: birth, to: today).day ?? 0) + 1
+        return "생후 \(days)일"
     }
 
     private var dateText: String {
