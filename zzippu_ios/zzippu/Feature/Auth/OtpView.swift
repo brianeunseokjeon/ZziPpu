@@ -32,15 +32,15 @@ struct OtpView: View {
             }
             .padding(.bottom, theme.space.lg)
 
-            // 재전송 카운트다운 타이머 (3:00 → 0, 명시적 표시)
+            // 인증코드 유효시간 타이머 (5:00 → 0, 명시적 표시)
             VStack(spacing: theme.space.xs) {
-                Label(vm.resendTimerText, systemImage: "clock")
+                Label(vm.isCodeExpired ? "만료됨" : vm.validityTimerText, systemImage: "clock")
                     .font(theme.typography.title)
                     .monospacedDigit()
                     .foregroundStyle(
-                        vm.canResend ? theme.color.textTertiary.color : theme.color.primary.color
+                        vm.isCodeExpired ? theme.color.statusDangerFg.color : theme.color.primary.color
                     )
-                Text(vm.canResend ? "인증코드가 만료됐어요 — 재전송해 주세요" : "재전송까지 남은 시간")
+                Text(vm.isCodeExpired ? "인증코드가 만료됐어요 — 재전송해 주세요" : "인증코드 유효시간")
                     .font(theme.typography.caption)
                     .foregroundStyle(theme.color.textSecondary.color)
             }
@@ -77,7 +77,7 @@ struct OtpView: View {
 
             // 재전송 / 뒤로
             HStack(spacing: theme.space.md) {
-                Button(vm.canResend ? "코드 재전송" : "\(vm.resendTimerText) 후 재전송") {
+                Button(vm.canResend ? "코드 재전송" : "\(vm.resendSeconds)초 후 재전송") {
                     vm.resendOtp()
                 }
                 .font(theme.typography.caption)

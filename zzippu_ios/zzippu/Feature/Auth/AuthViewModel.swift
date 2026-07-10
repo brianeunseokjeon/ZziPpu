@@ -20,11 +20,13 @@ final class AuthViewModel {
     var isLoading: Bool = false
     var errorMessage: String? = nil
 
-    /// 재전송 쿨다운 남은 초 (180 → 0). 0이면 재전송 가능.
+    /// 인증코드 유효시간 남은 초 (300 → 0). 서버 TTL(5분)과 일치.
+    var validitySeconds: Int = 0
+    /// 재전송 쿨다운 남은 초 (60 → 0). 0이면 재전송 가능. 서버 쿨다운(60초)과 일치.
     var resendSeconds: Int = 0
 
-    /// 재전송 쿨다운 총 길이(초) = 3분.
-    private let resendCooldown = 180
+    private let codeValidity = 300   // 코드 유효시간 5분
+    private let resendCooldown = 60  // 재전송 쿨다운 60초
 
     // MARK: - Dependencies
 
@@ -54,7 +56,7 @@ final class AuthViewModel {
             do {
                 try await authRepository.requestEmailOtp(email: email)
                 step = .otp
-                startResendCountdown()   // 발송 성공 → 3분 카운트다운 시작
+                startCountdowns()   // 발송 성공 → 유효시간(5분)·재전송쿨다운(60초) 시작
             } catch {
                 errorMessage = error.localizedDescription
             }
@@ -80,7 +82,7 @@ final class AuthViewModel {
         }
     }
 
-    /// OTP 재전송 — 쿨다운(3분) 중엔 무시. 성공 시 카운트다운 재시작.
+    /// OTP 재전송 — 쿨다운(60초) 중엔 무시. 성공 시 타이머 재시작.
     func resendOtp() {
         guard canResend else { return }
         otpCode = ""
@@ -93,19 +95,22 @@ final class AuthViewModel {
         otpCode = ""
         errorMessage = nil
         countdownTask?.cancel()
+        validitySeconds = 0
         resendSeconds = 0
     }
 
     // MARK: - Countdown
 
-    /// 3분(180초) 재전송 쿨다운 카운트다운 시작 (매초 감소).
-    private func startResendCountdown() {
+    /// 유효시간(300초)·재전송쿨다운(60초)을 매초 함께 감소.
+    private func startCountdowns() {
         countdownTask?.cancel()
+        validitySeconds = codeValidity
         resendSeconds = resendCooldown
         countdownTask = Task { @MainActor [weak self] in
-            while let self, self.resendSeconds > 0 {
+            while let self, (self.validitySeconds > 0 || self.resendSeconds > 0) {
                 try? await Task.sleep(nanoseconds: 1_000_000_000)
                 if Task.isCancelled { return }
+                if self.validitySeconds > 0 { self.validitySeconds -= 1 }
                 if self.resendSeconds > 0 { self.resendSeconds -= 1 }
             }
         }
@@ -119,10 +124,13 @@ final class AuthViewModel {
     /// 재전송 가능 여부 (쿨다운 종료 + 비로딩)
     var canResend: Bool { resendSeconds <= 0 && !isLoading }
 
-    /// 남은 시간 "M:SS" (예: 2:47)
-    var resendTimerText: String {
-        let m = resendSeconds / 60
-        let s = resendSeconds % 60
+    /// 코드 만료 여부 (유효시간 소진)
+    var isCodeExpired: Bool { validitySeconds <= 0 }
+
+    /// 유효시간 "M:SS" (예: 4:47)
+    var validityTimerText: String {
+        let m = validitySeconds / 60
+        let s = validitySeconds % 60
         return String(format: "%d:%02d", m, s)
     }
 
