@@ -42,3 +42,5 @@ htmlcov/
 *.db-journal
 *.sqlite
 *.sqlite3
+*.db.bak*
+*.db-backup*
