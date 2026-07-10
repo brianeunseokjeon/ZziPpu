@@ -11,6 +11,7 @@ struct zzippuApp: App {
         WindowGroup {
             AppRootView()
                 .environment(appContainer)
+                .environment(\.theme, .zzippu)
         }
     }
 }

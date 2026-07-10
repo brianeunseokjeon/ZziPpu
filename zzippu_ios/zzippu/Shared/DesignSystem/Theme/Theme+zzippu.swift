@@ -1,0 +1,169 @@
+// Shared/DesignSystem/Theme/Theme+zzippu.swift
+// 찌뿌둥 앱 기본 테마 조립.
+// 생성된 SemanticColorTokens / SemanticTypography / PrimitiveScale / PrimitiveShadow 를 조합.
+
+import SwiftUI
+
+extension Theme {
+    /// 찌뿌둥 앱 기본 테마. 앱 루트에서 @Environment(\.theme) 으로 주입.
+    static let zzippu: Theme = {
+        let sc = SemanticColorTokens.default
+        let ty = SemanticTypography.default
+
+        // MARK: Color
+        let color = ThemeColor(
+            background:      sc.background,
+            surface:         sc.surface,
+            surfaceElevated: sc.surfaceElevated,
+            surfaceSunken:   sc.surfaceSunken,
+            primary:         sc.primary,
+            primaryPressed:  sc.primaryPressed,
+            onPrimary:       sc.onPrimary,
+            primaryTint:     sc.primaryTint,
+            textPrimary:     sc.textPrimary,
+            textSecondary:   sc.textSecondary,
+            textTertiary:    sc.textTertiary,
+            border:          sc.border,
+            borderStrong:    sc.borderStrong,
+            divider:         sc.divider,
+            scrim:           sc.scrim,
+            statusSuccessFg:     sc.statusSuccessFg,
+            statusSuccessBg:     sc.statusSuccessBg,
+            statusSuccessSolid:  sc.statusSuccessSolid,
+            statusWarningFg:     sc.statusWarningFg,
+            statusWarningBg:     sc.statusWarningBg,
+            statusWarningSolid:  sc.statusWarningSolid,
+            statusDangerFg:      sc.statusDangerFg,
+            statusDangerBg:      sc.statusDangerBg,
+            statusDangerSolid:   sc.statusDangerSolid,
+            statusInfoFg:        sc.statusInfoFg,
+            statusInfoBg:        sc.statusInfoBg,
+            statusInfoSolid:     sc.statusInfoSolid,
+            domainFeedingFormulaSolid:     sc.domainFeedingFormulaSolid,
+            domainFeedingFormulaTint:      sc.domainFeedingFormulaTint,
+            domainFeedingBreastLeftSolid:  sc.domainFeedingBreastLeftSolid,
+            domainFeedingBreastLeftTint:   sc.domainFeedingBreastLeftTint,
+            domainFeedingBreastRightSolid: sc.domainFeedingBreastRightSolid,
+            domainFeedingBreastRightTint:  sc.domainFeedingBreastRightTint,
+            domainFeedingBreastBothSolid:  sc.domainFeedingBreastBothSolid,
+            domainFeedingBreastBothTint:   sc.domainFeedingBreastBothTint,
+            domainFeedingSolidsSolid:      sc.domainFeedingSolidsSolid,
+            domainFeedingSolidsTint:       sc.domainFeedingSolidsTint,
+            domainDiaperPeeSolid:  sc.domainDiaperPeeSolid,
+            domainDiaperPeeTint:   sc.domainDiaperPeeTint,
+            domainDiaperPoopSolid: sc.domainDiaperPoopSolid,
+            domainDiaperPoopTint:  sc.domainDiaperPoopTint,
+            domainDiaperBothSolid: sc.domainDiaperBothSolid,
+            domainDiaperBothTint:  sc.domainDiaperBothTint,
+            domainStoolYellow: sc.domainStoolYellow,
+            domainStoolGreen:  sc.domainStoolGreen,
+            domainStoolBrown:  sc.domainStoolBrown,
+            domainStoolBlack:  sc.domainStoolBlack,
+            domainStoolRed:    sc.domainStoolRed,
+            domainStoolWhite:  sc.domainStoolWhite,
+            domainSleepSolid: sc.domainSleepSolid,
+            domainSleepTint:  sc.domainSleepTint,
+            domainPlaySolid:  sc.domainPlaySolid,
+            domainPlayTint:   sc.domainPlayTint
+        )
+
+        // MARK: Typography
+        let typography = ThemeTypography(
+            display:       ty.display,
+            title:         ty.title,
+            headline:      ty.headline,
+            body:          ty.body,
+            bodyStrong:    ty.bodyStrong,
+            callout:       ty.callout,
+            caption:       ty.caption,
+            captionStrong: ty.captionStrong,
+            label:         ty.label,
+            mono:          ty.mono
+        )
+
+        // MARK: Space
+        let space = ThemeSpace(
+            componentPaddingX: 16,
+            componentPaddingY: 12,
+            cardPadding:       20,
+            screenPaddingX:    16,
+            screenPaddingY:    16,
+            sectionGap:        16,
+            stackGapSm:        8,
+            stackGapMd:        12,
+            inlineGap:         8,
+            xs: 4,
+            sm: 8,
+            md: 16,
+            lg: 24,
+            xl: 32
+        )
+
+        // MARK: Radius
+        let radius = ThemeRadius(
+            control: 12,
+            card:    16,
+            sheet:   24,
+            pill:    9999
+        )
+
+        // MARK: Shadow
+        let shadow = ThemeShadow(
+            sm: PrimitiveShadow.shadowSm,
+            md: PrimitiveShadow.shadowMd,
+            lg: PrimitiveShadow.shadowLg,
+            xl: PrimitiveShadow.shadowXl
+        )
+
+        // MARK: Motion
+        let motion = ThemeMotion(
+            fast:             DSMotion.fast,
+            normal:           DSMotion.normal,
+            slow:             DSMotion.slow,
+            toastAutoDismiss: DSMotion.toastAutoDismiss,
+            spring:           DSMotion.spring,
+            springFast:       DSMotion.springFast
+        )
+
+        // MARK: Components
+        let component = ComponentTokens(
+            button: ComponentButtonTokens(
+                heightSm:       36,
+                heightMd:       44,
+                heightLg:       56,
+                minWidth:       44,
+                paddingXMd:     20,
+                radius:         12,
+                disabledOpacity: 0.5
+            ),
+            card: ComponentCardTokens(
+                padding: 20,
+                radius:  16,
+                shadow:  PrimitiveShadow.shadowSm
+            ),
+            input: ComponentInputTokens(
+                height:   44,
+                paddingX: 16,
+                radius:   12
+            ),
+            chip: ComponentChipTokens(
+                paddingX: 12,
+                height:   44,
+                radius:   9999
+            ),
+            iconButtonSize:      44,
+            emptyStatePaddingY:  24,
+            sectionHeaderPaddingY: 8
+        )
+
+        return Theme(
+            color:      color,
+            typography: typography,
+            space:      space,
+            radius:     radius,
+            shadow:     shadow,
+            motion:     motion,
+            component:  component
+        )
+    }()
+}
