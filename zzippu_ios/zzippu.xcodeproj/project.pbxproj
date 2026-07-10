@@ -82,6 +82,7 @@
 		DDD587C8F47A5F3C600637DB /* DSNumberStepper.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9D7E9BCC3D0269738853326 /* DSNumberStepper.swift */; };
 		DE7CF49CC71C9C7146DDD96E /* APIClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9DAF399357A8600551960BA3 /* APIClient.swift */; };
 		E55C477C3E412A33B3BF783C /* AuthRemoteDataSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = 462279624CC6352D8362F327 /* AuthRemoteDataSource.swift */; };
+		E5CC0FE63924828EEA9C7997 /* HomeViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3DCB48126456D01CA517AC82 /* HomeViewModel.swift */; };
 		F264BA19F247AC4926D27A15 /* DSCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A4CB70DFEB907BFAF984313 /* DSCard.swift */; };
 		F8574575533F40626B6861F0 /* DSBadge.swift in Sources */ = {isa = PBXBuildFile; fileRef = 94D1BF2EABC2F47645E26B45 /* DSBadge.swift */; };
 		F96DD47BD5871F7A6CCD0B1D /* TermsAgreementView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FD64E1CDCC8C9C3A4291A2BD /* TermsAgreementView.swift */; };
@@ -143,6 +144,7 @@
 		39AA935AE1080FE43367DB91 /* BabyOnboardingView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = BabyOnboardingView.swift; sourceTree = "<group>"; };
 		3A5351BE5211F50B5AFF621E /* RemoteGrowthRepository.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = RemoteGrowthRepository.swift; sourceTree = "<group>"; };
 		3B3A120ABFD48850B4441677 /* LoginView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = LoginView.swift; sourceTree = "<group>"; };
+		3DCB48126456D01CA517AC82 /* HomeViewModel.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = HomeViewModel.swift; sourceTree = "<group>"; };
 		3DD65B1970206F01A77B4967 /* SaveFeedingUseCase.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = SaveFeedingUseCase.swift; path = SaveFeedingUseCase.swift; sourceTree = "<group>"; };
 		462279624CC6352D8362F327 /* AuthRemoteDataSource.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AuthRemoteDataSource.swift; sourceTree = "<group>"; };
 		47857ADDF84A6E7E15DAF0ED /* FeedingType.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = FeedingType.swift; path = FeedingType.swift; sourceTree = "<group>"; };
@@ -585,6 +587,7 @@
 			isa = PBXGroup;
 			children = (
 				F0B456FCC66069DCCB35A60E /* HomeView.swift */,
+				3DCB48126456D01CA517AC82 /* HomeViewModel.swift */,
 			);
 			name = Home;
 			path = Home;
@@ -890,6 +893,7 @@
 				185773B3CBADA1229AC35B98 /* DSTabBar.swift in Sources */,
 				278E46F4D0AA6A7735AD3D51 /* AppHeader.swift in Sources */,
 				DDD587C8F47A5F3C600637DB /* DSNumberStepper.swift in Sources */,
+				E5CC0FE63924828EEA9C7997 /* HomeViewModel.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

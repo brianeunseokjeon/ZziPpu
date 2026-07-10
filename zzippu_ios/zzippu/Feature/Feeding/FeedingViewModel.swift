@@ -24,7 +24,7 @@ final class FeedingViewModel {
     // MARK: - Dependencies (Domain 프로토콜만 의존)
     private let repository: FeedingRepository
     private let saveUseCase: SaveFeedingUseCase
-    private let babyId: UUID
+    let babyId: UUID
 
     init(repository: FeedingRepository, babyId: UUID) {
         self.repository = repository
@@ -131,7 +131,7 @@ final class FeedingViewModel {
 
     // MARK: - Private
 
-    private func resetInputs() {
+    func resetInputs() {
         amountMlText = ""
         durationText = ""
         memo = ""
