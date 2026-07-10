@@ -18,6 +18,7 @@ final class AppContainer {
     let dashboardRepository: DashboardRepository
     let developmentRepository: DevelopmentRepository
     let vaccinationRepository: VaccinationRepository
+    let caregiverRepository:   CaregiverRepository
 
     // MARK: - Session State (라우팅 전용)
     let sessionState: SessionState
@@ -45,6 +46,7 @@ final class AppContainer {
         self.dashboardRepository = RemoteDashboardRepository(api: api)
         self.developmentRepository = RemoteDevelopmentRepository(api: api)
         self.vaccinationRepository = RemoteVaccinationRepository(api: api)
+        self.caregiverRepository   = RemoteCaregiverRepository(api: api)
         self.sessionState = SessionState()
     }
 

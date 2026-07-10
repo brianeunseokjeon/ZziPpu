@@ -38,7 +38,8 @@ struct MainTabView: View {
                     DevelopmentView()
                         .environment(container)
                 } else if selection == 3 {
-                    placeholderView("설정", systemImage: "gearshape.fill")
+                    SettingsView()
+                        .environment(container)
                 }
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -47,17 +48,6 @@ struct MainTabView: View {
             DSTabBar(items: tabItems, selection: $selection)
         }
         .ignoresSafeArea(edges: .bottom)
-    }
-
-    private func placeholderView(_ title: String, systemImage: String) -> some View {
-        VStack(spacing: theme.space.stackGapMd) {
-            DSEmptyState(
-                icon: systemImage,
-                message: "\(title)\n다음 슬라이스에서 구현됩니다"
-            )
-        }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .background(theme.color.background.color)
     }
 }
 

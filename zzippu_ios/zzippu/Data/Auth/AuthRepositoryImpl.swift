@@ -13,6 +13,7 @@ final class AuthRepositoryImpl: AuthRepository {
         static let userId         = "zzippu.userId"
         static let isNewUser      = "zzippu.isNewUser"
         static let termsRequired  = "zzippu.termsRequired"
+        static let loginEmail     = "zzippu.loginEmail"
     }
 
     init(remote: AuthRemoteDataSource, tokenStore: KeychainTokenStore) {
@@ -41,6 +42,7 @@ final class AuthRepositoryImpl: AuthRepository {
         ud.set(session.userId.uuidString, forKey: UDKey.userId)
         ud.set(session.isNewUser,         forKey: UDKey.isNewUser)
         ud.set(session.termsRequired,     forKey: UDKey.termsRequired)
+        ud.set(email,                     forKey: UDKey.loginEmail)   // 설정 표시용(비민감)
         return session
     }
 
@@ -87,6 +89,10 @@ final class AuthRepositoryImpl: AuthRepository {
         )
     }
 
+    func loginEmail() -> String? {
+        UserDefaults.standard.string(forKey: UDKey.loginEmail)
+    }
+
     // MARK: - Sign Out
 
     func signOut() {
@@ -95,6 +101,7 @@ final class AuthRepositoryImpl: AuthRepository {
         ud.removeObject(forKey: UDKey.userId)
         ud.removeObject(forKey: UDKey.isNewUser)
         ud.removeObject(forKey: UDKey.termsRequired)
+        ud.removeObject(forKey: UDKey.loginEmail)
     }
 
     // MARK: - Redeem Code (공동양육자 — stub)

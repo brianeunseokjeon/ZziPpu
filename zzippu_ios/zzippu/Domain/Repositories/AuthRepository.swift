@@ -14,6 +14,8 @@ protocol AuthRepository {
     func agreeTerms(_ agreements: [(type: TermType, version: String)]) async throws
     /// Keychain에서 세션 복원 (동기, 런타임 검증 없음)
     func currentSession() -> AuthSession?
+    /// 마지막 로그인 이메일 (설정 화면 표시용, 비민감). 없으면 nil.
+    func loginEmail() -> String?
     /// 로그아웃 (Keychain + UserDefaults 초기화)
     func signOut()
     /// 공동양육자 코드 redeem (시그니처만 — 미구현 stub 허용)
