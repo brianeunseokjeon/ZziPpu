@@ -70,9 +70,28 @@ struct GrowthDetailView: View {
                             )
                             .frame(height: 220)
                         } else {
+                            let band = vm.whoBand
                             Chart {
-                                // WHO 백분위 밴드 자리 예약 — 데이터 추가 시 AreaMark 활성화
-                                // TODO: AreaMark WHO band overlay (번들 정적 JSON 준비 후)
+                                // WHO 백분위 밴드 오버레이 (p3–p97 옅게, p15–p85 진하게, p50 파선).
+                                // 아기 나이에서 보간한 값 → 실측 라인 뒤 가로 밴드로 표시.
+                                // WHO 미제공 지표(키·머리둘레)·성별 미상 시 band=nil → 생략.
+                                if let band {
+                                    RectangleMark(
+                                        yStart: .value("p3", band.p3),
+                                        yEnd:   .value("p97", band.p97)
+                                    )
+                                    .foregroundStyle(theme.color.statusInfoSolid.color.opacity(0.08))
+
+                                    RectangleMark(
+                                        yStart: .value("p15", band.p15),
+                                        yEnd:   .value("p85", band.p85)
+                                    )
+                                    .foregroundStyle(theme.color.statusInfoSolid.color.opacity(0.16))
+
+                                    RuleMark(y: .value("p50 (중앙값)", band.p50))
+                                        .lineStyle(StrokeStyle(lineWidth: 1, dash: [4, 3]))
+                                        .foregroundStyle(theme.color.textTertiary.color)
+                                }
 
                                 // 실측 라인
                                 ForEach(vm.chartPoints) { point in
@@ -116,6 +135,15 @@ struct GrowthDetailView: View {
                                 }
                             }
                             .frame(height: 260)
+
+                            // WHO 백분위 코멘트 + 면책 (밴드가 있을 때만)
+                            if let comment = vm.whoPercentileComment {
+                                Text(comment)
+                                    .font(theme.typography.caption)
+                                    .foregroundStyle(theme.color.textSecondary.color)
+                                    .fixedSize(horizontal: false, vertical: true)
+                                DSDisclaimerCaption("WHO 성장표(2006) 참고 · 진단이 아니에요")
+                            }
                         }
                     }
                 }

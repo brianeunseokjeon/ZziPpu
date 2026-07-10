@@ -20,6 +20,9 @@ final class AppContainer {
     let vaccinationRepository: VaccinationRepository
     let caregiverRepository:   CaregiverRepository
 
+    // MARK: - 정적 가이드 데이터 (소아과 권장 · WHO 성장) — Data 레이어 번들 로더
+    let guidelineRepository:   GuidelineRepository
+
     // MARK: - Session State (라우팅 전용)
     let sessionState: SessionState
 
@@ -47,6 +50,7 @@ final class AppContainer {
         self.developmentRepository = RemoteDevelopmentRepository(api: api)
         self.vaccinationRepository = RemoteVaccinationRepository(api: api)
         self.caregiverRepository   = RemoteCaregiverRepository(api: api)
+        self.guidelineRepository   = BundleGuidelineRepository()
         self.sessionState = SessionState()
     }
 

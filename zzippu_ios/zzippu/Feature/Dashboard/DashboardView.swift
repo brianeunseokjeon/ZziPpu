@@ -46,6 +46,8 @@ struct DashboardView: View {
                     diaperRepository:    container.diaperRepository,
                     playRepository:      container.playRepository,
                     growthRepository:    container.growthRepository,
+                    babyRepository:      container.babyRepository,
+                    guidelineRepository: container.guidelineRepository,
                     babyId:              container.activeBabyId
                 )
                 vm?.loadAll()
@@ -76,7 +78,9 @@ struct DashboardView: View {
             GrowthDetailView(
                 vm: GrowthViewModel(
                     growthRepository: container.growthRepository,
-                    babyId: container.activeBabyId
+                    babyId: container.activeBabyId,
+                    babyRepository: container.babyRepository,
+                    guidelineRepository: container.guidelineRepository
                 )
             )
         }
@@ -97,9 +101,16 @@ struct DashboardContentView: View {
                 NextFeedingCard(prediction: vm.prediction)
                     .padding(.horizontal, theme.space.screenPaddingX)
 
-                // 수유 적정량 게이지
-                FeedingAdequacyCard(totalMl: vm.dailySummary.totalFeedingMl)
+                // 오늘의 분석 — 가이드 비교 인사이트
+                TodayInsightsSection(insights: vm.insights, headline: vm.insightsHeadline)
                     .padding(.horizontal, theme.space.screenPaddingX)
+
+                // 수유 적정량 게이지 (체중 기반 권장 밴드)
+                FeedingAdequacyCard(
+                    totalMl: vm.dailySummary.totalFeedingMl,
+                    recommendedRange: vm.feedingRecommendedRange
+                )
+                .padding(.horizontal, theme.space.screenPaddingX)
 
                 // 메트릭 카드 그리드 (2열)
                 DSSectionHeader(title: "오늘 요약")

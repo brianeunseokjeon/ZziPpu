@@ -86,8 +86,18 @@ struct FeedingDetailView: View {
                             anchorDate: dashboardVM.selectedDate
                         )
                         let avg = trendUseCase.average(of: points)
+                        let recRange = dashboardVM.feedingRecommendedRange
 
                         Chart {
+                            // 권장 범위 음영 밴드(체중 기반 · AAP). 체중 미등록 시 생략.
+                            if let r = recRange {
+                                RectangleMark(
+                                    yStart: .value("권장 하한", r.lowerBound),
+                                    yEnd:   .value("권장 상한", r.upperBound)
+                                )
+                                .foregroundStyle(theme.color.statusSuccessSolid.color.opacity(0.14))
+                            }
+
                             ForEach(points) { point in
                                 BarMark(
                                     x: .value("날짜", point.date, unit: .day),
@@ -178,8 +188,18 @@ struct SleepDetailView: View {
                             anchorDate: dashboardVM.selectedDate
                         )
                         let avg = trendUseCase.average(of: points)
+                        let recRange = dashboardVM.sleepRecommendedRangeMinutes
 
                         Chart {
+                            // 권장 총수면 범위 음영 밴드(NSF/AASM, 연령 기반). 분 단위.
+                            if let r = recRange {
+                                RectangleMark(
+                                    yStart: .value("권장 하한", r.lowerBound),
+                                    yEnd:   .value("권장 상한", r.upperBound)
+                                )
+                                .foregroundStyle(theme.color.statusSuccessSolid.color.opacity(0.14))
+                            }
+
                             ForEach(points) { point in
                                 AreaMark(
                                     x: .value("날짜", point.date, unit: .day),

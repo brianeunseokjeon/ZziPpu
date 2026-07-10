@@ -65,12 +65,18 @@ struct FeedingAdequacyCard: View {
 
     /// 오늘 총 수유량 (ml)
     let totalMl: Int
-    /// 신생아 가이드라인: 150ml/kg/day, 평균 3.5kg 기준 약 525ml
-    /// 실제 가이드라인 밴드: 450~600ml (하한~상한)
-    private let recommendedMin: Int = 450
-    private let recommendedMax: Int = 600
+    /// 체중 기반 권장 범위(ml) — 가이드(AAP 150~180ml/kg) 연동. 없으면(체중 미등록) 비교 생략.
+    let recommendedRange: ClosedRange<Double>?
+
+    init(totalMl: Int, recommendedRange: ClosedRange<Double>? = nil) {
+        self.totalMl = totalMl
+        self.recommendedRange = recommendedRange
+    }
 
     @Environment(\.theme) private var theme
+
+    private var recommendedMin: Int? { recommendedRange.map { Int($0.lowerBound) } }
+    private var recommendedMax: Int? { recommendedRange.map { Int($0.upperBound) } }
 
     var body: some View {
         CardContainer {
@@ -99,34 +105,42 @@ struct FeedingAdequacyCard: View {
                     tone: adequacyTone
                 )
 
-                Text("권장 \(recommendedMin)~\(recommendedMax)ml (신생아 평균 기준)")
-                    .font(theme.typography.caption)
-                    .foregroundStyle(theme.color.textTertiary.color)
+                if let lo = recommendedMin, let hi = recommendedMax {
+                    Text("권장 \(lo)~\(hi)ml (체중 기반 · AAP)")
+                        .font(theme.typography.caption)
+                        .foregroundStyle(theme.color.textTertiary.color)
+                } else {
+                    Text("체중을 등록하면 AAP 권장과 비교해 드려요")
+                        .font(theme.typography.caption)
+                        .foregroundStyle(theme.color.textTertiary.color)
+                }
             }
         }
     }
 
     private var fillRatio: Double {
-        guard recommendedMax > 0 else { return 0 }
-        return min(Double(totalMl) / Double(recommendedMax), 1.3)  // 130%까지 표시
+        guard let hi = recommendedMax, hi > 0 else { return 0 }
+        return min(Double(totalMl) / Double(hi), 1.3)  // 130%까지 표시
     }
 
-    private var normalRange: ClosedRange<Double> {
-        let maxVal = Double(recommendedMax) * 1.3
-        guard maxVal > 0 else { return 0...1 }
-        return Double(recommendedMin) / maxVal ... Double(recommendedMax) / maxVal
+    private var normalRange: ClosedRange<Double>? {
+        guard let lo = recommendedMin, let hi = recommendedMax, hi > 0 else { return nil }
+        let maxVal = Double(hi) * 1.3
+        return Double(lo) / maxVal ... Double(hi) / maxVal
     }
 
     private var adequacyTone: StatusTone {
-        if totalMl < recommendedMin { return .warning }
-        if totalMl > recommendedMax { return .info }
+        guard let lo = recommendedMin, let hi = recommendedMax else { return .info }
+        if totalMl < lo { return .warning }
+        if totalMl > hi { return .info }
         return .success
     }
 
     private var adequacyLabel: String {
         if totalMl == 0 { return "기록 없음" }
-        if totalMl < recommendedMin { return "권장보다 적음" }
-        if totalMl > recommendedMax { return "권장 초과" }
+        guard let lo = recommendedMin, let hi = recommendedMax else { return "정보 없음" }
+        if totalMl < lo { return "권장보다 적음" }
+        if totalMl > hi { return "권장 초과" }
         return "적정"
     }
 }
@@ -143,8 +157,9 @@ struct FeedingAdequacyCard: View {
                 awakeWindowMinutes: nil, sleepBasedOn: 0
             ))
 
-            FeedingAdequacyCard(totalMl: 380)
-            FeedingAdequacyCard(totalMl: 520)
+            FeedingAdequacyCard(totalMl: 380, recommendedRange: 525...630)
+            FeedingAdequacyCard(totalMl: 560, recommendedRange: 525...630)
+            FeedingAdequacyCard(totalMl: 300)  // 체중 미등록 → 비교 생략
         }
         .padding()
     }

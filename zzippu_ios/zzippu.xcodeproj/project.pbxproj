@@ -64,6 +64,7 @@
 		435542E9111E97A042B502AF /* SaveFeedingUseCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3DD65B1970206F01A77B4967 /* SaveFeedingUseCase.swift */; };
 		457908137F9833EF26324992 /* PrimitiveColors.generated.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7D0349BA2B5565612AA9E478 /* PrimitiveColors.generated.swift */; };
 		46F0180C10B15746AE2B4CCC /* DevelopmentStage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 665122C5F11382581CEA0FE6 /* DevelopmentStage.swift */; };
+		478EBFA73B49AC27AA0F9C66 /* TodayInsightsSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1709D33D97B6047689B426CC /* TodayInsightsSection.swift */; };
 		47FD1B667883F34F17E45B8B /* DiaperDTO.swift in Sources */ = {isa = PBXBuildFile; fileRef = 502281F745E8C0CDF53EE122 /* DiaperDTO.swift */; };
 		4B6F7D8B391DE3B25E8AF9F7 /* Color+Hex.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2AEA429545D9F2DB9583AC6E /* Color+Hex.swift */; };
 		4FBD7F8215493B6937F4DCB4 /* RangeBandChart.swift in Sources */ = {isa = PBXBuildFile; fileRef = 105BA5A4800E331279400182 /* RangeBandChart.swift */; };
@@ -214,6 +215,7 @@
 		12AFFEF8457AD64BEC2555EE /* FeedingViewModel.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = FeedingViewModel.swift; path = FeedingViewModel.swift; sourceTree = "<group>"; };
 		140E4D00F9FC2774D872B6BA /* VaccinationRepository.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = VaccinationRepository.swift; sourceTree = "<group>"; };
 		15218DAD74298A15AF785A8B /* DSGaugeBar.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DSGaugeBar.swift; sourceTree = "<group>"; };
+		1709D33D97B6047689B426CC /* TodayInsightsSection.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = TodayInsightsSection.swift; sourceTree = "<group>"; };
 		1927104D7EC8A00CC8D943FC /* DSTextField.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DSTextField.swift; sourceTree = "<group>"; };
 		1A98363E0AB8DD6B90CF2C43 /* RemoteVaccinationRepository.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = RemoteVaccinationRepository.swift; sourceTree = "<group>"; };
 		1B2A99259BF614C30A986E61 /* DSBottomSheet.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DSBottomSheet.swift; sourceTree = "<group>"; };
@@ -656,6 +658,7 @@
 				08CA2CCB34272F21A6F934BF /* DashboardView.swift */,
 				38DE4DD5318C4324FA7BA009 /* MetricDetailView.swift */,
 				B9D471E90AC7CF6BF84018A5 /* GrowthDetailView.swift */,
+				1709D33D97B6047689B426CC /* TodayInsightsSection.swift */,
 			);
 			name = Dashboard;
 			path = Dashboard;
@@ -1340,6 +1343,7 @@
 				E1DDA3578FC9194C2A099BD0 /* InsightRow.swift in Sources */,
 				E881245F458D5C5A794427F9 /* AnalysisCard.swift in Sources */,
 				4FBD7F8215493B6937F4DCB4 /* RangeBandChart.swift in Sources */,
+				478EBFA73B49AC27AA0F9C66 /* TodayInsightsSection.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

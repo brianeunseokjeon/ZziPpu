@@ -28,6 +28,13 @@ final class DashboardViewModel {
     var growthSeries: [GrowthRecord] = []
     var latestGrowth: GrowthRecord?  { growthSeries.last }
 
+    // 활성 아기 (나이·성별 파생)
+    var activeBaby: Baby?
+
+    // "오늘의 분석" 결과 (EvaluateInsightsUseCase 산출)
+    var insights: [DomainInsight] = []
+    var insightsHeadline: String = ""
+
     // MARK: - Dependencies
 
     private let dashboardRepository: DashboardRepository
@@ -36,11 +43,14 @@ final class DashboardViewModel {
     private let diaperRepository:    DiaperRepository
     private let playRepository:      PlayRepository
     private let growthRepository:    GrowthRepository
+    private let babyRepository:      BabyRepository
+    private let guidelineRepository: GuidelineRepository
     private let babyId: UUID
 
     // MARK: - UseCases (순수 집계)
 
     private let trendUseCase = ComputeTrendUseCase()
+    private let insightsUseCase: EvaluateInsightsUseCase
 
     // MARK: - Init
 
@@ -51,6 +61,8 @@ final class DashboardViewModel {
         diaperRepository:    DiaperRepository,
         playRepository:      PlayRepository,
         growthRepository:    GrowthRepository,
+        babyRepository:      BabyRepository,
+        guidelineRepository: GuidelineRepository,
         babyId: UUID
     ) {
         self.dashboardRepository = dashboardRepository
@@ -59,7 +71,10 @@ final class DashboardViewModel {
         self.diaperRepository    = diaperRepository
         self.playRepository      = playRepository
         self.growthRepository    = growthRepository
+        self.babyRepository      = babyRepository
+        self.guidelineRepository = guidelineRepository
         self.babyId              = babyId
+        self.insightsUseCase     = EvaluateInsightsUseCase(repository: guidelineRepository)
     }
 
     // MARK: - Actions
@@ -74,6 +89,7 @@ final class DashboardViewModel {
                 async let summary    = dashboardRepository.dailySummary(babyId: babyId, date: target)
                 async let pred       = dashboardRepository.predictions(babyId: babyId)
                 async let growth     = growthRepository.series(babyId: babyId)
+                async let baby       = babyRepository.fetch(id: babyId)
 
                 // 7일 스파크라인용 각 날짜별 로드 (병렬)
                 let sparkDates = last7Days(anchor: target)
@@ -85,10 +101,13 @@ final class DashboardViewModel {
                 dailySummary  = try await summary
                 prediction    = try await pred
                 growthSeries  = try await growth
+                activeBaby    = try await baby
                 sparkFeedings = try await fAll
                 sparkSleeps   = try await sAll
                 sparkDiapers  = try await dAll
                 sparkPlays    = try await pAll
+
+                recomputeInsights()
 
             } catch {
                 errorMessage = "대시보드 로드 실패: \(error.localizedDescription)"
@@ -173,6 +192,81 @@ final class DashboardViewModel {
         let fmt = DateFormatter()
         fmt.dateFormat = "HH:mm"
         return fmt.string(from: next)
+    }
+
+    /// 수유 적정량 게이지용 권장 범위(ml). 체중 기반(가이드 연동). 없으면 nil → 게이지 밴드 생략.
+    var feedingRecommendedRange: ClosedRange<Double>? {
+        insights.first { $0.kind == .feeding }?.recommendedRange
+    }
+
+    /// 수면 추세 차트용 권장 범위(분). 엔진은 시간(h) 단위 → 차트 y(분)에 맞게 ×60.
+    var sleepRecommendedRangeMinutes: ClosedRange<Double>? {
+        guard let h = insights.first(where: { $0.kind == .sleep })?.recommendedRange else { return nil }
+        return (h.lowerBound * 60)...(h.upperBound * 60)
+    }
+
+    // MARK: - Insights (오늘의 분석)
+
+    /// 집계값 + 활성아기 나이/체중으로 InsightInput 구성 → EvaluateInsightsUseCase 실행.
+    /// 가이드 로드 실패(번들 누락 등)해도 앱은 깨지지 않게 빈 결과로 폴백.
+    private func recomputeInsights() {
+        let input = makeInsightInput()
+        do {
+            let result = try insightsUseCase.evaluate(input)
+            insights = result
+            insightsHeadline = insightsUseCase.rollupHeadline(result)
+        } catch {
+            insights = []
+            insightsHeadline = "분석 데이터를 준비 중이에요 📊"
+        }
+    }
+
+    private func makeInsightInput() -> InsightInput {
+        // 나이(개월): 출생일 → 오늘. 아기 미로딩 시 0.
+        let months: Int = {
+            guard let birth = activeBaby?.birthDate else { return 0 }
+            let comps = Calendar.current.dateComponents([.month], from: birth, to: selectedDate)
+            return max(0, comps.month ?? 0)
+        }()
+
+        // 체중(kg): 최신 성장기록 우선, 없으면 출생 체중.
+        let weightKg: Double? = {
+            if let g = latestGrowth?.weightG, g > 0 { return Double(g) / 1000.0 }
+            if let bw = activeBaby?.birthWeightG, bw > 0 { return Double(bw) / 1000.0 }
+            return nil
+        }()
+
+        // 오늘 집계값 (DailySummary — 서버 집계).
+        let feedingMl = dailySummary.totalFeedingMl > 0 ? Double(dailySummary.totalFeedingMl) : nil
+        let sleepH    = dailySummary.totalSleepMinutes > 0
+            ? Double(dailySummary.totalSleepMinutes) / 60.0 : nil
+        let peeC      = dailySummary.peeCount > 0 ? Double(dailySummary.peeCount) : nil
+        let poopC     = dailySummary.poopCount > 0 ? Double(dailySummary.poopCount) : nil
+        let tummyMin  = dailySummary.tummyTimeMinutes > 0
+            ? Double(dailySummary.tummyTimeMinutes) : nil
+
+        return InsightInput(
+            ageMonths: months,
+            weightKg: weightKg,
+            isBreastfeeding: false,     // 수유 방식 개인화는 후순위 — 분유 기준
+            validDays: validRecordDays,
+            feedingMlPerDay: feedingMl,
+            sleepHoursPerDay: sleepH,
+            peeCountPerDay: peeC,
+            poopCountPerDay: poopC,
+            tummyTimeMinPerDay: tummyMin
+        )
+    }
+
+    /// 최근 7일 중 기록이 하나라도 있는 날 수 (유효일수). <3이면 엔진이 noData 처리.
+    private var validRecordDays: Int {
+        let cal = Calendar.current
+        var days = Set<Date>()
+        for f in sparkFeedings { days.insert(cal.startOfDay(for: f.startedAt)) }
+        for s in sparkSleeps   { days.insert(cal.startOfDay(for: s.startedAt)) }
+        for d in sparkDiapers  { days.insert(cal.startOfDay(for: d.recordedAt)) }
+        for p in sparkPlays    { days.insert(cal.startOfDay(for: p.startedAt)) }
+        return days.count
     }
 
     // MARK: - Private Helpers
