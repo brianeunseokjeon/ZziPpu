@@ -25,7 +25,8 @@ final class OnboardingViewModel {
     private let growthRepository: GrowthRepository
     private let userId: UUID?
 
-    var onCompleted: (() -> Void)?
+    /// 완료 콜백 — 서버에서 받은 Baby 엔티티를 전달 (activeBabyId 설정용)
+    var onCompleted: ((Baby) -> Void)?
 
     init(babyRepository: BabyRepository,
          growthRepository: GrowthRepository,
@@ -44,40 +45,41 @@ final class OnboardingViewModel {
         }
         isLoading = true
 
-        do {
-            // 출생체중 변환 (kg → g, 0~15 kg 검증)
-            var birthWeightG: Int? = nil
-            if !birthWeightKgText.isEmpty,
-               let kg = Double(birthWeightKgText),
-               (0...15).contains(kg) {
-                birthWeightG = Int(kg * 1000)
-            }
+        Task { @MainActor in
+            defer { isLoading = false }
+            do {
+                // 출생체중 변환 (kg → g, 0~15 kg 검증)
+                var birthWeightG: Int? = nil
+                if !birthWeightKgText.isEmpty,
+                   let kg = Double(birthWeightKgText),
+                   (0...15).contains(kg) {
+                    birthWeightG = Int(kg * 1000)
+                }
 
-            // Baby 생성 및 로컬 저장
-            let baby = Baby.new(
-                userId: userId,
-                name: babyName.trimmingCharacters(in: .whitespaces),
-                birthDate: birthDate,
-                gender: gender,
-                birthWeightG: birthWeightG
-            )
-            try babyRepository.create(baby)
-
-            // 출생체중 있으면 GrowthRecord 1건 자동 생성 (recordedAt = birthDate)
-            if let weightG = birthWeightG {
-                let growth = GrowthRecord.new(
-                    babyId: baby.id,
-                    recordedAt: birthDate,
-                    weightG: weightG
+                // Baby 생성 — 서버 POST, 반환값이 확정 엔티티
+                let babyDraft = Baby.new(
+                    userId: userId,
+                    name: babyName.trimmingCharacters(in: .whitespaces),
+                    birthDate: birthDate,
+                    gender: gender,
+                    birthWeightG: birthWeightG
                 )
-                try growthRepository.create(growth)
-            }
+                let savedBaby = try await babyRepository.create(babyDraft)
 
-            isLoading = false
-            onCompleted?()
-        } catch {
-            isLoading = false
-            errorMessage = error.localizedDescription
+                // 출생체중 있으면 GrowthRecord 1건 자동 생성 (recordedAt = birthDate)
+                if let weightG = birthWeightG {
+                    let growth = GrowthRecord.new(
+                        babyId: savedBaby.id,
+                        recordedAt: savedBaby.birthDate,
+                        weightG: weightG
+                    )
+                    _ = try await growthRepository.create(growth)
+                }
+
+                onCompleted?(savedBaby)
+            } catch {
+                errorMessage = error.localizedDescription
+            }
         }
     }
 

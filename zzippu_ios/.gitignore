@@ -7,6 +7,7 @@ xcuserdata/
 # 빌드 산출물
 build/
 DerivedData/
+.build_sim/
 *.moved-aside
 *.hmap
 *.ipa

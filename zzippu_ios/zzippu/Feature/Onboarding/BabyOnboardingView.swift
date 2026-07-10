@@ -26,12 +26,9 @@ struct BabyOnboardingView: View {
                     userId: session?.userId
                 )
                 let capturedContainer = container
-                newVM.onCompleted = {
-                    // 등록된 아기로 activeBabyId 업데이트
-                    if let baby = try? capturedContainer.babyRepository.activeBaby() {
-                        capturedContainer.activeBabyId = baby.id
-                    }
-                    // 온보딩 완료 → 메인탭으로 분기
+                // onCompleted 콜백: 서버가 확정한 Baby를 받아 activeBabyId 설정
+                newVM.onCompleted = { savedBaby in
+                    capturedContainer.activeBabyId = savedBaby.id
                     capturedContainer.sessionState.activeBabyRegistered = true
                 }
                 vm = newVM

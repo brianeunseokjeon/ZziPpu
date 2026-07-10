@@ -24,11 +24,8 @@ struct Baby: Identifiable, Equatable, Sendable {
     var birthDate: Date
     var gender: Gender
     var birthWeightG: Int?
-    var photoData: Data?
+    var photoUrl: String?          // server-first: URL 문자열 (기존 photoData: Data? 제거)
     let createdAt: Date
-    var updatedAt: Date
-    var syncState: SyncState
-    var deletedAt: Date?
 
     static func new(
         userId: UUID? = nil,
@@ -37,7 +34,6 @@ struct Baby: Identifiable, Equatable, Sendable {
         gender: Gender,
         birthWeightG: Int? = nil
     ) -> Baby {
-        let now = Date.now
         return Baby(
             id: UUID(),
             userId: userId,
@@ -45,11 +41,8 @@ struct Baby: Identifiable, Equatable, Sendable {
             birthDate: birthDate,
             gender: gender,
             birthWeightG: birthWeightG,
-            photoData: nil,
-            createdAt: now,
-            updatedAt: now,
-            syncState: .localOnly,
-            deletedAt: nil
+            photoUrl: nil,
+            createdAt: Date.now
         )
     }
 }

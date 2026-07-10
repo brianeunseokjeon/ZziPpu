@@ -2,13 +2,10 @@
 // Composition Root — 모든 구체 Repository를 생성·보관
 
 import Foundation
-import SwiftData
 import Observation
 
 @Observable
 final class AppContainer {
-    // MARK: - Infrastructure
-    let modelContext: ModelContext
 
     // MARK: - Repositories (Domain 프로토콜 타입으로 보관)
     let feedingRepository: FeedingRepository
@@ -19,16 +16,19 @@ final class AppContainer {
     // MARK: - Session State (라우팅 전용)
     let sessionState: SessionState
 
-    // MARK: - Active Baby
-    var activeBabyId: UUID = UUID(uuidString: "00000000-0000-0000-0000-000000000001")!
+    // MARK: - Active Baby (로그인 후 GET /babies 응답으로 확정)
+    var activeBabyId: UUID = UUID()   // 임시값 — hydrateSession에서 덮어씀
 
     // MARK: - Init
 
-    init(modelContext: ModelContext) {
-        self.modelContext = modelContext
-        self.feedingRepository = SwiftDataFeedingRepository(context: modelContext)
-        self.babyRepository    = SwiftDataBabyRepository(context: modelContext)
-        self.growthRepository  = SwiftDataGrowthRepository(context: modelContext)
+    init() {
+        let api = APIClient(
+            tokenProvider: { KeychainTokenStore().load() },
+            onUnauthorized: { /* handleUnauthorized는 sessionState 접근이 필요 — 후처리 */ }
+        )
+        self.feedingRepository = RemoteFeedingRepository(api: api)
+        self.babyRepository    = RemoteBabyRepository(api: api)
+        self.growthRepository  = RemoteGrowthRepository(api: api)
         self.authRepository    = AuthRepositoryImpl(
             remote: AuthRemoteDataSource(),
             tokenStore: KeychainTokenStore()
@@ -36,23 +36,20 @@ final class AppContainer {
         self.sessionState = SessionState()
     }
 
-    // MARK: - Preview Factory
+    // MARK: - Unauthorized Handler (로그인 화면으로)
+
+    func handleUnauthorized() {
+        authRepository.signOut()
+        sessionState.setSession(nil)
+    }
+
+    // MARK: - Preview Factory (Mock 리포지토리 — 네트워크 미접속)
 
     @MainActor
     static var preview: AppContainer {
-        let container = try! ModelContainer.makePreviewContainer()
-        let ctx = container.mainContext
-        let appContainer = AppContainer(modelContext: ctx)
-
-        // 시드 데이터
-        let babyId = appContainer.activeBabyId
-        let samples: [Feeding] = [
-            .new(babyId: babyId, type: .formula, amountMl: 120, startedAt: Date().addingTimeInterval(-3600)),
-            .new(babyId: babyId, type: .breastLeft, durationMinutes: 15, startedAt: Date().addingTimeInterval(-7200)),
-        ]
-        for sample in samples {
-            try? appContainer.feedingRepository.create(sample)
-        }
-        return appContainer
+        let container = AppContainer()
+        // 프리뷰용 시드: 네트워크 없이 동작하려면 MockRepository 필요
+        // (현재 RemoteRepository는 실제 네트워크 — 프리뷰는 빈 상태로 표시)
+        return container
     }
 }

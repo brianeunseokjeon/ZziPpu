@@ -4,9 +4,9 @@
 import Foundation
 
 enum AuthConfig {
-    /// 로컬 통합 서버 (기본값)
-    /// 프로덕션 전환 시: "https://zzippu-api.onrender.com" 으로 교체
-    static let baseURL = URL(string: "http://localhost:8080")!
+    /// 통합 서버(zzippu-api). 로컬 개발 시엔 "http://localhost:8080" 으로 교체.
+    /// (localhost 는 HTTP 라 ATS 예외 필요 — 프로덕션 HTTPS 는 그대로 허용됨)
+    static let baseURL = URL(string: "https://zzippu-api.onrender.com")!
 
     /// JSON 디코더: snake_case → camelCase 자동 변환
     static var decoder: JSONDecoder {

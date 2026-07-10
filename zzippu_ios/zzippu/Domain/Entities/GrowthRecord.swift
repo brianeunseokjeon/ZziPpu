@@ -12,9 +12,6 @@ struct GrowthRecord: Identifiable, Equatable, Sendable {
     var headCircumferenceCm: Double?
     var memo: String?
     let createdAt: Date
-    var updatedAt: Date
-    var syncState: SyncState
-    var deletedAt: Date?
 
     static func new(
         babyId: UUID,
@@ -24,7 +21,6 @@ struct GrowthRecord: Identifiable, Equatable, Sendable {
         headCircumferenceCm: Double? = nil,
         memo: String? = nil
     ) -> GrowthRecord {
-        let now = Date.now
         return GrowthRecord(
             id: UUID(),
             babyId: babyId,
@@ -33,10 +29,7 @@ struct GrowthRecord: Identifiable, Equatable, Sendable {
             heightCm: heightCm,
             headCircumferenceCm: headCircumferenceCm,
             memo: memo,
-            createdAt: now,
-            updatedAt: now,
-            syncState: .localOnly,
-            deletedAt: nil
+            createdAt: Date.now
         )
     }
 }

@@ -10,12 +10,13 @@ final class SaveFeedingUseCase {
         self.repository = repository
     }
 
-    /// 새 수유 기록 저장
-    func execute(_ feeding: Feeding) throws {
+    /// 새 수유 기록 저장 (async — 서버 POST)
+    @discardableResult
+    func execute(_ feeding: Feeding) async throws -> Feeding {
         // 도메인 규칙 검증
         if feeding.type == .formula, let ml = feeding.amountMl, ml <= 0 {
             throw DomainError.invalidInput("분유량은 0ml 이상이어야 합니다.")
         }
-        try repository.create(feeding)
+        return try await repository.create(feeding)
     }
 }

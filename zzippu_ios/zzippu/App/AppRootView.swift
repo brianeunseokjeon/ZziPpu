@@ -1,7 +1,7 @@
 // App/AppRootView.swift
 // PRODUCT_SPEC §2.1 루트 분기:
 //   hydrating(스플래시) → token 없음(AuthFlow) → termsRequired(약관)
-//   → 활성 baby 없음(Onboarding) → MainTabView
+//   → 서버에 baby 없음(Onboarding) → MainTabView
 
 import SwiftUI
 
@@ -13,7 +13,7 @@ struct AppRootView: View {
 
         Group {
             if state.isHydrating {
-                // ① 스플래시 — Keychain 복원 완료 전 (깜빡임 방지)
+                // ① 스플래시 — Keychain 복원 + GET /babies 완료 전 (깜빡임 방지)
                 SplashView()
             } else if state.needsLogin {
                 // ② 로그인 화면
@@ -24,7 +24,7 @@ struct AppRootView: View {
                 TermsAgreementView()
                     .environment(container)
             } else if state.needsOnboarding {
-                // ④ 아기 온보딩 (처음 사용자)
+                // ④ 아기 온보딩 — 서버에 아기 없는 신규 사용자
                 BabyOnboardingView()
                     .environment(container)
             } else {
@@ -38,24 +38,32 @@ struct AppRootView: View {
         }
     }
 
-    // MARK: - Session Hydration
+    // MARK: - Session Hydration (S2 핵심: GET /babies로 기존 데이터 확인)
 
-    /// 재설치 감지 + Keychain 복원
-    /// - 서버 검증 없음(런타임 401에서만 감지)
-    /// - 복원 완료 후 isHydrating = false → 라우팅 확정
+    /// 1. Keychain 복원(동기)
+    /// 2. 로그인 상태면 GET /babies 호출 → 결과 유무로 온보딩 여부 결정
+    /// 3. 첫 아기 id를 activeBabyId에 세팅
+    /// → essy1224 등 기존 계정은 온보딩 없이 홈으로 바로 진입
     @MainActor
     private func hydrateSession() async {
         let useCase = RestoreSessionUseCase(authRepository: container.authRepository)
         let session = useCase.execute()   // 동기 (Keychain I/O만)
 
-        // 활성 아기 여부 확인
-        let hasActiveBaby = (try? container.babyRepository.activeBaby()) != nil
-
         container.sessionState.setSession(session)
-        container.sessionState.activeBabyRegistered = hasActiveBaby
 
-        if let baby = try? container.babyRepository.activeBaby() {
-            container.activeBabyId = baby.id
+        // 로그인된 경우에만 서버에서 아기 목록 조회
+        if session != nil {
+            do {
+                let babies = try await container.babyRepository.fetchAll()
+                container.sessionState.activeBabyRegistered = !babies.isEmpty
+                if let first = babies.first {
+                    container.activeBabyId = first.id
+                }
+            } catch {
+                // 네트워크 실패 시 온보딩으로 빠지지 않도록 false 유지
+                // (401이면 handleUnauthorized가 세션 무효화)
+                container.sessionState.activeBabyRegistered = false
+            }
         }
 
         // 마지막에 isHydrating 해제 (스플래시 → 실제 화면)
@@ -108,12 +116,21 @@ private struct AuthFlowView: View {
         .task {
             if vm == nil {
                 let authVM = AuthViewModel(authRepository: container.authRepository)
-                // container는 @Observable class — 강한 참조로 캡처 (SwiftUI가 생명주기 관리)
                 let capturedContainer = container
                 authVM.onSessionRestored = { session in
                     capturedContainer.sessionState.setSession(session)
-                    let hasActiveBaby = (try? capturedContainer.babyRepository.activeBaby()) != nil
-                    capturedContainer.sessionState.activeBabyRegistered = hasActiveBaby
+                    // 로그인 직후 서버에서 아기 목록 조회
+                    Task { @MainActor in
+                        do {
+                            let babies = try await capturedContainer.babyRepository.fetchAll()
+                            capturedContainer.sessionState.activeBabyRegistered = !babies.isEmpty
+                            if let first = babies.first {
+                                capturedContainer.activeBabyId = first.id
+                            }
+                        } catch {
+                            capturedContainer.sessionState.activeBabyRegistered = false
+                        }
+                    }
                 }
                 vm = authVM
             }

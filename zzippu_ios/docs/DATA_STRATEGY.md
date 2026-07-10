@@ -1,4 +1,9 @@
-# DATA_STRATEGY.md — local-first 데이터 전략 (★최중요★)
+> ⛔ **DEPRECATED (2026-07 폐기).** 이 local-first 전략은 **`DATA_STRATEGY_SERVER_FIRST.md`로 대체**되었다.
+> 양육자 공유가 핵심 가치로 확정되어 서버가 진실의 원천이 되었다. 아래 내용(SwiftData 진실원천·sync 메타 4필드·pendingSync 훅)은 **구현하지 말 것**. 전환 절차는 `MIGRATION_PLAN.md` 참조. 이 파일은 이력 보존용으로만 남긴다.
+
+---
+
+# DATA_STRATEGY.md — local-first 데이터 전략 (★폐기됨 · 이력 보존★)
 
 > 목표: 지금은 **회원가입·로그인만 서버**, 나머지 모든 기록은 로컬(SwiftData). 나중에 "로컬 → 서버 push" 동기화를 **거의 공짜**로 붙일 수 있도록 스키마·리포지토리 경계를 설계한다.
 > 레이어·DI는 ARCHITECTURE.md, 필드 근거는 PRODUCT_SPEC.md.

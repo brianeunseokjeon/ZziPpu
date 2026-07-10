@@ -24,15 +24,16 @@ graph TD
 
 | 레이어 | 책임 | 알아도 되는 것 | **절대 몰라야 하는 것** |
 |--------|------|----------------|------------------------|
-| **Domain** | 순수 비즈니스: 엔티티(struct), Repository **프로토콜**, UseCase, 도메인 규칙(나이·수유간격·백분위 계산) | Foundation, Shared(순수 유틸) | SwiftUI, SwiftData, 네트워킹, Feature |
-| **Data** | Repository 프로토콜 **구현**. SwiftData `@Model`(PersistenceModel) ↔ Domain 엔티티 매핑. Keychain, (미래) 네트워크 | Domain(프로토콜/엔티티), SwiftData, Shared | SwiftUI, Feature |
-| **Feature** | 화면 단위 UI(SwiftUI View) + ViewModel(@Observable). UseCase/Repository 프로토콜 호출 | Domain(프로토콜/엔티티/UseCase), Shared, SwiftUI | Data 구현체(오직 프로토콜만), 다른 Feature |
-| **App** | 진입점, DI 컨테이너 조립(Composition Root), 라우팅, ModelContainer 생성 | 전부(조립하므로) | — |
+| **Domain** | 순수 비즈니스: 엔티티(struct), Repository **프로토콜**(`async throws`), UseCase, 도메인 규칙(나이·수유간격·백분위 계산) | Foundation, Shared(순수 유틸) | SwiftUI, SwiftData, 네트워킹 구체타입, Feature |
+| **Data** | Repository 프로토콜 **구현**. **HTTP(`APIClient`/`URLSession`)로 zzippu-api 호출, DTO ↔ Domain 엔티티 매핑**. Keychain(토큰). **서버가 진실의 원천**(server-first) | Domain(프로토콜/엔티티), Foundation/URLSession, Shared | SwiftUI, Feature |
+| **Feature** | 화면 단위 UI(SwiftUI View) + ViewModel(@Observable). UseCase/Repository 프로토콜 호출(`await`) | Domain(프로토콜/엔티티/UseCase), Shared, SwiftUI | Data 구현체(오직 프로토콜만), 다른 Feature |
+| **App** | 진입점, DI 컨테이너 조립(Composition Root), 라우팅. `APIClient` 생성·주입 | 전부(조립하므로) | — |
 | **Shared** | 색상·타이포·공용 컴포넌트(BabyAvatar 등)·날짜 유틸·에러 타입 | Foundation, SwiftUI(디자인시스템만) | Domain/Data/Feature 도메인 지식 |
 
 핵심 규칙(코드 리뷰 체크리스트):
 - Feature는 **구체 Repository 타입을 import 하지 않는다**. 오직 `protocol FeedingRepository`(Domain)만 안다. 구현 주입은 App이 담당.
-- Domain은 `import SwiftUI`/`import SwiftData` 금지. 이것이 미래 모듈화·테스트 용이성의 근간.
+- Domain은 `import SwiftUI`/`import SwiftData` 금지. 네트워킹 **구체타입**(URLSession)도 금지 — 단 Repository 프로토콜 메서드는 `async throws`(서버 호출 대응). 이것이 미래 모듈화·테스트 용이성의 근간.
+- **server-first 결정**: 데이터의 진실의 원천은 서버(zzippu-api). SwiftData는 도메인 저장소로 사용하지 않는다(오프라인 캐시는 후속 옵션 B). 상세는 `DATA_STRATEGY_SERVER_FIRST.md`.
 - Feature 간 직접 의존 금지. 공유가 필요하면 Domain UseCase 또는 Shared로 올린다.
 
 ---
@@ -79,15 +80,15 @@ zzippu/
 │   ├── Values/               # 열거형/값객체: FeedingType, DiaperType, StoolColor, StoolState, PlayType, SyncState
 │   └── Errors/               # DomainError
 │
-├── Data/                     # 미래 모듈: Domain 구현 + 영속화
-│   ├── Persistence/
-│   │   ├── Models/           # @Model SwiftData 클래스: FeedingModel, SleepModel … (PersistenceModel)
-│   │   ├── Mappers/          # Model ↔ Entity 매핑 (FeedingModel.toEntity() / init(from:))
-│   │   └── SchemaV1.swift    # VersionedSchema(마이그레이션 대비)
-│   ├── Repositories/         # SwiftDataFeedingRepository … (Domain 프로토콜 구현)
+├── Data/                     # 미래 모듈: Domain 구현 + 서버 통신
+│   ├── Network/
+│   │   ├── APIClient.swift   # 공용 HTTP(Bearer 주입, snake_case 코덱, 401 처리, 쓰기 재시도)
+│   │   ├── DTOs/             # 서버 JSON 대응 struct: FeedingDTO, BabyDTO … (snake→camel 자동)
+│   │   ├── DataSources/      # RemoteFeedingDataSource … (엔드포인트/스키마 아는 유일한 곳)
+│   │   └── Mappers/          # DTO ↔ Entity 매핑 (FeedingDTO.toEntity())
+│   ├── Repositories/         # RemoteFeedingRepository … (Domain 프로토콜 구현, DataSource+Mapper 조합)
 │   ├── Auth/                 # AuthRemoteDataSource(URLSession), KeychainTokenStore, AuthRepositoryImpl
-│   ├── Content/              # 번들 정적 콘텐츠 로더(Development, Vaccination 프리셋)
-│   └── Sync/                 # (후순위, 빈 상태로 경계만 예약) SyncService, RemoteDataSource
+│   └── Content/              # 번들 정적 콘텐츠 로더(Development, Vaccination 프리셋)
 │
 └── Shared/                   # 미래 모듈: 순수 유틸 + 디자인시스템
     ├── DesignSystem/         # Color+Theme, Typography, Spacing, 공용 Button/Card 스타일
@@ -127,18 +128,19 @@ zzippu/
 - `AppContainer`(App 레이어)가 앱 시작 시 모든 구체 Repository를 생성·보관한다.
   ```swift
   @Observable final class AppContainer {
-      let modelContext: ModelContext
       let feedingRepository: FeedingRepository   // 프로토콜 타입으로 보관
-      let sleepRepository: SleepRepository
       let babyRepository: BabyRepository
+      let growthRepository: GrowthRepository
       let authRepository: AuthRepository
       // …
-      init(modelContext: ModelContext) {
-          self.modelContext = modelContext
-          self.feedingRepository = SwiftDataFeedingRepository(context: modelContext)
-          self.sleepRepository  = SwiftDataSleepRepository(context: modelContext)
-          self.authRepository   = AuthRepositoryImpl(remote: AuthRemoteDataSource(),
-                                                     tokenStore: KeychainTokenStore())
+      init() {
+          let api = APIClient(tokenProvider: { KeychainTokenStore().load() },
+                              onUnauthorized: { /* signOut + session=nil */ })
+          self.feedingRepository = RemoteFeedingRepository(api: api)
+          self.babyRepository    = RemoteBabyRepository(api: api)
+          self.growthRepository  = RemoteGrowthRepository(api: api)
+          self.authRepository    = AuthRepositoryImpl(remote: AuthRemoteDataSource(),
+                                                      tokenStore: KeychainTokenStore())
           // …
       }
   }
@@ -150,36 +152,33 @@ zzippu/
       @State private var vm: FeedingViewModel?
       var body: some View {
           content.task {
-              if vm == nil { vm = FeedingViewModel(repository: container.feedingRepository) }
+              if vm == nil { vm = FeedingViewModel(repository: container.feedingRepository, babyId: container.activeBabyId) }
           }
       }
   }
   ```
 - 테스트: ViewModel은 프로토콜만 알므로 `MockFeedingRepository` 주입으로 UI 없이 단위 테스트.
-- 프리뷰: `AppContainer.preview`(인메모리 ModelContainer + 시드 데이터) 정적 팩토리 제공.
+- 프리뷰: `AppContainer.preview`(**Mock 리포지토리 = 메모리 배열**, 네트워크 미접속) 정적 팩토리 제공.
 
-### Repository 패턴 (Domain 프로토콜 ← Data SwiftData 구현)
-- 프로토콜은 **Domain/Repositories** 에 위치(엔티티=struct 기준 시그니처). 예:
+### Repository 패턴 (Domain 프로토콜 ← Data Remote(HTTP) 구현)
+- 프로토콜은 **Domain/Repositories** 에 위치(엔티티=struct 기준 시그니처, **`async throws`**). 예:
   ```swift
-  // Domain — 프레임워크 무지
+  // Domain — 프레임워크 무지 (구체 네트워킹 타입 모름)
   protocol FeedingRepository {
-      func create(_ feeding: Feeding) throws
-      func update(_ feeding: Feeding) throws
-      func delete(id: UUID) throws                 // soft delete (deletedAt)
-      func list(babyId: UUID, on day: Date) throws -> [Feeding]
-      func lastFeeding(babyId: UUID) throws -> Feeding?
-      // 미래 동기화 훅 (지금은 no-op 구현 가능)
-      func pendingSync(babyId: UUID) throws -> [Feeding]
-      func markSynced(ids: [UUID], serverTime: Date) throws
+      func create(_ feeding: Feeding) async throws -> Feeding
+      func update(_ feeding: Feeding) async throws -> Feeding
+      func delete(id: UUID, babyId: UUID) async throws       // 서버 물리삭제(204)
+      func list(babyId: UUID, on day: Date) async throws -> [Feeding]
+      func lastFeeding(babyId: UUID) async throws -> Feeding?
   }
   ```
-- 구현은 **Data/Repositories** 에서 `ModelContext` + Mapper 사용. (스키마·매핑 상세는 DATA_STRATEGY §2~3.)
+- 구현은 **Data/Repositories** 의 `RemoteFeedingRepository` = `RemoteFeedingDataSource`(HTTP) + Mapper(DTO↔Entity). (엔드포인트·스키마·전략 상세는 `DATA_STRATEGY_SERVER_FIRST.md` §1~5, 전환 절차는 `MIGRATION_PLAN.md`.)
 
 ---
 
 ## 5. 아키텍처 관련 결정 요약
 1. 상태관리 = **@Observable**(TCA·Combine 미채택). 근거는 §3.
 2. DI = **환경 기반 Composition Root**(무외부의존). Feature는 프로토콜만 의존.
-3. Repository 프로토콜은 **Domain**, 구현은 **Data(SwiftData)**. Sync 훅을 프로토콜에 선반영해 미래 비용을 0으로.
+3. Repository 프로토콜은 **Domain**(`async throws`), 구현은 **Data(Remote/HTTP)**. **서버(zzippu-api)가 진실의 원천**(server-first). 부부 공유는 caregiver 초대코드. 오프라인은 낙관적 업데이트+재시도(MVP), 로컬캐시는 후속. 상세 `DATA_STRATEGY_SERVER_FIRST.md`.
 4. 폴더 = 미래 SPM/Tuist 모듈. import 방향 규칙을 CI/리뷰로 강제.
 5. SwiftUI 네이티브 관용구(TabView, sheet, Swift Charts, SF Symbols, `.searchable`/스낵바 등)를 쓰되 웹 화면을 픽셀 모방하지 않는다.
