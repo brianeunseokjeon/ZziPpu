@@ -370,7 +370,9 @@ private struct DayTimelineSection: View {
     let day: Date
 
     @Environment(\.theme) private var theme
+    @Environment(ToastCenter.self) private var toastCenter
     @State private var deleteTarget: TimelineItem? = nil
+    @State private var editRecord: EditableRecord? = nil
 
     private var isToday: Bool { Calendar.current.isDateInToday(day) }
 
@@ -393,7 +395,7 @@ private struct DayTimelineSection: View {
                             time:     item.time.timeString,
                             label:    item.label,
                             dotColor: theme.color.solid(for: item.domainKind).color,
-                            onEdit:   nil
+                            onEdit:   { editRecord = vm.editableRecord(for: item, on: day) }
                         )
                         .swipeActions(edge: .trailing, allowsFullSwipe: false) {
                             Button(role: .destructive) { deleteTarget = item } label: {
@@ -421,6 +423,39 @@ private struct DayTimelineSection: View {
                 if let t = deleteTarget { vm.delete(t, on: day); deleteTarget = nil }
             }
             Button("취소", role: .cancel) { deleteTarget = nil }
+        }
+        .dsBottomSheet(
+            isPresented: Binding(
+                get: { editRecord != nil },
+                set: { if !$0 { editRecord = nil } }
+            ),
+            options: .init(title: editSheetTitle, detents: [.medium, .large])
+        ) {
+            if let record = editRecord {
+                RecordEditSheet(
+                    record: record,
+                    vm: vm,
+                    onClose: { editRecord = nil },
+                    onToast: { msg in toastCenter.show(.init(message: msg, variant: .success)) }
+                )
+            }
+        }
+    }
+
+    /// 편집 시트 타이틀 (웹 titleMap 재현).
+    private var editSheetTitle: String {
+        switch editRecord {
+        case .feeding(let f):
+            return f.type == .formula ? "🍼 분유 수정" : "🤱 모유 수정"
+        case .diaper(let d):
+            switch d.diaperType {
+            case .pee:  return "💧 소변 수정"
+            case .poo:  return "💩 대변 수정"
+            case .both: return "💧💩 배변 수정"
+            }
+        case .sleep: return "😴 수면 수정"
+        case .play:  return "🎈 놀이 수정"
+        case .none:  return "수정"
         }
     }
 }

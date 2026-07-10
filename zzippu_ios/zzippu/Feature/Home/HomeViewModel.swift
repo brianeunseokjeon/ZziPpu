@@ -383,6 +383,152 @@ final class HomeViewModel {
         }
     }
 
+    // MARK: - 편집 대상 조회
+
+    /// 타임라인 아이템 → 편집용 도메인 원본(현재 필드값 포함).
+    func editableRecord(for item: TimelineItem, on day: Date) -> EditableRecord? {
+        let key = Calendar.current.startOfDay(for: day)
+        guard let rec = recordsByDay[key] else { return nil }
+        switch item.domainKind {
+        case .feedingFormula, .feedingBreastLeft, .feedingBreastRight, .feedingBreastBoth, .feedingSolids:
+            return rec.feedings.first { $0.id == item.id }.map(EditableRecord.feeding)
+        case .sleep:
+            return rec.sleeps.first { $0.id == item.id }.map(EditableRecord.sleep)
+        case .diaperPee, .diaperPoop, .diaperBoth:
+            return rec.diapers.first { $0.id == item.id }.map(EditableRecord.diaper)
+        case .play:
+            return rec.plays.first { $0.id == item.id }.map(EditableRecord.play)
+        }
+    }
+
+    // MARK: - 편집 저장 (웹 RecordEditSheet 재현)
+    //   • feeding: PATCH(update) 낙관적 반영
+    //   • diaper/sleep/play: PATCH 없음 → 삭제 후 재생성(웹과 동일 전략)
+    //   실패 시 원본 롤백 + 에러 표기.
+
+    /// 분유·모유 수정. feeding.startedAt 기준 일자에 반영.
+    func updateFeeding(_ updated: Feeding) async {
+        let day = await dayKey(for: updated.startedAt)
+        // 원본(롤백용) 확보
+        let original = recordsByDay[day]?.feedings.first { $0.id == updated.id }
+        await mutate(day) { r in
+            if let i = r.feedings.firstIndex(where: { $0.id == updated.id }) { r.feedings[i] = updated }
+        }
+        do {
+            let confirmed = try await feedingRepository.update(updated)
+            await mutate(day) { r in
+                if let i = r.feedings.firstIndex(where: { $0.id == updated.id }) { r.feedings[i] = confirmed }
+            }
+            if confirmed.type == .formula, let ml = confirmed.amountMl { lastFormulaMl = ml }
+        } catch {
+            await mutate(day) { r in
+                if let orig = original, let i = r.feedings.firstIndex(where: { $0.id == updated.id }) { r.feedings[i] = orig }
+            }
+            await MainActor.run { errorMessage = "수정 실패: \(error.localizedDescription)" }
+        }
+    }
+
+    /// 배변 수정 — PATCH 없음: 삭제→재생성. recordedAt 기준 일자에 반영.
+    func replaceDiaper(oldId: UUID, with new: DiaperRecord) async {
+        let day = await dayKey(for: new.recordedAt)
+        let original = recordsByDay[day]?.diapers.first { $0.id == oldId }
+        await mutate(day) { r in
+            r.diapers.removeAll { $0.id == oldId }
+            r.diapers.insert(new, at: 0)
+        }
+        do {
+            try await diaperRepository.delete(id: oldId, babyId: new.babyId)
+            let confirmed = try await diaperRepository.create(new)
+            await mutate(day) { r in
+                if let i = r.diapers.firstIndex(where: { $0.id == new.id }) { r.diapers[i] = confirmed }
+            }
+        } catch {
+            await mutate(day) { r in
+                r.diapers.removeAll { $0.id == new.id }
+                if let orig = original { r.diapers.insert(orig, at: 0) }
+            }
+            await MainActor.run { errorMessage = "수정 실패: \(error.localizedDescription)" }
+        }
+    }
+
+    /// 수면 수정 — PATCH 없음: 삭제→재생성(+종료). startedAt 기준 일자에 반영.
+    func replaceSleep(oldId: UUID, startedAt: Date, endedAt: Date?) async {
+        let day = await dayKey(for: startedAt)
+        let original = recordsByDay[day]?.sleeps.first { $0.id == oldId }
+        let babyIdForRec = original?.babyId ?? babyId
+        let placeholder = SleepRecord.new(babyId: babyIdForRec, startedAt: startedAt)
+        let optimistic: SleepRecord = {
+            var s = placeholder
+            s.endedAt = endedAt
+            if let e = endedAt { s.durationMinutes = max(0, Int(e.timeIntervalSince(startedAt) / 60)) }
+            return s
+        }()
+        await mutate(day) { r in
+            r.sleeps.removeAll { $0.id == oldId }
+            r.sleeps.insert(optimistic, at: 0)
+        }
+        if activeSleepSession?.id == oldId {
+            await MainActor.run { activeSleepSession = endedAt == nil ? optimistic : nil }
+        }
+        do {
+            try await sleepRepository.delete(id: oldId, babyId: babyIdForRec)
+            var created = try await sleepRepository.create(placeholder)
+            if let e = endedAt {
+                created = try await sleepRepository.endSleep(id: created.id, babyId: babyIdForRec, endedAt: e)
+            }
+            let confirmed = created
+            await mutate(day) { r in
+                if let i = r.sleeps.firstIndex(where: { $0.id == optimistic.id }) { r.sleeps[i] = confirmed }
+            }
+            if endedAt == nil { await MainActor.run { activeSleepSession = confirmed } }
+        } catch {
+            await mutate(day) { r in
+                r.sleeps.removeAll { $0.id == optimistic.id }
+                if let orig = original { r.sleeps.insert(orig, at: 0) }
+            }
+            await MainActor.run {
+                if original?.endedAt == nil { activeSleepSession = original }
+                errorMessage = "수정 실패: \(error.localizedDescription)"
+            }
+        }
+    }
+
+    /// 놀이 수정 — PATCH 없음: 삭제→재생성. startedAt 기준 일자에 반영.
+    func replacePlay(oldId: UUID, with new: PlayRecord) async {
+        let day = await dayKey(for: new.startedAt)
+        let original = recordsByDay[day]?.plays.first { $0.id == oldId }
+        await mutate(day) { r in
+            r.plays.removeAll { $0.id == oldId }
+            r.plays.insert(new, at: 0)
+        }
+        if activePlaySession?.id == oldId {
+            await MainActor.run { activePlaySession = new.endedAt == nil ? new : nil }
+        }
+        do {
+            try await playRepository.delete(id: oldId, babyId: new.babyId)
+            let confirmed = try await playRepository.create(new)
+            await mutate(day) { r in
+                if let i = r.plays.firstIndex(where: { $0.id == new.id }) { r.plays[i] = confirmed }
+            }
+            if new.endedAt == nil { await MainActor.run { activePlaySession = confirmed } }
+        } catch {
+            await mutate(day) { r in
+                r.plays.removeAll { $0.id == new.id }
+                if let orig = original { r.plays.insert(orig, at: 0) }
+            }
+            await MainActor.run {
+                if original?.endedAt == nil { activePlaySession = original }
+                errorMessage = "수정 실패: \(error.localizedDescription)"
+            }
+        }
+    }
+
+    /// 편집 시트에서 배변 빠른 추가(웹 handleAddDiaper 재현). 시각 지정 별도 기록.
+    func addDiaper(type: DiaperType, at date: Date) async {
+        let diaper = DiaperRecord.new(babyId: babyId, diaperType: type, recordedAt: date)
+        await insertDiaper(diaper)
+    }
+
     // MARK: - 삭제
 
     func delete(_ item: TimelineItem, on day: Date) {
@@ -430,6 +576,25 @@ struct DayRecords {
     var diapers:  [DiaperRecord] = []
     var plays:    [PlayRecord] = []
     var isLoading: Bool = false
+}
+
+// MARK: - EditableRecord (편집 시트 입력 — 도메인 원본 래핑)
+
+/// RecordEditSheet 에 넘길 편집 대상. 각 케이스가 현재 필드값을 그대로 보유.
+enum EditableRecord: Identifiable {
+    case feeding(Feeding)
+    case sleep(SleepRecord)
+    case diaper(DiaperRecord)
+    case play(PlayRecord)
+
+    var id: UUID {
+        switch self {
+        case .feeding(let f): return f.id
+        case .sleep(let s):   return s.id
+        case .diaper(let d):  return d.id
+        case .play(let p):    return p.id
+        }
+    }
 }
 
 // MARK: - TimelineItem (통합 타임라인 행)

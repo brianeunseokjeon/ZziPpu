@@ -113,6 +113,7 @@
 		9C963FE7A89AA274385D5C8C /* DevelopmentContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E08B2FF3C9606103F62B23A8 /* DevelopmentContentView.swift */; };
 		9CB1E5E7C75E3498EBAEA612 /* CaregiverInvite.swift in Sources */ = {isa = PBXBuildFile; fileRef = 72B38D485AAB242759A838D2 /* CaregiverInvite.swift */; };
 		9CF51E0E18EB391B45A6D929 /* Shadows.generated.swift in Sources */ = {isa = PBXBuildFile; fileRef = D9BBEB5A2C7B01D5DBE03D84 /* Shadows.generated.swift */; };
+		9E54881E0BE1D72A0BFE6B96 /* RecordEditSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = D0131C1DCE6062E2E8F3F880 /* RecordEditSheet.swift */; };
 		9E57D0A9D9C12E3C4256EEDD /* CaregiverMapper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7BED2A76C40FDFD4111AC2C6 /* CaregiverMapper.swift */; };
 		A2DFA7E3A1D741CA436807F4 /* MetricCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 24A91A1C7EA0A639E639F749 /* MetricCard.swift */; };
 		A3FB574A3C8038F10F0A0154 /* DashboardDTO.swift in Sources */ = {isa = PBXBuildFile; fileRef = 465ED0CC3B1DCBA09A985137 /* DashboardDTO.swift */; };
@@ -326,6 +327,7 @@
 		C723460CF9DA8ABDBD0A0D81 /* RemotePlayDataSource.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = RemotePlayDataSource.swift; path = Network/DataSources/RemotePlayDataSource.swift; sourceTree = "<group>"; };
 		C8D99E4EBFB60B2E1E16C24B /* DiaperRepository.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DiaperRepository.swift; sourceTree = "<group>"; };
 		C9D7E9BCC3D0269738853326 /* DSNumberStepper.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DSNumberStepper.swift; sourceTree = "<group>"; };
+		D0131C1DCE6062E2E8F3F880 /* RecordEditSheet.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = RecordEditSheet.swift; sourceTree = "<group>"; };
 		D06F39AB4E617AB598817C1B /* CaregiverMember.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CaregiverMember.swift; sourceTree = "<group>"; };
 		D34E89B0D2617C8B8E629352 /* AuthRepository.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AuthRepository.swift; sourceTree = "<group>"; };
 		D3A17B1D609D2C0816BE625C /* SleepRepository.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SleepRepository.swift; sourceTree = "<group>"; };
@@ -681,6 +683,15 @@
 			path = Components;
 			sourceTree = "<group>";
 		};
+		8E583A63DE0996FE4D8375D9 /* Recording */ = {
+			isa = PBXGroup;
+			children = (
+				D0131C1DCE6062E2E8F3F880 /* RecordEditSheet.swift */,
+			);
+			name = Recording;
+			path = Recording;
+			sourceTree = "<group>";
+		};
 		94108ED7A74793B1C6D53845 /* Onboarding */ = {
 			isa = PBXGroup;
 			children = (
@@ -900,6 +911,7 @@
 				5E589B4492B3BFA1335CD7AE /* Dashboard */,
 				B8689BA0B3B7DCACBA73E776 /* Development */,
 				133AFDCA499ED5608428D107 /* Settings */,
+				8E583A63DE0996FE4D8375D9 /* Recording */,
 			);
 			name = Feature;
 			path = Feature;
@@ -1252,6 +1264,7 @@
 				7F837E564B3F6E55AB1667B2 /* SettingsView.swift in Sources */,
 				A59B2F06922AA56FA568044B /* BabyProfileView.swift in Sources */,
 				D5E59E293CD34B1F808DEE6E /* CaregiverView.swift in Sources */,
+				9E54881E0BE1D72A0BFE6B96 /* RecordEditSheet.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
