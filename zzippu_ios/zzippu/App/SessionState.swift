@@ -16,8 +16,12 @@ final class SessionState {
     /// 현재 로그인 세션 (nil이면 로그인 화면)
     var session: AuthSession? = nil
 
-    /// 활성 아기 등록 여부 (온보딩 분기용)
+    /// 활성 아기 등록 여부 (온보딩 분기용). GET /babies 성공 시에만 세팅.
     var activeBabyRegistered: Bool = false
+
+    /// 아기 목록 조회 실패(네트워크/디코딩). true면 온보딩이 아니라 재시도 화면을 보인다.
+    /// (에러를 온보딩으로 오인하면 서버에 아기가 있는데도 중복 생성될 수 있음.)
+    var babyLoadFailed: Bool = false
 
     // MARK: - Computed Routing
 

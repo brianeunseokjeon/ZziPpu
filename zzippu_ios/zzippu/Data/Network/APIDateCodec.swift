@@ -15,16 +15,43 @@ enum APIDateCodec {
         return fmt
     }
 
-    /// ISO8601 datetime → Date (밀리초 포함/미포함 양쪽 시도)
+    /// 서버 datetime → Date. 다양한 포맷을 견고하게 처리한다.
+    /// 서버(Python/FastAPI + UTCDateTime)는 `2026-06-05T12:34:56.789123+00:00`
+    /// 처럼 **타임존 있는 6자리 마이크로초**를 보낸다. ISO8601DateFormatter 는
+    /// 밀리초(3자리)까지만 지원하므로 마이크로초에서 실패 → 아래 폴백들이 필요.
     static func parseDateTime(_ string: String) -> Date? {
-        let withMs = ISO8601DateFormatter()
-        withMs.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
-        if let d = withMs.date(from: string) { return d }
+        // 1) ISO8601 (3자리 ms + 타임존)
+        let isoMs = ISO8601DateFormatter()
+        isoMs.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+        if let d = isoMs.date(from: string) { return d }
 
-        let withoutMs = ISO8601DateFormatter()
-        withoutMs.formatOptions = [.withInternetDateTime]
-        return withoutMs.date(from: string)
+        // 2) ISO8601 (소수 없음 + 타임존: Z 또는 +00:00)
+        let isoPlain = ISO8601DateFormatter()
+        isoPlain.formatOptions = [.withInternetDateTime]
+        if let d = isoPlain.date(from: string) { return d }
+
+        // 3) 소수(마이크로초 등)를 제거하고 재시도 → 6자리 마이크로초 케이스 해결.
+        //    (초 미만 정밀도는 이 앱에 무의미하므로 잘라도 안전.)
+        if let range = string.range(of: #"\.\d+"#, options: .regularExpression) {
+            let stripped = string.replacingCharacters(in: range, with: "")
+            if let d = isoPlain.date(from: stripped) { return d }              // 타임존 있는 경우
+            if let d = naiveFormatter.date(from: stripped) { return d }        // naive(타임존 없는 경우)
+        }
+
+        // 4) naive datetime (타임존 표기 자체가 없는 경우 — UTC 로 간주)
+        if let d = naiveFormatter.date(from: string) { return d }
+
+        return nil
     }
+
+    /// 타임존 표기 없는 `yyyy-MM-dd'T'HH:mm:ss` (UTC 간주)
+    private static let naiveFormatter: DateFormatter = {
+        let f = DateFormatter()
+        f.dateFormat = "yyyy-MM-dd'T'HH:mm:ss"
+        f.locale = Locale(identifier: "en_US_POSIX")
+        f.timeZone = TimeZone(secondsFromGMT: 0)
+        return f
+    }()
 
     // MARK: - date (YYYY-MM-DD, 서버 birth_date, growth recorded_at 등)
 
