@@ -2,7 +2,7 @@
 // T1/T3: DSTabBar 기반 4탭 셸.
 //   0 홈     house.fill          → HomeView (기능)
 //   1 대시보드 heart.text.square.fill → DashboardView (T3)
-//   2 발달    figure.child        → DSEmptyState placeholder
+//   2 발달    figure.child        → DevelopmentView (T4)
 //   3 설정    gearshape.fill      → DSEmptyState placeholder
 // selectedDate는 탭 전환해도 유지 (홈·대시보드 공유 예정).
 
@@ -35,7 +35,8 @@ struct MainTabView: View {
                     DashboardView()
                         .environment(container)
                 } else if selection == 2 {
-                    placeholderView("발달", systemImage: "figure.child")
+                    DevelopmentView()
+                        .environment(container)
                 } else if selection == 3 {
                     placeholderView("설정", systemImage: "gearshape.fill")
                 }

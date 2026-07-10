@@ -16,6 +16,8 @@ final class AppContainer {
     let diaperRepository:    DiaperRepository
     let playRepository:      PlayRepository
     let dashboardRepository: DashboardRepository
+    let developmentRepository: DevelopmentRepository
+    let vaccinationRepository: VaccinationRepository
 
     // MARK: - Session State (라우팅 전용)
     let sessionState: SessionState
@@ -41,6 +43,8 @@ final class AppContainer {
         self.diaperRepository    = RemoteDiaperRepository(api: api)
         self.playRepository      = RemotePlayRepository(api: api)
         self.dashboardRepository = RemoteDashboardRepository(api: api)
+        self.developmentRepository = RemoteDevelopmentRepository(api: api)
+        self.vaccinationRepository = RemoteVaccinationRepository(api: api)
         self.sessionState = SessionState()
     }
 
