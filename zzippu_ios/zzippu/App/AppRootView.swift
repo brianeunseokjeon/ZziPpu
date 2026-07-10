@@ -157,7 +157,9 @@ private struct AuthFlowView: View {
                 let capturedContainer = container
                 authVM.onSessionRestored = { session in
                     capturedContainer.sessionState.setSession(session)
-                    // 로그인 직후 서버에서 아기 목록 조회
+                    // 아기 조회 중엔 스플래시 유지 → 온보딩 화면이 잠깐 깜빡이는 것 방지.
+                    // (조회 완료 후에만 온보딩/홈 분기 확정)
+                    capturedContainer.sessionState.isHydrating = true
                     Task { @MainActor in
                         do {
                             let babies = try await capturedContainer.babyRepository.fetchAll()
@@ -169,6 +171,7 @@ private struct AuthFlowView: View {
                         } catch {
                             capturedContainer.sessionState.babyLoadFailed = true
                         }
+                        capturedContainer.sessionState.isHydrating = false
                     }
                 }
                 vm = authVM
