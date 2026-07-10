@@ -36,14 +36,6 @@ private struct DSTabBarItemView: View {
                         ? theme.color.primary.color
                         : theme.color.textTertiary.color
                     )
-                    .overlay(alignment: .bottom) {
-                        if isActive {
-                            Capsule()
-                                .fill(theme.color.primary.color)
-                                .frame(width: 20, height: 2.5)
-                                .offset(y: 4)
-                        }
-                    }
 
                 Text(item.label)
                     .font(theme.typography.label)

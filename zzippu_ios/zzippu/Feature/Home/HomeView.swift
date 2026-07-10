@@ -397,8 +397,17 @@ private struct DayTimelineSection: View {
                             dotColor: theme.color.solid(for: item.domainKind).color,
                             onEdit:   { editRecord = vm.editableRecord(for: item, on: day) }
                         )
-                        .swipeActions(edge: .trailing, allowsFullSwipe: false) {
-                            Button(role: .destructive) { deleteTarget = item } label: {
+                        // LazyVStack 에서는 swipeActions 가 동작하지 않으므로
+                        // 길게 눌러 편집/삭제하는 컨텍스트 메뉴로 제공.
+                        .contextMenu {
+                            Button {
+                                editRecord = vm.editableRecord(for: item, on: day)
+                            } label: {
+                                Label("편집", systemImage: "pencil")
+                            }
+                            Button(role: .destructive) {
+                                deleteTarget = item
+                            } label: {
                                 Label("삭제", systemImage: "trash")
                             }
                         }
