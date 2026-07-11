@@ -104,7 +104,7 @@ final class SettingsViewModel {
 
     /// 한국식 생후 일수: 생일 당일 = 1.
     static func ageDays(birthDate: Date, now: Date = .now) -> Int {
-        let cal = Calendar.current
+        let cal = Calendar.kst
         let birth = cal.startOfDay(for: birthDate)
         let today = cal.startOfDay(for: now)
         let diff = cal.dateComponents([.day], from: birth, to: today).day ?? 0

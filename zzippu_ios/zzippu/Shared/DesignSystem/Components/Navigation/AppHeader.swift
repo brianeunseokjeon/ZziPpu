@@ -49,13 +49,13 @@ public struct AppHeader: View {
     @Environment(\.theme) private var theme
 
     private var isToday: Bool {
-        Calendar.current.isDateInToday(selectedDate)
+        Calendar.kst.isDateInToday(selectedDate)
     }
 
     private var ageText: String {
         // 웹 getAgeDays()와 일치: 태어난 날 당일 = 생후 1일.
         // 날짜(자정) 기준으로 일수를 세고 +1.
-        let cal = Calendar.current
+        let cal = Calendar.kst
         let birth = cal.startOfDay(for: baby.birthDate)
         let today = cal.startOfDay(for: Date())
         let days = (cal.dateComponents([.day], from: birth, to: today).day ?? 0) + 1
@@ -66,6 +66,7 @@ public struct AppHeader: View {
         if isToday { return "오늘" }
         let fmt = DateFormatter()
         fmt.locale = Locale(identifier: "ko_KR")
+        fmt.timeZone = .kst
         fmt.dateFormat = "M월 d일"
         return fmt.string(from: selectedDate)
     }
@@ -89,7 +90,7 @@ public struct AppHeader: View {
             // Date navigation
             HStack(spacing: 0) {
                 DSIconButton(systemName: "chevron.left") {
-                    let prev = Calendar.current.date(byAdding: .day, value: -1, to: selectedDate) ?? selectedDate
+                    let prev = Calendar.kst.date(byAdding: .day, value: -1, to: selectedDate) ?? selectedDate
                     selectedDate = prev
                     onDateChange(prev)
                 }
@@ -101,7 +102,7 @@ public struct AppHeader: View {
 
                 DSIconButton(systemName: "chevron.right") {
                     guard !isToday else { return }
-                    let next = Calendar.current.date(byAdding: .day, value: 1, to: selectedDate) ?? selectedDate
+                    let next = Calendar.kst.date(byAdding: .day, value: 1, to: selectedDate) ?? selectedDate
                     selectedDate = next
                     onDateChange(next)
                 }
@@ -127,7 +128,7 @@ private struct AppHeaderPreview: View {
 
     let baby = AppHeaderBaby(
         name:      "아람이",
-        birthDate: Calendar.current.date(byAdding: .day, value: -42, to: Date()) ?? Date(),
+        birthDate: Calendar.kst.date(byAdding: .day, value: -42, to: Date()) ?? Date(),
         gender:    .male
     )
 

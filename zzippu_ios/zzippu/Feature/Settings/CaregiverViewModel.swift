@@ -51,6 +51,7 @@ final class CaregiverViewModel {
     func expiryText(_ date: Date) -> String {
         let fmt = DateFormatter()
         fmt.locale = Locale(identifier: "ko_KR")
+        fmt.timeZone = .kst
         fmt.dateFormat = "M월 d일 HH:mm"
         return fmt.string(from: date)
     }

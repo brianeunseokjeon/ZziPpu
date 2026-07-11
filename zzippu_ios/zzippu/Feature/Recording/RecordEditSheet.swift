@@ -393,7 +393,7 @@ struct RecordEditSheet: View {
 
     /// base 날짜 + time 의 시/분 을 합성.
     private func combined(base: Date, time: Date) -> Date {
-        let cal = Calendar.current
+        let cal = Calendar.kst
         let t = cal.dateComponents([.hour, .minute], from: time)
         return cal.date(bySettingHour: t.hour ?? 0, minute: t.minute ?? 0, second: 0, of: base) ?? base
     }

@@ -173,7 +173,7 @@ final class GrowthViewModel {
     /// 출생일 → 오늘 개월수(0 이상).
     private var ageMonths: Int {
         guard let birth = activeBaby?.birthDate else { return 0 }
-        let comps = Calendar.current.dateComponents([.month], from: birth, to: .now)
+        let comps = Calendar.kst.dateComponents([.month], from: birth, to: .now)
         return max(0, comps.month ?? 0)
     }
 

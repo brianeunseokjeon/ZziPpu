@@ -193,6 +193,7 @@
 		FE235807FC697663AA5BFC2C /* AuthViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC5E5BB66C303191729CAD07 /* AuthViewModel.swift */; };
 		FEC52097C96ECFE610DDEC53 /* DiaperRecord.swift in Sources */ = {isa = PBXBuildFile; fileRef = 461B2AD016FE8779CEBA3C4E /* DiaperRecord.swift */; };
 		FF3417C96429D55E89C07F10 /* Date+.swift in Sources */ = {isa = PBXBuildFile; fileRef = 217B6B25134223FE24756126 /* Date+.swift */; };
+		AAAAAAAAAAAAAAAAAAAA0001 /* Calendar+KST.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAAAAAAAAAAAAAAAAAAA0002 /* Calendar+KST.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -250,6 +251,7 @@
 		20668740BDF1EFCB382A9A97 /* DiaperInputSheet.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DiaperInputSheet.swift; sourceTree = "<group>"; };
 		20A1B4DFCE9B542AAEA92808 /* Theme.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = Theme.swift; sourceTree = "<group>"; };
 		217B6B25134223FE24756126 /* Date+.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = "Date+.swift"; path = "Date+.swift"; sourceTree = "<group>"; };
+		AAAAAAAAAAAAAAAAAAAA0002 /* Calendar+KST.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = "Calendar+KST.swift"; path = "Calendar+KST.swift"; sourceTree = "<group>"; };
 		223E5075EFDB13983FACE758 /* APIDateCodec.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = APIDateCodec.swift; path = Network/APIDateCodec.swift; sourceTree = "<group>"; };
 		22A5DB23AF1D70998F4AD9FE /* ToastCenter.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ToastCenter.swift; sourceTree = "<group>"; };
 		22F92D7416CF5079E647E6CA /* PlayInputSheet.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PlayInputSheet.swift; sourceTree = "<group>"; };
@@ -839,6 +841,7 @@
 			isa = PBXGroup;
 			children = (
 				217B6B25134223FE24756126 /* Date+.swift */,
+				AAAAAAAAAAAAAAAAAAAA0002 /* Calendar+KST.swift */,
 			);
 			name = Extensions;
 			path = Extensions;
@@ -1252,6 +1255,7 @@
 				345D55D6A9F5031ECAFA8BB6 /* FeedingRepository.swift in Sources */,
 				435542E9111E97A042B502AF /* SaveFeedingUseCase.swift in Sources */,
 				FF3417C96429D55E89C07F10 /* Date+.swift in Sources */,
+				AAAAAAAAAAAAAAAAAAAA0001 /* Calendar+KST.swift in Sources */,
 				BDBBA8BB09B269445217629E /* FeedingViewModel.swift in Sources */,
 				2B9137A800A5EC187FCECC17 /* FeedingInputSheet.swift in Sources */,
 				9B8725CB28BE230EDEB377F8 /* HomeView.swift in Sources */,

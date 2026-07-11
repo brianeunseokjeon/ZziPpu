@@ -54,7 +54,7 @@ actor LocalFeedingRepository: FeedingRepository, SyncableStore {
 
     /// list: 해당 날짜(로컬 자정~자정) + deletedAt==nil 필터.
     func list(babyId: UUID, on day: Date) async throws -> [Feeding] {
-        let cal = Calendar.current
+        let cal = Calendar.kst
         let start = cal.startOfDay(for: day)
         let end = cal.date(byAdding: .day, value: 1, to: start) ?? start
         let predicate = #Predicate<FeedingModel> { m in

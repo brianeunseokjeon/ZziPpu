@@ -9,9 +9,9 @@ final class OnboardingViewModel {
 
     // MARK: - Input State
     var babyName: String = ""
-    var birthDate: Date = Calendar.current.date(
+    var birthDate: Date = Calendar.kst.date(
         byAdding: .day, value: -1,
-        to: Calendar.current.startOfDay(for: .now)
+        to: Calendar.kst.startOfDay(for: .now)
     ) ?? .now
     var gender: Gender = .unknown
     var birthWeightKgText: String = ""   // UI 입력: kg 단위 (0~15)

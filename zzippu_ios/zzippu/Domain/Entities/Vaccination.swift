@@ -21,7 +21,7 @@ struct Vaccination: Identifiable, Equatable, Sendable {
     /// 양수: 남음, 0: 오늘, 음수: 지남.
     var daysUntil: Int? {
         guard administeredDate == nil else { return nil }
-        let cal = Calendar.current
+        let cal = Calendar.kst
         let today = cal.startOfDay(for: .now)
         let target = cal.startOfDay(for: scheduledDate)
         return cal.dateComponents([.day], from: today, to: target).day

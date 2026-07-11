@@ -190,6 +190,7 @@ final class DashboardViewModel {
     var nextFeedingText: String {
         guard let next = prediction.nextFeedingAt else { return "예측 없음" }
         let fmt = DateFormatter()
+        fmt.timeZone = .kst
         fmt.dateFormat = "HH:mm"
         return fmt.string(from: next)
     }
@@ -225,7 +226,7 @@ final class DashboardViewModel {
         // 나이(개월): 출생일 → 오늘. 아기 미로딩 시 0.
         let months: Int = {
             guard let birth = activeBaby?.birthDate else { return 0 }
-            let comps = Calendar.current.dateComponents([.month], from: birth, to: selectedDate)
+            let comps = Calendar.kst.dateComponents([.month], from: birth, to: selectedDate)
             return max(0, comps.month ?? 0)
         }()
 
@@ -260,7 +261,7 @@ final class DashboardViewModel {
 
     /// 최근 7일 중 기록이 하나라도 있는 날 수 (유효일수). <3이면 엔진이 noData 처리.
     private var validRecordDays: Int {
-        let cal = Calendar.current
+        let cal = Calendar.kst
         var days = Set<Date>()
         for f in sparkFeedings { days.insert(cal.startOfDay(for: f.startedAt)) }
         for s in sparkSleeps   { days.insert(cal.startOfDay(for: s.startedAt)) }
@@ -272,7 +273,7 @@ final class DashboardViewModel {
     // MARK: - Private Helpers
 
     private func last7Days(anchor: Date) -> [Date] {
-        let cal = Calendar.current
+        let cal = Calendar.kst
         return (0..<7).compactMap { cal.date(byAdding: .day, value: -$0, to: anchor) }.reversed()
     }
 

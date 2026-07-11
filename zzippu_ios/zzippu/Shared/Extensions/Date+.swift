@@ -1,32 +1,49 @@
 // Shared/Extensions/Date+.swift
+//
+// 날짜 표시·경계·상대라벨 헬퍼. 시간대 민감 로직은 모두 KST(Asia/Seoul) 고정.
+// (저장/전송은 UTC 유지 — 여기서는 표시·그룹핑·오늘판별만 KST로 계산.)
 
 import Foundation
 
 extension Date {
-    /// 해당 날짜의 자정(시작)~다음 날 자정(끝) 튜플
+    /// 해당 날짜의 KST 자정(시작)~다음 날 KST 자정(끝) 튜플
     var dayBounds: (start: Date, end: Date) {
-        let cal = Calendar.current
+        let cal = Calendar.kst
         let start = cal.startOfDay(for: self)
         let end = cal.date(byAdding: .day, value: 1, to: start) ?? start
         return (start, end)
     }
 
-    /// "오늘", "어제", "MM월 dd일" 등 상대적 표기
+    /// "오늘", "어제", "MM월 dd일" 등 상대적 표기 (KST 기준)
     var relativeLabel: String {
-        let cal = Calendar.current
+        let cal = Calendar.kst
         if cal.isDateInToday(self)     { return "오늘" }
         if cal.isDateInYesterday(self) { return "어제" }
-        let fmt = DateFormatter()
-        fmt.locale = Locale(identifier: "ko_KR")
-        fmt.dateFormat = "M월 d일"
-        return fmt.string(from: self)
+        return Date.krMonthDayFormatter.string(from: self)
     }
 
-    /// HH:mm 형식
+    /// HH:mm 형식 (KST 기준)
     var timeString: String {
-        let fmt = DateFormatter()
-        fmt.locale = Locale(identifier: "ko_KR")
-        fmt.dateFormat = "HH:mm"
-        return fmt.string(from: self)
+        Date.krTimeFormatter.string(from: self)
     }
+
+    // MARK: - 공용 KST 포맷터 (재사용)
+
+    /// "M월 d일" (KST)
+    static let krMonthDayFormatter: DateFormatter = {
+        let f = DateFormatter()
+        f.locale = Locale(identifier: "ko_KR")
+        f.timeZone = .kst
+        f.dateFormat = "M월 d일"
+        return f
+    }()
+
+    /// "HH:mm" (KST)
+    static let krTimeFormatter: DateFormatter = {
+        let f = DateFormatter()
+        f.locale = Locale(identifier: "ko_KR")
+        f.timeZone = .kst
+        f.dateFormat = "HH:mm"
+        return f
+    }()
 }

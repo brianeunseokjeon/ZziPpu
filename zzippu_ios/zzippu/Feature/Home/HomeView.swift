@@ -318,7 +318,7 @@ private struct PastFocusView: View {
             }
 
             ScrollView {
-                DayTimelineSection(vm: vm, day: Calendar.current.startOfDay(for: vm.selectedDate))
+                DayTimelineSection(vm: vm, day: Calendar.kst.startOfDay(for: vm.selectedDate))
                     .padding(.bottom, theme.space.lg)
             }
             .background(theme.color.background.color)
@@ -332,16 +332,17 @@ private struct DateSectionHeader: View {
     let day: Date
     @Environment(\.theme) private var theme
 
-    private var isToday: Bool { Calendar.current.isDateInToday(day) }
+    private var isToday: Bool { Calendar.kst.isDateInToday(day) }
 
     private var label: String {
-        let cal = Calendar.current
+        let cal = Calendar.kst
         if cal.isDateInToday(day)     { return "오늘" }
         if cal.isDateInYesterday(day) { return "어제" }
         if let two = cal.date(byAdding: .day, value: -2, to: cal.startOfDay(for: Date())),
            cal.isDate(day, inSameDayAs: two) { return "그제" }
         let fmt = DateFormatter()
         fmt.locale = Locale(identifier: "ko_KR")
+        fmt.timeZone = .kst
         fmt.dateFormat = "M월 d일 (E)"
         return fmt.string(from: day)
     }
@@ -374,7 +375,7 @@ private struct DayTimelineSection: View {
     @State private var deleteTarget: TimelineItem? = nil
     @State private var editRecord: EditableRecord? = nil
 
-    private var isToday: Bool { Calendar.current.isDateInToday(day) }
+    private var isToday: Bool { Calendar.kst.isDateInToday(day) }
 
     var body: some View {
         let items = vm.timelineItems(for: day)

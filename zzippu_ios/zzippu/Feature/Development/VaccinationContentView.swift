@@ -113,6 +113,7 @@ struct VaccinationContentView: View {
     static func dateText(_ date: Date) -> String {
         let f = DateFormatter()
         f.locale = Locale(identifier: "ko_KR")
+        f.timeZone = .kst
         f.dateFormat = "yyyy.M.d"
         return f.string(from: date)
     }

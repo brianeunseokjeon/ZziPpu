@@ -1,4 +1,4 @@
-from datetime import date, datetime, timezone
+from datetime import date, datetime, timedelta, timezone
 from uuid import UUID
 
 from sqlalchemy import select
@@ -49,13 +49,21 @@ class SleepRepositoryImpl(SleepRepository):
         result = await self._session.execute(stmt)
         return [self._to_entity(m) for m in result.scalars().all()]
 
+    # 미종료 세션을 "활성"으로 인정할 최대 경과(과거 테스트 잔재·종료 누락 배제).
+    # 클라(iOS/웹)와 동일하게 24h. started_at 이 이보다 오래되면 활성으로 보지 않는다.
+    _ACTIVE_STALE_THRESHOLD = timedelta(hours=24)
+
     async def get_active(self, baby_id: UUID) -> SleepRecord | None:
+        # started_at 은 naive UTC 저장 → 비교 기준도 naive UTC.
+        now_naive = datetime.now(timezone.utc).replace(tzinfo=None)
+        recent_cutoff = now_naive - self._ACTIVE_STALE_THRESHOLD
         stmt = (
             select(SleepModel)
             .where(
                 SleepModel.baby_id == baby_id,
                 SleepModel.deleted_at.is_(None),
                 SleepModel.ended_at.is_(None),
+                SleepModel.started_at >= recent_cutoff,
             )
             .order_by(SleepModel.started_at.desc())
             .limit(1)

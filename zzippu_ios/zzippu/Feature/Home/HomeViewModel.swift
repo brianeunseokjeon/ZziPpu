@@ -37,7 +37,7 @@ final class HomeViewModel {
 
     /// 과거 날짜 포커스 뷰 여부
     var isFocusingPast: Bool {
-        !Calendar.current.isDateInToday(selectedDate)
+        !Calendar.kst.isDateInToday(selectedDate)
     }
 
     // MARK: - Dependencies (Domain 프로토콜만)
@@ -85,7 +85,7 @@ final class HomeViewModel {
 
     /// 홈 진입 시: 오늘~초기N일 로드 + 활성 세션 로드.
     func loadInitial() {
-        let cal = Calendar.current
+        let cal = Calendar.kst
         let today = cal.startOfDay(for: Date())
         loadedDays = (0..<Self.initialDays).compactMap {
             cal.date(byAdding: .day, value: -$0, to: today)
@@ -102,7 +102,7 @@ final class HomeViewModel {
     /// 피드 하단 도달 → 다음 과거 하루 append.
     func loadOlderDay() {
         guard loadedDays.count < Self.maxDays, let oldest = loadedDays.last else { return }
-        guard let next = Calendar.current.date(byAdding: .day, value: -1, to: oldest) else { return }
+        guard let next = Calendar.kst.date(byAdding: .day, value: -1, to: oldest) else { return }
         loadedDays.append(next)
         loadDay(next)
     }
@@ -112,9 +112,9 @@ final class HomeViewModel {
     /// AppHeader 날짜 변경 → 과거 포커스/오늘 전환.
     func changeDate(_ date: Date) {
         selectedDate = date
-        let day = Calendar.current.startOfDay(for: date)
+        let day = Calendar.kst.startOfDay(for: date)
         loadDay(day)                 // 포커스 대상 일자 로드(캐시 없으면)
-        if Calendar.current.isDateInToday(date) {
+        if Calendar.kst.isDateInToday(date) {
             refreshActiveSessions()
         }
     }
@@ -147,15 +147,33 @@ final class HomeViewModel {
         }
     }
 
+    /// "최근" 활성으로 인정할 최대 경과(초). 이보다 오래된 미종료 세션은
+    /// 과거 테스트 잔재·종료 누락으로 보고 활성 배너로 띄우지 않는다(웹과 동일한 24h 기준).
+    private static let activeStaleThreshold: TimeInterval = 24 * 60 * 60
+
+    /// 미종료 세션이 "최근(활성)"인지 판정. 시작이 24h 이내여야 활성으로 취급.
+    private func isRecentlyActive(startedAt: Date, now: Date = .now) -> Bool {
+        let elapsed = now.timeIntervalSince(startedAt)
+        return elapsed >= 0 && elapsed <= Self.activeStaleThreshold
+    }
+
     private func refreshActiveSessions() {
         Task { @MainActor in
             do {
-                activeSleepSession = try await sleepRepository.activeSession(babyId: babyId)
+                let fetched = try await sleepRepository.activeSession(babyId: babyId)
+                // 서버에 종료 안 된 오래된 수면(테스트 잔재)이 있어도 최근일 때만 활성 배너.
+                if let s = fetched, isRecentlyActive(startedAt: s.startedAt) {
+                    activeSleepSession = s
+                } else {
+                    activeSleepSession = nil
+                }
             } catch { /* 무음: 배너만 안 뜸 */ }
         }
-        // 활성 터미타임: 오늘 play 중 endedAt == nil.
-        let today = Calendar.current.startOfDay(for: Date())
-        activePlaySession = recordsByDay[today]?.plays.first { $0.endedAt == nil }
+        // 활성 터미타임: 오늘 play 중 endedAt == nil 이면서 최근(24h 이내) 시작.
+        let today = Calendar.kst.startOfDay(for: Date())
+        activePlaySession = recordsByDay[today]?.plays.first {
+            $0.endedAt == nil && isRecentlyActive(startedAt: $0.startedAt)
+        }
     }
 
     private func refreshLastFormula() {
@@ -191,7 +209,7 @@ final class HomeViewModel {
 
     // MARK: - 퀵세이브 (오늘 기록)
 
-    private var today: Date { Calendar.current.startOfDay(for: Date()) }
+    private var today: Date { Calendar.kst.startOfDay(for: Date()) }
 
     /// 분유 원탭: 마지막 분유량(없으면 120ml) 반복.
     func quickSaveFormula() async -> String {
@@ -242,17 +260,17 @@ final class HomeViewModel {
         if feeding.type == .formula, let ml = feeding.amountMl { lastFormulaMl = ml }
     }
     func saveSleep(_ sleep: SleepRecord) async {
-        await insertSleep(sleep, markActive: sleep.endedAt == nil && Calendar.current.isDateInToday(sleep.startedAt))
+        await insertSleep(sleep, markActive: sleep.endedAt == nil && Calendar.kst.isDateInToday(sleep.startedAt))
     }
     func saveDiaper(_ diaper: DiaperRecord) async { await insertDiaper(diaper) }
     func savePlay(_ play: PlayRecord) async {
-        await insertPlay(play, markActive: play.endedAt == nil && Calendar.current.isDateInToday(play.startedAt))
+        await insertPlay(play, markActive: play.endedAt == nil && Calendar.kst.isDateInToday(play.startedAt))
     }
 
     // MARK: - 낙관적 삽입 헬퍼
 
     @MainActor
-    private func dayKey(for date: Date) -> Date { Calendar.current.startOfDay(for: date) }
+    private func dayKey(for date: Date) -> Date { Calendar.kst.startOfDay(for: date) }
 
     @MainActor
     private func mutate(_ day: Date, _ block: (inout DayRecords) -> Void) {
@@ -387,7 +405,7 @@ final class HomeViewModel {
 
     /// 타임라인 아이템 → 편집용 도메인 원본(현재 필드값 포함).
     func editableRecord(for item: TimelineItem, on day: Date) -> EditableRecord? {
-        let key = Calendar.current.startOfDay(for: day)
+        let key = Calendar.kst.startOfDay(for: day)
         guard let rec = recordsByDay[key] else { return nil }
         switch item.domainKind {
         case .feedingFormula, .feedingBreastLeft, .feedingBreastRight, .feedingBreastBoth, .feedingSolids:
@@ -532,7 +550,7 @@ final class HomeViewModel {
     // MARK: - 삭제
 
     func delete(_ item: TimelineItem, on day: Date) {
-        let key = Calendar.current.startOfDay(for: day)
+        let key = Calendar.kst.startOfDay(for: day)
         switch item.domainKind {
         case .feedingFormula, .feedingBreastLeft, .feedingBreastRight, .feedingBreastBoth, .feedingSolids:
             guard let f = recordsByDay[key]?.feedings.first(where: { $0.id == item.id }) else { return }

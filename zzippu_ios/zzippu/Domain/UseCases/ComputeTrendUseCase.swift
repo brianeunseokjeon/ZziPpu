@@ -28,7 +28,7 @@ enum TrendRange: String, CaseIterable, Identifiable {
 
 struct ComputeTrendUseCase {
 
-    private let calendar = Calendar.current
+    private let calendar = Calendar.kst
 
     // MARK: - Feeding Trend (일별 총 ml)
 
