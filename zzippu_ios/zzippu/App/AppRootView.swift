@@ -74,6 +74,8 @@ struct AppRootView: View {
             container.sessionState.babyLoadFailed = false
             if let first = babies.first {
                 container.activeBabyId = first.id
+                // 무회귀 보장: 로그인/활성아기 확정 직후 초기 동기화(첫 pull로 서버 feeding을 로컬에 채움).
+                container.triggerFeedingFullSync()
             }
         } catch {
             container.sessionState.babyLoadFailed = true
@@ -167,6 +169,7 @@ private struct AuthFlowView: View {
                             capturedContainer.sessionState.babyLoadFailed = false
                             if let first = babies.first {
                                 capturedContainer.activeBabyId = first.id
+                                capturedContainer.triggerFeedingFullSync()
                             }
                         } catch {
                             capturedContainer.sessionState.babyLoadFailed = true
