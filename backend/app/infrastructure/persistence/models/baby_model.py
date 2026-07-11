@@ -5,10 +5,11 @@ from sqlalchemy import Date, Integer, String, Text, Uuid
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.infrastructure.persistence.models.base import Base
+from app.infrastructure.persistence.models.sync_mixin import SyncMixin
 from app.infrastructure.persistence.models.types import UTCDateTime
 
 
-class BabyModel(Base):
+class BabyModel(Base, SyncMixin):
     __tablename__ = "babies"
 
     id: Mapped[UUID] = mapped_column(Uuid(as_uuid=True), primary_key=True)

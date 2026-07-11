@@ -17,7 +17,7 @@ class CreatePlayRecordUseCase:
             duration = int(delta.total_seconds() / 60)
 
         record = PlayRecord(
-            id=uuid4(),
+            id=dto.id or uuid4(),
             baby_id=dto.baby_id,
             play_type=dto.play_type,
             started_at=dto.started_at,

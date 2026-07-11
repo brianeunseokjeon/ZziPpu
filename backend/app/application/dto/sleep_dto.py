@@ -16,6 +16,7 @@ class StartSleepDTO:
     baby_id: UUID
     started_at: datetime
     memo: str | None = None
+    id: UUID | None = None  # 클라 생성 UUID(멱등 upsert)
 
 
 @dataclass

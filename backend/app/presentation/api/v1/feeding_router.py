@@ -36,6 +36,7 @@ async def create_feeding(
 ) -> FeedingResponse:
     dto = CreateFeedingDTO(
         baby_id=baby_id,
+        id=body.id,
         feeding_type=body.feeding_type,
         started_at=body.started_at,
         ended_at=body.ended_at,

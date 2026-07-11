@@ -1,4 +1,4 @@
-from datetime import date, timedelta
+from datetime import date, datetime, timedelta, timezone
 from uuid import UUID
 
 from sqlalchemy import select
@@ -26,23 +26,22 @@ class VaccinationRepositoryImpl(VaccinationRepository):
             created_at=model.created_at,
         )
 
-    def _to_model(self, entity: Vaccination) -> VaccinationModel:
-        return VaccinationModel(
-            id=entity.id,
-            baby_id=entity.baby_id,
-            vaccine_name=entity.vaccine_name,
-            dose_number=entity.dose_number,
-            scheduled_date=entity.scheduled_date,
-            administered_date=entity.administered_date,
-            hospital_name=entity.hospital_name,
-            memo=entity.memo,
-            created_at=entity.created_at,
-        )
+    def _apply_fields(self, model: VaccinationModel, entity: Vaccination) -> None:
+        model.baby_id = entity.baby_id
+        model.vaccine_name = entity.vaccine_name
+        model.dose_number = entity.dose_number
+        model.scheduled_date = entity.scheduled_date
+        model.administered_date = entity.administered_date
+        model.hospital_name = entity.hospital_name
+        model.memo = entity.memo
 
     async def get_by_baby_id(self, baby_id: UUID) -> list[Vaccination]:
         stmt = (
             select(VaccinationModel)
-            .where(VaccinationModel.baby_id == baby_id)
+            .where(
+                VaccinationModel.baby_id == baby_id,
+                VaccinationModel.deleted_at.is_(None),
+            )
             .order_by(VaccinationModel.scheduled_date)
         )
         result = await self._session.execute(stmt)
@@ -55,6 +54,7 @@ class VaccinationRepositoryImpl(VaccinationRepository):
             select(VaccinationModel)
             .where(
                 VaccinationModel.baby_id == baby_id,
+                VaccinationModel.deleted_at.is_(None),
                 VaccinationModel.administered_date.is_(None),
                 VaccinationModel.scheduled_date >= today,
                 VaccinationModel.scheduled_date <= until,
@@ -65,8 +65,18 @@ class VaccinationRepositoryImpl(VaccinationRepository):
         return [self._to_entity(m) for m in result.scalars().all()]
 
     async def save(self, v: Vaccination) -> Vaccination:
-        model = self._to_model(v)
-        self._session.add(model)
+        now = datetime.now(timezone.utc)
+        model = await self._session.get(VaccinationModel, v.id)
+        if model is None:
+            model = VaccinationModel(id=v.id, created_at=v.created_at)
+            self._apply_fields(model, v)
+            model.deleted_at = None
+            model.updated_at = now
+            self._session.add(model)
+        else:
+            self._apply_fields(model, v)
+            model.deleted_at = None
+            model.updated_at = now
         await self._session.flush()
         return self._to_entity(model)
 
@@ -77,28 +87,35 @@ class VaccinationRepositoryImpl(VaccinationRepository):
         hospital_name: str | None,
     ) -> Vaccination:
         model = await self._session.get(VaccinationModel, id)
-        if model is None:
+        if model is None or model.deleted_at is not None:
             raise ValueError(f"Vaccination {id} not found")
         model.administered_date = administered_date
         model.hospital_name = hospital_name
+        model.updated_at = datetime.now(timezone.utc)
         await self._session.flush()
         return self._to_entity(model)
 
     async def delete(self, id: UUID) -> None:
         model = await self._session.get(VaccinationModel, id)
-        if model:
-            await self._session.delete(model)
+        if model and model.deleted_at is None:
+            now = datetime.now(timezone.utc)
+            model.deleted_at = now
+            model.updated_at = now
             await self._session.flush()
 
     async def delete_pending_by_baby(self, baby_id: UUID) -> None:
+        # 미접종 항목 재시드용: soft-delete 로 전환(동기화 tombstone 전파).
         stmt = (
             select(VaccinationModel)
             .where(
                 VaccinationModel.baby_id == baby_id,
+                VaccinationModel.deleted_at.is_(None),
                 VaccinationModel.administered_date.is_(None),
             )
         )
         result = await self._session.execute(stmt)
+        now = datetime.now(timezone.utc)
         for model in result.scalars().all():
-            await self._session.delete(model)
+            model.deleted_at = now
+            model.updated_at = now
         await self._session.flush()

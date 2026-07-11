@@ -1,7 +1,7 @@
-from datetime import date
+from datetime import date, datetime, timezone
 from uuid import UUID
 
-from sqlalchemy import func, select
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.domain.entities.feeding import Feeding
@@ -28,28 +28,27 @@ class FeedingRepositoryImpl(FeedingRepository):
             created_at=model.created_at,
         )
 
-    def _to_model(self, entity: Feeding) -> FeedingModel:
-        return FeedingModel(
-            id=entity.id,
-            baby_id=entity.baby_id,
-            feeding_type=entity.feeding_type.value,
-            started_at=entity.started_at,
-            ended_at=entity.ended_at,
-            amount_ml=entity.amount_ml,
-            duration_minutes=entity.duration_minutes,
-            memo=entity.memo,
-            created_at=entity.created_at,
-        )
+    def _apply_fields(self, model: FeedingModel, entity: Feeding) -> None:
+        model.baby_id = entity.baby_id
+        model.feeding_type = entity.feeding_type.value
+        model.started_at = entity.started_at
+        model.ended_at = entity.ended_at
+        model.amount_ml = entity.amount_ml
+        model.duration_minutes = entity.duration_minutes
+        model.memo = entity.memo
 
     async def get(self, id: UUID) -> Feeding | None:
         result = await self._session.get(FeedingModel, id)
-        return self._to_entity(result) if result else None
+        if result is None or result.deleted_at is not None:
+            return None
+        return self._to_entity(result)
 
     async def get_by_baby_and_date(self, baby_id: UUID, target_date: date) -> list[Feeding]:
         stmt = (
             select(FeedingModel)
             .where(
                 FeedingModel.baby_id == baby_id,
+                FeedingModel.deleted_at.is_(None),
                 kst_date_eq(FeedingModel.started_at, target_date),
             )
             .order_by(FeedingModel.started_at)
@@ -60,7 +59,10 @@ class FeedingRepositoryImpl(FeedingRepository):
     async def get_recent(self, baby_id: UUID, limit: int = 12) -> list[Feeding]:
         stmt = (
             select(FeedingModel)
-            .where(FeedingModel.baby_id == baby_id)
+            .where(
+                FeedingModel.baby_id == baby_id,
+                FeedingModel.deleted_at.is_(None),
+            )
             .order_by(FeedingModel.started_at.desc())
             .limit(limit)
         )
@@ -68,26 +70,35 @@ class FeedingRepositoryImpl(FeedingRepository):
         return [self._to_entity(m) for m in result.scalars().all()]
 
     async def save(self, feeding: Feeding) -> Feeding:
-        model = self._to_model(feeding)
-        self._session.add(model)
+        # upsert(멱등): 같은 id 존재 시 갱신, 없으면 삽입. 재시도 안전.
+        now = datetime.now(timezone.utc)
+        model = await self._session.get(FeedingModel, feeding.id)
+        if model is None:
+            model = FeedingModel(id=feeding.id, created_at=feeding.created_at)
+            self._apply_fields(model, feeding)
+            model.deleted_at = None
+            model.updated_at = now
+            self._session.add(model)
+        else:
+            self._apply_fields(model, feeding)
+            model.deleted_at = None
+            model.updated_at = now
         await self._session.flush()
         return self._to_entity(model)
 
     async def update(self, feeding: Feeding) -> Feeding:
         model = await self._session.get(FeedingModel, feeding.id)
-        if model is None:
+        if model is None or model.deleted_at is not None:
             raise ValueError(f"Feeding {feeding.id} not found")
-        model.feeding_type = feeding.feeding_type.value
-        model.started_at = feeding.started_at
-        model.ended_at = feeding.ended_at
-        model.amount_ml = feeding.amount_ml
-        model.duration_minutes = feeding.duration_minutes
-        model.memo = feeding.memo
+        self._apply_fields(model, feeding)
+        model.updated_at = datetime.now(timezone.utc)
         await self._session.flush()
         return self._to_entity(model)
 
     async def delete(self, id: UUID) -> None:
         model = await self._session.get(FeedingModel, id)
-        if model:
-            await self._session.delete(model)
+        if model and model.deleted_at is None:
+            now = datetime.now(timezone.utc)
+            model.deleted_at = now
+            model.updated_at = now
             await self._session.flush()

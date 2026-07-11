@@ -11,6 +11,7 @@ class CreatePlayDTO:
     ended_at: datetime | None = None
     duration_minutes: int | None = None
     memo: str | None = None
+    id: UUID | None = None  # 클라 생성 UUID(멱등 upsert)
 
 
 @dataclass

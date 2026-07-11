@@ -29,6 +29,7 @@ async def create_growth_record(
 ) -> GrowthResponse:
     dto = CreateGrowthDTO(
         baby_id=baby_id,
+        id=body.id,
         recorded_at=body.recorded_at,
         weight_g=body.weight_g,
         height_cm=body.height_cm,

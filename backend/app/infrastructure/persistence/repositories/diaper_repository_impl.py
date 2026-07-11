@@ -1,7 +1,7 @@
-from datetime import date
+from datetime import date, datetime, timezone
 from uuid import UUID
 
-from sqlalchemy import func, select
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.domain.entities.diaper import DiaperRecord
@@ -29,27 +29,26 @@ class DiaperRepositoryImpl(DiaperRepository):
             created_at=model.created_at,
         )
 
-    def _to_model(self, entity: DiaperRecord) -> DiaperModel:
-        return DiaperModel(
-            id=entity.id,
-            baby_id=entity.baby_id,
-            recorded_at=entity.recorded_at,
-            diaper_type=entity.diaper_type.value,
-            stool_color=entity.stool_color.value if entity.stool_color else None,
-            stool_state=entity.stool_state.value if entity.stool_state else None,
-            memo=entity.memo,
-            created_at=entity.created_at,
-        )
+    def _apply_fields(self, model: DiaperModel, entity: DiaperRecord) -> None:
+        model.baby_id = entity.baby_id
+        model.recorded_at = entity.recorded_at
+        model.diaper_type = entity.diaper_type.value
+        model.stool_color = entity.stool_color.value if entity.stool_color else None
+        model.stool_state = entity.stool_state.value if entity.stool_state else None
+        model.memo = entity.memo
 
     async def get(self, id: UUID) -> DiaperRecord | None:
         result = await self._session.get(DiaperModel, id)
-        return self._to_entity(result) if result else None
+        if result is None or result.deleted_at is not None:
+            return None
+        return self._to_entity(result)
 
     async def get_by_baby_and_date(self, baby_id: UUID, target_date: date) -> list[DiaperRecord]:
         stmt = (
             select(DiaperModel)
             .where(
                 DiaperModel.baby_id == baby_id,
+                DiaperModel.deleted_at.is_(None),
                 kst_date_eq(DiaperModel.recorded_at, target_date),
             )
             .order_by(DiaperModel.recorded_at)
@@ -58,25 +57,34 @@ class DiaperRepositoryImpl(DiaperRepository):
         return [self._to_entity(m) for m in result.scalars().all()]
 
     async def save(self, record: DiaperRecord) -> DiaperRecord:
-        model = self._to_model(record)
-        self._session.add(model)
+        now = datetime.now(timezone.utc)
+        model = await self._session.get(DiaperModel, record.id)
+        if model is None:
+            model = DiaperModel(id=record.id, created_at=record.created_at)
+            self._apply_fields(model, record)
+            model.deleted_at = None
+            model.updated_at = now
+            self._session.add(model)
+        else:
+            self._apply_fields(model, record)
+            model.deleted_at = None
+            model.updated_at = now
         await self._session.flush()
         return self._to_entity(model)
 
     async def update(self, record: DiaperRecord) -> DiaperRecord:
         model = await self._session.get(DiaperModel, record.id)
-        if model is None:
+        if model is None or model.deleted_at is not None:
             raise ValueError(f"DiaperRecord {record.id} not found")
-        model.recorded_at = record.recorded_at
-        model.diaper_type = record.diaper_type.value
-        model.stool_color = record.stool_color.value if record.stool_color else None
-        model.stool_state = record.stool_state.value if record.stool_state else None
-        model.memo = record.memo
+        self._apply_fields(model, record)
+        model.updated_at = datetime.now(timezone.utc)
         await self._session.flush()
         return self._to_entity(model)
 
     async def delete(self, id: UUID) -> None:
         model = await self._session.get(DiaperModel, id)
-        if model:
-            await self._session.delete(model)
+        if model and model.deleted_at is None:
+            now = datetime.now(timezone.utc)
+            model.deleted_at = now
+            model.updated_at = now
             await self._session.flush()

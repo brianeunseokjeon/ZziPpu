@@ -12,7 +12,7 @@ class CreateFeedingUseCase:
 
     async def execute(self, dto: CreateFeedingDTO) -> FeedingResponseDTO:
         feeding = Feeding(
-            id=uuid4(),
+            id=dto.id or uuid4(),
             baby_id=dto.baby_id,
             feeding_type=dto.feeding_type,
             started_at=dto.started_at,

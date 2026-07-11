@@ -10,6 +10,7 @@ from app.presentation.api.v1.feeding_router import router as feeding_router
 from app.presentation.api.v1.growth_router import router as growth_router
 from app.presentation.api.v1.play_router import router as play_router
 from app.presentation.api.v1.sleep_router import router as sleep_router
+from app.presentation.api.v1.sync_router import router as sync_router
 from app.presentation.api.v1.vaccination_router import router as vaccination_router
 from app.presentation.api.v1.youtube_router import router as youtube_router
 
@@ -26,4 +27,5 @@ v1_router.include_router(ai_router)
 v1_router.include_router(growth_router)
 v1_router.include_router(vaccination_router)
 v1_router.include_router(development_router)
+v1_router.include_router(sync_router)
 v1_router.include_router(youtube_router)

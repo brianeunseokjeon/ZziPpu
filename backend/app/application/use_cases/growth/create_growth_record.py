@@ -12,7 +12,7 @@ class CreateGrowthRecordUseCase:
 
     async def execute(self, dto: CreateGrowthDTO) -> GrowthResponseDTO:
         record = GrowthRecord(
-            id=uuid4(),
+            id=dto.id or uuid4(),
             baby_id=dto.baby_id,
             recorded_at=dto.recorded_at,
             weight_g=dto.weight_g,

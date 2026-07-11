@@ -30,6 +30,7 @@ async def create_play(
 ) -> PlayResponse:
     dto = CreatePlayDTO(
         baby_id=baby_id,
+        id=body.id,
         play_type=body.play_type,
         started_at=body.started_at,
         ended_at=body.ended_at,

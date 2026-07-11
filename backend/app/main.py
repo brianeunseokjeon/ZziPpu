@@ -75,6 +75,7 @@ async def _seed_dev_data() -> None:
                 gender="male",
                 birth_weight_g=3200,
                 created_at=now,
+                updated_at=now,
             )
             session.add(baby)
             await session.flush()
@@ -108,32 +109,90 @@ async def _seed_dev_data() -> None:
                 hospital_name=None,
                 memo=None,
                 created_at=now,
+                updated_at=now,
             ))
 
         await session.commit()
 
 
+# 오프라인 동기화 메타 컬럼을 추가할 레코드 테이블 (SyncMixin 적용 대상)
+_SYNC_TABLES = (
+    "feedings",
+    "sleep_records",
+    "diaper_records",
+    "play_records",
+    "growth_records",
+    "vaccinations",
+    "babies",
+)
+
+
+async def _existing_columns(conn, table: str, is_sqlite: bool) -> set[str]:
+    from sqlalchemy import text
+
+    if is_sqlite:
+        result = await conn.execute(text(f"PRAGMA table_info({table})"))
+        return {row[1] for row in result}
+    result = await conn.execute(
+        text(
+            "SELECT column_name FROM information_schema.columns "
+            "WHERE table_name = :t"
+        ),
+        {"t": table},
+    )
+    return {row[0] for row in result}
+
+
 async def _migrate_sqlite() -> None:
     """
-    SQLite의 `create_all`은 기존 테이블에 컬럼을 추가하지 않으므로
-    수동 ALTER TABLE로 누락 컬럼을 보강한다.
+    `create_all`은 기존 테이블에 컬럼을 추가하지 않으므로 수동 ALTER TABLE로
+    누락 컬럼을 보강한다. SQLite(로컬)·PostgreSQL(운영 Neon) 양쪽에서 안전하게 동작.
 
-    운영 PostgreSQL 전환 시 Alembic으로 교체.
+    운영 PostgreSQL의 본격 스키마 관리는 향후 Alembic으로 교체.
     """
     from sqlalchemy import text
 
-    if not settings.DATABASE_URL.startswith("sqlite"):
-        return
+    is_sqlite = settings.DATABASE_URL.startswith("sqlite")
 
     async with engine.begin() as conn:
-        # users.phone (Phase 6.B)
-        result = await conn.execute(text("PRAGMA table_info(users)"))
-        existing_cols = {row[1] for row in result}
-        if "phone" not in existing_cols:
-            await conn.execute(text("ALTER TABLE users ADD COLUMN phone VARCHAR(32)"))
-            await conn.execute(
-                text("CREATE UNIQUE INDEX IF NOT EXISTS ix_users_phone ON users(phone)")
-            )
+        # ── users.phone (Phase 6.B) — SQLite 전용 ─────────────────────────
+        if is_sqlite:
+            existing_cols = await _existing_columns(conn, "users", is_sqlite=True)
+            if "phone" not in existing_cols:
+                await conn.execute(text("ALTER TABLE users ADD COLUMN phone VARCHAR(32)"))
+                await conn.execute(
+                    text("CREATE UNIQUE INDEX IF NOT EXISTS ix_users_phone ON users(phone)")
+                )
+
+        # ── 오프라인 동기화 메타 컬럼 (updated_at / deleted_at) ───────────
+        # 두 컬럼을 nullable 로 추가 → 기존 행 updated_at = created_at 백필 →
+        # since 필터 성능용 인덱스 생성. (기존 프로덕션 데이터 무해.)
+        dt_type = "TIMESTAMP"
+        for table in _SYNC_TABLES:
+            cols = await _existing_columns(conn, table, is_sqlite)
+            if not cols:
+                # 테이블 자체가 아직 없음(create_all 이 방금 새 컬럼 포함해 생성) → skip
+                continue
+            if "updated_at" not in cols:
+                await conn.execute(
+                    text(f"ALTER TABLE {table} ADD COLUMN updated_at {dt_type}")
+                )
+                await conn.execute(
+                    text(
+                        f"UPDATE {table} SET updated_at = created_at "
+                        "WHERE updated_at IS NULL"
+                    )
+                )
+                await conn.execute(
+                    text(
+                        f"CREATE INDEX IF NOT EXISTS ix_{table}_updated_at "
+                        f"ON {table}(updated_at)"
+                    )
+                )
+            if "deleted_at" not in cols:
+                await conn.execute(
+                    text(f"ALTER TABLE {table} ADD COLUMN deleted_at {dt_type}")
+                )
 
 
 @asynccontextmanager

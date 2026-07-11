@@ -1,3 +1,4 @@
+from datetime import datetime, timezone
 from uuid import UUID
 
 from sqlalchemy import select
@@ -38,33 +39,56 @@ class BabyRepositoryImpl(BabyRepository):
 
     async def get(self, id: UUID) -> Baby | None:
         result = await self._session.get(BabyModel, id)
-        return self._to_entity(result) if result else None
+        if result is None or result.deleted_at is not None:
+            return None
+        return self._to_entity(result)
 
     async def get_by_user_id(self, user_id: UUID) -> list[Baby]:
-        stmt = select(BabyModel).where(BabyModel.user_id == user_id)
+        stmt = select(BabyModel).where(
+            BabyModel.user_id == user_id,
+            BabyModel.deleted_at.is_(None),
+        )
         result = await self._session.execute(stmt)
         return [self._to_entity(m) for m in result.scalars().all()]
 
     async def save(self, baby: Baby) -> Baby:
-        model = self._to_model(baby)
-        self._session.add(model)
+        # upsert(멱등): 같은 id 존재 시 갱신, 없으면 삽입.
+        now = datetime.now(timezone.utc)
+        model = await self._session.get(BabyModel, baby.id)
+        if model is None:
+            model = self._to_model(baby)
+            model.deleted_at = None
+            model.updated_at = now
+            self._session.add(model)
+        else:
+            model.user_id = baby.user_id
+            model.name = baby.name
+            model.birth_date = baby.birth_date
+            model.gender = baby.gender
+            model.birth_weight_g = baby.birth_weight_g
+            model.photo_url = baby.photo_url
+            model.deleted_at = None
+            model.updated_at = now
         await self._session.flush()
         return self._to_entity(model)
 
     async def update(self, baby: Baby) -> Baby:
         model = await self._session.get(BabyModel, baby.id)
-        if model is None:
+        if model is None or model.deleted_at is not None:
             raise ValueError(f"Baby {baby.id} not found")
         model.name = baby.name
         model.birth_date = baby.birth_date
         model.gender = baby.gender
         model.birth_weight_g = baby.birth_weight_g
         model.photo_url = baby.photo_url
+        model.updated_at = datetime.now(timezone.utc)
         await self._session.flush()
         return self._to_entity(model)
 
     async def delete(self, id: UUID) -> None:
         model = await self._session.get(BabyModel, id)
-        if model:
-            await self._session.delete(model)
+        if model and model.deleted_at is None:
+            now = datetime.now(timezone.utc)
+            model.deleted_at = now
+            model.updated_at = now
             await self._session.flush()

@@ -1,7 +1,7 @@
-from datetime import date
+from datetime import date, datetime, timezone
 from uuid import UUID
 
-from sqlalchemy import func, select
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.domain.entities.play_record import PlayRecord
@@ -26,27 +26,26 @@ class PlayRepositoryImpl(PlayRepository):
             created_at=model.created_at,
         )
 
-    def _to_model(self, entity: PlayRecord) -> PlayModel:
-        return PlayModel(
-            id=entity.id,
-            baby_id=entity.baby_id,
-            play_type=entity.play_type,
-            started_at=entity.started_at,
-            ended_at=entity.ended_at,
-            duration_minutes=entity.duration_minutes,
-            memo=entity.memo,
-            created_at=entity.created_at,
-        )
+    def _apply_fields(self, model: PlayModel, entity: PlayRecord) -> None:
+        model.baby_id = entity.baby_id
+        model.play_type = entity.play_type
+        model.started_at = entity.started_at
+        model.ended_at = entity.ended_at
+        model.duration_minutes = entity.duration_minutes
+        model.memo = entity.memo
 
     async def get(self, id: UUID) -> PlayRecord | None:
         result = await self._session.get(PlayModel, id)
-        return self._to_entity(result) if result else None
+        if result is None or result.deleted_at is not None:
+            return None
+        return self._to_entity(result)
 
     async def get_by_baby_and_date(self, baby_id: UUID, target_date: date) -> list[PlayRecord]:
         stmt = (
             select(PlayModel)
             .where(
                 PlayModel.baby_id == baby_id,
+                PlayModel.deleted_at.is_(None),
                 kst_date_eq(PlayModel.started_at, target_date),
             )
             .order_by(PlayModel.started_at)
@@ -55,25 +54,34 @@ class PlayRepositoryImpl(PlayRepository):
         return [self._to_entity(m) for m in result.scalars().all()]
 
     async def save(self, record: PlayRecord) -> PlayRecord:
-        model = self._to_model(record)
-        self._session.add(model)
+        now = datetime.now(timezone.utc)
+        model = await self._session.get(PlayModel, record.id)
+        if model is None:
+            model = PlayModel(id=record.id, created_at=record.created_at)
+            self._apply_fields(model, record)
+            model.deleted_at = None
+            model.updated_at = now
+            self._session.add(model)
+        else:
+            self._apply_fields(model, record)
+            model.deleted_at = None
+            model.updated_at = now
         await self._session.flush()
         return self._to_entity(model)
 
     async def update(self, record: PlayRecord) -> PlayRecord:
         model = await self._session.get(PlayModel, record.id)
-        if model is None:
+        if model is None or model.deleted_at is not None:
             raise ValueError(f"PlayRecord {record.id} not found")
-        model.play_type = record.play_type
-        model.started_at = record.started_at
-        model.ended_at = record.ended_at
-        model.duration_minutes = record.duration_minutes
-        model.memo = record.memo
+        self._apply_fields(model, record)
+        model.updated_at = datetime.now(timezone.utc)
         await self._session.flush()
         return self._to_entity(model)
 
     async def delete(self, id: UUID) -> None:
         model = await self._session.get(PlayModel, id)
-        if model:
-            await self._session.delete(model)
+        if model and model.deleted_at is None:
+            now = datetime.now(timezone.utc)
+            model.deleted_at = now
+            model.updated_at = now
             await self._session.flush()

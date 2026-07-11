@@ -7,6 +7,7 @@ from app.domain.value_objects.feeding_type import FeedingType
 
 
 class FeedingCreateRequest(BaseModel):
+    id: UUID | None = None  # 클라 생성 UUID(멱등 upsert). 생략 시 서버 생성(하위호환).
     feeding_type: FeedingType
     started_at: datetime
     ended_at: datetime | None = None

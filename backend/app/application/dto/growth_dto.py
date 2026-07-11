@@ -11,6 +11,7 @@ class CreateGrowthDTO:
     height_cm: float | None = None
     head_circumference_cm: float | None = None
     memo: str | None = None
+    id: UUID | None = None  # 클라 생성 UUID(멱등 upsert)
 
 
 @dataclass

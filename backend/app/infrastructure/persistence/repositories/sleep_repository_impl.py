@@ -1,7 +1,7 @@
-from datetime import date
+from datetime import date, datetime, timezone
 from uuid import UUID
 
-from sqlalchemy import func, select
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.domain.entities.sleep_record import SleepRecord
@@ -24,25 +24,24 @@ class SleepRepositoryImpl(SleepRepository):
             created_at=model.created_at,
         )
 
-    def _to_model(self, entity: SleepRecord) -> SleepModel:
-        return SleepModel(
-            id=entity.id,
-            baby_id=entity.baby_id,
-            started_at=entity.started_at,
-            ended_at=entity.ended_at,
-            memo=entity.memo,
-            created_at=entity.created_at,
-        )
+    def _apply_fields(self, model: SleepModel, entity: SleepRecord) -> None:
+        model.baby_id = entity.baby_id
+        model.started_at = entity.started_at
+        model.ended_at = entity.ended_at
+        model.memo = entity.memo
 
     async def get(self, id: UUID) -> SleepRecord | None:
         result = await self._session.get(SleepModel, id)
-        return self._to_entity(result) if result else None
+        if result is None or result.deleted_at is not None:
+            return None
+        return self._to_entity(result)
 
     async def get_by_baby_and_date(self, baby_id: UUID, target_date: date) -> list[SleepRecord]:
         stmt = (
             select(SleepModel)
             .where(
                 SleepModel.baby_id == baby_id,
+                SleepModel.deleted_at.is_(None),
                 kst_date_eq(SleepModel.started_at, target_date),
             )
             .order_by(SleepModel.started_at)
@@ -53,7 +52,11 @@ class SleepRepositoryImpl(SleepRepository):
     async def get_active(self, baby_id: UUID) -> SleepRecord | None:
         stmt = (
             select(SleepModel)
-            .where(SleepModel.baby_id == baby_id, SleepModel.ended_at.is_(None))
+            .where(
+                SleepModel.baby_id == baby_id,
+                SleepModel.deleted_at.is_(None),
+                SleepModel.ended_at.is_(None),
+            )
             .order_by(SleepModel.started_at.desc())
             .limit(1)
         )
@@ -64,7 +67,10 @@ class SleepRepositoryImpl(SleepRepository):
     async def get_recent(self, baby_id: UUID, limit: int = 12) -> list[SleepRecord]:
         stmt = (
             select(SleepModel)
-            .where(SleepModel.baby_id == baby_id)
+            .where(
+                SleepModel.baby_id == baby_id,
+                SleepModel.deleted_at.is_(None),
+            )
             .order_by(SleepModel.started_at.desc())
             .limit(limit)
         )
@@ -72,23 +78,34 @@ class SleepRepositoryImpl(SleepRepository):
         return [self._to_entity(m) for m in result.scalars().all()]
 
     async def save(self, record: SleepRecord) -> SleepRecord:
-        model = self._to_model(record)
-        self._session.add(model)
+        now = datetime.now(timezone.utc)
+        model = await self._session.get(SleepModel, record.id)
+        if model is None:
+            model = SleepModel(id=record.id, created_at=record.created_at)
+            self._apply_fields(model, record)
+            model.deleted_at = None
+            model.updated_at = now
+            self._session.add(model)
+        else:
+            self._apply_fields(model, record)
+            model.deleted_at = None
+            model.updated_at = now
         await self._session.flush()
         return self._to_entity(model)
 
     async def update(self, record: SleepRecord) -> SleepRecord:
         model = await self._session.get(SleepModel, record.id)
-        if model is None:
+        if model is None or model.deleted_at is not None:
             raise ValueError(f"SleepRecord {record.id} not found")
-        model.started_at = record.started_at
-        model.ended_at = record.ended_at
-        model.memo = record.memo
+        self._apply_fields(model, record)
+        model.updated_at = datetime.now(timezone.utc)
         await self._session.flush()
         return self._to_entity(model)
 
     async def delete(self, id: UUID) -> None:
         model = await self._session.get(SleepModel, id)
-        if model:
-            await self._session.delete(model)
+        if model and model.deleted_at is None:
+            now = datetime.now(timezone.utc)
+            model.deleted_at = now
+            model.updated_at = now
             await self._session.flush()

@@ -32,6 +32,7 @@ async def start_sleep(
 ) -> SleepResponse:
     dto = StartSleepDTO(
         baby_id=baby_id,
+        id=body.id,
         started_at=body.started_at,
         memo=body.memo,
     )

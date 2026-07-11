@@ -5,6 +5,7 @@ from pydantic import BaseModel, Field
 
 
 class CreateGrowthRequest(BaseModel):
+    id: UUID | None = None  # 클라 생성 UUID(멱등 upsert). 생략 시 서버 생성(하위호환).
     recorded_at: date
     weight_g: int | None = Field(None, gt=0, description="체중 (그램)")
     height_cm: float | None = Field(None, gt=0, description="키 (cm)")

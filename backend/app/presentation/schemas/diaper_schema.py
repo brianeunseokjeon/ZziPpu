@@ -9,6 +9,7 @@ from app.domain.value_objects.stool_state import StoolState
 
 
 class DiaperCreateRequest(BaseModel):
+    id: UUID | None = None  # 클라 생성 UUID(멱등 upsert). 생략 시 서버 생성(하위호환).
     recorded_at: datetime
     diaper_type: DiaperType
     stool_color: StoolColor | None = None

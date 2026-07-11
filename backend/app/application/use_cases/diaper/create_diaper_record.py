@@ -12,7 +12,7 @@ class CreateDiaperRecordUseCase:
 
     async def execute(self, dto: CreateDiaperDTO) -> DiaperResponseDTO:
         record = DiaperRecord(
-            id=uuid4(),
+            id=dto.id or uuid4(),
             baby_id=dto.baby_id,
             recorded_at=dto.recorded_at,
             diaper_type=dto.diaper_type,

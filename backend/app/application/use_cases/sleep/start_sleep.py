@@ -12,7 +12,7 @@ class StartSleepUseCase:
 
     async def execute(self, dto: StartSleepDTO) -> SleepResponseDTO:
         record = SleepRecord(
-            id=uuid4(),
+            id=dto.id or uuid4(),
             baby_id=dto.baby_id,
             started_at=dto.started_at,
             ended_at=None,

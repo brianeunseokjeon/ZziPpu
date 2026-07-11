@@ -30,6 +30,7 @@ async def create_diaper(
 ) -> DiaperResponse:
     dto = CreateDiaperDTO(
         baby_id=baby_id,
+        id=body.id,
         recorded_at=body.recorded_at,
         diaper_type=body.diaper_type,
         stool_color=body.stool_color,
