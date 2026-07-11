@@ -14,7 +14,7 @@ class AuthSettings(BaseSettings):
     # --- JWT (core-service 와 동일값이어야 함 — 같은 env 읽음) ---
     SECRET_KEY: str = "change-me-in-production"
     ALGORITHM: str = "HS256"
-    ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24 * 365  # 1년
+    ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24 * 365 * 100  # 100년 = 사실상 만료 없음(한 번 로그인 유지)
 
     # --- CORS (core main.py 에서 합집합으로 처리하므로 참조용) ---
     CORS_ORIGINS: list[str] = ["http://localhost:3000"]

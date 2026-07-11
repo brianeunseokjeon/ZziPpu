@@ -26,7 +26,7 @@ services:
       - key: ALGORITHM
         value: HS256
       - key: ACCESS_TOKEN_EXPIRE_MINUTES
-        value: "525600"
+        value: "52560000"   # 100년 = 사실상 만료 없음 (한 번 로그인하면 계속 유지)
       - key: DEV_MODE
         value: "false"
 
