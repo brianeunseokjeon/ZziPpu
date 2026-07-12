@@ -3,7 +3,7 @@
 
 import Foundation
 
-struct PlayRecord: Identifiable, Equatable, Sendable {
+struct PlayRecord: Identifiable, Equatable, Sendable, Codable {
     let id: UUID
     let babyId: UUID
     var playType: PlayType

@@ -3,7 +3,7 @@
 
 import Foundation
 
-struct Feeding: Identifiable, Equatable, Sendable {
+struct Feeding: Identifiable, Equatable, Sendable, Codable {
     let id: UUID
     let babyId: UUID
     var type: FeedingType

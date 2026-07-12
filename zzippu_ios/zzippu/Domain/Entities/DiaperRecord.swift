@@ -3,7 +3,7 @@
 
 import Foundation
 
-struct DiaperRecord: Identifiable, Equatable, Sendable {
+struct DiaperRecord: Identifiable, Equatable, Sendable, Codable {
     let id: UUID
     let babyId: UUID
     var recordedAt: Date

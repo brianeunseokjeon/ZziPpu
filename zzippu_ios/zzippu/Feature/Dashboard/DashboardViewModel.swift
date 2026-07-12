@@ -53,6 +53,9 @@ final class DashboardViewModel {
     private let guidelineRepository: GuidelineRepository
     private let babyId: UUID
 
+    /// SWR 디스크 캐시 저장소(옵셔널 주입). nil이면 캐싱 이전과 완전 동일 동작.
+    private let snapshotStore: DashboardSnapshotStore?
+
     // MARK: - UseCases (순수 집계)
 
     private let trendUseCase = ComputeTrendUseCase()
@@ -71,7 +74,8 @@ final class DashboardViewModel {
         growthRepository:    GrowthRepository,
         babyRepository:      BabyRepository,
         guidelineRepository: GuidelineRepository,
-        babyId: UUID
+        babyId: UUID,
+        snapshotStore: DashboardSnapshotStore? = nil
     ) {
         self.dashboardRepository = dashboardRepository
         self.feedingRepository   = feedingRepository
@@ -82,6 +86,7 @@ final class DashboardViewModel {
         self.babyRepository      = babyRepository
         self.guidelineRepository = guidelineRepository
         self.babyId              = babyId
+        self.snapshotStore       = snapshotStore
         self.insightsUseCase     = EvaluateInsightsUseCase(repository: guidelineRepository)
     }
 
@@ -89,6 +94,15 @@ final class DashboardViewModel {
 
     func loadAll(for date: Date? = nil) {
         let target = date ?? selectedDate
+        let isToday = Calendar.kst.isDateInToday(target)
+
+        // SWR hydrate: 진입 초기(아직 데이터 없음) && 오늘 조회일 때만 디스크 스냅샷을 즉시 복원.
+        // → dailySummary != .empty 가 되어 전체 스피너를 자연스럽게 스킵(콜드스타트 무-스피너).
+        // store=nil 이면 이 블록은 통째로 no-op → 기존 동작과 바이트-동일.
+        if isToday, dailySummary == .empty, let snapshot = snapshotStore?.load(babyId: babyId) {
+            hydrate(from: snapshot)
+        }
+
         isLoading = true
         Task { @MainActor in
             defer { isLoading = false }
@@ -121,10 +135,49 @@ final class DashboardViewModel {
 
                 recomputeInsights()
 
+                // SWR save: fetch 성공 후 최신 상태를 오늘 날짜에 한해 스냅샷 저장.
+                // 과거일 조회는 캐시 우회(오늘 데이터 오염 방지). store=nil 이면 no-op.
+                if isToday { saveSnapshot() }
+
             } catch {
+                // 실패해도 hydrate된 stale 데이터는 유지(사용자 경험 보호).
                 errorMessage = "대시보드 로드 실패: \(error.localizedDescription)"
             }
         }
+    }
+
+    // MARK: - SWR Snapshot (디스크 캐시 hydrate/save)
+
+    /// 디스크 스냅샷 → 표시 상태 복원 후 인사이트 재계산(동기).
+    private func hydrate(from s: DashboardSnapshot) {
+        dailySummary  = s.dailySummary
+        prediction    = s.prediction
+        growthSeries  = s.growthSeries
+        sparkFeedings = s.sparkFeedings
+        sparkSleeps   = s.sparkSleeps
+        sparkDiapers  = s.sparkDiapers
+        sparkPlays    = s.sparkPlays
+        trendFeedings = s.trendFeedings
+        activeBaby    = s.activeBaby
+        recomputeInsights()
+    }
+
+    /// 현재 표시 상태를 스냅샷으로 묶어 백그라운드 저장(store=nil이면 no-op).
+    private func saveSnapshot() {
+        guard let store = snapshotStore else { return }
+        let snapshot = DashboardSnapshot(
+            dailySummary:  dailySummary,
+            prediction:    prediction,
+            growthSeries:  growthSeries,
+            sparkFeedings: sparkFeedings,
+            sparkSleeps:   sparkSleeps,
+            sparkDiapers:  sparkDiapers,
+            sparkPlays:    sparkPlays,
+            trendFeedings: trendFeedings,
+            activeBaby:    activeBaby,
+            savedAt:       .now
+        )
+        store.save(snapshot, babyId: babyId)
     }
 
     func changeDate(_ date: Date) {

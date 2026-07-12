@@ -5,7 +5,7 @@ import Foundation
 
 // MARK: - DailySummary (서버 집계 결과)
 
-struct DailySummary: Equatable, Sendable {
+struct DailySummary: Equatable, Sendable, Codable {
     let totalFeedingMl:    Int
     let feedingCount:      Int
     let totalSleepMinutes: Int
@@ -30,7 +30,7 @@ struct DailySummary: Equatable, Sendable {
 
 // MARK: - FeedingPrediction
 
-struct FeedingPrediction: Equatable, Sendable {
+struct FeedingPrediction: Equatable, Sendable, Codable {
     let lastFeedingAt:          Date?
     let nextFeedingAt:          Date?
     let feedingIntervalMinutes: Int?

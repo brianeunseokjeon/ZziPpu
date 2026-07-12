@@ -17,7 +17,7 @@ enum Gender: String, Codable, Sendable, CaseIterable {
     }
 }
 
-struct Baby: Identifiable, Equatable, Sendable {
+struct Baby: Identifiable, Equatable, Sendable, Codable {
     let id: UUID
     let userId: UUID?
     var name: String

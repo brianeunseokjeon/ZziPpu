@@ -48,7 +48,8 @@ struct DashboardView: View {
                     growthRepository:    container.growthRepository,
                     babyRepository:      container.babyRepository,
                     guidelineRepository: container.guidelineRepository,
-                    babyId:              container.activeBabyId
+                    babyId:              container.activeBabyId,
+                    snapshotStore:       container.dashboardSnapshotStore
                 )
                 vm?.loadAll()
             }

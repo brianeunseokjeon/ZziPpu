@@ -3,7 +3,7 @@
 
 import Foundation
 
-struct SleepRecord: Identifiable, Equatable, Sendable {
+struct SleepRecord: Identifiable, Equatable, Sendable, Codable {
     let id: UUID
     let babyId: UUID
     var startedAt: Date

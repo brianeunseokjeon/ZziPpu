@@ -24,6 +24,10 @@ final class AppContainer {
     // MARK: - 정적 가이드 데이터 (소아과 권장 · WHO 성장) — Data 레이어 번들 로더
     let guidelineRepository:   GuidelineRepository
 
+    // MARK: - 대시보드 SWR 디스크 캐시 (콜드스타트 무-스피너)
+    // 결합도↓: 이 프로퍼티 + DashboardView 주입만 제거하면 캐싱 완전 비활성화.
+    let dashboardSnapshotStore: DashboardSnapshotStore
+
     // MARK: - Session State (라우팅 전용)
     let sessionState: SessionState
 
@@ -79,6 +83,7 @@ final class AppContainer {
         self.vaccinationRepository = RemoteVaccinationRepository(api: api)
         self.caregiverRepository   = RemoteCaregiverRepository(api: api)
         self.guidelineRepository   = BundleGuidelineRepository()
+        self.dashboardSnapshotStore = FileDashboardSnapshotStore()
         self.sessionState = SessionState()
     }
 

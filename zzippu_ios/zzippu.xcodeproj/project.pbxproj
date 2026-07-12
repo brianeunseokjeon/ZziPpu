@@ -178,6 +178,7 @@
 		DC9D89EC3581E866B2A70417 /* MetricDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 38DE4DD5318C4324FA7BA009 /* MetricDetailView.swift */; };
 		DDD587C8F47A5F3C600637DB /* DSNumberStepper.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9D7E9BCC3D0269738853326 /* DSNumberStepper.swift */; };
 		DE7CF49CC71C9C7146DDD96E /* APIClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9DAF399357A8600551960BA3 /* APIClient.swift */; };
+		E07A487AEAE7F11A5BBC1EC8 /* DashboardSnapshotStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = A19F37A99F272F216CA8B9F3 /* DashboardSnapshotStore.swift */; };
 		E11B4A471A97A80F7223D8E0 /* GrowthViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63AFBBB40633397B444604BE /* GrowthViewModel.swift */; };
 		E1DDA3578FC9194C2A099BD0 /* InsightRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0BC56F438465C84BCFA0613B /* InsightRow.swift */; };
 		E55C477C3E412A33B3BF783C /* AuthRemoteDataSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = 462279624CC6352D8362F327 /* AuthRemoteDataSource.swift */; };
@@ -199,6 +200,7 @@
 		FC4484E02D03748C600F01CD /* DomainError.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33166EE9764C26180E945643 /* DomainError.swift */; };
 		FC920F68E4579AC0876D25A2 /* LoginView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B3A120ABFD48850B4441677 /* LoginView.swift */; };
 		FE235807FC697663AA5BFC2C /* AuthViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC5E5BB66C303191729CAD07 /* AuthViewModel.swift */; };
+		FEBC9F4C4E442BCD4573BA86 /* DashboardSnapshot.swift in Sources */ = {isa = PBXBuildFile; fileRef = EFB322BD681EE90EBCA729FC /* DashboardSnapshot.swift */; };
 		FEC52097C96ECFE610DDEC53 /* DiaperRecord.swift in Sources */ = {isa = PBXBuildFile; fileRef = 461B2AD016FE8779CEBA3C4E /* DiaperRecord.swift */; };
 		FF3417C96429D55E89C07F10 /* Date+.swift in Sources */ = {isa = PBXBuildFile; fileRef = 217B6B25134223FE24756126 /* Date+.swift */; };
 /* End PBXBuildFile section */
@@ -359,6 +361,7 @@
 		9B6171E96CF2A1847AAF433A /* DashboardRepository.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DashboardRepository.swift; sourceTree = "<group>"; };
 		9DAF399357A8600551960BA3 /* APIClient.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = APIClient.swift; path = Network/APIClient.swift; sourceTree = "<group>"; };
 		A03E7FF4C92BF8917D4687F0 /* DSIconButton.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DSIconButton.swift; sourceTree = "<group>"; };
+		A19F37A99F272F216CA8B9F3 /* DashboardSnapshotStore.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DashboardSnapshotStore.swift; sourceTree = "<group>"; };
 		A27D7EAF97AE5D79252FEF82 /* PlayRepository.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PlayRepository.swift; sourceTree = "<group>"; };
 		A27FD59AFCABD2B6BDD8FB09 /* BabyRepository.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = BabyRepository.swift; sourceTree = "<group>"; };
 		A3D5AD97DB4402EBDFB269B7 /* AppHeader.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AppHeader.swift; sourceTree = "<group>"; };
@@ -414,6 +417,7 @@
 		EAC64E3B6ACF98DA0422C9EE /* RemoteDiaperRepository.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = RemoteDiaperRepository.swift; sourceTree = "<group>"; };
 		EBD887C3EF6E11003BEE3EE8 /* ComputeTrendUseCase.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ComputeTrendUseCase.swift; sourceTree = "<group>"; };
 		ECED078EAFBF55ABCF767B56 /* FeedingDTO.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = FeedingDTO.swift; path = Network/DTOs/FeedingDTO.swift; sourceTree = "<group>"; };
+		EFB322BD681EE90EBCA729FC /* DashboardSnapshot.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DashboardSnapshot.swift; sourceTree = "<group>"; };
 		F0B456FCC66069DCCB35A60E /* HomeView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = HomeView.swift; path = HomeView.swift; sourceTree = "<group>"; };
 		F0B7B9EBE9DE393D1D4B6ECF /* PlayType.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PlayType.swift; sourceTree = "<group>"; };
 		FD64E1CDCC8C9C3A4291A2BD /* TermsAgreementView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = TermsAgreementView.swift; sourceTree = "<group>"; };
@@ -735,6 +739,8 @@
 				B9D471E90AC7CF6BF84018A5 /* GrowthDetailView.swift */,
 				1709D33D97B6047689B426CC /* TodayInsightsSection.swift */,
 				04DE0CE6356D994BECA2C6F8 /* FeedingTrendCard.swift */,
+				EFB322BD681EE90EBCA729FC /* DashboardSnapshot.swift */,
+				A19F37A99F272F216CA8B9F3 /* DashboardSnapshotStore.swift */,
 			);
 			name = Dashboard;
 			path = Dashboard;
@@ -1455,6 +1461,8 @@
 				DBAFFA6B2852AE72FA93D825 /* DSTrendBarChart.swift in Sources */,
 				E640C6B9A5243C4FEEF0AF6A /* ComputeFeedingTrendUseCase.swift in Sources */,
 				CE826B0D3BD4998D73F3F552 /* FeedingTrendCard.swift in Sources */,
+				FEBC9F4C4E442BCD4573BA86 /* DashboardSnapshot.swift in Sources */,
+				E07A487AEAE7F11A5BBC1EC8 /* DashboardSnapshotStore.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

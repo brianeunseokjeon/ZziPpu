@@ -3,7 +3,7 @@
 
 import Foundation
 
-struct GrowthRecord: Identifiable, Equatable, Sendable {
+struct GrowthRecord: Identifiable, Equatable, Sendable, Codable {
     let id: UUID
     let babyId: UUID
     var recordedAt: Date
