@@ -14,9 +14,11 @@ final class SettingsViewModel {
     var isLoading: Bool = false
     var errorMessage: String?
 
-    // 현재 몸무게(성장기록 최신값) — 표시/프리필용.
+    // 현재 성장(성장기록 최신값) — 표시/프리필용.
     var latestWeightG: Int?
+    var latestHeightCm: Double?
     var currentWeightKgText: String = ""
+    var currentHeightCmText: String = ""
     var isSavingWeight: Bool = false
 
     // MARK: - Dependencies
@@ -81,18 +83,54 @@ final class SettingsViewModel {
         return String(format: "%.2f kg", kg)
     }
 
-    /// 입력 검증(0~15 kg). 정상/빈 값이면 nil.
+    /// 최신 키 표기(예: "55.5 cm"). 없으면 "미등록".
+    var latestHeightText: String {
+        guard let cm = latestHeightCm, cm > 0 else { return "미등록" }
+        return String(format: "%.1f cm", cm)
+    }
+
+    /// 섹션 서브텍스트 — 최신 키·몸무게 요약(둘 다 없으면 안내).
+    var latestGrowthSummary: String {
+        let hasW = (latestWeightG ?? 0) > 0
+        let hasH = (latestHeightCm ?? 0) > 0
+        if !hasW && !hasH { return "권장 수유량 계산에 사용돼요" }
+        var parts: [String] = []
+        if hasH { parts.append("키 \(latestHeightText)") }
+        if hasW { parts.append("몸무게 \(latestWeightText)") }
+        return parts.joined(separator: " · ")
+    }
+
+    /// 체중 입력 검증(0~15 kg). 정상/빈 값이면 nil.
     var currentWeightValidation: String? {
         let text = currentWeightKgText.trimmingCharacters(in: .whitespaces)
         guard !text.isEmpty else { return nil }
-        guard let kg = Double(text) else { return "숫자로 입력해 주세요 (예: 3.5)" }
-        guard (0...15).contains(kg) else { return "0~15 kg 범위로 입력해 주세요." }
+        guard let kg = Double(text) else { return "몸무게는 숫자로 입력해 주세요 (예: 3.5)" }
+        guard (0...15).contains(kg) else { return "몸무게는 0~15 kg 범위로 입력해 주세요." }
         return nil
     }
 
+    /// 키 입력 검증(0~200 cm). 정상/빈 값이면 nil.
+    var currentHeightValidation: String? {
+        let text = currentHeightCmText.trimmingCharacters(in: .whitespaces)
+        guard !text.isEmpty else { return nil }
+        guard let cm = Double(text) else { return "키는 숫자로 입력해 주세요 (예: 55.5)" }
+        guard (0...200).contains(cm) else { return "키는 0~200 cm 범위로 입력해 주세요." }
+        return nil
+    }
+
+    private var hasWeightInput: Bool {
+        !currentWeightKgText.trimmingCharacters(in: .whitespaces).isEmpty
+    }
+    private var hasHeightInput: Bool {
+        !currentHeightCmText.trimmingCharacters(in: .whitespaces).isEmpty
+    }
+
+    /// 저장 가능: 최소 하나 입력 + 입력한 항목 모두 검증 통과 + 저장 중 아님.
     var canSaveWeight: Bool {
-        let text = currentWeightKgText.trimmingCharacters(in: .whitespaces)
-        return !text.isEmpty && currentWeightValidation == nil && !isSavingWeight
+        (hasWeightInput || hasHeightInput)
+            && currentWeightValidation == nil
+            && currentHeightValidation == nil
+            && !isSavingWeight
     }
 
     // MARK: - Export
@@ -117,33 +155,50 @@ final class SettingsViewModel {
             } catch {
                 self.errorMessage = "프로필을 불러오지 못했어요"
             }
-            // 최신 체중은 실패해도 화면 진입 막지 않음(부가 정보).
+            // 최신 성장값은 실패해도 화면 진입 막지 않음(부가 정보).
             let series = (try? await growthRepository.series(babyId: babyId)) ?? []
             self.latestWeightG = series
                 .filter { ($0.weightG ?? 0) > 0 }
                 .max(by: { $0.recordedAt < $1.recordedAt })?
                 .weightG
+            self.latestHeightCm = series
+                .filter { ($0.heightCm ?? 0) > 0 }
+                .max(by: { $0.recordedAt < $1.recordedAt })?
+                .heightCm
         }
     }
 
-    /// 현재 몸무게 저장 = 오늘 날짜 성장기록 1건 생성(kg→g). 성공 시 true.
+    /// 현재 성장 저장 = 오늘 날짜 성장기록 1건 생성(키·몸무게, 최소 하나). 성공 시 true.
     /// 시간에 따라 변하는 값이라 Baby가 아닌 GrowthRecord에 적재(과거 이력·추세 보존).
+    /// kg→g(×1000), cm 그대로.
     @MainActor
-    func saveCurrentWeight() async -> Bool {
-        guard canSaveWeight,
-              let kg = Double(currentWeightKgText.trimmingCharacters(in: .whitespaces))
-        else { return false }
+    func saveGrowth() async -> Bool {
+        guard canSaveWeight else { return false }
+        let weightG: Int? = hasWeightInput
+            ? Double(currentWeightKgText.trimmingCharacters(in: .whitespaces)).map { Int($0 * 1000) }
+            : nil
+        let heightCm: Double? = hasHeightInput
+            ? Double(currentHeightCmText.trimmingCharacters(in: .whitespaces))
+            : nil
+        guard weightG != nil || heightCm != nil else { return false }
+
         isSavingWeight = true
         defer { isSavingWeight = false }
-        let weightG = Int(kg * 1000)
-        let record = GrowthRecord.new(babyId: babyId, recordedAt: .now, weightG: weightG)
+        let record = GrowthRecord.new(
+            babyId: babyId,
+            recordedAt: .now,
+            weightG: weightG,
+            heightCm: heightCm
+        )
         do {
             let saved = try await growthRepository.create(record)
-            latestWeightG = saved.weightG
+            if let w = saved.weightG, w > 0 { latestWeightG = w }
+            if let h = saved.heightCm, h > 0 { latestHeightCm = h }
             currentWeightKgText = ""
+            currentHeightCmText = ""
             return true
         } catch {
-            errorMessage = "몸무게 저장에 실패했어요. 다시 시도해 주세요."
+            errorMessage = "성장 기록 저장에 실패했어요. 다시 시도해 주세요."
             return false
         }
     }

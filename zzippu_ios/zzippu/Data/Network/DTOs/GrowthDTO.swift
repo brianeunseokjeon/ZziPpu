@@ -25,3 +25,15 @@ struct GrowthCreateRequestDTO: Encodable {
     let headCircumferenceCm: Double?
     let memo: String?
 }
+
+// MARK: - Update Request DTO (PATCH — 전체교체)
+
+/// 서버 PATCH /growth/{id} 대응. recorded_at은 ISO datetime(apiEncoder가 Date→ISO 인코딩).
+/// 나머지는 옵셔널이나 편집 시 전체 전송(전체교체 의미).
+struct GrowthUpdateRequestDTO: Encodable {
+    let recordedAt: Date            // datetime — apiEncoder가 ISO8601로 인코딩
+    let weightG: Int?
+    let heightCm: Double?
+    let headCircumferenceCm: Double?
+    let memo: String?
+}

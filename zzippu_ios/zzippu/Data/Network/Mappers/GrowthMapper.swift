@@ -32,4 +32,16 @@ enum GrowthMapper {
             memo: record.memo
         )
     }
+
+    // MARK: - Entity → Update Request DTO (PATCH — 전체교체)
+
+    static func toUpdateRequest(_ record: GrowthRecord) -> GrowthUpdateRequestDTO {
+        GrowthUpdateRequestDTO(
+            recordedAt: record.recordedAt,   // Date → apiEncoder가 ISO datetime으로 인코딩
+            weightG: record.weightG,
+            heightCm: record.heightCm,
+            headCircumferenceCm: record.headCircumferenceCm,
+            memo: record.memo
+        )
+    }
 }

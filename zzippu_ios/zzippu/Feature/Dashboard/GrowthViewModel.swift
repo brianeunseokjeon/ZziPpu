@@ -47,6 +47,9 @@ final class GrowthViewModel {
     // 성장 입력 시트
     var showInputSheet: Bool = false
 
+    // 편집 시트 — 대상 레코드가 있으면 편집 시트 오픈(신규 추가와 분리).
+    var editingRecord: GrowthRecord?
+
     // 활성 아기(성별·나이 → WHO 밴드 선택)
     var activeBaby: Baby?
 
@@ -98,6 +101,29 @@ final class GrowthViewModel {
         } catch {
             await MainActor.run {
                 errorMessage = "성장 기록 저장 실패: \(error.localizedDescription)"
+            }
+        }
+    }
+
+    /// 편집 저장 — 낙관적 갱신(series에서 해당 id 교체 → 실패 시 롤백 + errorMessage).
+    func updateRecord(_ record: GrowthRecord) {
+        guard let idx = series.firstIndex(where: { $0.id == record.id }) else { return }
+        let previous = series[idx]
+        series[idx] = record
+        series.sort { $0.recordedAt < $1.recordedAt }
+        Task { @MainActor in
+            do {
+                let confirmed = try await growthRepository.update(record)
+                if let i = series.firstIndex(where: { $0.id == confirmed.id }) {
+                    series[i] = confirmed
+                    series.sort { $0.recordedAt < $1.recordedAt }
+                }
+            } catch {
+                if let i = series.firstIndex(where: { $0.id == previous.id }) {
+                    series[i] = previous
+                    series.sort { $0.recordedAt < $1.recordedAt }
+                }
+                errorMessage = "수정 실패: \(error.localizedDescription)"
             }
         }
     }

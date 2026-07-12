@@ -157,6 +157,8 @@ struct GrowthDetailView: View {
                         GrowthRecordRow(record: record, metric: vm.selectedMetric) {
                             vm.deleteRecord(record)
                         }
+                        .contentShape(Rectangle())
+                        .onTapGesture { vm.editingRecord = record }
                     }
                     .padding(.horizontal, 16)
                 }
@@ -191,6 +193,27 @@ struct GrowthDetailView: View {
                 Task { @MainActor in
                     await vm.saveRecord(record)
                     toastCenter.show(.init(message: "성장 기록 완료!", variant: .success))
+                }
+            }
+        }
+        .dsBottomSheet(
+            isPresented: Binding(
+                get: { vm.editingRecord != nil },
+                set: { if !$0 { vm.editingRecord = nil } }
+            ),
+            options: .init(title: "기록 수정", detents: [.medium, .large])
+        ) {
+            if let editing = vm.editingRecord {
+                GrowthInputSheet(
+                    isPresented: Binding(
+                        get: { vm.editingRecord != nil },
+                        set: { if !$0 { vm.editingRecord = nil } }
+                    ),
+                    babyId: editing.babyId,
+                    editing: editing
+                ) { record in
+                    vm.updateRecord(record)
+                    toastCenter.show(.init(message: "기록을 수정했어요", variant: .success))
                 }
             }
         }
@@ -254,14 +277,34 @@ struct GrowthInputSheet: View {
 
     @Binding var isPresented: Bool
     let babyId: UUID
+    /// 편집 대상 레코드. nil이면 신규 추가, 있으면 편집 모드(프리필 + "수정" 저장).
+    let editing: GrowthRecord?
     let onSaved: (GrowthRecord) -> Void
 
-    @State private var weightKgStr: String = ""
-    @State private var heightCmStr: String = ""
-    @State private var headCmStr:   String = ""
-    @State private var recordedAt:  Date   = .now
+    @State private var weightKgStr: String
+    @State private var heightCmStr: String
+    @State private var headCmStr:   String
+    @State private var recordedAt:  Date
 
     @Environment(\.theme) private var theme
+
+    init(
+        isPresented: Binding<Bool>,
+        babyId: UUID,
+        editing: GrowthRecord? = nil,
+        onSaved: @escaping (GrowthRecord) -> Void
+    ) {
+        self._isPresented = isPresented
+        self.babyId = babyId
+        self.editing = editing
+        self.onSaved = onSaved
+        _weightKgStr = State(initialValue: editing?.weightG.map { String(format: "%.2f", Double($0) / 1000.0) } ?? "")
+        _heightCmStr = State(initialValue: editing?.heightCm.map { String(format: "%.1f", $0) } ?? "")
+        _headCmStr   = State(initialValue: editing?.headCircumferenceCm.map { String(format: "%.1f", $0) } ?? "")
+        _recordedAt  = State(initialValue: editing?.recordedAt ?? .now)
+    }
+
+    private var isEditing: Bool { editing != nil }
 
     var body: some View {
         ScrollView {
@@ -311,7 +354,7 @@ struct GrowthInputSheet: View {
                 .padding(.horizontal, 16)
 
                 // 저장 버튼
-                DSButton("저장", variant: .primary, size: .lg) {
+                DSButton(isEditing ? "수정" : "저장", variant: .primary, size: .lg) {
                     save()
                 }
                 .padding(.horizontal, 16)
@@ -331,13 +374,28 @@ struct GrowthInputSheet: View {
         let heightCm: Double? = Double(heightCmStr)
         let headCm: Double? = Double(headCmStr)
 
-        let record = GrowthRecord.new(
-            babyId: babyId,
-            recordedAt: recordedAt,
-            weightG: weightG,
-            heightCm: heightCm,
-            headCircumferenceCm: headCm
-        )
+        let record: GrowthRecord
+        if let editing {
+            // 편집: id·babyId·createdAt 보존, 입력값으로 전체교체.
+            record = GrowthRecord(
+                id: editing.id,
+                babyId: editing.babyId,
+                recordedAt: recordedAt,
+                weightG: weightG,
+                heightCm: heightCm,
+                headCircumferenceCm: headCm,
+                memo: editing.memo,
+                createdAt: editing.createdAt
+            )
+        } else {
+            record = GrowthRecord.new(
+                babyId: babyId,
+                recordedAt: recordedAt,
+                weightG: weightG,
+                heightCm: heightCm,
+                headCircumferenceCm: headCm
+            )
+        }
         onSaved(record)
         isPresented = false
     }

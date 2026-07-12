@@ -19,6 +19,12 @@ final class RemoteGrowthRepository: GrowthRepository {
         return GrowthMapper.toEntity(dto)
     }
 
+    func update(_ record: GrowthRecord) async throws -> GrowthRecord {
+        let request = GrowthMapper.toUpdateRequest(record)
+        let dto = try await dataSource.update(babyId: record.babyId, recordId: record.id, request: request)
+        return GrowthMapper.toEntity(dto)
+    }
+
     func delete(id: UUID, babyId: UUID) async throws {
         try await dataSource.delete(babyId: babyId, recordId: id)
     }

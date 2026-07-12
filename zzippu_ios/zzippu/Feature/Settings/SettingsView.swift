@@ -85,51 +85,82 @@ private struct SettingsContent: View {
         }
         .dsBottomSheet(
             isPresented: $showWeightSheet,
-            options: .init(title: "현재 몸무게", detents: [.medium])
+            options: .init(title: "성장 (키·몸무게)", detents: [.medium])
         ) {
             weightSheetContent
         }
     }
 
-    // MARK: - Current Weight
+    // MARK: - Growth (키·몸무게)
 
     private var weightSection: some View {
         VStack(alignment: .leading, spacing: theme.space.sm) {
-            DSSectionHeader(title: "몸무게")
-            Button {
-                vm.currentWeightKgText = ""   // 매번 새로 입력(프리필 없이 명확하게)
-                showWeightSheet = true
-            } label: {
-                DSListRow(variant: .withTrailing) {
-                    Image(systemName: "scalemass.fill")
-                        .foregroundStyle(theme.color.primary.color)
-                } content: {
-                    VStack(alignment: .leading, spacing: 2) {
-                        Text("현재 몸무게").font(theme.typography.body)
-                        Text("권장 수유량 계산에 사용돼요")
-                            .font(theme.typography.caption)
-                            .foregroundStyle(theme.color.textSecondary.color)
-                    }
-                } trailing: {
-                    HStack(spacing: theme.space.xs) {
-                        Text(vm.latestWeightText)
-                            .font(theme.typography.callout)
-                            .foregroundStyle(theme.color.textSecondary.color)
+            DSSectionHeader(title: "성장 (키·몸무게)")
+            VStack(spacing: 0) {
+                Button {
+                    vm.currentWeightKgText = ""   // 매번 새로 입력(프리필 없이 명확하게)
+                    vm.currentHeightCmText = ""
+                    showWeightSheet = true
+                } label: {
+                    DSListRow(variant: .withTrailing) {
+                        Image(systemName: "figure.child")
+                            .foregroundStyle(theme.color.primary.color)
+                    } content: {
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text("성장 (키·몸무게)").font(theme.typography.body)
+                            Text(vm.latestGrowthSummary)
+                                .font(theme.typography.caption)
+                                .foregroundStyle(theme.color.textSecondary.color)
+                        }
+                    } trailing: {
                         Image(systemName: "chevron.right")
                             .font(.system(size: 13, weight: .semibold))
                             .foregroundStyle(theme.color.textTertiary.color)
                     }
                 }
+                .buttonStyle(.plain)
+
+                DSListRowDivider()
+
+                NavigationLink {
+                    growthManageDestination
+                } label: {
+                    DSListRow(variant: .navigable) {
+                        Image(systemName: "chart.line.uptrend.xyaxis")
+                            .foregroundStyle(theme.color.primary.color)
+                    } content: {
+                        Text("전체 기록 관리").font(theme.typography.body)
+                    }
+                }
+                .buttonStyle(.plain)
             }
-            .buttonStyle(.plain)
         }
     }
 
     private var weightSheetContent: some View {
         VStack(alignment: .leading, spacing: theme.space.lg) {
-            Text("오늘 잰 몸무게를 입력하면 성장 기록으로 저장돼요.")
+            Text("오늘 잰 키·몸무게를 입력하면 성장 기록으로 저장돼요. (하나만 입력해도 돼요)")
                 .font(theme.typography.callout)
                 .foregroundStyle(theme.color.textSecondary.color)
+
+            VStack(alignment: .leading, spacing: theme.space.xs) {
+                HStack {
+                    DSTextField(
+                        placeholder: "예: 55.5",
+                        text: $vm.currentHeightCmText,
+                        keyboardType: .decimalPad
+                    )
+                    Text("cm")
+                        .font(theme.typography.body)
+                        .foregroundStyle(theme.color.textSecondary.color)
+                        .frame(width: 32)
+                }
+                if let note = vm.currentHeightValidation {
+                    Text(note)
+                        .font(theme.typography.caption)
+                        .foregroundStyle(theme.color.statusDangerFg.color)
+                }
+            }
 
             VStack(alignment: .leading, spacing: theme.space.xs) {
                 HStack {
@@ -152,15 +183,28 @@ private struct SettingsContent: View {
 
             DSButton("저장", isLoading: vm.isSavingWeight) {
                 Task {
-                    let ok = await vm.saveCurrentWeight()
+                    let ok = await vm.saveGrowth()
                     if ok {
                         showWeightSheet = false
-                        toastCenter.show(.init(message: "몸무게를 저장했어요", variant: .success))
+                        toastCenter.show(.init(message: "성장 기록을 저장했어요", variant: .success))
                     }
                 }
             }
             .disabled(!vm.canSaveWeight)
         }
+    }
+
+    // MARK: - Growth Manage Destination (기존 GrowthDetailView 재사용)
+
+    private var growthManageDestination: some View {
+        GrowthDetailView(
+            vm: GrowthViewModel(
+                growthRepository: container.growthRepository,
+                babyId: container.activeBabyId,
+                babyRepository: container.babyRepository,
+                guidelineRepository: container.guidelineRepository
+            )
+        )
     }
 
     // MARK: - Profile Header
