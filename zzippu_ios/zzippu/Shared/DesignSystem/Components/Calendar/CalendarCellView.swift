@@ -21,11 +21,13 @@ struct CalendarCellDTO {
 struct EventBadgeDTO {
     let label: String             // "2차"
     let kind: CalendarDecorationKind
+    let round: Int                // 검진 차수(색 팔레트 인덱스)
 }
 
 struct UnderbarDTO {
     let spanRole: SpanRole
     let kind: CalendarDecorationKind
+    let round: Int                // 검진 차수(색 팔레트 인덱스)
 }
 
 // MARK: - CalendarCellView
@@ -100,7 +102,8 @@ struct CalendarCellView: View {
                     .font(theme.typography.mono)
                     .minimumScaleFactor(0.8)
                     .lineLimit(1)
-                    .foregroundStyle(theme.color.textStrong.color)
+                    // 수유량 = 수유 도메인색(파랑) — 날짜 숫자(검정/회색)와 시각 구분.
+                    .foregroundStyle(theme.color.domainFeedingFormulaSolid.color)
             } else {
                 // 공란 — 높이 보존용 투명 텍스트
                 Text(" ")
@@ -115,10 +118,11 @@ struct CalendarCellView: View {
             let badge = dto.eventBadges[0]
             let overflow = dto.eventBadges.count - 1
 
+            let badgeColor = theme.color.checkupColor(round: badge.round).color
             HStack(spacing: 1) {
                 // 도트
                 Circle()
-                    .fill(checkupColor)
+                    .fill(badgeColor)
                     .frame(
                         width:  theme.component.calendarCell.eventDotSize,
                         height: theme.component.calendarCell.eventDotSize
@@ -128,7 +132,7 @@ struct CalendarCellView: View {
                     .font(theme.typography.label)
                     .minimumScaleFactor(0.7)
                     .lineLimit(1)
-                    .foregroundStyle(checkupColor)
+                    .foregroundStyle(badgeColor)
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topTrailing)
             .padding(.top, 2)
@@ -142,7 +146,7 @@ struct CalendarCellView: View {
             VStack(spacing: 1) {
                 ForEach(Array(dto.underbars.enumerated()), id: \.offset) { _, bar in
                     underbarShape(role: bar.spanRole)
-                        .fill(checkupColor)
+                        .fill(theme.color.checkupColor(round: bar.round).color)  // 차수별 색
                         .frame(height: theme.component.calendarCell.underbarHeight)
                         .padding(.horizontal, 3)
                 }
@@ -154,10 +158,6 @@ struct CalendarCellView: View {
         UnderbarShape(spanRole: role)
     }
 
-    // kind → theme 색 매핑 (DS는 Domain 비의존 — kind 값만 받아 View에서 변환)
-    private var checkupColor: Color {
-        theme.color.domainCheckupSolid.color
-    }
 }
 
 // MARK: - UnderbarShape
@@ -201,8 +201,8 @@ struct UnderbarShape: Shape {
         CalendarCellDTO(
             dateNumber: 12, volumeText: "720", isToday: true,
             isOutside: false, isFuture: false,
-            eventBadges: [EventBadgeDTO(label: "2차", kind: .checkupWindow)],
-            underbars: [UnderbarDTO(spanRole: .start, kind: .checkupWindow)],
+            eventBadges: [EventBadgeDTO(label: "2차", kind: .checkupWindow, round: 2)],
+            underbars: [UnderbarDTO(spanRole: .start, kind: .checkupWindow, round: 2)],
             accessibilityLabel: "7월 12일, 오늘. 총 수유 720밀리리터. 2차 검진 시작일."
         ),
         // 검진 기간 중(미래)
@@ -210,7 +210,7 @@ struct UnderbarShape: Shape {
             dateNumber: 25, volumeText: nil, isToday: false,
             isOutside: false, isFuture: true,
             eventBadges: [],
-            underbars: [UnderbarDTO(spanRole: .middle, kind: .checkupWindow)],
+            underbars: [UnderbarDTO(spanRole: .middle, kind: .checkupWindow, round: 2)],
             accessibilityLabel: "8월 25일. 2차 검진 기간."
         ),
         // 넘침칸
@@ -249,8 +249,8 @@ struct UnderbarShape: Shape {
     let dto = CalendarCellDTO(
         dateNumber: 22, volumeText: "820", isToday: false,
         isOutside: false, isFuture: false,
-        eventBadges: [EventBadgeDTO(label: "3차", kind: .checkupWindow)],
-        underbars: [UnderbarDTO(spanRole: .start, kind: .checkupWindow)],
+        eventBadges: [EventBadgeDTO(label: "3차", kind: .checkupWindow, round: 3)],
+        underbars: [UnderbarDTO(spanRole: .start, kind: .checkupWindow, round: 3)],
         accessibilityLabel: "8월 22일. 총 수유 820밀리리터. 3차 검진 시작일."
     )
     return CalendarCellView(dto: dto, isWeekend: false, weekdayIndex: 3)

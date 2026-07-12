@@ -21,6 +21,7 @@ struct CheckupBannerView: View {
         switch bannerInfo {
         case .upcoming(let order, let dDay, let start, let end):
             bannerContent(
+                round: order,
                 badge: "\(order)차",
                 dDayText: "D-\(dDay)",
                 rangeText: "\(dateFmt.string(from: start))~\(dateFmt.string(from: end))",
@@ -29,6 +30,7 @@ struct CheckupBannerView: View {
 
         case .inProgress(let order, let daysLeft, let start, let end):
             bannerContent(
+                round: order,
                 badge: "\(order)차",
                 dDayText: "진행 중",
                 rangeText: "마감까지 \(daysLeft)일 (\(dateFmt.string(from: start))~\(dateFmt.string(from: end)))",
@@ -41,12 +43,13 @@ struct CheckupBannerView: View {
     }
 
     @ViewBuilder
-    private func bannerContent(badge: String, dDayText: String, rangeText: String, isInProgress: Bool) -> some View {
+    private func bannerContent(round: Int, badge: String, dDayText: String, rangeText: String, isInProgress: Bool) -> some View {
+        let checkupColor = theme.color.checkupColor(round: round).color  // 차수별 색
         HStack(alignment: .center, spacing: theme.space.stackGapSm) {
             // 좌측 도트 (색맹 대비 아이콘 병행)
             Image(systemName: "stethoscope")
                 .font(.system(size: 14))
-                .foregroundStyle(theme.color.domainCheckupSolid.color)
+                .foregroundStyle(checkupColor)
 
             VStack(alignment: .leading, spacing: 2) {
                 HStack(spacing: 4) {
@@ -56,7 +59,7 @@ struct CheckupBannerView: View {
 
                     Text("\(badge) · \(dDayText)")
                         .font(theme.typography.captionStrong)
-                        .foregroundStyle(theme.color.domainCheckupSolid.color)
+                        .foregroundStyle(checkupColor)
                 }
 
                 Text(rangeText)

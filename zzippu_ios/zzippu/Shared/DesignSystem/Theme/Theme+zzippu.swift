@@ -72,6 +72,17 @@ extension Theme {
             domainPlayTint:   sc.domainPlayTint,
             domainCheckupSolid: sc.domainCheckupSolid,
             domainCheckupTint:  sc.domainCheckupTint,
+            // 검진 1~8차 색상(파랑=수유량 텍스트와 겹치지 않도록 제외). 라이트/다크 각각.
+            domainCheckupPalette: [
+                DynamicColor(light: PrimitiveColor.teal500,   dark: PrimitiveColor.teal400),   // 1차
+                DynamicColor(light: PrimitiveColor.purple500, dark: PrimitiveColor.purple400), // 2차
+                DynamicColor(light: PrimitiveColor.pink500,   dark: PrimitiveColor.pink400),   // 3차
+                DynamicColor(light: PrimitiveColor.green500,  dark: PrimitiveColor.green400),  // 4차
+                DynamicColor(light: PrimitiveColor.amber500,  dark: PrimitiveColor.amber400),  // 5차
+                DynamicColor(light: PrimitiveColor.orange400, dark: PrimitiveColor.orange400), // 6차
+                DynamicColor(light: PrimitiveColor.rose600,   dark: PrimitiveColor.rose400),   // 7차
+                DynamicColor(light: PrimitiveColor.red500,    dark: PrimitiveColor.red400),    // 8차
+            ],
             quickButton: { kind in
                 switch kind {
                 case .formula:

@@ -85,6 +85,8 @@ struct ThemeColor {
     // MARK: Domain — Checkup (영유아 검진 달력 표시 전용)
     let domainCheckupSolid: DynamicColor
     let domainCheckupTint:  DynamicColor
+    /// 검진 차수별 색상(1~8차). 차수마다 시각 구분되도록 서로 다른 색.
+    let domainCheckupPalette: [DynamicColor]
 
     // MARK: QuickButton — 홈 6버튼 상태별 팔레트(웹 BigActionGrid 1:1)
     let quickButton: (QuickButtonKind) -> QuickButtonColors
@@ -120,6 +122,13 @@ struct ThemeColor {
         case .play:               return domainPlayTint
         case .checkup:            return domainCheckupTint
         }
+    }
+
+    /// 검진 차수(1~8) → 팔레트 색. 범위 밖은 순환. 팔레트 비면 기본색.
+    func checkupColor(round: Int) -> DynamicColor {
+        guard !domainCheckupPalette.isEmpty else { return domainCheckupSolid }
+        let idx = (max(1, round) - 1) % domainCheckupPalette.count
+        return domainCheckupPalette[idx]
     }
 
     func swatch(for stool: StoolSwatch) -> DynamicColor {

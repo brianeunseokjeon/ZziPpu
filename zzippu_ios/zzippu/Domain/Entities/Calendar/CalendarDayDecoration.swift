@@ -45,6 +45,7 @@ struct CalendarDayDecoration: Identifiable {
     let slot: CalendarDecorationSlot
     let text: String?                   // 예: "720", "2차"
     let spanRole: SpanRole?             // 구간 데코 전용(underbar에서 사용)
+    let colorIndex: Int?                // 그룹 색 인덱스(예: 검진 차수 1~8) — View가 팔레트 매핑에 사용
 
     init(
         id: UUID = UUID(),
@@ -52,13 +53,15 @@ struct CalendarDayDecoration: Identifiable {
         kind: CalendarDecorationKind,
         slot: CalendarDecorationSlot,
         text: String? = nil,
-        spanRole: SpanRole? = nil
+        spanRole: SpanRole? = nil,
+        colorIndex: Int? = nil
     ) {
-        self.id       = id
-        self.date     = date
-        self.kind     = kind
-        self.slot     = slot
-        self.text     = text
-        self.spanRole = spanRole
+        self.id         = id
+        self.date       = date
+        self.kind       = kind
+        self.slot       = slot
+        self.text       = text
+        self.spanRole   = spanRole
+        self.colorIndex = colorIndex
     }
 }

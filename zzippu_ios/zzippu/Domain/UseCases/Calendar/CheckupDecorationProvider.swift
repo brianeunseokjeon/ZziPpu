@@ -34,7 +34,8 @@ struct CheckupDecorationProvider: CalendarDecorationProvider {
                     date: startDay,
                     kind: .checkupWindow,
                     slot: .eventBadge,
-                    text: window.orderLabel  // "2차"
+                    text: window.orderLabel,  // "2차"
+                    colorIndex: window.order  // 차수별 색
                 ))
             }
 
@@ -57,7 +58,8 @@ struct CheckupDecorationProvider: CalendarDecorationProvider {
                     kind: .checkupWindow,
                     slot: .underbar,
                     text: window.orderLabel,
-                    spanRole: spanRole
+                    spanRole: spanRole,
+                    colorIndex: window.order  // 차수별 색
                 ))
             }
         }

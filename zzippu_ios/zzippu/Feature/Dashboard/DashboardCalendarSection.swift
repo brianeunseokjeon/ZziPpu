@@ -76,13 +76,13 @@ struct DashboardCalendarSection: View {
         let cal = Calendar.kst
         let dayNum = cal.component(.day, from: day.date)
 
-        // eventBadge 데코 → EventBadgeDTO
+        // eventBadge 데코 → EventBadgeDTO (colorIndex = 검진 차수)
         let badges = day.eventBadgeDecorations.map {
-            EventBadgeDTO(label: $0.text ?? "", kind: $0.kind)
+            EventBadgeDTO(label: $0.text ?? "", kind: $0.kind, round: $0.colorIndex ?? 1)
         }
-        // underbar 데코 → UnderbarDTO (최대 2겹)
+        // underbar 데코 → UnderbarDTO (최대 2겹, 차수별 색)
         let underbars = day.underbarDecorations.map {
-            UnderbarDTO(spanRole: $0.spanRole ?? .middle, kind: $0.kind)
+            UnderbarDTO(spanRole: $0.spanRole ?? .middle, kind: $0.kind, round: $0.colorIndex ?? 1)
         }
 
         return CalendarCellDTO(
@@ -116,12 +116,16 @@ struct DashboardCalendarSection: View {
             Text("·")
                 .foregroundStyle(theme.color.textTertiary.color)
 
-            // 검진 범례 도트
+            // 검진 범례 — 차수별 색(대표 3색 도트로 힌트)
             HStack(spacing: 4) {
-                Circle()
-                    .fill(theme.color.domainCheckupSolid.color)
-                    .frame(width: 6, height: 6)
-                Text("검진 기간")
+                HStack(spacing: 2) {
+                    ForEach(1...3, id: \.self) { round in
+                        Circle()
+                            .fill(theme.color.checkupColor(round: round).color)
+                            .frame(width: 6, height: 6)
+                    }
+                }
+                Text("검진(차수별 색)")
                     .font(theme.typography.caption)
                     .foregroundStyle(theme.color.textTertiary.color)
             }
