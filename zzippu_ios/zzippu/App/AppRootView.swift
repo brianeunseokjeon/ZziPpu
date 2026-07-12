@@ -100,7 +100,8 @@ private struct BabyLoadErrorView: View {
         DSEmptyState(
             icon: "wifi.exclamationmark",
             message: "데이터를 불러오지 못했어요\n잠시 후 다시 시도해 주세요.",
-            actionLabel: isRetrying ? "..." : "다시 시도"
+            actionLabel: "다시 시도",
+            actionLoading: isRetrying     // 라벨 바꿔치기 대신 로딩 상태 → 버튼 폭 유지
         ) {
             Task {
                 isRetrying = true

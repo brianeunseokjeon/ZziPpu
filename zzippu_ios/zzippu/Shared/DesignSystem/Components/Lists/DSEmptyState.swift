@@ -6,7 +6,7 @@ import SwiftUI
 public struct DSEmptyState: View {
     public let icon:    String  // SF Symbol name or emoji string
     public let message: String
-    public var action:  (label: String, handler: () -> Void)?
+    public var action:  (label: String, loading: Bool, handler: () -> Void)?
 
     public init(
         icon:    String = "moon.zzz",
@@ -18,14 +18,15 @@ public struct DSEmptyState: View {
     }
 
     public init(
-        icon:        String = "moon.zzz",
-        message:     String,
-        actionLabel: String,
-        onAction:    @escaping () -> Void
+        icon:          String = "moon.zzz",
+        message:       String,
+        actionLabel:   String,
+        actionLoading: Bool = false,          // 로딩 시 라벨 유지 + 스피너 → 버튼 폭 불변(축소 방지)
+        onAction:      @escaping () -> Void
     ) {
         self.icon    = icon
         self.message = message
-        self.action  = (label: actionLabel, handler: onAction)
+        self.action  = (label: actionLabel, loading: actionLoading, handler: onAction)
     }
 
     @Environment(\.theme) private var theme
@@ -42,8 +43,9 @@ public struct DSEmptyState: View {
                 .multilineTextAlignment(.center)
 
             if let action {
-                DSButton(action.label, variant: .tertiary, size: .sm, action: action.handler)
-                    .fixedSize()
+                DSButton(action.label, variant: .tertiary, size: .sm,
+                         isLoading: action.loading, action: action.handler)
+                    .fixedSize()   // 라벨 기준 폭 고정 — 로딩 스피너로 바뀌어도 축소 안 됨
             }
         }
         .frame(maxWidth: .infinity)
