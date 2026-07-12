@@ -152,6 +152,7 @@
 		B54B6106D2D020F544647AB8 /* EvaluateInsightsUseCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = B70CA639B37513701C1E39FA /* EvaluateInsightsUseCase.swift */; };
 		B61681F61E86A9AB68AE3B86 /* Vaccination.swift in Sources */ = {isa = PBXBuildFile; fileRef = 046BBD6EE0B74130611A76F0 /* Vaccination.swift */; };
 		BA956E62959602826CE418CD /* SparklineChart.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41958C109B68743DFEC0BF74 /* SparklineChart.swift */; };
+		BCEF1D5AC7CC100B25C9404C /* AppNavigationState.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0D0864C2FB51D07D7BB7F87 /* AppNavigationState.swift */; };
 		BDBBA8BB09B269445217629E /* FeedingViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 12AFFEF8457AD64BEC2555EE /* FeedingViewModel.swift */; };
 		BF3ACCCFC9EFF9125A3F6BE7 /* View+DSShadow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 320DF91913047380A2883C19 /* View+DSShadow.swift */; };
 		BF6C776BBBC3F2198CD7A022 /* RemoteVaccinationDataSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4EA72C7C7398E326E12C5DCB /* RemoteVaccinationDataSource.swift */; };
@@ -361,6 +362,7 @@
 		9B6171E96CF2A1847AAF433A /* DashboardRepository.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DashboardRepository.swift; sourceTree = "<group>"; };
 		9DAF399357A8600551960BA3 /* APIClient.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = APIClient.swift; path = Network/APIClient.swift; sourceTree = "<group>"; };
 		A03E7FF4C92BF8917D4687F0 /* DSIconButton.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DSIconButton.swift; sourceTree = "<group>"; };
+		A0D0864C2FB51D07D7BB7F87 /* AppNavigationState.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AppNavigationState.swift; sourceTree = "<group>"; };
 		A19F37A99F272F216CA8B9F3 /* DashboardSnapshotStore.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DashboardSnapshotStore.swift; sourceTree = "<group>"; };
 		A27D7EAF97AE5D79252FEF82 /* PlayRepository.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PlayRepository.swift; sourceTree = "<group>"; };
 		A27FD59AFCABD2B6BDD8FB09 /* BabyRepository.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = BabyRepository.swift; sourceTree = "<group>"; };
@@ -855,6 +857,7 @@
 				FECCC14E65742B98402CE793 /* AppRootView.swift */,
 				6519A1126295CD014E06AC4F /* MainTabView.swift */,
 				036CF36678A053C3DB145BDC /* SessionState.swift */,
+				A0D0864C2FB51D07D7BB7F87 /* AppNavigationState.swift */,
 			);
 			name = App;
 			path = App;
@@ -1463,6 +1466,7 @@
 				CE826B0D3BD4998D73F3F552 /* FeedingTrendCard.swift in Sources */,
 				FEBC9F4C4E442BCD4573BA86 /* DashboardSnapshot.swift in Sources */,
 				E07A487AEAE7F11A5BBC1EC8 /* DashboardSnapshotStore.swift in Sources */,
+				BCEF1D5AC7CC100B25C9404C /* AppNavigationState.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

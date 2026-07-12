@@ -8,6 +8,9 @@ import SwiftUI
 struct AppRootView: View {
     @Environment(AppContainer.self) private var container
 
+    // 앱 공용 내비게이션 상태 — 탭 가로질러 딥링크(대시보드 성장 카드 → 발달 성장 세그먼트).
+    @State private var appNav = AppNavigationState()
+
     var body: some View {
         let state = container.sessionState
 
@@ -34,6 +37,7 @@ struct AppRootView: View {
                 // ⑤ 메인 탭
                 MainTabView()
                     .environment(container)
+                    .environment(appNav)
             }
         }
         .dsTypeCap()   // 고정 pt 위 접근성 상한(...xLarge) — 웹 레이아웃 유지 + 신생아 아빠 배려

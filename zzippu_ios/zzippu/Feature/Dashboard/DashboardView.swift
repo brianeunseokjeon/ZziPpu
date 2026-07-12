@@ -11,7 +11,6 @@ enum DashboardDestination: Hashable {
     case sleepDetail
     case diaperDetail
     case playDetail
-    case growthDetail
 }
 
 // MARK: - DashboardView
@@ -75,15 +74,6 @@ struct DashboardView: View {
             if let vm {
                 PlayDetailView(dashboardVM: vm)
             }
-        case .growthDetail:
-            GrowthDetailView(
-                vm: GrowthViewModel(
-                    growthRepository: container.growthRepository,
-                    babyId: container.activeBabyId,
-                    babyRepository: container.babyRepository,
-                    guidelineRepository: container.guidelineRepository
-                )
-            )
         }
     }
 }
@@ -93,6 +83,7 @@ struct DashboardView: View {
 struct DashboardContentView: View {
 
     @Bindable var vm: DashboardViewModel
+    @Environment(AppNavigationState.self) private var appNav
     @Environment(\.theme) private var theme
 
     // 도메인 값(VM 튜플) → DS 세그먼트(theme 색 주입). DS는 Domain 비의존.
@@ -216,8 +207,11 @@ struct DashboardContentView: View {
                 NextFeedingCard(prediction: vm.prediction)
                     .padding(.horizontal, theme.space.screenPaddingX)
 
-                // ⑤ 성장 요약 (전폭 카드)
-                NavigationLink(value: DashboardDestination.growthDetail) {
+                // ⑤ 성장 요약 (전폭 카드) — 글랜스 + 딥링크(발달 탭 성장 세그먼트로 점프).
+                Button {
+                    appNav.selectedTab = 2
+                    appNav.developmentSegment = .growth
+                } label: {
                     GrowthMetricCard(
                         weight: vm.latestWeightText,
                         height: vm.latestHeightText,
@@ -249,6 +243,7 @@ struct DashboardContentView: View {
 #Preview("DashboardView — light") {
     DashboardView()
         .environment(AppContainer.preview)
+        .environment(AppNavigationState())
         .environment(ToastCenter())
         .environment(\.theme, .zzippu)
 }
@@ -256,6 +251,7 @@ struct DashboardContentView: View {
 #Preview("DashboardView — dark") {
     DashboardView()
         .environment(AppContainer.preview)
+        .environment(AppNavigationState())
         .environment(ToastCenter())
         .environment(\.theme, .zzippu)
         .preferredColorScheme(.dark)

@@ -9,10 +9,9 @@
 import SwiftUI
 
 struct MainTabView: View {
-    @Environment(AppContainer.self) private var container
-    @Environment(\.theme)          private var theme
-
-    @State private var selection: Int = 0
+    @Environment(AppContainer.self)       private var container
+    @Environment(AppNavigationState.self) private var appNav
+    @Environment(\.theme)                 private var theme
 
     private let tabItems = [
         DSTabItem(id: 0, systemName: "house.fill",              label: "홈"),
@@ -22,7 +21,10 @@ struct MainTabView: View {
     ]
 
     var body: some View {
-        VStack(spacing: 0) {
+        @Bindable var appNav = appNav
+        let selection = appNav.selectedTab
+
+        return VStack(spacing: 0) {
             // Tab content
             ZStack {
                 // 홈 — 항상 로드 유지 (숨김 처리로 상태 보존)
@@ -44,8 +46,8 @@ struct MainTabView: View {
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
 
-            // Custom tab bar
-            DSTabBar(items: tabItems, selection: $selection)
+            // Custom tab bar — selection은 앱 공용 상태(탭 가로질러 딥링크 지원)를 따른다.
+            DSTabBar(items: tabItems, selection: $appNav.selectedTab)
         }
         .ignoresSafeArea(edges: .bottom)
     }
@@ -56,6 +58,7 @@ struct MainTabView: View {
 #Preview("MainTabView") {
     MainTabView()
         .environment(AppContainer())
+        .environment(AppNavigationState())
         .environment(\.theme, .zzippu)
         .environment(ToastCenter())
 }

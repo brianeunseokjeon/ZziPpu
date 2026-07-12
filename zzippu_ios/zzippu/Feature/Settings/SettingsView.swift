@@ -29,7 +29,6 @@ struct SettingsView: View {
                 let newVM = SettingsViewModel(
                     babyRepository: container.babyRepository,
                     authRepository: container.authRepository,
-                    growthRepository: container.growthRepository,
                     babyId: container.activeBabyId
                 )
                 let captured = container
@@ -49,19 +48,16 @@ struct SettingsView: View {
 private struct SettingsContent: View {
     @Bindable var vm: SettingsViewModel
     @Environment(AppContainer.self) private var container
-    @Environment(ToastCenter.self) private var toastCenter
     @Environment(\.theme) private var theme
 
     @State private var showLogoutConfirm = false
     @State private var exportShareItems: [Any]?
-    @State private var showWeightSheet = false
 
     var body: some View {
         ScrollView {
             VStack(spacing: theme.space.lg) {
                 profileHeader
                 babyProfileSection
-                weightSection
                 caregiverSection
                 exportSection
                 accountSection
@@ -83,128 +79,6 @@ private struct SettingsContent: View {
             Button("로그아웃", role: .destructive) { vm.signOut() }
             Button("취소", role: .cancel) {}
         }
-        .dsBottomSheet(
-            isPresented: $showWeightSheet,
-            options: .init(title: "성장 (키·몸무게)", detents: [.medium])
-        ) {
-            weightSheetContent
-        }
-    }
-
-    // MARK: - Growth (키·몸무게)
-
-    private var weightSection: some View {
-        VStack(alignment: .leading, spacing: theme.space.sm) {
-            DSSectionHeader(title: "성장 (키·몸무게)")
-            VStack(spacing: 0) {
-                Button {
-                    vm.currentWeightKgText = ""   // 매번 새로 입력(프리필 없이 명확하게)
-                    vm.currentHeightCmText = ""
-                    showWeightSheet = true
-                } label: {
-                    DSListRow(variant: .withTrailing) {
-                        Image(systemName: "figure.child")
-                            .foregroundStyle(theme.color.primary.color)
-                    } content: {
-                        VStack(alignment: .leading, spacing: 2) {
-                            Text("성장 (키·몸무게)").font(theme.typography.body)
-                            Text(vm.latestGrowthSummary)
-                                .font(theme.typography.caption)
-                                .foregroundStyle(theme.color.textSecondary.color)
-                        }
-                    } trailing: {
-                        Image(systemName: "chevron.right")
-                            .font(.system(size: 13, weight: .semibold))
-                            .foregroundStyle(theme.color.textTertiary.color)
-                    }
-                }
-                .buttonStyle(.plain)
-
-                DSListRowDivider()
-
-                NavigationLink {
-                    growthManageDestination
-                } label: {
-                    DSListRow(variant: .navigable) {
-                        Image(systemName: "chart.line.uptrend.xyaxis")
-                            .foregroundStyle(theme.color.primary.color)
-                    } content: {
-                        Text("전체 기록 관리").font(theme.typography.body)
-                    }
-                }
-                .buttonStyle(.plain)
-            }
-        }
-    }
-
-    private var weightSheetContent: some View {
-        VStack(alignment: .leading, spacing: theme.space.lg) {
-            Text("오늘 잰 키·몸무게를 입력하면 성장 기록으로 저장돼요. (하나만 입력해도 돼요)")
-                .font(theme.typography.callout)
-                .foregroundStyle(theme.color.textSecondary.color)
-
-            VStack(alignment: .leading, spacing: theme.space.xs) {
-                HStack {
-                    DSTextField(
-                        placeholder: "예: 55.5",
-                        text: $vm.currentHeightCmText,
-                        keyboardType: .decimalPad
-                    )
-                    Text("cm")
-                        .font(theme.typography.body)
-                        .foregroundStyle(theme.color.textSecondary.color)
-                        .frame(width: 32)
-                }
-                if let note = vm.currentHeightValidation {
-                    Text(note)
-                        .font(theme.typography.caption)
-                        .foregroundStyle(theme.color.statusDangerFg.color)
-                }
-            }
-
-            VStack(alignment: .leading, spacing: theme.space.xs) {
-                HStack {
-                    DSTextField(
-                        placeholder: "예: 3.50",
-                        text: $vm.currentWeightKgText,
-                        keyboardType: .decimalPad
-                    )
-                    Text("kg")
-                        .font(theme.typography.body)
-                        .foregroundStyle(theme.color.textSecondary.color)
-                        .frame(width: 32)
-                }
-                if let note = vm.currentWeightValidation {
-                    Text(note)
-                        .font(theme.typography.caption)
-                        .foregroundStyle(theme.color.statusDangerFg.color)
-                }
-            }
-
-            DSButton("저장", isLoading: vm.isSavingWeight) {
-                Task {
-                    let ok = await vm.saveGrowth()
-                    if ok {
-                        showWeightSheet = false
-                        toastCenter.show(.init(message: "성장 기록을 저장했어요", variant: .success))
-                    }
-                }
-            }
-            .disabled(!vm.canSaveWeight)
-        }
-    }
-
-    // MARK: - Growth Manage Destination (기존 GrowthDetailView 재사용)
-
-    private var growthManageDestination: some View {
-        GrowthDetailView(
-            vm: GrowthViewModel(
-                growthRepository: container.growthRepository,
-                babyId: container.activeBabyId,
-                babyRepository: container.babyRepository,
-                guidelineRepository: container.guidelineRepository
-            )
-        )
     }
 
     // MARK: - Profile Header

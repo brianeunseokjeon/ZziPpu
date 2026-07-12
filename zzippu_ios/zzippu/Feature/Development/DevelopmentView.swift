@@ -1,20 +1,24 @@
 // Feature/Development/DevelopmentView.swift
-// 발달 탭 — 상단 세그먼트(DSChip)로 [발달 이정표] / [예방접종] 전환.
+// 발달 탭 — 상단 세그먼트(DSChip)로 [발달 이정표] / [예방접종] / [성장] 전환.
 //   발달: 현재 시기 카드 + 마일스톤 타임라인 (읽기 전용).
 //   예방접종: 백신 목록 + 완료 처리 시트.
+//   성장: 키·몸무게 차트·히스토리·추가·수정·삭제 (GrowthDetailView 임베드).
 
 import SwiftUI
 
 // MARK: - Segment
 
-private enum DevelopmentSegment: String, CaseIterable, Identifiable {
+/// 발달 탭 세그먼트. 앱 공용 딥링크(AppNavigationState)에서 참조하므로 internal.
+enum DevelopmentSegment: String, CaseIterable, Identifiable {
     case development
     case vaccination
+    case growth
     var id: String { rawValue }
     var label: String {
         switch self {
-        case .development: return "발달 이정표"
-        case .vaccination: return "예방접종"
+        case .development:  return "발달 이정표"
+        case .vaccination:  return "예방접종"
+        case .growth:       return "성장"
         }
     }
 }
@@ -24,11 +28,13 @@ private enum DevelopmentSegment: String, CaseIterable, Identifiable {
 struct DevelopmentView: View {
 
     @Environment(AppContainer.self) private var container
+    @Environment(AppNavigationState.self) private var appNav
     @Environment(\.theme) private var theme
 
     @State private var segment: DevelopmentSegment = .development
     @State private var developmentVM: DevelopmentViewModel?
     @State private var vaccinationVM: VaccinationViewModel?
+    @State private var growthVM: GrowthViewModel?
 
     var body: some View {
         NavigationStack {
@@ -49,12 +55,20 @@ struct DevelopmentView: View {
                         } else {
                             loading
                         }
+                    case .growth:
+                        if let growthVM {
+                            // 발달 탭이 이미 NavigationStack → GrowthDetailView는 콘텐츠로 임베드.
+                            GrowthDetailView(vm: growthVM)
+                        } else {
+                            loading
+                        }
                     }
                 }
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
             }
             .background(theme.color.background.color)
-            .navigationTitle("발달")
+            // 성장 세그먼트는 GrowthDetailView가 자체 타이틀("성장곡선")을 갖는다.
+            .navigationTitle(segment == .growth ? "" : "발달")
             .navigationBarTitleDisplayMode(.large)
         }
         .onAppear {
@@ -75,6 +89,26 @@ struct DevelopmentView: View {
                 vaccinationVM = vm
                 vm.load()
             }
+            if growthVM == nil {
+                growthVM = GrowthViewModel(
+                    growthRepository: container.growthRepository,
+                    babyId: container.activeBabyId,
+                    babyRepository: container.babyRepository,
+                    guidelineRepository: container.guidelineRepository
+                )
+            }
+            consumePendingSegment()
+        }
+        .onChange(of: appNav.developmentSegment) { _, _ in
+            consumePendingSegment()
+        }
+    }
+
+    /// 딥링크로 지정된 세그먼트가 있으면 전환 후 소비(nil로 클리어).
+    private func consumePendingSegment() {
+        if let pending = appNav.developmentSegment {
+            segment = pending
+            appNav.developmentSegment = nil
         }
     }
 
@@ -104,6 +138,7 @@ struct DevelopmentView: View {
 #Preview("DevelopmentView — 라이트") {
     DevelopmentView()
         .environment(AppContainer.preview)
+        .environment(AppNavigationState())
         .environment(ToastCenter())
         .environment(\.theme, .zzippu)
 }
@@ -111,6 +146,7 @@ struct DevelopmentView: View {
 #Preview("DevelopmentView — 다크") {
     DevelopmentView()
         .environment(AppContainer.preview)
+        .environment(AppNavigationState())
         .environment(ToastCenter())
         .environment(\.theme, .zzippu)
         .preferredColorScheme(.dark)
