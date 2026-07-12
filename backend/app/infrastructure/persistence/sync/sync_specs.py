@@ -128,6 +128,7 @@ _DIAPER = SyncSpec(
         FieldSpec("diaper_type", parse_str, ser_passthrough, required=True),
         FieldSpec("stool_color", parse_str, ser_passthrough),
         FieldSpec("stool_state", parse_str, ser_passthrough),
+        FieldSpec("amount", parse_str, ser_passthrough),
         FieldSpec("memo", parse_str, ser_passthrough),
     ],
 )

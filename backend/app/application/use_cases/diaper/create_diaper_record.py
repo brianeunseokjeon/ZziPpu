@@ -18,6 +18,7 @@ class CreateDiaperRecordUseCase:
             diaper_type=dto.diaper_type,
             stool_color=dto.stool_color,
             stool_state=dto.stool_state,
+            amount=dto.amount,
             memo=dto.memo,
             created_at=datetime.now(timezone.utc),
         )
@@ -29,6 +30,7 @@ class CreateDiaperRecordUseCase:
             diaper_type=saved.diaper_type,
             stool_color=saved.stool_color,
             stool_state=saved.stool_state,
+            amount=saved.amount,
             memo=saved.memo,
             created_at=saved.created_at,
         )

@@ -194,6 +194,32 @@ async def _migrate_sqlite() -> None:
                     text(f"ALTER TABLE {table} ADD COLUMN deleted_at {dt_type}")
                 )
 
+        # ── diaper_records.amount (기저귀 양: little|normal|lot) ───────────
+        # nullable 컬럼만 추가(파괴적 변경 없음). 하위호환: 없어도 기존 동작.
+        # 멱등 — 이미 있으면 skip. 실패해도 앱 기동은 막지 않음(로그만).
+        try:
+            diaper_cols = await _existing_columns(conn, "diaper_records", is_sqlite)
+            if diaper_cols and "amount" not in diaper_cols:
+                if is_sqlite:
+                    await conn.execute(
+                        text("ALTER TABLE diaper_records ADD COLUMN amount VARCHAR(20)")
+                    )
+                else:
+                    # PostgreSQL(Neon): IF NOT EXISTS 로 멱등 보장
+                    await conn.execute(
+                        text(
+                            "ALTER TABLE diaper_records "
+                            "ADD COLUMN IF NOT EXISTS amount VARCHAR(20)"
+                        )
+                    )
+        except Exception:  # noqa: BLE001 — 마이그레이션 실패가 기동을 막지 않도록
+            import logging
+
+            logging.getLogger(__name__).warning(
+                "diaper_records.amount 마이그레이션 실패(무시하고 기동 계속)",
+                exc_info=True,
+            )
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncIterator[None]:

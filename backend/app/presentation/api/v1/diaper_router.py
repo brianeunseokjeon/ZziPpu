@@ -35,6 +35,7 @@ async def create_diaper(
         diaper_type=body.diaper_type,
         stool_color=body.stool_color,
         stool_state=body.stool_state,
+        amount=body.amount,
         memo=body.memo,
     )
     result = await use_case.execute(dto)
@@ -45,6 +46,7 @@ async def create_diaper(
         diaper_type=result.diaper_type,
         stool_color=result.stool_color,
         stool_state=result.stool_state,
+        amount=result.amount,
         memo=result.memo,
         created_at=result.created_at,
     )
@@ -66,6 +68,7 @@ async def get_diapers(
             diaper_type=r.diaper_type,
             stool_color=r.stool_color,
             stool_state=r.stool_state,
+            amount=r.amount,
             memo=r.memo,
             created_at=r.created_at,
         )

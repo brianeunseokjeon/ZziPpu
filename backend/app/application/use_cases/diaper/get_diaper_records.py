@@ -19,6 +19,7 @@ class GetDiaperRecordsUseCase:
                 diaper_type=r.diaper_type,
                 stool_color=r.stool_color,
                 stool_state=r.stool_state,
+                amount=r.amount,
                 memo=r.memo,
                 created_at=r.created_at,
             )

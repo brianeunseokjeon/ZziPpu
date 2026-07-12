@@ -3,6 +3,7 @@ from uuid import UUID
 
 from pydantic import BaseModel
 
+from app.domain.value_objects.diaper_amount import DiaperAmount
 from app.domain.value_objects.diaper_type import DiaperType
 from app.domain.value_objects.stool_color import StoolColor
 from app.domain.value_objects.stool_state import StoolState
@@ -14,6 +15,7 @@ class DiaperCreateRequest(BaseModel):
     diaper_type: DiaperType
     stool_color: StoolColor | None = None
     stool_state: StoolState | None = None
+    amount: DiaperAmount | None = None
     memo: str | None = None
 
 
@@ -24,6 +26,7 @@ class DiaperResponse(BaseModel):
     diaper_type: DiaperType
     stool_color: StoolColor | None
     stool_state: StoolState | None
+    amount: DiaperAmount | None = None
     memo: str | None
     created_at: datetime
 

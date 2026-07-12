@@ -18,5 +18,6 @@ class DiaperModel(Base, SyncMixin):
     diaper_type: Mapped[str] = mapped_column(String(20), nullable=False)
     stool_color: Mapped[str | None] = mapped_column(String(20), nullable=True)
     stool_state: Mapped[str | None] = mapped_column(String(20), nullable=True)
+    amount: Mapped[str | None] = mapped_column(String(20), nullable=True)
     memo: Mapped[str | None] = mapped_column(Text, nullable=True)
     created_at: Mapped[datetime] = mapped_column(UTCDateTime, nullable=False)

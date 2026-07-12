@@ -6,6 +6,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.domain.entities.diaper import DiaperRecord
 from app.domain.repositories.diaper_repository import DiaperRepository
+from app.domain.value_objects.diaper_amount import DiaperAmount
 from app.domain.value_objects.diaper_type import DiaperType
 from app.domain.value_objects.stool_color import StoolColor
 from app.domain.value_objects.stool_state import StoolState
@@ -25,6 +26,7 @@ class DiaperRepositoryImpl(DiaperRepository):
             diaper_type=DiaperType(model.diaper_type),
             stool_color=StoolColor(model.stool_color) if model.stool_color else None,
             stool_state=StoolState(model.stool_state) if model.stool_state else None,
+            amount=DiaperAmount(model.amount) if model.amount else None,
             memo=model.memo,
             created_at=model.created_at,
         )
@@ -35,6 +37,7 @@ class DiaperRepositoryImpl(DiaperRepository):
         model.diaper_type = entity.diaper_type.value
         model.stool_color = entity.stool_color.value if entity.stool_color else None
         model.stool_state = entity.stool_state.value if entity.stool_state else None
+        model.amount = entity.amount.value if entity.amount else None
         model.memo = entity.memo
 
     async def get(self, id: UUID) -> DiaperRecord | None:
