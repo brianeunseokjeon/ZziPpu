@@ -146,6 +146,7 @@ struct ThemeTypography {
     let captionStrong:Font
     let label:        Font
     let mono:         Font  // monospaced, capped Dynamic Type
+    let input:        Font  // 16pt 고정 — iOS 자동줌 방지(회귀 방지선)
 }
 
 // MARK: - ThemeSpace

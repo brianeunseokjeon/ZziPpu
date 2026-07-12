@@ -18,8 +18,7 @@ struct OtpView: View {
                     .foregroundStyle(theme.color.primary.color)
 
                 Text("인증코드 확인")
-                    .font(theme.typography.headline)
-                    .fontWeight(.bold)
+                    .font(theme.typography.title)
 
                 Text(vm.email)
                     .font(theme.typography.callout)

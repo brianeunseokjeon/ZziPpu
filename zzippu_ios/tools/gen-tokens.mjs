@@ -205,21 +205,10 @@ for (const [name, entry] of Object.entries(tokens.semantic.typography)) {
 }
 
 // ─────────────────────────────────────────────
-// 8. iOS TextStyle mapping (for Dynamic Type)
+// 8. iOS fixed-pt weight mapping
+//    (웹 px 1:1 수렴 위해 TextStyle 매핑 폐기 → 고정 pt 방출.
+//     Dynamic Type 접근성은 뷰단 상한(dsTypeCap)으로만 허용.)
 // ─────────────────────────────────────────────
-const TYPO_TEXTSLYLE_MAP = {
-  display:      '.largeTitle',
-  title:        '.title3',
-  headline:     '.headline',
-  body:         '.body',
-  bodyStrong:   '.body',
-  callout:      '.callout',
-  caption:      '.caption',
-  captionStrong:'.caption',
-  label:        '.caption2',
-  mono:         '.caption2',
-};
-
 const TYPO_WEIGHT_MAP = {
   400: '.regular',
   500: '.medium',
@@ -339,17 +328,21 @@ console.log('✓ SemanticColors.generated.swift');
 // ─────────────────────────────────────────────
 // 13. GENERATE: Typography.generated.swift
 // ─────────────────────────────────────────────
+// input 자동줌 방지값(16 고정) — component.input.minFontSize 참조.
+const inputMinFontSize = compTokens.inputMinFontSize ?? 16;
+
 let typoSwift = `${BANNER}
 
 import SwiftUI
 
 // MARK: - Semantic Typography
-// Dynamic Type 유지: TextStyle 매핑. display/mono는 상한(.xxLarge) 적용.
+// 고정 pt 방출(웹 px 1:1 수렴). Dynamic Type은 뷰단 상한만 허용(dsTypeCap / dsDynamicTypeCap).
+// pt/weight 값은 전부 tokens.json(primitive.font.scale·semantic.typography)에서 옴.
 
 struct SemanticTypography {
 `;
 for (const [name, val] of Object.entries(semTypo)) {
-  const textStyle = TYPO_TEXTSLYLE_MAP[name] || '.body';
+  const size = val.size != null ? val.size : 14;
   const weight = val.weight != null ? (TYPO_WEIGHT_MAP[val.weight] || '.regular') : '.regular';
   const isMono = name === 'mono' || (val.family && val.family.includes('monospace'));
   const isDisplayOrMono = name === 'display' || name === 'mono';
@@ -359,14 +352,14 @@ for (const [name, val] of Object.entries(semTypo)) {
 
   let fontExpr;
   if (design) {
-    fontExpr = `.system(${textStyle}, design: ${design}).weight(${weight})`;
+    fontExpr = `.system(size: ${size}, weight: ${weight}, design: ${design})`;
   } else {
-    fontExpr = `.system(${textStyle}).weight(${weight})`;
+    fontExpr = `.system(size: ${size}, weight: ${weight})`;
   }
   // label: +0.3 tracking (자간) — 소형 라벨 가독·정돈.
   const tracking = name === 'label';
 
-  let comment = `/// ${name}: textStyle=${textStyle}, weight=${weight}`
+  let comment = `/// ${name}: ${size}pt, weight=${weight}`
     + `${design ? `, design=${design}` : ''}`
     + `${tracking ? ', tracking=+0.3' : ''}`
     + `${isDisplayOrMono ? ', dynamicTypeSize ≤ .xxLarge' : ''}`;
@@ -379,14 +372,28 @@ for (const [name, val] of Object.entries(semTypo)) {
     typoSwift += `    let ${name}: Font = ${fontExpr}\n\n`;
   }
 }
+// 인풋 전용 폰트: 16pt 고정(iOS 자동줌 방지). callout이 14로 낮아져도 여기서 분리 유지.
+typoSwift += `    /// input: ${inputMinFontSize}pt 고정 — iOS 자동줌 방지(callout 14와 분리)\n`;
+typoSwift += `    let input: Font = .system(size: ${inputMinFontSize}, weight: .regular)\n\n`;
 typoSwift += '}\n\n';
 typoSwift += `extension SemanticTypography {
     static let \`default\` = SemanticTypography()
 }
 
-// MARK: - View modifier for capping Dynamic Type
+// MARK: - View modifiers for capping Dynamic Type
 extension View {
-    /// display/mono 스타일에 적용. 접근성 초대형에서 레이아웃 보호.
+    /// 전역 상한: 고정 pt 위에 접근성만 제한적으로 허용(신생아 아빠 배려 + 웹 레이아웃 유지).
+    /// 앱 루트에 1회 적용 권장.
+    @ViewBuilder
+    func dsTypeCap() -> some View {
+        if #available(iOS 15.0, *) {
+            self.dynamicTypeSize(...DynamicTypeSize.xLarge)
+        } else {
+            self
+        }
+    }
+
+    /// display/mono 등 큰 숫자·모노 스타일 국소 상한. 초대형에서 레이아웃 보호.
     @ViewBuilder
     func dsDynamicTypeCap() -> some View {
         if #available(iOS 15.0, *) {

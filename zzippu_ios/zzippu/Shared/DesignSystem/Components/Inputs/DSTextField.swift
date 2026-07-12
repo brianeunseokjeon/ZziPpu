@@ -59,7 +59,7 @@ public struct DSTextField: View {
                         .keyboardType(keyboardType)
                 }
             }
-            .font(theme.typography.callout)   // 16pt — iOS 자동줌 방지
+            .font(theme.typography.input)   // 16pt 고정 — iOS 자동줌 방지
             .focused($isFocused)
             .frame(height: theme.component.input.height)
             .padding(.horizontal, theme.component.input.paddingX)

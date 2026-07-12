@@ -127,9 +127,8 @@ private struct TermRow: View {
                 HStack(spacing: 4) {
                     if term.required {
                         Text("[필수]")
-                            .font(theme.typography.caption)
+                            .font(theme.typography.captionStrong)
                             .foregroundStyle(theme.color.primary.color)
-                            .fontWeight(.semibold)
                     } else {
                         Text("[선택]")
                             .font(theme.typography.caption)

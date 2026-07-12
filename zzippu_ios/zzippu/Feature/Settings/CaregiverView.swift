@@ -49,7 +49,6 @@ struct CaregiverView: View {
                     HStack {
                         Text(invite.code)
                             .font(theme.typography.mono)
-                            .fontWeight(.bold)
                         Spacer()
                         DSStatusPill(tone: .info, text: "\(vm.expiryText(invite.expiresAt)) 만료")
                     }

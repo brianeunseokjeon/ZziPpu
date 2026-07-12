@@ -36,6 +36,7 @@ struct AppRootView: View {
                     .environment(container)
             }
         }
+        .dsTypeCap()   // 고정 pt 위 접근성 상한(...xLarge) — 웹 레이아웃 유지 + 신생아 아빠 배려
         .task {
             await hydrateSession()
         }

@@ -36,7 +36,6 @@ private struct DSBottomSheetModifier<SheetContent: View>: ViewModifier {
             .sheet(isPresented: $isPresented) {
                 DSBottomSheetContainer(
                     options:      options,
-                    isPresented:  $isPresented,
                     content:      sheetContent
                 )
                 .presentationDetents(options.detents)
@@ -51,23 +50,19 @@ private struct DSBottomSheetModifier<SheetContent: View>: ViewModifier {
 
 private struct DSBottomSheetContainer<Content: View>: View {
     let options:     DSBottomSheetOptions
-    @Binding var isPresented: Bool
     let content:     () -> Content
 
     @Environment(\.theme) private var theme
 
     var body: some View {
         VStack(spacing: 0) {
-            // Optional header
+            // Optional header — X 닫기 버튼 없음(grabber+스와이프+스크림 탭으로 충분, 웹 동일).
             if let title = options.title {
                 HStack {
                     Text(title)
                         .font(theme.typography.headline)
                         .foregroundStyle(theme.color.textPrimary.color)
-                    Spacer()
-                    DSIconButton(systemName: "xmark") {
-                        isPresented = false
-                    }
+                    Spacer(minLength: 0)
                 }
                 .padding(.horizontal, theme.space.componentPaddingX)
                 .padding(.vertical, theme.space.componentPaddingY)
@@ -76,9 +71,15 @@ private struct DSBottomSheetContainer<Content: View>: View {
                     .foregroundStyle(theme.color.divider.color)
             }
 
-            // Content
+            // Content — 시트 표준 패딩(웹 px-5=20). 헤더 유무에 따라 top만 달라짐.
+            // 피처는 시트 콘텐츠 안에서 다시 .padding()을 걸지 말 것(중복 패딩 방지).
             content()
-                .padding(.bottom, theme.space.md)  // safe-area 보완
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(.horizontal, theme.space.cardPadding)              // 20 — 좌우
+                .padding(.top, options.title != nil
+                         ? theme.space.componentPaddingY                    // 12 — 헤더와 간격
+                         : theme.space.cardPadding)                         // 20 — grabber 아래 여백
+                .padding(.bottom, theme.space.cardPadding)                  // 20 — 하단 통일
         }
         .background(theme.color.surface.color)
     }
@@ -123,7 +124,6 @@ private struct BottomSheetPreview: View {
             VStack(spacing: 12) {
                 Text("바텀시트 콘텐츠")
                     .font(Theme.zzippu.typography.body)
-                    .padding()
             }
         }
         .dsBottomSheet(
@@ -133,7 +133,6 @@ private struct BottomSheetPreview: View {
             VStack(spacing: 12) {
                 Text("여기에 폼이 들어갑니다")
                     .font(Theme.zzippu.typography.body)
-                    .padding()
             }
         }
         .environment(\.theme, .zzippu)

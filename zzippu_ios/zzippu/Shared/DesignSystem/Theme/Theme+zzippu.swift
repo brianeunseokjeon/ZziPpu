@@ -81,7 +81,8 @@ extension Theme {
             caption:       ty.caption,
             captionStrong: ty.captionStrong,
             label:         ty.label,
-            mono:          ty.mono
+            mono:          ty.mono,
+            input:         ty.input
         )
 
         // MARK: Space

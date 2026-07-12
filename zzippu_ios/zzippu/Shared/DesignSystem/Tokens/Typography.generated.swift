@@ -6,39 +6,43 @@
 import SwiftUI
 
 // MARK: - Semantic Typography
-// Dynamic Type 유지: TextStyle 매핑. display/mono는 상한(.xxLarge) 적용.
+// 고정 pt 방출(웹 px 1:1 수렴). Dynamic Type은 뷰단 상한만 허용(dsTypeCap / dsDynamicTypeCap).
+// pt/weight 값은 전부 tokens.json(primitive.font.scale·semantic.typography)에서 옴.
 
 struct SemanticTypography {
-    /// display: textStyle=.largeTitle, weight=.bold, design=.rounded, dynamicTypeSize ≤ .xxLarge
-    let display: Font = .system(.largeTitle, design: .rounded).weight(.bold)
+    /// display: 36pt, weight=.bold, design=.rounded, dynamicTypeSize ≤ .xxLarge
+    let display: Font = .system(size: 36, weight: .bold, design: .rounded)
 
-    /// title: textStyle=.title3, weight=.semibold
-    let title: Font = .system(.title3).weight(.semibold)
+    /// title: 18pt, weight=.semibold
+    let title: Font = .system(size: 18, weight: .semibold)
 
-    /// headline: textStyle=.headline, weight=.semibold
-    let headline: Font = .system(.headline).weight(.semibold)
+    /// headline: 16pt, weight=.semibold
+    let headline: Font = .system(size: 16, weight: .semibold)
 
-    /// body: textStyle=.body, weight=.regular
-    let body: Font = .system(.body).weight(.regular)
+    /// body: 14pt, weight=.medium
+    let body: Font = .system(size: 14, weight: .medium)
 
-    /// bodyStrong: textStyle=.body, weight=.semibold
-    let bodyStrong: Font = .system(.body).weight(.semibold)
+    /// bodyStrong: 14pt, weight=.semibold
+    let bodyStrong: Font = .system(size: 14, weight: .semibold)
 
-    /// callout: textStyle=.callout, weight=.regular
-    let callout: Font = .system(.callout).weight(.regular)
+    /// callout: 14pt, weight=.medium
+    let callout: Font = .system(size: 14, weight: .medium)
 
-    /// caption: textStyle=.caption, weight=.regular
-    let caption: Font = .system(.caption).weight(.regular)
+    /// caption: 12pt, weight=.regular
+    let caption: Font = .system(size: 12, weight: .regular)
 
-    /// captionStrong: textStyle=.caption, weight=.semibold
-    let captionStrong: Font = .system(.caption).weight(.semibold)
+    /// captionStrong: 12pt, weight=.semibold
+    let captionStrong: Font = .system(size: 12, weight: .semibold)
 
-    /// label: textStyle=.caption2, weight=.medium, tracking=+0.3
-    let label: Font = .system(.caption2).weight(.medium)
+    /// label: 12pt, weight=.medium, tracking=+0.3
+    let label: Font = .system(size: 12, weight: .medium)
     let labelTracking: CGFloat = 0.3
 
-    /// mono: textStyle=.caption2, weight=.medium, design=.monospaced, dynamicTypeSize ≤ .xxLarge
-    let mono: Font = .system(.caption2, design: .monospaced).weight(.medium)
+    /// mono: 12pt, weight=.medium, design=.monospaced, dynamicTypeSize ≤ .xxLarge
+    let mono: Font = .system(size: 12, weight: .medium, design: .monospaced)
+
+    /// input: 16pt 고정 — iOS 자동줌 방지(callout 14와 분리)
+    let input: Font = .system(size: 16, weight: .regular)
 
 }
 
@@ -46,9 +50,20 @@ extension SemanticTypography {
     static let `default` = SemanticTypography()
 }
 
-// MARK: - View modifier for capping Dynamic Type
+// MARK: - View modifiers for capping Dynamic Type
 extension View {
-    /// display/mono 스타일에 적용. 접근성 초대형에서 레이아웃 보호.
+    /// 전역 상한: 고정 pt 위에 접근성만 제한적으로 허용(신생아 아빠 배려 + 웹 레이아웃 유지).
+    /// 앱 루트에 1회 적용 권장.
+    @ViewBuilder
+    func dsTypeCap() -> some View {
+        if #available(iOS 15.0, *) {
+            self.dynamicTypeSize(...DynamicTypeSize.xLarge)
+        } else {
+            self
+        }
+    }
+
+    /// display/mono 등 큰 숫자·모노 스타일 국소 상한. 초대형에서 레이아웃 보호.
     @ViewBuilder
     func dsDynamicTypeCap() -> some View {
         if #available(iOS 15.0, *) {

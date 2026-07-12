@@ -40,13 +40,13 @@ enum PrimitiveScale {
     static let fontWeightMedium: CGFloat = 500
     static let fontWeightSemibold: CGFloat = 600
     static let fontWeightBold: CGFloat = 700
-    static let fontScaleCaption2: CGFloat = 11
+    static let fontScaleCaption2: CGFloat = 12
     static let fontScaleCaption: CGFloat = 12
     static let fontScaleFootnote: CGFloat = 13
     static let fontScaleSubheadline: CGFloat = 15
-    static let fontScaleCallout: CGFloat = 16
-    static let fontScaleBody: CGFloat = 16
-    static let fontScaleHeadline: CGFloat = 17
+    static let fontScaleCallout: CGFloat = 14
+    static let fontScaleBody: CGFloat = 14
+    static let fontScaleHeadline: CGFloat = 16
     static let fontScaleTitle3: CGFloat = 18
     static let fontScaleTitle2: CGFloat = 22
     static let fontScaleTitle1: CGFloat = 28

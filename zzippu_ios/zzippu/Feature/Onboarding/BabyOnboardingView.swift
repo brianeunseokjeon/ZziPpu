@@ -55,8 +55,7 @@ private struct OnboardingContent: View {
                             .foregroundStyle(theme.color.primary.color)
 
                         Text("아기 정보 등록")
-                            .font(theme.typography.headline)
-                            .fontWeight(.bold)
+                            .font(theme.typography.title)
 
                         Text("기록을 시작하기 위해 아기 정보를 입력해 주세요.")
                             .font(theme.typography.callout)
