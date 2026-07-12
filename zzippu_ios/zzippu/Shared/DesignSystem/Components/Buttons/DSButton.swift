@@ -27,10 +27,12 @@ extension DSButtonStyle {
             }
         }
 
+        // 웹정합: 웹 button md=text-base(16), lg=text-lg(18), sm=text-sm(14).
         var font: Font {
             switch self {
-            case .sm: return Theme.zzippu.typography.caption
-            case .md, .lg: return Theme.zzippu.typography.body
+            case .sm: return Theme.zzippu.typography.body        // 14
+            case .md: return Theme.zzippu.typography.headline    // 16
+            case .lg: return Theme.zzippu.typography.title       // 18
             }
         }
 
@@ -55,8 +57,8 @@ public struct DSButtonStyle: ButtonStyle {
 
     public func makeBody(configuration: Configuration) -> some View {
         let pressed = configuration.isPressed
-        // lg 사이즈(56pt)는 각짐 완화용 control-lg(16) 라운드.
-        let radius = size == .lg ? theme.component.button.radiusLg : theme.component.button.radius
+        // 웹정합: 웹 버튼은 lg도 rounded-xl(12). 전 사이즈 control(12) 라운드로 통일.
+        let radius = theme.component.button.radius
 
         configuration.label
             .font(size.font)
@@ -88,7 +90,10 @@ public struct DSButtonStyle: ButtonStyle {
         }
         switch variant {
         case .primary:
-            return pressed ? theme.color.primaryPressed.color : theme.color.primary.color
+            // R7(웹정합): 주요 CTA(md/lg)는 웹 bg-blue-500(#3B82F6=statusInfoSolid).
+            // sm 인라인 버튼만 웹 button default(bg-blue-400=primary) 유지.
+            let base = size == .sm ? theme.color.primary.color : theme.color.statusInfoSolid.color
+            return pressed ? theme.color.primaryPressed.color : base
         case .secondary:
             // 프레스 시 살짝 진하게(borderStrong) — 눌림 피드백.
             return pressed ? theme.color.borderStrong.color : theme.color.surfaceSunken.color

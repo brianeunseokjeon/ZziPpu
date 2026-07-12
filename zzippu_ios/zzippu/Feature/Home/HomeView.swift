@@ -32,7 +32,7 @@ struct HomeView: View {
                 )
                 .dsBottomSheet(
                     isPresented: $showBreastSheet,
-                    options: .init(title: "모유 기록", detents: [.medium, .large])
+                    options: .init(title: "🤱 모유 기록", detents: [.medium, .large])
                 ) {
                     FeedingInputSheet(
                         isPresented: $showBreastSheet,
@@ -47,7 +47,7 @@ struct HomeView: View {
                 }
                 .dsBottomSheet(
                     isPresented: $showDiaperSheet,
-                    options: .init(title: "대변 기록", detents: [.medium, .large])
+                    options: .init(title: "💩 대변 기록", detents: [.medium, .large])
                 ) {
                     DiaperInputSheet(
                         isPresented: $showDiaperSheet,
@@ -62,7 +62,7 @@ struct HomeView: View {
                 }
                 .dsBottomSheet(
                     isPresented: $showFeedingSheet,
-                    options: .init(title: "분유 기록", detents: [.medium, .large])
+                    options: .init(title: "🍼 분유 기록", detents: [.medium, .large])
                 ) {
                     FeedingInputSheet(
                         isPresented: $showFeedingSheet,
@@ -77,7 +77,7 @@ struct HomeView: View {
                 }
                 .dsBottomSheet(
                     isPresented: $showSleepSheet,
-                    options: .init(title: "수면 기록", detents: [.medium])
+                    options: .init(title: "😴 수면 기록", detents: [.medium])
                 ) {
                     SleepInputSheet(
                         isPresented: $showSleepSheet,
@@ -92,7 +92,7 @@ struct HomeView: View {
                 }
                 .dsBottomSheet(
                     isPresented: $showPlaySheet,
-                    options: .init(title: "터미타임 기록", detents: [.medium, .large])
+                    options: .init(title: "🎈 터미타임 기록", detents: [.medium, .large])
                 ) {
                     PlayInputSheet(
                         isPresented: $showPlaySheet,
@@ -281,23 +281,13 @@ private struct PastFocusView: View {
     var body: some View {
         VStack(spacing: 0) {
             VStack(spacing: theme.space.sm) {
-                // 과거 기록 안내 배너
+                // 과거 기록 안내 배너 — 웹정합: "오늘로" 버튼 없음(헤더 날짜네비로 복귀).
                 HStack(spacing: theme.space.xs) {
                     Text("📅")
                     Text("\(vm.selectedDate.relativeLabel)에 기록 중 · 버튼을 누르면 시각을 입력해요")
                         .font(theme.typography.caption)
                         .foregroundStyle(theme.color.statusWarningFg.color)
                     Spacer()
-                    Button {
-                        vm.changeDate(Date())
-                    } label: {
-                        HStack(spacing: 2) {
-                            Image(systemName: "arrow.left").font(.system(size: 11, weight: .semibold))
-                            Text("오늘로").font(theme.typography.captionStrong)
-                        }
-                        .foregroundStyle(theme.color.primary.color)
-                    }
-                    .buttonStyle(.plain)
                 }
                 .padding(.horizontal, theme.space.componentPaddingX)
                 .padding(.vertical, theme.space.sm)
@@ -334,6 +324,14 @@ private struct DateSectionHeader: View {
 
     private var isToday: Bool { Calendar.kst.isDateInToday(day) }
 
+    private var isRelative: Bool {
+        let cal = Calendar.kst
+        if cal.isDateInToday(day) || cal.isDateInYesterday(day) { return true }
+        if let two = cal.date(byAdding: .day, value: -2, to: cal.startOfDay(for: Date())),
+           cal.isDate(day, inSameDayAs: two) { return true }
+        return false
+    }
+
     private var label: String {
         let cal = Calendar.kst
         if cal.isDateInToday(day)     { return "오늘" }
@@ -347,11 +345,25 @@ private struct DateSectionHeader: View {
         return fmt.string(from: day)
     }
 
+    /// 웹정합: 오늘/어제/그제 옆 작은 YYYY-MM-DD 부가 표기(10pt gray-400).
+    private var isoDate: String {
+        let fmt = DateFormatter()
+        fmt.locale = Locale(identifier: "en_US_POSIX")
+        fmt.timeZone = .kst
+        fmt.dateFormat = "yyyy-MM-dd"
+        return fmt.string(from: day)
+    }
+
     var body: some View {
         HStack(spacing: theme.space.xs) {
             Text(label)
                 .font(theme.typography.captionStrong)
                 .foregroundStyle(isToday ? theme.color.primary.color : theme.color.textSecondary.color)
+            if isRelative {
+                Text(isoDate)
+                    .font(.system(size: 10))
+                    .foregroundStyle(theme.color.textTertiary.color)
+            }
             Spacer()
         }
         .padding(.horizontal, theme.space.screenPaddingX)

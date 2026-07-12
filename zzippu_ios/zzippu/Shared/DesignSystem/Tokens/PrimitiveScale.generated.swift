@@ -19,6 +19,7 @@ enum PrimitiveScale {
     static let space10: CGFloat = 40
     static let space12: CGFloat = 48
     static let space1_5: CGFloat = 6
+    static let space2_5: CGFloat = 10
     static let space3_5: CGFloat = 14
     static let radiusNone: CGFloat = 0
     static let radiusSm: CGFloat = 8

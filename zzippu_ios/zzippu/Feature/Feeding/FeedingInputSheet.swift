@@ -46,97 +46,119 @@ private struct FeedingInputContent: View {
 
     @Environment(\.theme) private var theme
 
+    /// 웹정합: 분유 프리셋 6개(웹 ML_PRESETS).
+    private let mlPresets = [60, 80, 100, 120, 150, 180]
+
+    /// 프리셋 칩 1개(선택 시 solid 파란 채움/흰 글자, 미선택 흰 배경+회 테두리).
+    @ViewBuilder
+    private func presetChip(_ ml: Int) -> some View {
+        let selected = vm.amountMlInt == ml
+        Button { vm.amountMlText = "\(ml)" } label: {
+            Text("\(ml)ml")
+                .font(theme.typography.body)
+                .foregroundStyle(selected ? theme.color.onPrimary.color : theme.color.textSecondary.color)
+                .frame(maxWidth: .infinity)
+                .frame(height: 40)
+                .background(selected ? theme.color.statusInfoSolid.color : theme.color.surface.color)
+                .clipShape(Capsule())
+                .overlay(
+                    Capsule().stroke(selected ? .clear : theme.color.borderStrong.color, lineWidth: 1)
+                )
+        }
+        .buttonStyle(.plain)
+    }
+
     var body: some View {
-        VStack(spacing: 0) {
-            // 수유 종류 칩 토글
-            ScrollView(.horizontal, showsIndicators: false) {
+        VStack(spacing: theme.space.lg) {
+            // 수유 종류 선택 — 분유 / 모유(좌·우·양쪽). 웹은 활동별 분기이나 iOS는 통합 시트.
+            VStack(alignment: .leading, spacing: theme.space.xs) {
+                Text("수유 종류")
+                    .font(theme.typography.captionStrong)
+                    .foregroundStyle(theme.color.textSecondary.color)
                 HStack(spacing: theme.space.sm) {
-                    ForEach(FeedingType.allCases, id: \.self) { type in
-                        DSChip(
-                            label: type.displayName,
-                            isSelected: vm.selectedType == type,
-                            variant: .selectable,
-                            onTap: { vm.selectedType = type }
-                        )
-                    }
+                    FeedingTypeButton(type: .formula,     emoji: "🍼",   label: "분유",  tone: .formula, selection: $vm.selectedType)
+                    FeedingTypeButton(type: .breastLeft,  emoji: "◀",   label: "왼쪽",  tone: .breast,  selection: $vm.selectedType)
+                    FeedingTypeButton(type: .breastRight, emoji: "▶",   label: "오른쪽", tone: .breast,  selection: $vm.selectedType)
+                    FeedingTypeButton(type: .breastBoth,  emoji: "◀▶", label: "양쪽",  tone: .breast,  selection: $vm.selectedType)
                 }
-                .padding(.horizontal, theme.space.screenPaddingX)
             }
-            .padding(.vertical, theme.space.md)
 
-            Divider()
-
-            // 입력 필드
-            VStack(spacing: theme.space.md) {
-                if vm.selectedType == .formula {
-                    // 분유량
-                    VStack(alignment: .leading, spacing: theme.space.xs) {
-                        Text("분유량 (ml)")
-                            .font(theme.typography.captionStrong)
+            if vm.selectedType == .formula {
+                // 분유량 — 웹: 큰 파란 숫자(30/bold/blue-600) + 슬라이더 + 6프리셋(solid 선택).
+                VStack(spacing: theme.space.md) {
+                    HStack(alignment: .firstTextBaseline, spacing: 2) {
+                        Text("\(vm.amountMlInt)")
+                            .font(.system(size: 30, weight: .bold))
+                            .foregroundStyle(theme.color.primaryPressed.color)   // blue-600
+                        Text("ml")
+                            .font(theme.typography.body)
                             .foregroundStyle(theme.color.textSecondary.color)
-                        DSNumberStepper(
-                            value: Binding(
-                                get: { vm.amountMlInt },
-                                set: { vm.amountMlText = "\($0)" }
-                            ),
-                            range: 0...500,
-                            step: 10
-                        )
                     }
-                    // 빠른 선택 칩
-                    QuickChipsRow(
-                        options: ["100ml", "120ml", "150ml", "180ml"],
-                        selection: Binding(
-                            get: { vm.amountMlText.isEmpty ? nil : "\(vm.amountMlText)ml" },
-                            set: { sel in
-                                if let s = sel {
-                                    vm.amountMlText = s.replacingOccurrences(of: "ml", with: "")
-                                }
-                            }
-                        )
-                    )
-                } else {
-                    // 수유 시간
-                    VStack(alignment: .leading, spacing: theme.space.xs) {
-                        Text("수유 시간 (분)")
-                            .font(theme.typography.captionStrong)
-                            .foregroundStyle(theme.color.textSecondary.color)
-                        DSNumberStepper(
+                    .frame(maxWidth: .infinity)
+
+                    // 슬라이더 + 원형 −/+ (웹 range + w-10 h-10 원형 버튼).
+                    HStack(spacing: theme.space.sm) {
+                        RoundStepButton(symbol: "minus") {
+                            vm.amountMlText = "\(max(10, vm.amountMlInt - 10))"
+                        }
+                        Slider(
                             value: Binding(
-                                get: { vm.durationInt },
-                                set: { vm.durationText = "\($0)" }
+                                get: { Double(vm.amountMlInt) },
+                                set: { vm.amountMlText = "\(Int($0))" }
                             ),
-                            range: 0...120,
-                            step: 1
+                            in: 10...300, step: 10
                         )
+                        .tint(theme.color.statusInfoSolid.color)
+                        RoundStepButton(symbol: "plus") {
+                            vm.amountMlText = "\(min(300, vm.amountMlInt + 10))"
+                        }
+                    }
+
+                    // 6 프리셋 (solid 파란 채움 선택). 웹 flex-wrap 대응 → 2행 3열 그리드.
+                    Grid(horizontalSpacing: theme.space.sm, verticalSpacing: theme.space.sm) {
+                        GridRow {
+                            ForEach(mlPresets.prefix(3), id: \.self) { ml in presetChip(ml) }
+                        }
+                        GridRow {
+                            ForEach(mlPresets.suffix(3), id: \.self) { ml in presetChip(ml) }
+                        }
                     }
                 }
-
-                // 시작 시각
+            } else {
+                // 모유 — 수유 시간(분).
                 VStack(alignment: .leading, spacing: theme.space.xs) {
-                    Text("시작 시각")
+                    Text("수유 시간 (분)")
                         .font(theme.typography.captionStrong)
                         .foregroundStyle(theme.color.textSecondary.color)
-                    DatePicker(
-                        "",
-                        selection: $vm.startedAt,
-                        displayedComponents: [.date, .hourAndMinute]
+                    DSNumberStepper(
+                        value: Binding(
+                            get: { vm.durationInt },
+                            set: { vm.durationText = "\($0)" }
+                        ),
+                        range: 0...120,
+                        step: 1
                     )
-                    .labelsHidden()
                 }
             }
-            .padding(.horizontal, theme.space.screenPaddingX)
-            .padding(.vertical, theme.space.md)
 
-            Spacer()
+            // 시작 시각
+            VStack(alignment: .leading, spacing: theme.space.xs) {
+                Text("기록 시간")
+                    .font(theme.typography.captionStrong)
+                    .foregroundStyle(theme.color.textSecondary.color)
+                DatePicker(
+                    "",
+                    selection: $vm.startedAt,
+                    displayedComponents: [.date, .hourAndMinute]
+                )
+                .labelsHidden()
+            }
 
             // 저장 버튼
             DSButton("저장", variant: .primary, size: .lg) {
                 handleSave()
             }
             .disabled(!vm.isFormValid)
-            .padding(.horizontal, theme.space.screenPaddingX)
-            .padding(.bottom, theme.space.md)
         }
         .alert("오류", isPresented: Binding(
             get: { vm.errorMessage != nil },
@@ -169,6 +191,71 @@ private struct FeedingInputContent: View {
             vm.saveFeeding()
             isPresented = false
         }
+    }
+}
+
+// MARK: - FeedingTypeButton (분유/모유 좌·우·양쪽 선택)
+
+/// 웹정합: 분유=파란 파스텔, 모유=핑크 파스텔 선택(border-2 이모지 버튼).
+private struct FeedingTypeButton: View {
+    enum Tone { case formula, breast }
+    let type:  FeedingType
+    let emoji: String
+    let label: String
+    let tone:  Tone
+    @Binding var selection: FeedingType
+    @Environment(\.theme) private var theme
+
+    private var isSelected: Bool { selection == type }
+
+    private var selectedBg: Color {
+        tone == .formula ? theme.color.domainFeedingFormulaTint.color
+                         : theme.color.domainFeedingBreastLeftTint.color
+    }
+    private var selectedBorder: Color {
+        tone == .formula ? theme.color.statusInfoSolid.color
+                         : theme.color.domainFeedingBreastLeftSolid.color
+    }
+
+    var body: some View {
+        Button { selection = type } label: {
+            VStack(spacing: 2) {
+                Text(emoji).font(.system(size: 18))
+                Text(label)
+                    .font(theme.typography.caption)
+                    .foregroundStyle(theme.color.textPrimary.color)
+            }
+            .frame(maxWidth: .infinity)
+            .frame(height: 56)
+            .background(isSelected ? selectedBg : theme.color.surface.color)
+            .clipShape(RoundedRectangle(cornerRadius: theme.radius.control, style: .continuous))
+            .overlay(
+                RoundedRectangle(cornerRadius: theme.radius.control, style: .continuous)
+                    .stroke(isSelected ? selectedBorder : theme.color.borderStrong.color,
+                            lineWidth: isSelected ? 2 : 1)
+            )
+        }
+        .buttonStyle(.plain)
+    }
+}
+
+// MARK: - RoundStepButton (웹 원형 −/+ w-10 h-10)
+
+private struct RoundStepButton: View {
+    let symbol: String
+    let action: () -> Void
+    @Environment(\.theme) private var theme
+
+    var body: some View {
+        Button(action: action) {
+            Image(systemName: symbol)
+                .font(.system(size: 17, weight: .bold))
+                .foregroundStyle(theme.color.textPrimary.color)
+                .frame(width: 40, height: 40)
+                .background(theme.color.surfaceSunken.color)
+                .clipShape(Circle())
+        }
+        .buttonStyle(.plain)
     }
 }
 

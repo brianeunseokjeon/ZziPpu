@@ -63,7 +63,7 @@ public struct AppHeader: View {
     }
 
     private var dateText: String {
-        if isToday { return "오늘" }
+        // 웹정합: 웹 헤더는 오늘도 "M월 d일"을 그대로 노출(formatDate). "오늘" 치환 폐기.
         let fmt = DateFormatter()
         fmt.locale = Locale(identifier: "ko_KR")
         fmt.timeZone = .kst
@@ -77,30 +77,34 @@ public struct AppHeader: View {
             BabyAvatar(photoURL: baby.photoURL, gender: baby.gender, size: .sm)
 
             VStack(alignment: .leading, spacing: 1) {
+                // R4(웹정합): 아기이름 웹 text-base(16) bold.
                 Text(baby.name)
-                    .font(theme.typography.bodyStrong)
+                    .font(theme.typography.headlineStrong)
                     .foregroundStyle(theme.color.textPrimary.color)
+                // 웹정합: 나이 텍스트 gray-400(textTertiary).
                 Text(ageText)
                     .font(theme.typography.caption)
-                    .foregroundStyle(theme.color.textSecondary.color)
+                    .foregroundStyle(theme.color.textTertiary.color)
             }
 
             Spacer()
 
             // Date navigation
             HStack(spacing: 0) {
-                DSIconButton(systemName: "chevron.left") {
+                // 웹정합: chevron 16pt(w-4 h-4).
+                DSIconButton(systemName: "chevron.left", iconSize: 16) {
                     let prev = Calendar.kst.date(byAdding: .day, value: -1, to: selectedDate) ?? selectedDate
                     selectedDate = prev
                     onDateChange(prev)
                 }
 
+                // 웹정합: 날짜 라벨 text-sm(14) medium(=body), min-w 110(전환 시 폭 흔들림 방지).
                 Text(dateText)
-                    .font(theme.typography.captionStrong)
+                    .font(theme.typography.body)
                     .foregroundStyle(theme.color.textPrimary.color)
-                    .frame(minWidth: 52, alignment: .center)
+                    .frame(minWidth: 110, alignment: .center)
 
-                DSIconButton(systemName: "chevron.right") {
+                DSIconButton(systemName: "chevron.right", iconSize: 16) {
                     guard !isToday else { return }
                     let next = Calendar.kst.date(byAdding: .day, value: 1, to: selectedDate) ?? selectedDate
                     selectedDate = next

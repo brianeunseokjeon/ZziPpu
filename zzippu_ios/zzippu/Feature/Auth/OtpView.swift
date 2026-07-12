@@ -1,109 +1,114 @@
 // Feature/Auth/OtpView.swift
-// 6자리 OTP 입력 화면
+// 6자리 OTP 입력 화면 — 웹(login/page.tsx code step) 정합: 흰 카드 + 큰 자간 입력 + 자동제출.
+// 유효시간/재전송 타이머는 현행 유지(팀 결정).
 
 import SwiftUI
 
 struct OtpView: View {
     @Bindable var vm: AuthViewModel
     @Environment(\.theme) private var theme
+    @FocusState private var otpFocused: Bool
 
     var body: some View {
-        VStack(spacing: 0) {
-            Spacer()
-
-            // 헤더
-            VStack(spacing: theme.space.sm) {
-                Image(systemName: "envelope.badge.fill")
-                    .font(.system(size: 48))
-                    .foregroundStyle(theme.color.primary.color)
-
-                Text("인증코드 확인")
-                    .font(theme.typography.title)
-
-                Text(vm.email)
-                    .font(theme.typography.callout)
-                    .foregroundStyle(theme.color.textSecondary.color)
-
-                Text("로 6자리 인증코드를 보냈어요.")
-                    .font(theme.typography.caption)
-                    .foregroundStyle(theme.color.textSecondary.color)
-                    .multilineTextAlignment(.center)
-            }
-            .padding(.bottom, theme.space.lg)
-
-            // 인증코드 유효시간 타이머 (5:00 → 0, 명시적 표시)
-            VStack(spacing: theme.space.xs) {
-                Label(vm.isCodeExpired ? "만료됨" : vm.validityTimerText, systemImage: "clock")
-                    .font(theme.typography.title)
-                    .monospacedDigit()
-                    .foregroundStyle(
-                        vm.isCodeExpired ? theme.color.statusDangerFg.color : theme.color.primary.color
-                    )
-                Text(vm.isCodeExpired ? "인증코드가 만료됐어요 — 재전송해 주세요" : "인증코드 유효시간")
-                    .font(theme.typography.caption)
-                    .foregroundStyle(theme.color.textSecondary.color)
-            }
-            .padding(.bottom, theme.space.lg)
-
-            // OTP 입력 필드
-            DSTextField(
-                label: "인증코드 (6자리)",
-                placeholder: "000000",
-                text: $vm.otpCode,
-                keyboardType: .numberPad
-            )
-            .onChange(of: vm.otpCode) { _, newVal in
-                // 최대 6자리 제한
-                if newVal.count > 6 {
-                    vm.otpCode = String(newVal.prefix(6))
+        ScrollView {
+            VStack(spacing: theme.space.lg) {
+                // 헤더 — 전송된 이메일 표시(웹: "전송: {email}" + 이메일 변경).
+                VStack(spacing: theme.space.xs) {
+                    Text("인증번호 6자리")
+                        .font(.system(size: 24, weight: .bold))
+                        .foregroundStyle(theme.color.textPrimary.color)
+                    Text(vm.email)
+                        .font(theme.typography.callout)
+                        .foregroundStyle(theme.color.textSecondary.color)
+                        .multilineTextAlignment(.center)
                 }
-                // 숫자만 허용
-                vm.otpCode = newVal.filter(\.isNumber)
-            }
-            .padding(.horizontal, theme.space.lg)
+                .padding(.top, theme.space.xl)
 
-            Spacer().frame(height: theme.space.xl)
+                VStack(spacing: theme.space.md) {
+                    // 유효시간 타이머 (현행 유지)
+                    VStack(spacing: theme.space.xs) {
+                        Label(vm.isCodeExpired ? "만료됨" : vm.validityTimerText, systemImage: "clock")
+                            .font(theme.typography.headline)
+                            .monospacedDigit()
+                            .foregroundStyle(
+                                vm.isCodeExpired ? theme.color.statusDangerFg.color : theme.color.primary.color
+                            )
+                        Text(vm.isCodeExpired ? "인증번호가 만료됐어요 — 재전송해 주세요" : "인증번호 유효시간")
+                            .font(theme.typography.caption)
+                            .foregroundStyle(theme.color.textSecondary.color)
+                    }
 
-            // 확인 버튼
-            DSButton(
-                "확인",
-                isLoading: vm.isLoading
-            ) {
-                vm.verifyOtp()
-            }
-            .disabled(!vm.isOtpValid)
-            .padding(.horizontal, theme.space.lg)
+                    // OTP 입력 필드 — 웹: h-14(56) text-2xl(24) center tracking 넓게.
+                    TextField("000000", text: $vm.otpCode)
+                        .keyboardType(.numberPad)
+                        .multilineTextAlignment(.center)
+                        .font(.system(size: 24, weight: .semibold, design: .monospaced))
+                        .tracking(8)
+                        .foregroundStyle(theme.color.textPrimary.color)
+                        .focused($otpFocused)
+                        .frame(height: 56)
+                        .frame(maxWidth: .infinity)
+                        .background(theme.color.surface.color)
+                        .clipShape(RoundedRectangle(cornerRadius: theme.radius.control, style: .continuous))
+                        .overlay(
+                            RoundedRectangle(cornerRadius: theme.radius.control, style: .continuous)
+                                .stroke(otpFocused ? theme.color.primary.color : theme.color.borderStrong.color,
+                                        lineWidth: otpFocused ? 1.5 : 1)
+                        )
+                        .onChange(of: vm.otpCode) { _, newVal in
+                            let filtered = String(newVal.filter(\.isNumber).prefix(6))
+                            if filtered != newVal { vm.otpCode = filtered }
+                            // 웹정합: 6자리 입력 시 자동 제출.
+                            if filtered.count == 6 && !vm.isLoading {
+                                vm.verifyOtp()
+                            }
+                        }
 
-            // 재전송 / 뒤로
-            HStack(spacing: theme.space.md) {
-                Button(vm.canResend ? "코드 재전송" : "\(vm.resendSeconds)초 후 재전송") {
-                    vm.resendOtp()
+                    // 확인 버튼
+                    DSButton(
+                        "확인",
+                        size: .lg,
+                        isLoading: vm.isLoading
+                    ) {
+                        vm.verifyOtp()
+                    }
+                    .disabled(!vm.isOtpValid)
+
+                    // 재전송 / 이메일 변경
+                    HStack(spacing: theme.space.md) {
+                        Button(vm.canResend ? "인증번호 재전송" : "\(vm.resendSeconds)초 후 재전송 가능") {
+                            vm.resendOtp()
+                        }
+                        .font(theme.typography.body)
+                        .foregroundStyle(
+                            vm.canResend ? theme.color.primary.color : theme.color.textTertiary.color
+                        )
+                        .disabled(!vm.canResend)
+
+                        Text("·").foregroundStyle(theme.color.textSecondary.color)
+
+                        Button("이메일 변경") { vm.backToLogin() }
+                            .font(theme.typography.body)
+                            .foregroundStyle(theme.color.textSecondary.color)
+                    }
+
+                    // 인라인 에러
+                    if let error = vm.errorMessage {
+                        InlineErrorBox(message: error)
+                    }
                 }
-                .font(theme.typography.caption)
-                .foregroundStyle(
-                    vm.canResend ? theme.color.primary.color : theme.color.textTertiary.color
-                )
-                .disabled(!vm.canResend)
-
-                Text("·")
-                    .foregroundStyle(theme.color.textSecondary.color)
-
-                Button("이메일 변경") { vm.backToLogin() }
-                    .font(theme.typography.caption)
-                    .foregroundStyle(theme.color.textSecondary.color)
+                .padding(theme.space.lg)
+                .dsCard()
+                .padding(.horizontal, theme.space.screenPaddingX)
             }
-            .padding(.top, theme.space.md)
-
-            Spacer()
         }
         .background(theme.color.background.color)
-        .alert("오류", isPresented: Binding(
-            get: { vm.errorMessage != nil },
-            set: { if !$0 { vm.errorMessage = nil } }
-        )) {
-            Button("확인", role: .cancel) { vm.errorMessage = nil }
-        } message: {
-            Text(vm.errorMessage ?? "")
-        }
+        .onAppear { otpFocused = true }
     }
+}
+
+#Preview("OtpView — 라이트") {
+    let vm = AuthViewModel(authRepository: AppContainer.preview.authRepository)
+    vm.email = "you@example.com"
+    return OtpView(vm: vm).environment(\.theme, .zzippu)
 }

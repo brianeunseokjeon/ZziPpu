@@ -27,7 +27,8 @@ extension Theme {
             textTertiary:    sc.textTertiary,
             border:          sc.border,
             borderStrong:    sc.borderStrong,
-            cardBorder:      DynamicColor(light: .clear, dark: sc.border.dark),
+            // R1(웹정합): 라이트에서도 border-gray-100 상시 표시(웹 카드 정합). sc.border = gray-100/gray-700.
+            cardBorder:      sc.border,
             divider:         sc.divider,
             scrim:           sc.scrim,
             statusSuccessFg:     sc.statusSuccessFg,
@@ -109,6 +110,7 @@ extension Theme {
             display:       ty.display,
             title:         ty.title,
             headline:      ty.headline,
+            headlineStrong: ty.headlineStrong,
             body:          ty.body,
             bodyStrong:    ty.bodyStrong,
             callout:       ty.callout,
@@ -194,8 +196,8 @@ extension Theme {
             iconButtonSize:      44,
             emptyStatePaddingY:  24,
             sectionHeaderPaddingY: 8,
-            statusPillPaddingX:  PrimitiveScale.space3,
-            statusPillPaddingY:  PrimitiveScale.space1_5,
+            statusPillPaddingX:  PrimitiveScale.space2_5,
+            statusPillPaddingY:  PrimitiveScale.space1,
             timelineDotSize:     PrimitiveScale.sizeDotMd,
             timelineDotSizeIdle: PrimitiveScale.sizeDotSm
         )

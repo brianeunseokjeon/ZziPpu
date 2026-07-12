@@ -60,7 +60,7 @@ private struct DSBottomSheetContainer<Content: View>: View {
             if let title = options.title {
                 HStack {
                     Text(title)
-                        .font(theme.typography.headline)
+                        .font(theme.typography.title)   // R4(웹정합): 시트 타이틀 text-lg(18) semibold
                         .foregroundStyle(theme.color.textPrimary.color)
                     Spacer(minLength: 0)
                 }

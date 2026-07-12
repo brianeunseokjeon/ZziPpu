@@ -57,13 +57,13 @@ public struct TimelineItemRow: View {
                         .foregroundStyle(theme.color.primary.color)
                 }
             }
-            .frame(width: 56, alignment: .leading)
+            .frame(width: 64, alignment: .leading)   // 웹정합: 시간 컬럼 w-16(64)
 
-            // Dot — 웹: 최신 8pt / 일반 6pt.
+            // Dot — 웹: 최신 w-2(8pt) / 일반 w-1.5(6pt).
             Circle()
                 .fill(dotColor)
-                .frame(width: isNewest ? theme.component.timelineDotSizeIdle : 6,
-                       height: isNewest ? theme.component.timelineDotSizeIdle : 6)
+                .frame(width: isNewest ? 8 : 6,
+                       height: isNewest ? 8 : 6)
 
             // Label
             Text(label)

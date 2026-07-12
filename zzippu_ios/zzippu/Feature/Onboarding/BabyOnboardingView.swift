@@ -47,29 +47,29 @@ private struct OnboardingContent: View {
     var body: some View {
         NavigationStack {
             ScrollView {
-                VStack(spacing: theme.space.xl) {
-                    // 헤더
-                    VStack(spacing: theme.space.sm) {
-                        Image(systemName: "figure.and.child.holdinghands")
+                VStack(spacing: theme.space.lg) {
+                    // 헤더 — 웹: 🍼 text-5xl + "아기 정보를 알려주세요" text-2xl bold + 서브.
+                    VStack(spacing: theme.space.xs) {
+                        Text("🍼")
                             .font(.system(size: 48))
-                            .foregroundStyle(theme.color.primary.color)
 
-                        Text("아기 정보 등록")
-                            .font(theme.typography.title)
+                        Text("아기 정보를 알려주세요")
+                            .font(.system(size: 24, weight: .bold))
+                            .foregroundStyle(theme.color.textPrimary.color)
 
-                        Text("기록을 시작하기 위해 아기 정보를 입력해 주세요.")
+                        Text("맞춤형 기록과 AI 피드백을 위해 필요해요.")
                             .font(theme.typography.callout)
                             .foregroundStyle(theme.color.textSecondary.color)
                             .multilineTextAlignment(.center)
                     }
                     .padding(.top, theme.space.xl)
 
-                    // 입력 폼
+                    // 입력 폼 카드 — 웹 흰 카드(R1).
                     VStack(spacing: theme.space.lg) {
-                        // 이름
+                        // 이름 — 웹 "아기 이름"(별표 없음).
                         DSTextField(
-                            label: "아이 이름 *",
-                            placeholder: "예: 준서",
+                            label: "아기 이름",
+                            placeholder: "예: 우리 아기",
                             text: $vm.babyName
                         )
 
@@ -89,26 +89,20 @@ private struct OnboardingContent: View {
                                 theme.color.surface.color,
                                 in: RoundedRectangle(cornerRadius: theme.radius.control)
                             )
+                            .overlay(
+                                RoundedRectangle(cornerRadius: theme.radius.control)
+                                    .stroke(theme.color.borderStrong.color, lineWidth: 1)
+                            )
                         }
 
-                        // 성별
-                        FormField(label: "성별") {
-                            Picker("성별", selection: $vm.gender) {
-                                ForEach(Gender.allCases, id: \.self) { g in
-                                    Text(g.displayName).tag(g)
-                                }
-                            }
-                            .pickerStyle(.segmented)
-                        }
-
-                        // 출생체중 (선택)
+                        // 출생체중 (선택) — 웹 "출생 체중 (선택)".
                         FormField(
-                            label: "출생체중 (선택)",
+                            label: "출생 체중 (선택)",
                             note: vm.birthWeightValidation
                         ) {
                             HStack {
                                 DSTextField(
-                                    placeholder: "예: 3.2",
+                                    placeholder: "예: 3.30",
                                     text: $vm.birthWeightKgText,
                                     keyboardType: .decimalPad
                                 )
@@ -119,32 +113,75 @@ private struct OnboardingContent: View {
                                     .frame(width: 32)
                             }
                         }
-                    }
-                    .padding(.horizontal, theme.space.lg)
 
-                    // 저장 버튼
-                    DSButton(
-                        "시작하기",
-                        isLoading: vm.isLoading
-                    ) {
-                        vm.save()
+                        // 성별 — 웹: 이모지 3버튼 그리드(선택=bg-blue-50 border-blue-400 text-blue-700).
+                        FormField(label: "성별") {
+                            HStack(spacing: theme.space.sm) {
+                                GenderButton(gender: .male,    emoji: "👦", label: "남아",   selection: $vm.gender)
+                                GenderButton(gender: .female,  emoji: "👧", label: "여아",   selection: $vm.gender)
+                                GenderButton(gender: .unknown, emoji: "·",  label: "비공개", selection: $vm.gender)
+                            }
+                        }
+
+                        // 인라인 에러
+                        if let error = vm.errorMessage {
+                            InlineErrorBox(message: error)
+                        }
+
+                        // 저장 버튼 — 웹 "시작하기" blue-500.
+                        DSButton(
+                            "시작하기",
+                            size: .lg,
+                            isLoading: vm.isLoading
+                        ) {
+                            vm.save()
+                        }
+                        .disabled(!vm.isFormValid || vm.birthWeightValidation != nil)
                     }
-                    .disabled(!vm.isFormValid || vm.birthWeightValidation != nil)
-                    .padding(.horizontal, theme.space.lg)
+                    .padding(theme.space.lg)
+                    .dsCard()
+                    .padding(.horizontal, theme.space.screenPaddingX)
                     .padding(.bottom, theme.space.xl)
                 }
             }
             .background(theme.color.background.color)
             .navigationBarTitleDisplayMode(.inline)
         }
-        .alert("오류", isPresented: Binding(
-            get: { vm.errorMessage != nil },
-            set: { if !$0 { vm.errorMessage = nil } }
-        )) {
-            Button("확인", role: .cancel) { vm.errorMessage = nil }
-        } message: {
-            Text(vm.errorMessage ?? "")
+    }
+}
+
+// MARK: - GenderButton (웹 이모지 3버튼 그리드)
+
+private struct GenderButton: View {
+    let gender: Gender
+    let emoji:  String
+    let label:  String
+    @Binding var selection: Gender
+    @Environment(\.theme) private var theme
+
+    private var isSelected: Bool { selection == gender }
+
+    var body: some View {
+        Button {
+            selection = gender
+        } label: {
+            VStack(spacing: 2) {
+                Text(emoji).font(.system(size: 18))
+                Text(label)
+                    .font(theme.typography.body)
+                    .foregroundStyle(isSelected ? theme.color.statusInfoFg.color : theme.color.textSecondary.color)
+            }
+            .frame(maxWidth: .infinity)
+            .frame(height: 48)
+            .background(isSelected ? theme.color.primaryTint.color : theme.color.surface.color)
+            .clipShape(RoundedRectangle(cornerRadius: theme.radius.control, style: .continuous))
+            .overlay(
+                RoundedRectangle(cornerRadius: theme.radius.control, style: .continuous)
+                    .stroke(isSelected ? theme.color.primary.color : theme.color.borderStrong.color,
+                            lineWidth: isSelected ? 1.5 : 1)
+            )
         }
+        .buttonStyle(.plain)
     }
 }
 

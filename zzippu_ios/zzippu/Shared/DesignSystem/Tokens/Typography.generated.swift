@@ -19,6 +19,9 @@ struct SemanticTypography {
     /// headline: 16pt, weight=.semibold
     let headline: Font = .system(size: 16, weight: .semibold)
 
+    /// headlineStrong: 16pt, weight=.bold
+    let headlineStrong: Font = .system(size: 16, weight: .bold)
+
     /// body: 14pt, weight=.medium
     let body: Font = .system(size: 14, weight: .medium)
 

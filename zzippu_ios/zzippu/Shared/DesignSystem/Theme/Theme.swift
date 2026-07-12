@@ -142,6 +142,7 @@ struct ThemeTypography {
     let display:      Font  // tabular large numbers, capped Dynamic Type
     let title:        Font
     let headline:     Font
+    let headlineStrong: Font  // 16pt/bold — 헤더 아기이름(R4)
     let body:         Font
     let bodyStrong:   Font
     let callout:      Font

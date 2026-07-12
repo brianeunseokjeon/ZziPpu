@@ -81,7 +81,7 @@ private struct ToastBubble: View {
                 .foregroundStyle(fgColor)
 
             Text(item.message)
-                .font(theme.typography.captionStrong)
+                .font(theme.typography.body)   // 웹 text-sm(14) medium
                 .foregroundStyle(fgColor)
                 .frame(maxWidth: .infinity, alignment: .leading)
 
