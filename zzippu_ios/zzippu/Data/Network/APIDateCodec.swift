@@ -55,20 +55,23 @@ enum APIDateCodec {
 
     // MARK: - date (YYYY-MM-DD, 서버 birth_date, growth recorded_at 등)
 
+    // 날짜 전용 필드/조회는 **KST(Asia/Seoul) 기준**이어야 한다.
+    // 서버가 date 조회를 kst_date_eq(KST 날짜)로 필터하고, 홈도 KST로 날짜를 계산하므로
+    // UTC로 포맷하면 KST 자정(=UTC 전날 15시)이 하루 밀려 "기록 없음"으로 어긋난다(웹은 KST 전송).
     static let dateOnlyFormatter: DateFormatter = {
         let f = DateFormatter()
         f.dateFormat = "yyyy-MM-dd"
         f.locale = Locale(identifier: "en_US_POSIX")
-        f.timeZone = TimeZone(secondsFromGMT: 0)
+        f.timeZone = .kst
         return f
     }()
 
-    /// YYYY-MM-DD String → Date (자정 UTC 기준)
+    /// YYYY-MM-DD String → Date (KST 자정 기준)
     static func parseDate(_ string: String) -> Date? {
         dateOnlyFormatter.date(from: string)
     }
 
-    /// Date → YYYY-MM-DD String (UTC 기준)
+    /// Date → YYYY-MM-DD String (KST 기준 — 서버 date 조회/저장과 정합)
     static func formatDate(_ date: Date) -> String {
         dateOnlyFormatter.string(from: date)
     }
