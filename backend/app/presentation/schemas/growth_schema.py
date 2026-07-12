@@ -13,6 +13,15 @@ class CreateGrowthRequest(BaseModel):
     memo: str | None = None
 
 
+class UpdateGrowthRequest(BaseModel):
+    # iOS는 편집 시 레코드 전체를 보냄(전체 교체). 모든 필드 옵셔널.
+    recorded_at: date | None = None
+    weight_g: int | None = Field(None, gt=0, description="체중 (그램)")
+    height_cm: float | None = Field(None, gt=0, description="키 (cm)")
+    head_circumference_cm: float | None = Field(None, gt=0, description="머리둘레 (cm)")
+    memo: str | None = None
+
+
 class GrowthResponse(BaseModel):
     id: UUID
     baby_id: UUID

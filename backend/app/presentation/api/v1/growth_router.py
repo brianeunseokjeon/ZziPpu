@@ -1,21 +1,27 @@
 from typing import Annotated
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, status
+from fastapi import APIRouter, Depends, HTTPException, status
 
-from app.application.dto.growth_dto import CreateGrowthDTO
+from app.application.dto.growth_dto import CreateGrowthDTO, UpdateGrowthDTO
 from app.application.use_cases.growth import (
     CreateGrowthRecordUseCase,
     DeleteGrowthRecordUseCase,
     GetGrowthRecordsUseCase,
+    UpdateGrowthRecordUseCase,
 )
 from app.presentation.dependencies import (
     CurrentUserDep,
     get_create_growth_use_case,
     get_delete_growth_use_case,
     get_get_growth_records_use_case,
+    get_update_growth_use_case,
 )
-from app.presentation.schemas.growth_schema import CreateGrowthRequest, GrowthResponse
+from app.presentation.schemas.growth_schema import (
+    CreateGrowthRequest,
+    GrowthResponse,
+    UpdateGrowthRequest,
+)
 
 router = APIRouter(prefix="/babies/{baby_id}/growth", tags=["growth"])
 
@@ -69,6 +75,39 @@ async def get_growth_records(
         )
         for r in results
     ]
+
+
+@router.patch("/{record_id}", response_model=GrowthResponse)
+async def update_growth_record(
+    baby_id: UUID,
+    record_id: UUID,
+    body: UpdateGrowthRequest,
+    user_id: CurrentUserDep,
+    use_case: Annotated[UpdateGrowthRecordUseCase, Depends(get_update_growth_use_case)],
+) -> GrowthResponse:
+    dto = UpdateGrowthDTO(
+        baby_id=baby_id,
+        record_id=record_id,
+        recorded_at=body.recorded_at,
+        weight_g=body.weight_g,
+        height_cm=body.height_cm,
+        head_circumference_cm=body.head_circumference_cm,
+        memo=body.memo,
+    )
+    try:
+        result = await use_case.execute(dto)
+    except ValueError as e:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
+    return GrowthResponse(
+        id=result.id,
+        baby_id=result.baby_id,
+        recorded_at=result.recorded_at,
+        weight_g=result.weight_g,
+        height_cm=result.height_cm,
+        head_circumference_cm=result.head_circumference_cm,
+        memo=result.memo,
+        created_at=result.created_at,
+    )
 
 
 @router.delete("/{record_id}", status_code=status.HTTP_204_NO_CONTENT)

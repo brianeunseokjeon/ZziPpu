@@ -15,6 +15,18 @@ class CreateGrowthDTO:
 
 
 @dataclass
+class UpdateGrowthDTO:
+    # 전체 교체(PUT류). record_id로 조회 후 baby_id 소유권 검증에 사용.
+    baby_id: UUID
+    record_id: UUID
+    recorded_at: date | None = None
+    weight_g: int | None = None
+    height_cm: float | None = None
+    head_circumference_cm: float | None = None
+    memo: str | None = None
+
+
+@dataclass
 class GrowthResponseDTO:
     id: UUID
     baby_id: UUID

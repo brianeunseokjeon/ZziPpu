@@ -34,6 +34,7 @@ from app.application.use_cases.growth import (
     CreateGrowthRecordUseCase,
     DeleteGrowthRecordUseCase,
     GetGrowthRecordsUseCase,
+    UpdateGrowthRecordUseCase,
 )
 from app.application.use_cases.play import (
     CreatePlayRecordUseCase,
@@ -344,6 +345,12 @@ def get_delete_growth_use_case(
     growth_repo: Annotated[GrowthRepositoryImpl, Depends(get_growth_repo)],
 ) -> DeleteGrowthRecordUseCase:
     return DeleteGrowthRecordUseCase(growth_repo)
+
+
+def get_update_growth_use_case(
+    growth_repo: Annotated[GrowthRepositoryImpl, Depends(get_growth_repo)],
+) -> UpdateGrowthRecordUseCase:
+    return UpdateGrowthRecordUseCase(growth_repo)
 
 
 def get_vaccinations_use_case(
