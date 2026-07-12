@@ -43,6 +43,21 @@ struct BabyProfileView: View {
                     .pickerStyle(.segmented)
                 }
 
+                // 출생 체중(선택) — 태어날 때 고정값. kg 입력 → g 저장.
+                FormField(label: "출생 체중 (선택)", note: vm.birthWeightValidation) {
+                    HStack {
+                        DSTextField(
+                            placeholder: "예: 3.30",
+                            text: $vm.birthWeightKgText,
+                            keyboardType: .decimalPad
+                        )
+                        Text("kg")
+                            .font(theme.typography.body)
+                            .foregroundStyle(theme.color.textSecondary.color)
+                            .frame(width: 32)
+                    }
+                }
+
                 DSTextField(
                     label: "사진 URL (선택)",
                     placeholder: "https://...",
@@ -80,6 +95,7 @@ struct BabyProfileView: View {
 
 private struct FormField<Content: View>: View {
     let label: String
+    var note: String? = nil
     @ViewBuilder let content: () -> Content
     @Environment(\.theme) private var theme
 
@@ -89,6 +105,11 @@ private struct FormField<Content: View>: View {
                 .font(theme.typography.caption)
                 .foregroundStyle(theme.color.textSecondary.color)
             content()
+            if let note {
+                Text(note)
+                    .font(theme.typography.caption)
+                    .foregroundStyle(theme.color.statusDangerFg.color)
+            }
         }
     }
 }

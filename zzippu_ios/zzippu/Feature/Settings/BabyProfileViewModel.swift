@@ -14,6 +14,7 @@ final class BabyProfileViewModel {
     var birthDate: Date
     var gender: Gender
     var photoUrlText: String
+    var birthWeightKgText: String   // UI 입력: kg 단위(온보딩과 동일). 저장 시 g로 변환.
 
     // MARK: - Status
 
@@ -36,12 +37,30 @@ final class BabyProfileViewModel {
         self.birthDate = baby.birthDate
         self.gender = baby.gender
         self.photoUrlText = baby.photoUrl ?? ""
+        // g → kg 텍스트("3.2"). 없으면 빈 값.
+        if let g = baby.birthWeightG, g > 0 {
+            let kg = Double(g) / 1000.0
+            // 소수 불필요한 0 제거(3.20 → 3.2, 3.0 → 3).
+            self.birthWeightKgText = kg == kg.rounded() ? String(Int(kg)) : String(kg)
+        } else {
+            self.birthWeightKgText = ""
+        }
     }
 
     // MARK: - Validation
 
     var isFormValid: Bool {
-        !name.trimmingCharacters(in: .whitespaces).isEmpty
+        guard !name.trimmingCharacters(in: .whitespaces).isEmpty else { return false }
+        return birthWeightValidation == nil   // 체중 형식 오류 시 저장 차단
+    }
+
+    /// 출생 체중 입력 검증(온보딩과 동일 규칙: 0~15 kg). 정상/빈 값이면 nil.
+    var birthWeightValidation: String? {
+        let text = birthWeightKgText.trimmingCharacters(in: .whitespaces)
+        guard !text.isEmpty else { return nil }          // 선택 입력 — 비어도 OK
+        guard let kg = Double(text) else { return "숫자로 입력해 주세요 (예: 3.2)" }
+        guard (0...15).contains(kg) else { return "0~15 kg 범위로 입력해 주세요." }
+        return nil
     }
 
     // MARK: - Actions
@@ -61,6 +80,9 @@ final class BabyProfileViewModel {
                 updated.gender = gender
                 let trimmedURL = photoUrlText.trimmingCharacters(in: .whitespaces)
                 updated.photoUrl = trimmedURL.isEmpty ? nil : trimmedURL
+                // kg 텍스트 → g(정수). 빈 값이면 nil(미입력). 검증은 isFormValid에서 선통과.
+                let trimmedKg = birthWeightKgText.trimmingCharacters(in: .whitespaces)
+                updated.birthWeightG = trimmedKg.isEmpty ? nil : Double(trimmedKg).map { Int($0 * 1000) }
 
                 let saved = try await babyRepository.update(updated)
                 onSaved?(saved)

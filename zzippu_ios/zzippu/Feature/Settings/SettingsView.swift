@@ -29,6 +29,7 @@ struct SettingsView: View {
                 let newVM = SettingsViewModel(
                     babyRepository: container.babyRepository,
                     authRepository: container.authRepository,
+                    growthRepository: container.growthRepository,
                     babyId: container.activeBabyId
                 )
                 let captured = container
@@ -48,16 +49,19 @@ struct SettingsView: View {
 private struct SettingsContent: View {
     @Bindable var vm: SettingsViewModel
     @Environment(AppContainer.self) private var container
+    @Environment(ToastCenter.self) private var toastCenter
     @Environment(\.theme) private var theme
 
     @State private var showLogoutConfirm = false
     @State private var exportShareItems: [Any]?
+    @State private var showWeightSheet = false
 
     var body: some View {
         ScrollView {
             VStack(spacing: theme.space.lg) {
                 profileHeader
                 babyProfileSection
+                weightSection
                 caregiverSection
                 exportSection
                 accountSection
@@ -78,6 +82,84 @@ private struct SettingsContent: View {
         .confirmationDialog("로그아웃 하시겠어요?", isPresented: $showLogoutConfirm, titleVisibility: .visible) {
             Button("로그아웃", role: .destructive) { vm.signOut() }
             Button("취소", role: .cancel) {}
+        }
+        .dsBottomSheet(
+            isPresented: $showWeightSheet,
+            options: .init(title: "현재 몸무게", detents: [.medium])
+        ) {
+            weightSheetContent
+        }
+    }
+
+    // MARK: - Current Weight
+
+    private var weightSection: some View {
+        VStack(alignment: .leading, spacing: theme.space.sm) {
+            DSSectionHeader(title: "몸무게")
+            Button {
+                vm.currentWeightKgText = ""   // 매번 새로 입력(프리필 없이 명확하게)
+                showWeightSheet = true
+            } label: {
+                DSListRow(variant: .withTrailing) {
+                    Image(systemName: "scalemass.fill")
+                        .foregroundStyle(theme.color.primary.color)
+                } content: {
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("현재 몸무게").font(theme.typography.body)
+                        Text("권장 수유량 계산에 사용돼요")
+                            .font(theme.typography.caption)
+                            .foregroundStyle(theme.color.textSecondary.color)
+                    }
+                } trailing: {
+                    HStack(spacing: theme.space.xs) {
+                        Text(vm.latestWeightText)
+                            .font(theme.typography.callout)
+                            .foregroundStyle(theme.color.textSecondary.color)
+                        Image(systemName: "chevron.right")
+                            .font(.system(size: 13, weight: .semibold))
+                            .foregroundStyle(theme.color.textTertiary.color)
+                    }
+                }
+            }
+            .buttonStyle(.plain)
+        }
+    }
+
+    private var weightSheetContent: some View {
+        VStack(alignment: .leading, spacing: theme.space.lg) {
+            Text("오늘 잰 몸무게를 입력하면 성장 기록으로 저장돼요.")
+                .font(theme.typography.callout)
+                .foregroundStyle(theme.color.textSecondary.color)
+
+            VStack(alignment: .leading, spacing: theme.space.xs) {
+                HStack {
+                    DSTextField(
+                        placeholder: "예: 3.50",
+                        text: $vm.currentWeightKgText,
+                        keyboardType: .decimalPad
+                    )
+                    Text("kg")
+                        .font(theme.typography.body)
+                        .foregroundStyle(theme.color.textSecondary.color)
+                        .frame(width: 32)
+                }
+                if let note = vm.currentWeightValidation {
+                    Text(note)
+                        .font(theme.typography.caption)
+                        .foregroundStyle(theme.color.statusDangerFg.color)
+                }
+            }
+
+            DSButton("저장", isLoading: vm.isSavingWeight) {
+                Task {
+                    let ok = await vm.saveCurrentWeight()
+                    if ok {
+                        showWeightSheet = false
+                        toastCenter.show(.init(message: "몸무게를 저장했어요", variant: .success))
+                    }
+                }
+            }
+            .disabled(!vm.canSaveWeight)
         }
     }
 
