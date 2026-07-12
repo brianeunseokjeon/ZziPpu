@@ -16,17 +16,12 @@ enum SchemaV1: VersionedSchema {
 
 enum AppModelContainer {
 
-    /// 앱 컨테이너 (디스크 영속)
-    static func make() -> ModelContainer {
+    /// 앱 컨테이너 (디스크 영속).
+    /// 실패(스키마 손상·마이그레이션 오류)를 **삼키지 않고 throw** — 상위(OfflineToggle)에서
+    /// server-only 로 강등 판단한다. (force-try 인메모리 폴백 제거: OFFLINE_TOGGLE_PLAN §2.)
+    static func makeThrowing() throws -> ModelContainer {
         let schema = Schema(versionedSchema: SchemaV1.self)
         let config = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false)
-        do {
-            return try ModelContainer(for: schema, configurations: [config])
-        } catch {
-            // 스키마 손상 등 복구 불가 상황: 인메모리로라도 앱은 뜨게 (기록은 세션 한정)
-            let mem = ModelConfiguration(schema: schema, isStoredInMemoryOnly: true)
-            // swiftlint:disable:next force_try
-            return try! ModelContainer(for: schema, configurations: [mem])
-        }
+        return try ModelContainer(for: schema, configurations: [config])
     }
 }

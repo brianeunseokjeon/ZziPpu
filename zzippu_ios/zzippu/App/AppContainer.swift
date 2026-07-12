@@ -28,16 +28,19 @@ final class AppContainer {
     let sessionState: SessionState
 
     // MARK: - Offline Sync 인프라 (feeding 파일럿, Data/Sync 격리)
-    let modelContainer: ModelContainer
-    let syncCoordinator: SyncCoordinator
-    let feedingSyncEngine: FeedingSyncEngine
-    private let networkMonitor: NetworkMonitor
-    /// 동기화 엔진이 참조하는 활성 아기 id 상자 (init 중 self 캡처 회피)
-    private let activeBabyBox: ActiveBabyBox
+    // OFF/폴백 시 아예 nil — SwiftData·동기화 런타임 완전 배제. (OFFLINE_TOGGLE_PLAN §1.1)
+    private let offline: OfflineInfra?
+
+    /// SwiftData 컨테이너 — OFF/폴백이면 nil (zzippuApp 이 옵셔널로 배선).
+    var modelContainer: ModelContainer? { offline?.modelContainer }
+    /// 동기화 상태 코디네이터 — OFF/폴백이면 nil (오프라인 UI 가드 대상).
+    var syncCoordinator: SyncCoordinator? { offline?.coordinator }
+    /// 오프라인 계층 활성 여부 — Feature/UI 는 이 플래그 하나만 본다.
+    var isOfflineActive: Bool { offline != nil }
 
     // MARK: - Active Baby (로그인 후 GET /babies 응답으로 확정)
     var activeBabyId: UUID = UUID() {   // 임시값 — hydrateSession에서 덮어씀
-        didSet { activeBabyBox.id = activeBabyId }
+        didSet { offline?.activeBabyBox.id = activeBabyId }
     }
 
     // MARK: - Init
@@ -48,27 +51,20 @@ final class AppContainer {
             onUnauthorized: { /* handleUnauthorized는 sessionState 접근이 필요 — 후처리 */ }
         )
 
-        // --- feeding 오프라인 영속 + 동기화 엔진 배선 (S0~S3) ---
-        let container = AppModelContainer.make()
-        self.modelContainer = container
-        let localFeeding = LocalFeedingRepository(modelContainer: container)
-        let coordinator = SyncCoordinator()
-        self.syncCoordinator = coordinator
+        // --- 모드 스위치: 오프라인(Local+Sync) vs 서버-전용(Remote) ---
+        // 오프라인 심볼(OfflineInfra·ModelContainer·Local·Syncing)은 이 case .offline 한 곳에서만 등장.
+        // (OFFLINE_TOGGLE_PLAN §1.2·§2 — 실패 시 크래시 없이 server-only 강등)
+        switch OfflineToggle.resolvedMode() {
+        case .offline(let container):
+            let infra = OfflineInfra.make(api: api, container: container)
+            self.offline = infra
+            self.feedingRepository = infra.feedingRepository
+        case .serverOnly:
+            self.offline = nil
+            self.feedingRepository = RemoteFeedingRepository(api: api)
+        }
 
-        // babyIdProvider 는 self.activeBabyId 를 지연 참조. init 중 self 캡처 회피 위해 box 사용.
-        let babyBox = ActiveBabyBox()
-        let engine = FeedingSyncEngine(
-            store: localFeeding,
-            dataSource: FeedingSyncDataSource(api: api),
-            coordinator: coordinator,
-            babyIdProvider: { babyBox.id }
-        )
-        self.feedingSyncEngine = engine
-        self.activeBabyBox = babyBox
-        self.networkMonitor = NetworkMonitor { [engine] in engine.triggerFullSync() }
-
-        // feeding 만 Local(+동기화 데코레이터)로 주입. 나머지는 Remote 유지(혼재 허용).
-        self.feedingRepository = SyncingFeedingRepository(local: localFeeding, engine: engine)
+        // ↓ 아래는 모드 무관 — 항상 Remote (S4 전까지)
         self.babyRepository    = RemoteBabyRepository(api: api)
         self.growthRepository  = RemoteGrowthRepository(api: api)
         self.authRepository    = AuthRepositoryImpl(
@@ -96,14 +92,16 @@ final class AppContainer {
     // MARK: - Sync 트리거 (Feature 는 이 존재를 모른다 — App 레이어에서만 호출)
 
     /// 네트워크 감시 시작 (앱 기동 1회). 오프라인→온라인 전환 시 full sync.
+    /// server-only(offline == nil)면 옵셔널 체이닝으로 자동 no-op — 호출부 무변경.
     func startNetworkMonitoring() {
-        networkMonitor.start()
+        offline?.networkMonitor.start()
     }
 
     /// 로그인 직후·활성 아기 확정 후·포그라운드 복귀: 초기/전체 동기화.
     /// 무회귀 보장: 로컬이 비어도 첫 pull(since=nil)로 서버 기존 feeding을 채운다.
+    /// server-only면 no-op(서버가 진실원천 — 동기화 불필요).
     func triggerFeedingFullSync() {
-        feedingSyncEngine.triggerFullSync()
+        offline?.engine.triggerFullSync()
     }
 
     // MARK: - Preview Factory (Mock 리포지토리 — 네트워크 미접속)

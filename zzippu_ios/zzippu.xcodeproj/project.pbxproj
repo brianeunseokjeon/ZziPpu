@@ -24,6 +24,8 @@
 		0DCC66F5603F592F112146CC /* OnboardingViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB29328896FFE322C5D2A2B6 /* OnboardingViewModel.swift */; };
 		1342EEF1B57E5AA3A29C1F9A /* DiaperType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 734CF29084606CB53760BC23 /* DiaperType.swift */; };
 		15816DA16E6B4BF0D18CBC20 /* AppContainer.swift in Sources */ = {isa = PBXBuildFile; fileRef = DC6116370C00CA56076813B3 /* AppContainer.swift */; };
+		AAAA000000000000000000A1 /* OfflineToggle.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAAA000000000000000000B1 /* OfflineToggle.swift */; };
+		AAAA000000000000000000A2 /* OfflineInfra.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAAA000000000000000000B2 /* OfflineInfra.swift */; };
 		1819F3AE6C2A8CB4878F7E9F /* CaregiverViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 78B9F2C9C92B87B2CD9D3EBF /* CaregiverViewModel.swift */; };
 		1853F231279C13D9DE1D3BFE /* Motion.generated.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D5CD5D64393B98F64FD21AA /* Motion.generated.swift */; };
 		185773B3CBADA1229AC35B98 /* DSTabBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4EAA4BDA7B549959F0982AB /* DSTabBar.swift */; };
@@ -392,6 +394,8 @@
 		D9BBEB5A2C7B01D5DBE03D84 /* Shadows.generated.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = Shadows.generated.swift; sourceTree = "<group>"; };
 		DB80B6331AAA33F2B625093A /* VaccinationDTO.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = VaccinationDTO.swift; path = Network/DTOs/VaccinationDTO.swift; sourceTree = "<group>"; };
 		DC6116370C00CA56076813B3 /* AppContainer.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = AppContainer.swift; path = AppContainer.swift; sourceTree = "<group>"; };
+		AAAA000000000000000000B1 /* OfflineToggle.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = OfflineToggle.swift; sourceTree = "<group>"; };
+		AAAA000000000000000000B2 /* OfflineInfra.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = OfflineInfra.swift; sourceTree = "<group>"; };
 		DCFF8FF117EEABBDEE84C4D7 /* SaveSleepUseCase.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SaveSleepUseCase.swift; sourceTree = "<group>"; };
 		DF1D700F66EE62EDE0D278B3 /* DevelopmentRepository.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DevelopmentRepository.swift; sourceTree = "<group>"; };
 		DF81BAA54656781FC82170D1 /* RemotePlayRepository.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = RemotePlayRepository.swift; sourceTree = "<group>"; };
@@ -829,6 +833,8 @@
 			isa = PBXGroup;
 			children = (
 				DC6116370C00CA56076813B3 /* AppContainer.swift */,
+				AAAA000000000000000000B1 /* OfflineToggle.swift */,
+				AAAA000000000000000000B2 /* OfflineInfra.swift */,
 				FECCC14E65742B98402CE793 /* AppRootView.swift */,
 				6519A1126295CD014E06AC4F /* MainTabView.swift */,
 				036CF36678A053C3DB145BDC /* SessionState.swift */,
@@ -1260,6 +1266,8 @@
 				2B9137A800A5EC187FCECC17 /* FeedingInputSheet.swift in Sources */,
 				9B8725CB28BE230EDEB377F8 /* HomeView.swift in Sources */,
 				15816DA16E6B4BF0D18CBC20 /* AppContainer.swift in Sources */,
+				AAAA000000000000000000A1 /* OfflineToggle.swift in Sources */,
+				AAAA000000000000000000A2 /* OfflineInfra.swift in Sources */,
 				9994BE3259E19AE033028D63 /* AppRootView.swift in Sources */,
 				364D38112A1AB6F710173520 /* MainTabView.swift in Sources */,
 				1D16F71CE2D8EE9EA3E7A7CC /* AuthSession.swift in Sources */,

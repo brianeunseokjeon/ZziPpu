@@ -61,6 +61,9 @@ private struct SettingsContent: View {
                 caregiverSection
                 exportSection
                 accountSection
+                #if DEBUG
+                debugOfflineSection
+                #endif
             }
             .padding(.vertical, theme.space.lg)
         }
@@ -225,6 +228,58 @@ private struct SettingsContent: View {
             }
         }
     }
+
+    // MARK: - Debug (오프라인 킬 스위치 — DEBUG 빌드에서만 노출, 일반 사용자 숨김)
+
+    #if DEBUG
+    private var debugOfflineSection: some View {
+        VStack(alignment: .leading, spacing: theme.space.sm) {
+            DSSectionHeader(title: "개발자 (DEBUG)")
+            VStack(spacing: 0) {
+                Toggle(isOn: Binding(
+                    get: { OfflineToggle.offlineEnabled },
+                    set: { OfflineToggle.offlineEnabled = $0 }
+                )) {
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("오프라인 저장 사용").font(theme.typography.body)
+                        Text(debugOfflineHint)
+                            .font(theme.typography.caption)
+                            .foregroundStyle(theme.color.textSecondary.color)
+                    }
+                }
+                .tint(theme.color.primary.color)
+                .padding(theme.space.md)
+                .background(
+                    theme.color.surface.color,
+                    in: RoundedRectangle(cornerRadius: theme.radius.card)
+                )
+
+                if OfflineToggle.isDisabledByFallback {
+                    Button {
+                        OfflineToggle.clearFallback()
+                    } label: {
+                        DSListRow(variant: .plain) {
+                            Image(systemName: "arrow.clockwise")
+                                .foregroundStyle(theme.color.primary.color)
+                        } content: {
+                            Text("폴백 강등 해제 (재시작 후 재시도)")
+                                .font(theme.typography.body)
+                        }
+                    }
+                    .buttonStyle(.plain)
+                }
+            }
+            .padding(.horizontal, theme.space.screenPaddingX)
+        }
+    }
+
+    private var debugOfflineHint: String {
+        if OfflineToggle.isDisabledByFallback {
+            return "초기화 실패로 강등됨 · 현재: \(container.isOfflineActive ? "오프라인" : "서버-전용") · 앱 재시작 시 반영"
+        }
+        return "현재: \(container.isOfflineActive ? "오프라인" : "서버-전용") · 앱 재시작 시 반영"
+    }
+    #endif
 
     // MARK: - Destinations (VM 생성 후 push)
 
