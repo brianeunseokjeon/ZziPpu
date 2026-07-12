@@ -56,7 +56,8 @@ private struct DSBottomSheetContainer<Content: View>: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            // Optional header — X 닫기 버튼 없음(grabber+스와이프+스크림 탭으로 충분, 웹 동일).
+            // Optional header(고정) — ScrollView 밖에 둬서 스크롤해도 제목이 항상 보인다.
+            // X 닫기 버튼 없음(grabber+스와이프+스크림 탭으로 충분, 웹 동일).
             if let title = options.title {
                 HStack {
                     Text(title)
@@ -65,22 +66,27 @@ private struct DSBottomSheetContainer<Content: View>: View {
                     Spacer(minLength: 0)
                 }
                 .padding(.horizontal, theme.space.componentPaddingX)
-                .padding(.vertical, theme.space.componentPaddingY)
+                .padding(.bottom, theme.space.stackGapMd)                   // 12 — 제목 아래 간격
 
                 Divider()
                     .foregroundStyle(theme.color.divider.color)
             }
 
-            // Content — 시트 표준 패딩(웹 px-5=20). 헤더 유무에 따라 top만 달라짐.
+            // Content(스크롤) — detent 높이보다 콘텐츠가 커도 잘리지 않고 스크롤된다.
             // 피처는 시트 콘텐츠 안에서 다시 .padding()을 걸지 말 것(중복 패딩 방지).
-            content()
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .padding(.horizontal, theme.space.cardPadding)              // 20 — 좌우
-                .padding(.top, options.title != nil
-                         ? theme.space.componentPaddingY                    // 12 — 헤더와 간격
-                         : theme.space.cardPadding)                         // 20 — grabber 아래 여백
-                .padding(.bottom, theme.space.cardPadding)                  // 20 — 하단 통일
+            ScrollView {
+                content()
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(.horizontal, theme.space.cardPadding)          // 20 — 좌우
+                    .padding(.top, options.title != nil
+                             ? theme.space.stackGapMd                       // 12 — 헤더와 간격
+                             : 0)
+                    .padding(.bottom, theme.space.cardPadding)              // 20 — 하단 통일
+            }
         }
+        // grabber(손잡이) 자리 확보 — 없으면 시트 맨 위 손잡이/둥근모서리에 상단이 가려진다.
+        .padding(.top, options.showGrabber ? theme.space.lg                 // 24 — 손잡이 아래로
+                                           : theme.space.cardPadding)       // 20 — 손잡이 없을 때
         .background(theme.color.surface.color)
     }
 }
