@@ -21,44 +21,60 @@ public struct TimelineItemRow: View {
     public let time:      String   // e.g. "09:30"
     public let label:     String
     public let dotColor:  Color    // domain.*.solid.color 주입
+    public var variant:   TimelineRowVariant
     public var onEdit:    (() -> Void)?
 
     public init(
         time:     String,
         label:    String,
         dotColor: Color,
+        variant:  TimelineRowVariant = .normal,
         onEdit:   (() -> Void)? = nil
     ) {
         self.time     = time
         self.label    = label
         self.dotColor = dotColor
+        self.variant  = variant
         self.onEdit   = onEdit
     }
 
     @Environment(\.theme) private var theme
 
+    private var isNewest: Bool { variant == .highlighted }
+
     public var body: some View {
         HStack(spacing: theme.space.stackGapSm) {
-            // Mono time
-            Text(time)
-                .font(theme.typography.mono)
-                .foregroundStyle(theme.color.textSecondary.color)
-                .frame(width: 48, alignment: .trailing)
+            // Mono time — 웹: 11pt mono. 일반=gray-400 / 최신=blue-500 bold, "최신" 9pt blue-400.
+            VStack(alignment: .leading, spacing: 0) {
+                Text(time)
+                    .font(theme.typography.mono)
+                    .fontWeight(isNewest ? .bold : nil)
+                    .foregroundStyle(isNewest ? theme.color.statusInfoSolid.color
+                                              : theme.color.textTertiary.color)
+                if isNewest {
+                    Text("최신")
+                        .font(.system(size: 9, weight: .medium))
+                        .foregroundStyle(theme.color.primary.color)
+                }
+            }
+            .frame(width: 56, alignment: .leading)
 
-            // Dot (10pt — 왜소한 점 → 또렷한 색 마커)
+            // Dot — 웹: 최신 8pt / 일반 6pt.
             Circle()
                 .fill(dotColor)
-                .frame(width: theme.component.timelineDotSize, height: theme.component.timelineDotSize)
+                .frame(width: isNewest ? theme.component.timelineDotSizeIdle : 6,
+                       height: isNewest ? theme.component.timelineDotSizeIdle : 6)
 
             // Label
             Text(label)
                 .font(theme.typography.body)
+                .fontWeight(isNewest ? .semibold : nil)
                 .foregroundStyle(theme.color.textPrimary.color)
                 .frame(maxWidth: .infinity, alignment: .leading)
 
-            // Edit button
+            // Edit button — 웹: 아웃라인 연필 gray-300(textTertiary), 14pt, 배경/채움 없음.
             if let onEdit {
-                DSIconButton(systemName: "pencil", action: onEdit)
+                DSIconButton(systemName: "pencil", iconSize: 14, tint: .tertiary, action: onEdit)
             }
         }
         // 좌우 패딩은 섹션(screenPaddingX)이 담당 — 이중 패딩(32pt) 제거.
@@ -85,9 +101,10 @@ public struct TimelineGroupView<Rows: View>: View {
 
     public var body: some View {
         ZStack(alignment: .leading) {
-            // Highlight background
+            // Highlight background — 웹 bg-blue-50/70 (primaryTint = blue-50, 70% 불투명)
             if variant == .highlighted {
                 theme.color.primaryTint.color
+                    .opacity(0.7)
                     .cornerRadius(theme.radius.control)
             }
 
@@ -119,12 +136,14 @@ private struct TimelineRowPreview: View {
                     time:     "09:30",
                     label:    "분유 120ml",
                     dotColor: theme.color.domainFeedingFormulaSolid.color,
+                    variant:  .highlighted,
                     onEdit:   {}
                 )
                 TimelineItemRow(
                     time:     "09:31",
                     label:    "왼쪽 모유 10분",
                     dotColor: theme.color.domainFeedingBreastLeftSolid.color,
+                    variant:  .highlighted,
                     onEdit:   {}
                 )
             }

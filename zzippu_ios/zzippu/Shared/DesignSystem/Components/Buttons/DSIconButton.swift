@@ -8,28 +8,46 @@ public enum DSIconButtonVariant {
     case tinted  // primaryTint 배경
 }
 
+public enum DSIconButtonTint {
+    case secondary  // 기본 — textSecondary
+    case tertiary   // 연한 회색(gray-300 급) — 타임라인 편집 연필 등 비강조 아이콘
+}
+
 public struct DSIconButton: View {
     public let systemName: String
     public var variant: DSIconButtonVariant
+    public var iconSize: CGFloat
+    public var tint: DSIconButtonTint
     public let action: () -> Void
 
     public init(
         systemName: String,
         variant: DSIconButtonVariant = .plain,
+        iconSize: CGFloat = 20,
+        tint: DSIconButtonTint = .secondary,
         action: @escaping () -> Void
     ) {
         self.systemName = systemName
         self.variant    = variant
+        self.iconSize   = iconSize
+        self.tint       = tint
         self.action     = action
     }
 
     @Environment(\.theme) private var theme
 
+    private var fg: Color {
+        switch tint {
+        case .secondary: return theme.color.textSecondary.color
+        case .tertiary:  return theme.color.textTertiary.color
+        }
+    }
+
     public var body: some View {
         Button(action: action) {
             Image(systemName: systemName)
-                .font(.system(size: 20, weight: .regular))
-                .foregroundStyle(theme.color.textSecondary.color)
+                .font(.system(size: iconSize, weight: .regular))
+                .foregroundStyle(fg)
                 .frame(width: theme.component.iconButtonSize,
                        height: theme.component.iconButtonSize)
                 .background(

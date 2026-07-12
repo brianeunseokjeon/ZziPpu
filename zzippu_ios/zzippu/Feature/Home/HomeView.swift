@@ -389,13 +389,15 @@ private struct DayTimelineSection: View {
                     .padding(.vertical, theme.space.md)
             } else {
                 ForEach(Array(items.enumerated()), id: \.element.id) { index, item in
+                    let rowVariant: TimelineRowVariant = (isToday && index == 0) ? .highlighted : .normal
                     TimelineGroupView(
-                        variant: (isToday && index == 0) ? .highlighted : .normal
+                        variant: rowVariant
                     ) {
                         TimelineItemRow(
                             time:     item.time.timeString,
                             label:    item.label,
                             dotColor: theme.color.solid(for: item.domainKind).color,
+                            variant:  rowVariant,
                             onEdit:   { editRecord = vm.editableRecord(for: item, on: day) }
                         )
                         // LazyVStack 에서는 swipeActions 가 동작하지 않으므로
@@ -484,10 +486,10 @@ private struct BigActionGrid: View {
             columns: Array(repeating: GridItem(.flexible(), spacing: theme.space.sm), count: 3),
             spacing: theme.space.sm
         ) {
-            BigActionButton(emoji: "🍼", label: "분유", kind: .feedingFormula) { onAction(.formula) }
-            BigActionButton(emoji: "🤱", label: "모유", kind: .feedingBreastBoth) { onAction(.breast) }
-            BigActionButton(emoji: "💧", label: "소변", kind: .diaperPee) { onAction(.pee) }
-            BigActionButton(emoji: "💩", label: "대변", kind: .diaperPoop) { onAction(.poo) }
+            BigActionButton(emoji: "🍼", label: "분유", kind: .formula) { onAction(.formula) }
+            BigActionButton(emoji: "🤱", label: "모유", kind: .breast) { onAction(.breast) }
+            BigActionButton(emoji: "💧", label: "소변", kind: .pee) { onAction(.pee) }
+            BigActionButton(emoji: "💩", label: "대변", kind: .poo) { onAction(.poo) }
             BigActionButton(
                 emoji: "😴",
                 label: hasActiveSleep ? "수면 종료" : "수면 시작",
@@ -507,40 +509,38 @@ private struct BigActionGrid: View {
 private struct BigActionButton: View {
     let emoji: String
     let label: String
-    let kind:  DomainKind
+    let kind:  QuickButtonKind
     var isActive: Bool = false
     let action: () -> Void
 
     @Environment(\.theme) private var theme
     @State private var isPressed = false
 
+    // 웹 BigActionGrid.tsx: idle=bg{50}/border{100}/text{700}, active=bg{100}/border{300}/text{800}.
+    private var palette: QuickButtonColors { theme.color.quickButton(kind) }
+
     var body: some View {
         Button(action: action) {
+            // 웹: flex-col gap-1(4pt), py-3(12pt), rounded-xl(12), border 1pt, active:scale-95.
             VStack(spacing: theme.space.xs) {
-                Text(emoji).font(.system(size: 22))
+                Text(emoji).font(.system(size: 20))       // 웹 text-xl = 20pt
                 Text(label)
-                    .font(theme.typography.captionStrong)
-                    .foregroundStyle(theme.color.solid(for: kind).color)
+                    .font(.system(size: 11, weight: .semibold))  // 웹 text-[11px] font-semibold
                     .lineLimit(1)
                     .minimumScaleFactor(0.8)
             }
+            .foregroundStyle((isActive ? palette.activeText : palette.idleText).color)
             .frame(maxWidth: .infinity)
-            .padding(.vertical, theme.space.md)
+            .padding(.vertical, theme.space.stackGapMd)   // py-3 = 12pt
             .background(
-                RoundedRectangle(cornerRadius: theme.radius.controlLg, style: .continuous)
-                    .fill(theme.color.tint(for: kind).color)
-                    // press 시 도메인 색 tint를 살짝 진하게(피드백).
-                    .overlay(
-                        RoundedRectangle(cornerRadius: theme.radius.controlLg, style: .continuous)
-                            .fill(theme.color.solid(for: kind).color.opacity(isPressed ? 0.12 : 0))
-                    )
+                RoundedRectangle(cornerRadius: theme.radius.control, style: .continuous)
+                    .fill((isActive ? palette.activeBg : palette.idleBg).color)
             )
             .overlay(
-                RoundedRectangle(cornerRadius: theme.radius.controlLg, style: .continuous)
-                    .stroke(theme.color.solid(for: kind).color,
-                            lineWidth: isActive ? 2 : 0)
+                RoundedRectangle(cornerRadius: theme.radius.control, style: .continuous)
+                    .stroke((isActive ? palette.activeBorder : palette.idleBorder).color, lineWidth: 1)
             )
-            .scaleEffect(isPressed ? 0.97 : 1.0)
+            .scaleEffect(isPressed ? 0.95 : 1.0)          // active:scale-95
             .animation(.easeOut(duration: 0.12), value: isPressed)
         }
         .buttonStyle(.plain)

@@ -67,7 +67,41 @@ extension Theme {
             domainSleepSolid: sc.domainSleepSolid,
             domainSleepTint:  sc.domainSleepTint,
             domainPlaySolid:  sc.domainPlaySolid,
-            domainPlayTint:   sc.domainPlayTint
+            domainPlayTint:   sc.domainPlayTint,
+            quickButton: { kind in
+                switch kind {
+                case .formula:
+                    return QuickButtonColors(
+                        idleBg: sc.quickButtonFormulaIdleBg, idleBorder: sc.quickButtonFormulaIdleBorder, idleText: sc.quickButtonFormulaIdleText,
+                        activeBg: sc.quickButtonFormulaActiveBg, activeBorder: sc.quickButtonFormulaActiveBorder, activeText: sc.quickButtonFormulaActiveText
+                    )
+                case .breast:
+                    return QuickButtonColors(
+                        idleBg: sc.quickButtonBreastIdleBg, idleBorder: sc.quickButtonBreastIdleBorder, idleText: sc.quickButtonBreastIdleText,
+                        activeBg: sc.quickButtonBreastActiveBg, activeBorder: sc.quickButtonBreastActiveBorder, activeText: sc.quickButtonBreastActiveText
+                    )
+                case .pee:
+                    return QuickButtonColors(
+                        idleBg: sc.quickButtonPeeIdleBg, idleBorder: sc.quickButtonPeeIdleBorder, idleText: sc.quickButtonPeeIdleText,
+                        activeBg: sc.quickButtonPeeActiveBg, activeBorder: sc.quickButtonPeeActiveBorder, activeText: sc.quickButtonPeeActiveText
+                    )
+                case .poo:
+                    return QuickButtonColors(
+                        idleBg: sc.quickButtonPooIdleBg, idleBorder: sc.quickButtonPooIdleBorder, idleText: sc.quickButtonPooIdleText,
+                        activeBg: sc.quickButtonPooActiveBg, activeBorder: sc.quickButtonPooActiveBorder, activeText: sc.quickButtonPooActiveText
+                    )
+                case .sleep:
+                    return QuickButtonColors(
+                        idleBg: sc.quickButtonSleepIdleBg, idleBorder: sc.quickButtonSleepIdleBorder, idleText: sc.quickButtonSleepIdleText,
+                        activeBg: sc.quickButtonSleepActiveBg, activeBorder: sc.quickButtonSleepActiveBorder, activeText: sc.quickButtonSleepActiveText
+                    )
+                case .play:
+                    return QuickButtonColors(
+                        idleBg: sc.quickButtonPlayIdleBg, idleBorder: sc.quickButtonPlayIdleBorder, idleText: sc.quickButtonPlayIdleText,
+                        activeBg: sc.quickButtonPlayActiveBg, activeBorder: sc.quickButtonPlayActiveBorder, activeText: sc.quickButtonPlayActiveText
+                    )
+                }
+            }
         )
 
         // MARK: Typography

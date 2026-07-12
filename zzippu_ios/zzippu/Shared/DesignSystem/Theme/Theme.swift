@@ -81,6 +81,9 @@ struct ThemeColor {
     let domainPlaySolid:  DynamicColor
     let domainPlayTint:   DynamicColor
 
+    // MARK: QuickButton — 홈 6버튼 상태별 팔레트(웹 BigActionGrid 1:1)
+    let quickButton: (QuickButtonKind) -> QuickButtonColors
+
     // MARK: Domain color lookup (저결합)
     func solid(for kind: DomainKind) -> DynamicColor {
         switch kind {
@@ -281,6 +284,22 @@ public enum DomainKind {
     case diaperBoth
     case sleep
     case play
+}
+
+/// 홈 퀵버튼(BigActionGrid) 도메인 키
+public enum QuickButtonKind {
+    case formula, breast, pee, poo, sleep, play
+}
+
+/// 퀵버튼 상태별 색 묶음(idle/active × bg/border/text). 웹 BigActionGrid 상태 매핑.
+/// DynamicColor(internal)를 담으므로 struct도 internal 유지(ThemeColor와 동일 접근수준).
+struct QuickButtonColors {
+    let idleBg:       DynamicColor
+    let idleBorder:   DynamicColor
+    let idleText:     DynamicColor
+    let activeBg:     DynamicColor
+    let activeBorder: DynamicColor
+    let activeText:   DynamicColor
 }
 
 /// 대변 색 스와치 키
