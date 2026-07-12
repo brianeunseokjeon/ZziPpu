@@ -74,14 +74,20 @@ public struct TimelineItemRow: View {
                     .foregroundStyle(theme.color.textPrimary.color)
                     .frame(maxWidth: .infinity, alignment: .leading)
 
-                // Edit button — 웹: 아웃라인 연필 gray-300(textTertiary), 14pt, 배경/채움 없음.
-                if let onEdit {
-                    DSIconButton(systemName: "pencil", iconSize: 14, tint: .tertiary, action: onEdit)
+                // 상세로 이동 표시(화살표) — 탭은 아이콘이 아니라 "행 전체"가 처리한다.
+                if onEdit != nil {
+                    Image(systemName: "chevron.right")
+                        .font(.system(size: 13, weight: .semibold))
+                        .foregroundStyle(theme.color.textTertiary.color)
+                        .frame(width: 24, height: 24)   // 시각 정렬용 여백
                 }
             }
         }
         // 좌우/상하 패딩은 그룹(TimelineGroupView)이 담당. 행 높이는 웹 min-h-1.8rem(≈29).
         .frame(minHeight: 29)
+        // 행 전체를 탭하면 편집 모달 오픈(아이콘만이 아니라 UI 전체).
+        .contentShape(Rectangle())
+        .onTapGesture { onEdit?() }
     }
 }
 
