@@ -64,10 +64,11 @@ public struct AppHeader: View {
 
     private var dateText: String {
         // 웹정합: 웹 헤더는 오늘도 "M월 d일"을 그대로 노출(formatDate). "오늘" 치환 폐기.
+        // 요일(E) 병기 — 예: "7월 12일 (일)". ko_KR에서 E=일/월/…
         let fmt = DateFormatter()
         fmt.locale = Locale(identifier: "ko_KR")
         fmt.timeZone = .kst
-        fmt.dateFormat = "M월 d일"
+        fmt.dateFormat = "M월 d일 (E)"
         return fmt.string(from: selectedDate)
     }
 
@@ -98,11 +99,11 @@ public struct AppHeader: View {
                     onDateChange(prev)
                 }
 
-                // 웹정합: 날짜 라벨 text-sm(14) medium(=body), min-w 110(전환 시 폭 흔들림 방지).
+                // 날짜 라벨 text-sm(14) medium(=body). 요일 병기로 폭 증가 → min-w 130(전환 시 흔들림 방지).
                 Text(dateText)
                     .font(theme.typography.body)
                     .foregroundStyle(theme.color.textPrimary.color)
-                    .frame(minWidth: 110, alignment: .center)
+                    .frame(minWidth: 130, alignment: .center)
 
                 DSIconButton(systemName: "chevron.right", iconSize: 16) {
                     guard !isToday else { return }
