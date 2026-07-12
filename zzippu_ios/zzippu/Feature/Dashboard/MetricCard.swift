@@ -13,9 +13,28 @@ struct MetricCard: View {
     let color:    Color
     let points:   [MetricPoint]
     let sparkKind: SparklineKind
+    /// 비중 도넛 세그먼트. nil/빈 배열이면 스파크라인으로 폴백(비추이 카드만 도넛 사용).
+    let donutSegments: [DSDonutSegment]?
+    let donutCenter:   (text: String, caption: String)?
     let onTap:   () -> Void
 
+    init(
+        title: String, value: String, subValue: String, symbol: String,
+        color: Color, points: [MetricPoint], sparkKind: SparklineKind,
+        donutSegments: [DSDonutSegment]? = nil,
+        donutCenter: (text: String, caption: String)? = nil,
+        onTap: @escaping () -> Void
+    ) {
+        self.title = title; self.value = value; self.subValue = subValue
+        self.symbol = symbol; self.color = color; self.points = points
+        self.sparkKind = sparkKind
+        self.donutSegments = donutSegments; self.donutCenter = donutCenter
+        self.onTap = onTap
+    }
+
     @Environment(\.theme) private var theme
+
+    private var usesDonut: Bool { (donutSegments?.isEmpty == false) }
 
     var body: some View {
         Button(action: onTap) {
@@ -36,26 +55,49 @@ struct MetricCard: View {
 
                 Spacer().frame(height: 10)
 
-                // 큰 숫자
-                Text(value)
-                    .font(theme.typography.display)
-                    .dsDynamicTypeCap()
-                    .foregroundStyle(theme.color.textPrimary.color)
-                    .lineLimit(1)
-                    .minimumScaleFactor(0.7)
+                if usesDonut, let segments = donutSegments {
+                    // 비중 도넛(수유 분유/모유, 기저귀 소/대) — 중앙에 대표값
+                    HStack(alignment: .center, spacing: 10) {
+                        DSDonutChart(
+                            segments: segments,
+                            centerText: donutCenter?.text ?? value,
+                            centerCaption: donutCenter?.caption,
+                            size: .sm
+                        )
+                        VStack(alignment: .leading, spacing: 3) {
+                            ForEach(segments) { seg in
+                                HStack(spacing: 5) {
+                                    Circle().fill(seg.color).frame(width: 7, height: 7)
+                                    Text(seg.label)
+                                        .font(theme.typography.caption)
+                                        .foregroundStyle(theme.color.textSecondary.color)
+                                }
+                            }
+                        }
+                        Spacer(minLength: 0)
+                    }
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                } else {
+                    // 값 (title 18 — 화면당 display36 1개 원칙, 그리드는 title로 강등)
+                    Text(value)
+                        .font(theme.typography.title)
+                        .foregroundStyle(theme.color.textPrimary.color)
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.7)
 
-                if !subValue.isEmpty {
-                    Text(subValue)
-                        .font(theme.typography.caption)
-                        .foregroundStyle(theme.color.textTertiary.color)
-                        .padding(.top, 2)
+                    if !subValue.isEmpty {
+                        Text(subValue)
+                            .font(theme.typography.caption)
+                            .foregroundStyle(theme.color.textTertiary.color)
+                            .padding(.top, 2)
+                    }
+
+                    Spacer().frame(height: 12)
+
+                    // 미니 스파크라인(추이 카드 — 수면·놀이)
+                    SparklineChart(points: points, kind: sparkKind, color: color)
+                        .frame(height: 36)
                 }
-
-                Spacer().frame(height: 12)
-
-                // 미니 스파크라인
-                SparklineChart(points: points, kind: sparkKind, color: color)
-                    .frame(height: 36)
             }
             .padding(16)
             .frame(maxWidth: .infinity, alignment: .leading)
@@ -100,8 +142,7 @@ struct GrowthMetricCard: View {
                             .font(theme.typography.caption)
                             .foregroundStyle(theme.color.textTertiary.color)
                         Text(weight)
-                            .font(theme.typography.display)
-                            .dsDynamicTypeCap()
+                            .font(theme.typography.headline)
                             .minimumScaleFactor(0.6)
                             .lineLimit(1)
                             .foregroundStyle(theme.color.textPrimary.color)
@@ -111,8 +152,7 @@ struct GrowthMetricCard: View {
                             .font(theme.typography.caption)
                             .foregroundStyle(theme.color.textTertiary.color)
                         Text(height)
-                            .font(theme.typography.display)
-                            .dsDynamicTypeCap()
+                            .font(theme.typography.headline)
                             .minimumScaleFactor(0.6)
                             .lineLimit(1)
                             .foregroundStyle(theme.color.textPrimary.color)

@@ -50,6 +50,7 @@ final class DashboardViewModel {
     // MARK: - UseCases (순수 집계)
 
     private let trendUseCase = ComputeTrendUseCase()
+    private let summaryUseCase = ComputeDashboardSummaryUseCase()
     private let insightsUseCase: EvaluateInsightsUseCase
 
     // MARK: - Init
@@ -136,6 +137,62 @@ final class DashboardViewModel {
 
     var playSparkPoints: [MetricPoint] {
         trendUseCase.playTrend(plays: sparkPlays, range: .week, anchorDate: selectedDate)
+    }
+
+    // MARK: - Computed: 도넛 세그먼트 (수유 타입별 / 기저귀 소·대)
+
+    /// 선택 날짜의 수유 기록(sparkFeedings 7일치에서 필터).
+    private var todayFeedings: [Feeding] {
+        let cal = Calendar.kst
+        let day = cal.startOfDay(for: selectedDate)
+        return sparkFeedings.filter { cal.startOfDay(for: $0.startedAt) == day }
+    }
+
+    /// 수유 도넛 원천값(분유 ml : 모유 ml/회수). UI는 값만 받음.
+    var feedingBreakdown: ComputeDashboardSummaryUseCase.FeedingBreakdown {
+        summaryUseCase.feedingBreakdown(todayFeedings)
+    }
+
+    /// 수유 도넛: 분유 vs 모유. ml 우선, 모유 ml 미기록이면 회수 비중으로 폴백.
+    var feedingDonutSegments: [(value: Double, isFormula: Bool, label: String)] {
+        let b = feedingBreakdown
+        // 둘 다 ml 있으면 ml 기준
+        if b.formulaMl > 0 || b.breastMl > 0 {
+            var segs: [(Double, Bool, String)] = []
+            if b.formulaMl > 0 { segs.append((Double(b.formulaMl), true, "분유")) }
+            if b.breastMl > 0 { segs.append((Double(b.breastMl), false, "모유")) }
+            // 모유는 ml 없지만 회수는 있는 경우 — 최소 존재 표시(회수를 ml 대용 스케일)
+            if b.breastMl == 0 && b.breastCount > 0 {
+                segs.append((Double(b.breastCount), false, "모유"))
+            }
+            return segs.map { (value: $0.0, isFormula: $0.1, label: $0.2) }
+        }
+        // ml 전무 → 회수 비중
+        var segs: [(Double, Bool, String)] = []
+        if b.formulaCount > 0 { segs.append((Double(b.formulaCount), true, "분유")) }
+        if b.breastCount > 0 { segs.append((Double(b.breastCount), false, "모유")) }
+        return segs.map { (value: $0.0, isFormula: $0.1, label: $0.2) }
+    }
+
+    /// 수유 도넛 중앙 텍스트(총 ml 또는 총 회수).
+    var feedingDonutCenter: (text: String, caption: String) {
+        let ml = dailySummary.totalFeedingMl
+        if ml > 0 { return ("\(ml)", "ml") }
+        let cnt = dailySummary.feedingCount
+        return cnt > 0 ? ("\(cnt)", "회") : ("—", "")
+    }
+
+    /// 기저귀 도넛: 소(pee) vs 대(poop). dailySummary에 이미 존재 → 매핑만.
+    var diaperDonutSegments: [(value: Double, isPee: Bool, label: String)] {
+        var segs: [(Double, Bool, String)] = []
+        if dailySummary.peeCount > 0 { segs.append((Double(dailySummary.peeCount), true, "소변")) }
+        if dailySummary.poopCount > 0 { segs.append((Double(dailySummary.poopCount), false, "대변")) }
+        return segs.map { (value: $0.0, isPee: $0.1, label: $0.2) }
+    }
+
+    var diaperDonutCenter: (text: String, caption: String) {
+        let total = dailySummary.diaperCount
+        return total > 0 ? ("\(total)", "회") : ("—", "")
     }
 
     // MARK: - Computed: 표시용 포맷

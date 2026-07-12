@@ -94,25 +94,46 @@ struct DashboardContentView: View {
     @Bindable var vm: DashboardViewModel
     @Environment(\.theme) private var theme
 
+    // 도메인 값(VM 튜플) → DS 세그먼트(theme 색 주입). DS는 Domain 비의존.
+    private var feedingDonutSegments: [DSDonutSegment] {
+        vm.feedingDonutSegments.map { seg in
+            DSDonutSegment(
+                value: seg.value,
+                color: seg.isFormula
+                    ? theme.color.domainFeedingFormulaSolid.color
+                    : theme.color.domainFeedingBreastBothSolid.color,
+                label: seg.label
+            )
+        }
+    }
+
+    private var diaperDonutSegments: [DSDonutSegment] {
+        vm.diaperDonutSegments.map { seg in
+            DSDonutSegment(
+                value: seg.value,
+                color: seg.isPee
+                    ? theme.color.domainDiaperPeeSolid.color
+                    : theme.color.domainDiaperPoopSolid.color,
+                label: seg.label
+            )
+        }
+    }
+
     var body: some View {
         ScrollView {
             LazyVStack(spacing: theme.space.sectionGap) {
-                // 다음 수유 예측 카드 (상단 강조)
-                NextFeedingCard(prediction: vm.prediction)
-                    .padding(.horizontal, theme.space.screenPaddingX)
-
-                // 오늘의 분석 — 가이드 비교 인사이트
+                // ① 오늘의 분석 — 가이드 비교 인사이트(최상단 롤업)
                 TodayInsightsSection(insights: vm.insights, headline: vm.insightsHeadline)
                     .padding(.horizontal, theme.space.screenPaddingX)
 
-                // 수유 적정량 게이지 (체중 기반 권장 밴드)
+                // ② 오늘 수유량 대표 지표(화면 유일 display36 · 링 게이지)
                 FeedingAdequacyCard(
                     totalMl: vm.dailySummary.totalFeedingMl,
                     recommendedRange: vm.feedingRecommendedRange
                 )
                 .padding(.horizontal, theme.space.screenPaddingX)
 
-                // 메트릭 카드 그리드 (2열)
+                // ③ 2열 지표 카드 그리드 (수유·수면·기저귀·놀이)
                 DSSectionHeader(title: "오늘 요약")
 
                 LazyVGrid(
@@ -128,6 +149,8 @@ struct DashboardContentView: View {
                             color:     theme.color.domainFeedingFormulaSolid.color,
                             points:    vm.feedingSparkPoints,
                             sparkKind: .bar,
+                            donutSegments: feedingDonutSegments,
+                            donutCenter:   vm.feedingDonutCenter,
                             onTap:     {}
                         )
                     }
@@ -156,6 +179,8 @@ struct DashboardContentView: View {
                             color:     theme.color.domainDiaperPeeSolid.color,
                             points:    vm.diaperSparkPoints,
                             sparkKind: .bar,
+                            donutSegments: diaperDonutSegments,
+                            donutCenter:   vm.diaperDonutCenter,
                             onTap:     {}
                         )
                     }
@@ -174,16 +199,22 @@ struct DashboardContentView: View {
                         )
                     }
                     .buttonStyle(.plain)
-
-                    NavigationLink(value: DashboardDestination.growthDetail) {
-                        GrowthMetricCard(
-                            weight: vm.latestWeightText,
-                            height: vm.latestHeightText,
-                            onTap:  {}
-                        )
-                    }
-                    .buttonStyle(.plain)
                 }
+                .padding(.horizontal, theme.space.screenPaddingX)
+
+                // ④ 다음 수유/수면 예측 (적정 크기)
+                NextFeedingCard(prediction: vm.prediction)
+                    .padding(.horizontal, theme.space.screenPaddingX)
+
+                // ⑤ 성장 요약 (전폭 카드)
+                NavigationLink(value: DashboardDestination.growthDetail) {
+                    GrowthMetricCard(
+                        weight: vm.latestWeightText,
+                        height: vm.latestHeightText,
+                        onTap:  {}
+                    )
+                }
+                .buttonStyle(.plain)
                 .padding(.horizontal, theme.space.screenPaddingX)
             }
             .padding(.vertical, theme.space.screenPaddingY)

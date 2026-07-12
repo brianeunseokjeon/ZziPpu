@@ -145,6 +145,20 @@ extension ButtonStyle where Self == DSButtonStyle {
 - SwiftUI: `DSGaugeBar(fillRatio:normalRange:tone:)`. tone→fill 색은 `status.{tone}.solid`.
 - 웹 매핑: FeedingAdequacyCard 게이지.
 
+## 13a. DonutChart (비중)
+
+- variant: 2~4 세그먼트 비중 도넛. `size` = `sm`(카드 미니, 라벨 숨김) / `lg`(상세, 범례). 데이터 없으면 완곡한 빈 링 + 중앙 "—".
+- 토큰: 세그먼트 색은 호출자가 `domain*Solid`/`status*` Color로 주입(DS는 Domain 비의존). 빈 링=`surfaceSunken`, 중앙 텍스트=`textPrimary`.
+- SwiftUI: `DSDonutChart(segments:[DSDonutSegment(value:color:label:)], centerText:centerCaption:size:showLegend:)`. Swift Charts `SectorMark`(iOS17+, innerRadius ratio 0.62).
+- 웹 매핑: 대시보드 수유(분유:모유) / 기저귀(소:대) 비중 원그래프.
+
+## 13b. RingGauge (적정도)
+
+- variant: 단일 진행/적정도 링(270° 아크). `tone`→채움색, `normalRange`(권장 상한 기준 정규화)로 권장 밴드 강조. 중앙 대표값(display36).
+- 토큰: track=`surfaceSunken`, normalBand=`status.success.bg`, fill=`status.{tone}.solid`. 내부 130% 축으로 초과분 표시.
+- SwiftUI: `DSRingGauge(ratio:normalRange:tone:centerText:centerCaption:size:lineWidth:)`. `ratio`=총량/권장상한. `Path` 아크(Shape) 구현.
+- 웹 매핑: FeedingAdequacyCard 대표 지표(오늘 수유량 링).
+
 ## 14. Toast / Snackbar
 
 - variant: `success` / `error` / `info`. 하단 중앙, 자동 소멸(3.5s, `motion.toastAutoDismissMs`), 탭 시 즉시 닫힘.

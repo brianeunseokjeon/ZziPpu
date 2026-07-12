@@ -24,8 +24,6 @@
 		0DCC66F5603F592F112146CC /* OnboardingViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB29328896FFE322C5D2A2B6 /* OnboardingViewModel.swift */; };
 		1342EEF1B57E5AA3A29C1F9A /* DiaperType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 734CF29084606CB53760BC23 /* DiaperType.swift */; };
 		15816DA16E6B4BF0D18CBC20 /* AppContainer.swift in Sources */ = {isa = PBXBuildFile; fileRef = DC6116370C00CA56076813B3 /* AppContainer.swift */; };
-		AAAA000000000000000000A1 /* OfflineToggle.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAAA000000000000000000B1 /* OfflineToggle.swift */; };
-		AAAA000000000000000000A2 /* OfflineInfra.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAAA000000000000000000B2 /* OfflineInfra.swift */; };
 		1819F3AE6C2A8CB4878F7E9F /* CaregiverViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 78B9F2C9C92B87B2CD9D3EBF /* CaregiverViewModel.swift */; };
 		1853F231279C13D9DE1D3BFE /* Motion.generated.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D5CD5D64393B98F64FD21AA /* Motion.generated.swift */; };
 		185773B3CBADA1229AC35B98 /* DSTabBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4EAA4BDA7B549959F0982AB /* DSTabBar.swift */; };
@@ -43,6 +41,7 @@
 		1F1215962FFE889600F02CA5 /* zzippuUITestsLaunchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1F1215952FFE889600F02CA5 /* zzippuUITestsLaunchTests.swift */; };
 		231731F2F57F90A0703C52C5 /* LocalFeedingRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7E4477BEDBCCAFD2798A27F7 /* LocalFeedingRepository.swift */; };
 		23DF12C0309FC6BC075773F0 /* BabyRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = A27FD59AFCABD2B6BDD8FB09 /* BabyRepository.swift */; };
+		27453046BD7CBC687AE4C35D /* DSDonutChart.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D167BF5C864319F99BFADB4 /* DSDonutChart.swift */; };
 		278E46F4D0AA6A7735AD3D51 /* AppHeader.swift in Sources */ = {isa = PBXBuildFile; fileRef = A3D5AD97DB4402EBDFB269B7 /* AppHeader.swift */; };
 		27F702B5BBC718EC5672F248 /* APIError.swift in Sources */ = {isa = PBXBuildFile; fileRef = C271F7BCE733B0BBBF4B62FE /* APIError.swift */; };
 		284D275F363C97ECB2C59C9D /* RemoteDiaperRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = EAC64E3B6ACF98DA0422C9EE /* RemoteDiaperRepository.swift */; };
@@ -144,6 +143,9 @@
 		A3FB574A3C8038F10F0A0154 /* DashboardDTO.swift in Sources */ = {isa = PBXBuildFile; fileRef = 465ED0CC3B1DCBA09A985137 /* DashboardDTO.swift */; };
 		A59B2F06922AA56FA568044B /* BabyProfileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58C3DDC56C3FB9C79CF22891 /* BabyProfileView.swift */; };
 		A8CFF3C35CEA798716D7A743 /* ToastCenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 22A5DB23AF1D70998F4AD9FE /* ToastCenter.swift */; };
+		AAAA000000000000000000A1 /* OfflineToggle.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAAA000000000000000000B1 /* OfflineToggle.swift */; };
+		AAAA000000000000000000A2 /* OfflineInfra.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAAA000000000000000000B2 /* OfflineInfra.swift */; };
+		AAAAAAAAAAAAAAAAAAAA0001 /* Calendar+KST.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAAAAAAAAAAAAAAAAAAA0002 /* Calendar+KST.swift */; };
 		AB24EA15EB80A6C6E4EA98D7 /* SleepRecord.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8AB367D535416C42DBA06D6C /* SleepRecord.swift */; };
 		AC453B903112BAA43B7D9DB8 /* PlayDTO.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6D2751E5038B51444550AD65 /* PlayDTO.swift */; };
 		AC76D41EFA2622DAB1A477EB /* SaveDiaperUseCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9F2099E28FC13F347F86EFC /* SaveDiaperUseCase.swift */; };
@@ -179,6 +181,7 @@
 		E55C477C3E412A33B3BF783C /* AuthRemoteDataSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = 462279624CC6352D8362F327 /* AuthRemoteDataSource.swift */; };
 		E5CC0FE63924828EEA9C7997 /* HomeViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3DCB48126456D01CA517AC82 /* HomeViewModel.swift */; };
 		E6891422AD8083153A30D501 /* SaveSleepUseCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = DCFF8FF117EEABBDEE84C4D7 /* SaveSleepUseCase.swift */; };
+		E6E9C2FFD75D0213C0DF79E6 /* DSRingGauge.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C4162B2CA40D989AB0198D8 /* DSRingGauge.swift */; };
 		E7947006F5DFCAC2CA4047A9 /* DiaperRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8D99E4EBFB60B2E1E16C24B /* DiaperRepository.swift */; };
 		E7CC68FFE9D64A147E184A73 /* RemotePlayDataSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = C723460CF9DA8ABDBD0A0D81 /* RemotePlayDataSource.swift */; };
 		E881245F458D5C5A794427F9 /* AnalysisCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0A84670C6CDDDBBFB60369B3 /* AnalysisCard.swift */; };
@@ -195,7 +198,6 @@
 		FE235807FC697663AA5BFC2C /* AuthViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC5E5BB66C303191729CAD07 /* AuthViewModel.swift */; };
 		FEC52097C96ECFE610DDEC53 /* DiaperRecord.swift in Sources */ = {isa = PBXBuildFile; fileRef = 461B2AD016FE8779CEBA3C4E /* DiaperRecord.swift */; };
 		FF3417C96429D55E89C07F10 /* Date+.swift in Sources */ = {isa = PBXBuildFile; fileRef = 217B6B25134223FE24756126 /* Date+.swift */; };
-		AAAAAAAAAAAAAAAAAAAA0001 /* Calendar+KST.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAAAAAAAAAAAAAAAAAAA0002 /* Calendar+KST.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -240,6 +242,7 @@
 		1B2A99259BF614C30A986E61 /* DSBottomSheet.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DSBottomSheet.swift; sourceTree = "<group>"; };
 		1BCAD8104026EE66E2C18481 /* EnvironmentTheme.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = EnvironmentTheme.swift; sourceTree = "<group>"; };
 		1BEB5534F7B49932733DC943 /* VaccinationMapper.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = VaccinationMapper.swift; path = Network/Mappers/VaccinationMapper.swift; sourceTree = "<group>"; };
+		1D167BF5C864319F99BFADB4 /* DSDonutChart.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DSDonutChart.swift; sourceTree = "<group>"; };
 		1F1215732FFE889300F02CA5 /* zzippu.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = zzippu.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		1F1215762FFE889300F02CA5 /* zzippuApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = zzippuApp.swift; sourceTree = "<group>"; };
 		1F1215782FFE889400F02CA5 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
@@ -253,7 +256,6 @@
 		20668740BDF1EFCB382A9A97 /* DiaperInputSheet.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DiaperInputSheet.swift; sourceTree = "<group>"; };
 		20A1B4DFCE9B542AAEA92808 /* Theme.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = Theme.swift; sourceTree = "<group>"; };
 		217B6B25134223FE24756126 /* Date+.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = "Date+.swift"; path = "Date+.swift"; sourceTree = "<group>"; };
-		AAAAAAAAAAAAAAAAAAAA0002 /* Calendar+KST.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = "Calendar+KST.swift"; path = "Calendar+KST.swift"; sourceTree = "<group>"; };
 		223E5075EFDB13983FACE758 /* APIDateCodec.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = APIDateCodec.swift; path = Network/APIDateCodec.swift; sourceTree = "<group>"; };
 		22A5DB23AF1D70998F4AD9FE /* ToastCenter.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ToastCenter.swift; sourceTree = "<group>"; };
 		22F92D7416CF5079E647E6CA /* PlayInputSheet.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PlayInputSheet.swift; sourceTree = "<group>"; };
@@ -331,6 +333,7 @@
 		7AE63A49D75373F2DC84608A /* GrowthRepository.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = GrowthRepository.swift; sourceTree = "<group>"; };
 		7BED2A76C40FDFD4111AC2C6 /* CaregiverMapper.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = CaregiverMapper.swift; path = Network/Mappers/CaregiverMapper.swift; sourceTree = "<group>"; };
 		7C316709D85EEE3F919AE448 /* Feeding.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = Feeding.swift; path = Feeding.swift; sourceTree = "<group>"; };
+		7C4162B2CA40D989AB0198D8 /* DSRingGauge.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DSRingGauge.swift; sourceTree = "<group>"; };
 		7CA691FDE2EF6CED2F40EA87 /* pediatric_guidelines.json */ = {isa = PBXFileReference; includeInIndex = 1; path = pediatric_guidelines.json; sourceTree = "<group>"; };
 		7D0349BA2B5565612AA9E478 /* PrimitiveColors.generated.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PrimitiveColors.generated.swift; sourceTree = "<group>"; };
 		7E4477BEDBCCAFD2798A27F7 /* LocalFeedingRepository.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = LocalFeedingRepository.swift; sourceTree = "<group>"; };
@@ -356,6 +359,9 @@
 		A7A217DA6E231205E5AC2151 /* SleepInputSheet.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SleepInputSheet.swift; sourceTree = "<group>"; };
 		A7B61589E08ED3148FD5DBEF /* CaregiverView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CaregiverView.swift; sourceTree = "<group>"; };
 		A92B0E4985B7B7E16061A073 /* FeedingMapper.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = FeedingMapper.swift; path = Network/Mappers/FeedingMapper.swift; sourceTree = "<group>"; };
+		AAAA000000000000000000B1 /* OfflineToggle.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = OfflineToggle.swift; sourceTree = "<group>"; };
+		AAAA000000000000000000B2 /* OfflineInfra.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = OfflineInfra.swift; sourceTree = "<group>"; };
+		AAAAAAAAAAAAAAAAAAAA0002 /* Calendar+KST.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = "Calendar+KST.swift"; path = "Calendar+KST.swift"; sourceTree = "<group>"; };
 		AAF28D6FEB496C79A855FE20 /* RestoreSessionUseCase.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = RestoreSessionUseCase.swift; sourceTree = "<group>"; };
 		AB29328896FFE322C5D2A2B6 /* OnboardingViewModel.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = OnboardingViewModel.swift; sourceTree = "<group>"; };
 		AC241B57F9B896477724FC6F /* DevelopmentViewModel.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DevelopmentViewModel.swift; sourceTree = "<group>"; };
@@ -394,8 +400,6 @@
 		D9BBEB5A2C7B01D5DBE03D84 /* Shadows.generated.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = Shadows.generated.swift; sourceTree = "<group>"; };
 		DB80B6331AAA33F2B625093A /* VaccinationDTO.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = VaccinationDTO.swift; path = Network/DTOs/VaccinationDTO.swift; sourceTree = "<group>"; };
 		DC6116370C00CA56076813B3 /* AppContainer.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = AppContainer.swift; path = AppContainer.swift; sourceTree = "<group>"; };
-		AAAA000000000000000000B1 /* OfflineToggle.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = OfflineToggle.swift; sourceTree = "<group>"; };
-		AAAA000000000000000000B2 /* OfflineInfra.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = OfflineInfra.swift; sourceTree = "<group>"; };
 		DCFF8FF117EEABBDEE84C4D7 /* SaveSleepUseCase.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SaveSleepUseCase.swift; sourceTree = "<group>"; };
 		DF1D700F66EE62EDE0D278B3 /* DevelopmentRepository.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DevelopmentRepository.swift; sourceTree = "<group>"; };
 		DF81BAA54656781FC82170D1 /* RemotePlayRepository.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = RemotePlayRepository.swift; sourceTree = "<group>"; };
@@ -1079,6 +1083,8 @@
 				22A5DB23AF1D70998F4AD9FE /* ToastCenter.swift */,
 				15218DAD74298A15AF785A8B /* DSGaugeBar.swift */,
 				44B90CF02498087E4EF2542B /* DSDisclaimerCaption.swift */,
+				1D167BF5C864319F99BFADB4 /* DSDonutChart.swift */,
+				7C4162B2CA40D989AB0198D8 /* DSRingGauge.swift */,
 			);
 			name = Feedback;
 			path = Feedback;
@@ -1435,6 +1441,8 @@
 				5521BF50453175FCD589E8E9 /* NetworkMonitor.swift in Sources */,
 				6249DAB59DBD4398055453C0 /* SyncDTO.swift in Sources */,
 				2E8821CF269CD1F5C71E5D94 /* SyncState.swift in Sources */,
+				27453046BD7CBC687AE4C35D /* DSDonutChart.swift in Sources */,
+				E6E9C2FFD75D0213C0DF79E6 /* DSRingGauge.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
