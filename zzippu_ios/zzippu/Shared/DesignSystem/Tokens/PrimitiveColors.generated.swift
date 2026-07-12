@@ -88,4 +88,7 @@ enum PrimitiveColor {
     static let yellow800: Color = Color(hex: 0x854D0E)
     static let brown600: Color = Color(hex: 0xA16207)
     static let sky200: Color = Color(hex: 0xBAE6FD)
+    static let teal50: Color = Color(hex: 0xF0FDFA)
+    static let teal400: Color = Color(hex: 0x2DD4BF)
+    static let teal500: Color = Color(hex: 0x14B8A6)
 }

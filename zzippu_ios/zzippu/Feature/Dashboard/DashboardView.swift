@@ -83,8 +83,11 @@ struct DashboardView: View {
 struct DashboardContentView: View {
 
     @Bindable var vm: DashboardViewModel
+    @Environment(AppContainer.self) private var container
     @Environment(AppNavigationState.self) private var appNav
     @Environment(\.theme) private var theme
+
+    @State private var calendarVM: CalendarViewModel?
 
     // 도메인 값(VM 튜플) → DS 세그먼트(theme 색 주입). DS는 Domain 비의존.
     private var feedingDonutSegments: [DSDonutSegment] {
@@ -114,7 +117,13 @@ struct DashboardContentView: View {
     var body: some View {
         ScrollView {
             LazyVStack(spacing: theme.space.sectionGap) {
-                // ① 오늘의 분석 — 가이드 비교 인사이트(최상단 롤업)
+                // ① 달력 — 월별 수유량 + 영유아 검진 (최상단, 기획 §2.3 배치)
+                if let calVM = calendarVM {
+                    DashboardCalendarSection(vm: calVM)
+                        .padding(.horizontal, theme.space.screenPaddingX)
+                }
+
+                // ② 오늘의 분석 — 가이드 비교 인사이트
                 TodayInsightsSection(insights: vm.insights, headline: vm.insightsHeadline)
                     .padding(.horizontal, theme.space.screenPaddingX)
 
@@ -225,8 +234,18 @@ struct DashboardContentView: View {
         }
         .navigationTitle("대시보드")
         .navigationBarTitleDisplayMode(.large)
+        .onAppear {
+            if calendarVM == nil {
+                calendarVM = CalendarViewModel(
+                    feedingRepository: container.feedingRepository,
+                    babyRepository:    container.babyRepository,
+                    babyId:            container.activeBabyId
+                )
+            }
+        }
         .refreshable {
             vm.loadAll()
+            calendarVM?.invalidateCurrentMonthCache()
         }
         .overlay {
             if vm.isLoading && vm.dailySummary == .empty {

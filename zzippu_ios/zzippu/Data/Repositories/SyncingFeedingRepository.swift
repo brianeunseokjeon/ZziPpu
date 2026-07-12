@@ -43,4 +43,9 @@ final class SyncingFeedingRepository: FeedingRepository {
     func lastFeeding(babyId: UUID) async throws -> Feeding? {
         try await local.lastFeeding(babyId: babyId)
     }
+
+    /// 읽기 전용 — 로컬에 위임 (동기화 불필요).
+    func dailyTotals(babyId: UUID, from start: Date, to end: Date) async throws -> [DateVolume] {
+        try await local.dailyTotals(babyId: babyId, from: start, to: end)
+    }
 }

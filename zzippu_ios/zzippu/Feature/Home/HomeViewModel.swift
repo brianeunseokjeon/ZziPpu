@@ -377,6 +377,8 @@ final class HomeViewModel {
             return rec.diapers.first { $0.id == item.id }.map(EditableRecord.diaper)
         case .play:
             return rec.plays.first { $0.id == item.id }.map(EditableRecord.play)
+        case .checkup:
+            return nil   // 검진은 타임라인 편집 없음(달력 표시 전용)
         }
     }
 
@@ -543,6 +545,8 @@ final class HomeViewModel {
                 do { try await playRepository.delete(id: p.id, babyId: p.babyId) }
                 catch { recordsByDay[key]?.plays.insert(p, at: 0); errorMessage = "삭제 실패: \(error.localizedDescription)" }
             }
+        case .checkup:
+            break   // 검진은 달력 전용 — 타임라인 삭제 없음
         }
     }
 }

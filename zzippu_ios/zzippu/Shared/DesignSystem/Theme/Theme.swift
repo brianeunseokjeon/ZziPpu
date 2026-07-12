@@ -82,6 +82,10 @@ struct ThemeColor {
     let domainPlaySolid:  DynamicColor
     let domainPlayTint:   DynamicColor
 
+    // MARK: Domain — Checkup (영유아 검진 달력 표시 전용)
+    let domainCheckupSolid: DynamicColor
+    let domainCheckupTint:  DynamicColor
+
     // MARK: QuickButton — 홈 6버튼 상태별 팔레트(웹 BigActionGrid 1:1)
     let quickButton: (QuickButtonKind) -> QuickButtonColors
 
@@ -98,6 +102,7 @@ struct ThemeColor {
         case .diaperBoth:         return domainDiaperBothSolid
         case .sleep:              return domainSleepSolid
         case .play:               return domainPlaySolid
+        case .checkup:            return domainCheckupSolid
         }
     }
 
@@ -113,6 +118,7 @@ struct ThemeColor {
         case .diaperBoth:         return domainDiaperBothTint
         case .sleep:              return domainSleepTint
         case .play:               return domainPlayTint
+        case .checkup:            return domainCheckupTint
         }
     }
 
@@ -245,6 +251,14 @@ struct ComponentChipTokens {
     let radius:   CGFloat
 }
 
+struct ComponentCalendarCellTokens {
+    let minHeight:      CGFloat  // 52
+    let spacing:        CGFloat  // 4  (셀 간격)
+    let todayCircle:    CGFloat  // 24 (오늘 강조 원 지름)
+    let underbarHeight: CGFloat  // 3
+    let eventDotSize:   CGFloat  // 6
+}
+
 struct ComponentTokens {
     let button:     ComponentButtonTokens
     let card:       ComponentCardTokens
@@ -257,6 +271,7 @@ struct ComponentTokens {
     let statusPillPaddingY: CGFloat  // 6
     let timelineDotSize:     CGFloat // 10
     let timelineDotSizeIdle: CGFloat // 8
+    let calendarCell:        ComponentCalendarCellTokens
 }
 
 // MARK: - Theme
@@ -286,6 +301,7 @@ public enum DomainKind {
     case diaperBoth
     case sleep
     case play
+    case checkup  // 영유아 검진 달력 표시
 }
 
 /// 홈 퀵버튼(BigActionGrid) 도메인 키

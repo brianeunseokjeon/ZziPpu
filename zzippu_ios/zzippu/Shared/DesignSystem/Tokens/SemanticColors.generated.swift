@@ -66,6 +66,8 @@ struct SemanticColorTokens {
     let domainSleepTint: DynamicColor = DynamicColor(light: Color(hex: 0xFAF5FF), dark: Color(hex: 0xC084FC, opacity: 0.22))
     let domainPlaySolid: DynamicColor = DynamicColor(light: Color(hex: 0x4ADE80), dark: Color(hex: 0x4ADE80))
     let domainPlayTint: DynamicColor = DynamicColor(light: Color(hex: 0xF0FDF4), dark: Color(hex: 0x4ADE80, opacity: 0.22))
+    let domainCheckupSolid: DynamicColor = DynamicColor(light: Color(hex: 0x14B8A6), dark: Color(hex: 0x2DD4BF))
+    let domainCheckupTint: DynamicColor = DynamicColor(light: Color(hex: 0xF0FDFA), dark: Color(hex: 0x14B8A6, opacity: 0.22))
     let quickButtonFormulaIdleBg: DynamicColor = DynamicColor(light: Color(hex: 0xEFF6FF), dark: Color(hex: 0x3B82F6, opacity: 0.14))
     let quickButtonFormulaIdleBorder: DynamicColor = DynamicColor(light: Color(hex: 0xDBEAFE), dark: Color(hex: 0x3B82F6, opacity: 0.3))
     let quickButtonFormulaIdleText: DynamicColor = DynamicColor(light: Color(hex: 0x1D4ED8), dark: Color(hex: 0x93C5FD))

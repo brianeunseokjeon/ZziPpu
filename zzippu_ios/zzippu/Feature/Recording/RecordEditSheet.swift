@@ -473,6 +473,7 @@ private struct PreviewFeedingRepo: FeedingRepository {
     func fetch(id: UUID, babyId: UUID) async throws -> Feeding? { nil }
     func list(babyId: UUID, on day: Date) async throws -> [Feeding] { [] }
     func lastFeeding(babyId: UUID) async throws -> Feeding? { nil }
+    func dailyTotals(babyId: UUID, from start: Date, to end: Date) async throws -> [DateVolume] { [] }
 }
 private struct PreviewBabyRepo: BabyRepository {
     func create(_ baby: Baby) async throws -> Baby { baby }

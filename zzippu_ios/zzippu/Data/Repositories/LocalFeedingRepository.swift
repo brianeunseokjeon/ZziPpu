@@ -78,6 +78,30 @@ actor LocalFeedingRepository: FeedingRepository, SyncableStore {
         return try modelContext.fetch(descriptor).first.map(FeedingModelMapper.toEntity)
     }
 
+    /// 날짜 범위 내 날별 총 수유량 집계 — 로컬 SwiftData 단일 쿼리(N+1 없음).
+    /// KST 경계: startedAt >= start(KST 자정) && startedAt < end 다음날 자정.
+    func dailyTotals(babyId: UUID, from start: Date, to end: Date) async throws -> [DateVolume] {
+        let cal = Calendar.kst
+        // end 다음날 자정(= end 포함한 범위 끝)
+        let endExclusive = cal.date(byAdding: .day, value: 1, to: cal.startOfDay(for: end)) ?? end
+
+        let predicate = #Predicate<FeedingModel> { m in
+            m.babyId == babyId && m.deletedAt == nil &&
+            m.startedAt >= start && m.startedAt < endExclusive
+        }
+        let descriptor = FetchDescriptor<FeedingModel>(predicate: predicate)
+        let models = try modelContext.fetch(descriptor)
+
+        // KST 날짜별 ml 합산
+        var buckets: [Date: Int] = [:]
+        for m in models {
+            let day = cal.startOfDay(for: m.startedAt)
+            buckets[day, default: 0] += m.amountMl ?? 0
+        }
+        return buckets.map { DateVolume(day: $0.key, totalMl: $0.value) }
+            .sorted { $0.day < $1.day }
+    }
+
     // MARK: - SyncableStore (동기화 엔진 전용)
 
     /// syncState != synced 인 모든 레코드(tombstone 포함) — push 대상.

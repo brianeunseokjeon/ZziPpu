@@ -70,6 +70,8 @@ extension Theme {
             domainSleepTint:  sc.domainSleepTint,
             domainPlaySolid:  sc.domainPlaySolid,
             domainPlayTint:   sc.domainPlayTint,
+            domainCheckupSolid: sc.domainCheckupSolid,
+            domainCheckupTint:  sc.domainCheckupTint,
             quickButton: { kind in
                 switch kind {
                 case .formula:
@@ -200,7 +202,14 @@ extension Theme {
             statusPillPaddingX:  PrimitiveScale.space2_5,
             statusPillPaddingY:  PrimitiveScale.space1,
             timelineDotSize:     PrimitiveScale.sizeDotMd,
-            timelineDotSizeIdle: PrimitiveScale.sizeDotSm
+            timelineDotSizeIdle: PrimitiveScale.sizeDotSm,
+            calendarCell: ComponentCalendarCellTokens(
+                minHeight:      52,
+                spacing:        PrimitiveScale.space1,   // 4
+                todayCircle:    PrimitiveScale.sizeIconLg, // 24
+                underbarHeight: 3,
+                eventDotSize:   6
+            )
         )
 
         return Theme(

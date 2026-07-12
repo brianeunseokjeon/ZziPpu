@@ -52,4 +52,24 @@ final class RemoteFeedingRepository: FeedingRepository {
         let dtos = try await dataSource.list(babyId: babyId, date: dateStr)
         return dtos.first.map { FeedingMapper.toEntity($0) }
     }
+
+    /// 서버에 range EP 미지원 시 날짜별 N회 호출 폴백 — 오프라인 계층 킬스위치 정책과 정합.
+    /// 향후 서버에 `/feedings/daily-totals?from=&to=` EP 추가 시 단일 호출로 교체 가능.
+    func dailyTotals(babyId: UUID, from start: Date, to end: Date) async throws -> [DateVolume] {
+        let cal = Calendar.kst
+        var cursor = cal.startOfDay(for: start)
+        let endDay = cal.startOfDay(for: end)
+        var results: [DateVolume] = []
+
+        while cursor <= endDay {
+            let dateStr = APIDateCodec.formatDate(cursor)
+            let dtos = try await dataSource.list(babyId: babyId, date: dateStr)
+            let total = dtos.reduce(0) { $0 + ($1.amountMl ?? 0) }
+            if total > 0 {
+                results.append(DateVolume(day: cursor, totalMl: total))
+            }
+            cursor = cal.date(byAdding: .day, value: 1, to: cursor) ?? cursor
+        }
+        return results
+    }
 }
