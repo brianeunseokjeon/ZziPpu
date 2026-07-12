@@ -73,7 +73,7 @@ public struct AppHeader: View {
     }
 
     public var body: some View {
-        HStack(spacing: theme.space.stackGapMd) {
+        HStack(spacing: theme.space.stackGapSm) {   // 8 — 웹 좌측 gap-2(아바타↔이름)
             // Avatar + name/age
             BabyAvatar(photoURL: baby.photoURL, gender: baby.gender, size: .sm)
 
@@ -92,20 +92,21 @@ public struct AppHeader: View {
 
             // Date navigation
             HStack(spacing: 0) {
-                // 웹정합: chevron 16pt(w-4 h-4).
-                DSIconButton(systemName: "chevron.left", iconSize: 16) {
+                // 웹정합: chevron 웹 w-4(16px) lucide 얇은 선. SF 심볼은 같은 pt에서 더 두꺼워 보여
+                // 시각 크기를 맞추려 13pt로 축소(색 gray-500=textSecondary는 DSIconButton 기본).
+                DSIconButton(systemName: "chevron.left", iconSize: 13) {
                     let prev = Calendar.kst.date(byAdding: .day, value: -1, to: selectedDate) ?? selectedDate
                     selectedDate = prev
                     onDateChange(prev)
                 }
 
-                // 날짜 라벨 text-sm(14) medium(=body). 요일 병기로 폭 증가 → min-w 130(전환 시 흔들림 방지).
+                // 웹정합: 날짜 text-sm(14) medium(=body) + gray-700(textStrong). min-w 110(웹 동일, 흔들림 방지).
                 Text(dateText)
                     .font(theme.typography.body)
-                    .foregroundStyle(theme.color.textPrimary.color)
-                    .frame(minWidth: 130, alignment: .center)
+                    .foregroundStyle(theme.color.textStrong.color)
+                    .frame(minWidth: 110, alignment: .center)
 
-                DSIconButton(systemName: "chevron.right", iconSize: 16) {
+                DSIconButton(systemName: "chevron.right", iconSize: 13) {
                     guard !isToday else { return }
                     let next = Calendar.kst.date(byAdding: .day, value: 1, to: selectedDate) ?? selectedDate
                     selectedDate = next

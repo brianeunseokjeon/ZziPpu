@@ -23,6 +23,7 @@ struct ThemeColor {
 
     // MARK: Text
     let textPrimary:   DynamicColor
+    let textStrong:    DynamicColor   // 본문보다 진한 보조 텍스트(gray-700) — 헤더 날짜 등
     let textSecondary: DynamicColor
     let textTertiary:  DynamicColor
 

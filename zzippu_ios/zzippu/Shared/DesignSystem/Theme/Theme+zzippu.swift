@@ -23,6 +23,7 @@ extension Theme {
             primaryDisabledBg: sc.primaryDisabledBg,
             onPrimaryDisabled: sc.onPrimaryDisabled,
             textPrimary:     sc.textPrimary,
+            textStrong:      sc.textStrong,
             textSecondary:   sc.textSecondary,
             textTertiary:    sc.textTertiary,
             border:          sc.border,
