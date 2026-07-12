@@ -427,10 +427,10 @@ private struct DayTimelineSection: View {
                             }
                         }
                     }
-                    .padding(.horizontal, theme.space.screenPaddingX)
+                    // 좌우 패딩·하이라이트는 그룹 내부가 담당(웹처럼 전폭). 이중 패딩 금지.
 
                     if index < items.count - 1 {
-                        Divider().padding(.horizontal, theme.space.screenPaddingX)
+                        Divider()   // 웹 divide-y — 전폭 얇은 구분선
                     }
                 }
             }

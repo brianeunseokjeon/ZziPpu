@@ -38,12 +38,12 @@ extension Date {
         return f
     }()
 
-    /// "HH:mm" (KST)
+    /// "오전/오후 h:mm" (KST) — 웹 formatTime(Intl ko-KR, hour12) 정합. 예: "오후 2:30".
     static let krTimeFormatter: DateFormatter = {
         let f = DateFormatter()
         f.locale = Locale(identifier: "ko_KR")
         f.timeZone = .kst
-        f.dateFormat = "HH:mm"
+        f.dateFormat = "a h:mm"
         return f
     }()
 }
