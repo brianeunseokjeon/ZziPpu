@@ -14,6 +14,9 @@ final class DashboardViewModel {
     var isLoading: Bool = false
     var errorMessage: String?
 
+    /// 수유량 추세 카드 기간 토글(7/14일). 웹 TrendRangeToggle 정합.
+    var trendDayCount: Int = 7
+
     // 서버 집계 (오늘 일별 요약)
     var dailySummary:  DailySummary       = .empty
     var prediction:    FeedingPrediction  = .empty
@@ -23,6 +26,9 @@ final class DashboardViewModel {
     var sparkSleeps:   [SleepRecord] = []
     var sparkDiapers:  [DiaperRecord] = []
     var sparkPlays:    [PlayRecord]  = []
+
+    // 수유량 추세 카드용 원본(최근 14일치 — 7/14 토글 모두 커버).
+    var trendFeedings: [Feeding]     = []
 
     // 성장 시계열
     var growthSeries: [GrowthRecord] = []
@@ -50,6 +56,7 @@ final class DashboardViewModel {
     // MARK: - UseCases (순수 집계)
 
     private let trendUseCase = ComputeTrendUseCase()
+    private let feedingTrendUseCase = ComputeFeedingTrendUseCase()
     private let summaryUseCase = ComputeDashboardSummaryUseCase()
     private let insightsUseCase: EvaluateInsightsUseCase
 
@@ -99,6 +106,9 @@ final class DashboardViewModel {
                 async let dAll = loadSparkDiapers(dates: sparkDates)
                 async let pAll = loadSparkPlays(dates: sparkDates)
 
+                // 수유량 추세(7/14 토글)용 14일치 수유 기록.
+                async let tFeed = loadTrendFeedings(anchor: target)
+
                 dailySummary  = try await summary
                 prediction    = try await pred
                 growthSeries  = try await growth
@@ -107,6 +117,7 @@ final class DashboardViewModel {
                 sparkSleeps   = try await sAll
                 sparkDiapers  = try await dAll
                 sparkPlays    = try await pAll
+                trendFeedings = try await tFeed
 
                 recomputeInsights()
 
@@ -257,6 +268,23 @@ final class DashboardViewModel {
         insights.first { $0.kind == .feeding }?.recommendedRange
     }
 
+    // MARK: - Computed: 수유량 추세(7/14일 막대 차트)
+
+    /// 현재 토글(trendDayCount) 기준 KST 일별 수유량 배열(요일 라벨·빈날 nil).
+    var feedingTrendDays: [FeedingTrendDay] {
+        feedingTrendUseCase(
+            feedings: trendFeedings,
+            dayCount: trendDayCount,
+            anchorDate: selectedDate
+        )
+    }
+
+    /// 수유량 추세 카드 권장선(min/max, ml). FeedingAdequacy 권장값 재사용. 없으면 nil → 선 생략.
+    var feedingTrendGuideline: (min: Double, max: Double)? {
+        guard let range = feedingRecommendedRange else { return nil }
+        return (range.lowerBound, range.upperBound)
+    }
+
     /// 수면 추세 차트용 권장 범위(분). 엔진은 시간(h) 단위 → 차트 y(분)에 맞게 ×60.
     var sleepRecommendedRangeMinutes: ClosedRange<Double>? {
         guard let h = insights.first(where: { $0.kind == .sleep })?.recommendedRange else { return nil }
@@ -332,6 +360,18 @@ final class DashboardViewModel {
     private func last7Days(anchor: Date) -> [Date] {
         let cal = Calendar.kst
         return (0..<7).compactMap { cal.date(byAdding: .day, value: -$0, to: anchor) }.reversed()
+    }
+
+    /// 수유량 추세 카드용 최근 14일 수유 기록(7/14 토글 공용).
+    private func loadTrendFeedings(anchor: Date) async throws -> [Feeding] {
+        let cal = Calendar.kst
+        let dates = (0..<14).compactMap { cal.date(byAdding: .day, value: -$0, to: anchor) }
+        var all: [Feeding] = []
+        for date in dates {
+            let items = try await feedingRepository.list(babyId: babyId, on: date)
+            all += items
+        }
+        return all
     }
 
     private func loadSparkFeedings(dates: [Date]) async throws -> [Feeding] {

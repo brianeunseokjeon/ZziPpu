@@ -133,6 +133,15 @@ struct DashboardContentView: View {
                 )
                 .padding(.horizontal, theme.space.screenPaddingX)
 
+                // ②-b 수유량 추세(7/14일 막대 차트) — 웹 정합
+                FeedingTrendCard(
+                    days: vm.feedingTrendDays,
+                    dayCount: vm.trendDayCount,
+                    guideline: vm.feedingTrendGuideline,
+                    onSelectDayCount: { vm.trendDayCount = $0 }
+                )
+                .padding(.horizontal, theme.space.screenPaddingX)
+
                 // ③ 2열 지표 카드 그리드 (수유·수면·기저귀·놀이)
                 DSSectionHeader(title: "오늘 요약")
 
