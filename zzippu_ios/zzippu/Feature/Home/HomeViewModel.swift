@@ -1,7 +1,7 @@
 // Feature/Home/HomeViewModel.swift
 // 홈 기록허브 ViewModel — 웹 홈(page.tsx) 재현:
 //   • 여러 날 스크롤 피드(날짜 섹션: 오늘/어제/그제/"N월 N일 (요일)")
-//   • 6버튼 퀵기록(분유·모유·소변·대변·수면시작·터미타임시작) + 활성세션(수면/터미타임)
+//   • 6버튼 퀵기록(분유·모유·소변·대변·수면시작·터미타임) + 활성세션(수면). 터미타임=즉시기록.
 //   • 과거 날짜 포커스 뷰
 // Domain 프로토콜만 의존(클린아키텍처).
 
@@ -169,11 +169,8 @@ final class HomeViewModel {
                 }
             } catch { /* 무음: 배너만 안 뜸 */ }
         }
-        // 활성 터미타임: 오늘 play 중 endedAt == nil 이면서 최근(24h 이내) 시작.
-        let today = Calendar.kst.startOfDay(for: Date())
-        activePlaySession = recordsByDay[today]?.plays.first {
-            $0.endedAt == nil && isRecentlyActive(startedAt: $0.startedAt)
-        }
+        // 터미타임은 즉시 기록(분유처럼 시점만) → 활성 세션 개념 없음.
+        activePlaySession = nil
     }
 
     private func refreshLastFormula() {
@@ -241,16 +238,12 @@ final class HomeViewModel {
         }
     }
 
-    /// 터미타임 시작/종료. 반환 = 토스트 메시지.
-    func togglePlay() async -> String {
-        if let active = activePlaySession {
-            await endPlay(active)
-            return "터미타임 종료됐어요"
-        } else {
-            let play = PlayRecord.new(babyId: babyId, playType: .tummyTime, startedAt: .now)
-            await insertPlay(play, markActive: true)
-            return "터미타임 타이머 시작됐어요"
-        }
+    /// 터미타임 즉시 기록 — 분유처럼 "언제 했는지" 시점만 남긴다(타이머·기간 없음).
+    /// 반환 = 토스트 메시지.
+    func recordPlay() async -> String {
+        let play = PlayRecord.new(babyId: babyId, playType: .tummyTime, startedAt: .now)
+        await insertPlay(play, markActive: false)
+        return "터미타임 기록됐어요"
     }
 
     // MARK: - 시트 저장 콜백 (모유/대변 상세, 과거 날짜 입력)
@@ -367,39 +360,7 @@ final class HomeViewModel {
         }
     }
 
-    /// 터미타임 종료: PlayRepository에 end API가 없어 delete + endedAt 포함 재생성.
-    private func endPlay(_ active: PlayRecord) async {
-        let day = await dayKey(for: active.startedAt)
-        let now = Date.now
-        let minutes = max(0, Int(now.timeIntervalSince(active.startedAt) / 60))
-        let ended = PlayRecord.new(
-            babyId: active.babyId, playType: active.playType,
-            startedAt: active.startedAt, endedAt: now,
-            durationMinutes: minutes, memo: active.memo
-        )
-        // 낙관적: 기존 제거 후 종료본 삽입
-        await mutate(day) { r in
-            r.plays.removeAll { $0.id == active.id }
-            r.plays.insert(ended, at: 0)
-        }
-        await MainActor.run { activePlaySession = nil }
-        do {
-            try await playRepository.delete(id: active.id, babyId: active.babyId)
-            let confirmed = try await playRepository.create(ended)
-            await mutate(day) { r in
-                if let i = r.plays.firstIndex(where: { $0.id == ended.id }) { r.plays[i] = confirmed }
-            }
-        } catch {
-            await mutate(day) { r in
-                r.plays.removeAll { $0.id == ended.id }
-                r.plays.insert(active, at: 0)
-            }
-            await MainActor.run {
-                activePlaySession = active
-                errorMessage = "터미타임 종료 실패: \(error.localizedDescription)"
-            }
-        }
-    }
+    // (터미타임은 즉시 기록으로 전환 — 시작/종료 타이머 폐기. endPlay 제거.)
 
     // MARK: - 편집 대상 조회
 
@@ -699,7 +660,7 @@ extension DiaperRecord {
 
 extension PlayRecord {
     var timelineLabel: String {
-        if endedAt == nil { return "\(playType.displayName) 시작" }
+        // 즉시 기록(기간 없음) → 이름만(분유처럼 시점만 표기). 기간 있으면 legacy로 "(N분)".
         if let min = durationMinutes, min > 0 {
             let h = min / 60, m = min % 60
             if h > 0 { return "\(playType.displayName) (\(h)시간\(m > 0 ? " \(m)분" : ""))" }

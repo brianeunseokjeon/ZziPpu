@@ -3,7 +3,7 @@
 //   • 상단 고정: 6버튼 퀵기록(분유·모유·소변·대변·수면시작·터미타임시작)
 //   • 하단: 여러 날 스크롤 피드(날짜 섹션: 오늘/어제/그제/"N월 N일 (요일)"), 아래로 과거 로드(최대 60일)
 //   • 과거 날짜 선택 시 단일 일자 포커스 뷰
-//   • 활성 세션(수면/터미타임)은 버튼이 "종료"로 전환.
+//   • 활성 세션(수면)은 버튼이 "종료"로 전환. 터미타임은 즉시 기록(분유처럼 시점만).
 // DS 컴포넌트(AppHeader/TimelineGroupView/TimelineItemRow/DSCard/DSBottomSheet/DSEmptyState) + theme 토큰만 사용.
 
 import SwiftUI
@@ -165,7 +165,7 @@ struct HomeView: View {
             }
         case .play:
             Task { @MainActor in
-                let msg = await vm.togglePlay()
+                let msg = await vm.recordPlay()   // 즉시 기록(분유처럼 시점만)
                 toastCenter.show(.init(message: msg, variant: .success))
             }
         }
@@ -228,7 +228,6 @@ private struct TodayView: View {
             // ── 고정 상단: 6버튼 ──
             BigActionGrid(
                 hasActiveSleep: vm.activeSleepSession != nil,
-                hasActivePlay:  vm.activePlaySession != nil,
                 onAction: onAction
             )
             .padding(.horizontal, theme.space.screenPaddingX)
@@ -296,7 +295,6 @@ private struct PastFocusView: View {
 
                 BigActionGrid(
                     hasActiveSleep: false,
-                    hasActivePlay:  false,
                     onAction: onAction
                 )
             }
@@ -488,7 +486,6 @@ private struct DayTimelineSection: View {
 
 private struct BigActionGrid: View {
     let hasActiveSleep: Bool
-    let hasActivePlay:  Bool
     let onAction: (HomeAction) -> Void
 
     @Environment(\.theme) private var theme
@@ -507,11 +504,8 @@ private struct BigActionGrid: View {
                 label: hasActiveSleep ? "수면 종료" : "수면 시작",
                 kind: .sleep, isActive: hasActiveSleep
             ) { onAction(.sleep) }
-            BigActionButton(
-                emoji: "🎈",
-                label: hasActivePlay ? "터미타임 종료" : "터미타임 시작",
-                kind: .play, isActive: hasActivePlay
-            ) { onAction(.play) }
+            // 터미타임: 즉시 기록(분유처럼 시점만) — 시작/종료 없음.
+            BigActionButton(emoji: "🎈", label: "터미타임", kind: .play) { onAction(.play) }
         }
     }
 }

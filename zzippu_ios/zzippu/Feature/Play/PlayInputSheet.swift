@@ -65,37 +65,9 @@ private struct PlayInputContent: View {
                     }
                 }
 
-                // 놀이 시간
+                // 시각 — 터미타임은 즉시 기록(분유처럼 시점만). 기간 입력 없음.
                 VStack(alignment: .leading, spacing: theme.space.xs) {
-                    Text("놀이 시간 (분)")
-                        .font(theme.typography.captionStrong)
-                        .foregroundStyle(theme.color.textSecondary.color)
-                    DSNumberStepper(
-                        value: $vm.durationMinutes,
-                        range: 1...120,
-                        step: 5
-                    )
-                }
-
-                // 빠른 선택
-                QuickChipsRow(
-                    options: ["5분", "10분", "15분", "20분", "30분"],
-                    selection: Binding(
-                        get: {
-                            let label = "\(vm.durationMinutes)분"
-                            return ["5분", "10분", "15분", "20분", "30분"].contains(label) ? label : nil
-                        },
-                        set: { sel in
-                            if let s = sel, let min = Int(s.replacingOccurrences(of: "분", with: "")) {
-                                vm.durationMinutes = min
-                            }
-                        }
-                    )
-                )
-
-                // 시작 시각
-                VStack(alignment: .leading, spacing: theme.space.xs) {
-                    Text("시작 시각")
+                    Text("시각")
                         .font(theme.typography.captionStrong)
                         .foregroundStyle(theme.color.textSecondary.color)
                     DatePicker(
@@ -128,13 +100,11 @@ private struct PlayInputContent: View {
     }
 
     private func handleSave() {
-        let endedAt = vm.startedAt.addingTimeInterval(Double(vm.durationMinutes) * 60)
+        // 즉시 기록 — 분유처럼 시점만. 종료·기간 없음.
         let play = PlayRecord.new(
             babyId: vm.babyId,
             playType: vm.selectedType,
-            startedAt: vm.startedAt,
-            endedAt: endedAt,
-            durationMinutes: vm.durationMinutes > 0 ? vm.durationMinutes : nil
+            startedAt: vm.startedAt
         )
         vm.resetInputs()
         isPresented = false

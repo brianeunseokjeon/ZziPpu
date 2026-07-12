@@ -93,8 +93,8 @@ public struct AppHeader: View {
             // Date navigation
             HStack(spacing: 0) {
                 // 웹정합: chevron 웹 w-4(16px) lucide 얇은 선. SF 심볼은 같은 pt에서 더 두꺼워 보여
-                // 시각 크기를 맞추려 13pt로 축소(색 gray-500=textSecondary는 DSIconButton 기본).
-                DSIconButton(systemName: "chevron.left", iconSize: 13) {
+                // 시각 크기를 맞추려 12pt로 축소(색 gray-500=textSecondary는 DSIconButton 기본).
+                DSIconButton(systemName: "chevron.left", iconSize: 12) {
                     let prev = Calendar.kst.date(byAdding: .day, value: -1, to: selectedDate) ?? selectedDate
                     selectedDate = prev
                     onDateChange(prev)
@@ -106,7 +106,7 @@ public struct AppHeader: View {
                     .foregroundStyle(theme.color.textStrong.color)
                     .frame(minWidth: 110, alignment: .center)
 
-                DSIconButton(systemName: "chevron.right", iconSize: 13) {
+                DSIconButton(systemName: "chevron.right", iconSize: 12) {
                     guard !isToday else { return }
                     let next = Calendar.kst.date(byAdding: .day, value: 1, to: selectedDate) ?? selectedDate
                     selectedDate = next
