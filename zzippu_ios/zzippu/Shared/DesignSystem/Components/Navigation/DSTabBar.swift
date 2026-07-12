@@ -8,12 +8,14 @@ import SwiftUI
 
 public struct DSTabItem: Identifiable {
     public let id:         Int
-    public let systemName: String  // SF Symbol
+    public let systemName: String   // SF Symbol (assetName 없을 때 폴백)
+    public let assetName:  String?  // 에셋 카탈로그 벡터 아이콘(lucide 등). 있으면 우선.
     public let label:      String
 
-    public init(id: Int, systemName: String, label: String) {
+    public init(id: Int, systemName: String, assetName: String? = nil, label: String) {
         self.id         = id
         self.systemName = systemName
+        self.assetName  = assetName
         self.label      = label
     }
 }
@@ -30,8 +32,7 @@ private struct DSTabBarItemView: View {
     var body: some View {
         Button(action: onTap) {
             VStack(spacing: 3) {
-                Image(systemName: item.systemName)
-                    .font(.system(size: 22, weight: isActive ? .semibold : .regular))
+                iconView
                     .foregroundStyle(isActive
                         ? theme.color.primary.color
                         : theme.color.textSecondary.color
@@ -50,6 +51,21 @@ private struct DSTabBarItemView: View {
         }
         .buttonStyle(.plain)
         .animation(.easeOut(duration: 0.15), value: isActive)
+    }
+
+    /// 에셋(lucide 벡터)이 있으면 template로 틴트, 없으면 SF Symbol.
+    @ViewBuilder
+    private var iconView: some View {
+        if let asset = item.assetName {
+            Image(asset)
+                .renderingMode(.template)
+                .resizable()
+                .scaledToFit()
+                .frame(width: 24, height: 24)
+        } else {
+            Image(systemName: item.systemName)
+                .font(.system(size: 22, weight: isActive ? .semibold : .regular))
+        }
     }
 }
 

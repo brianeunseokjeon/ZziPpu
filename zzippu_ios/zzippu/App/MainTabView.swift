@@ -1,9 +1,10 @@
 // App/MainTabView.swift
 // T1/T3: DSTabBar 기반 4탭 셸.
-//   0 홈     house.fill          → HomeView (기능)
-//   1 대시보드 heart.text.square.fill → DashboardView (T3)
-//   2 발달    figure.child        → DevelopmentView (T4)
-//   3 설정    gearshape.fill      → DSEmptyState placeholder
+//   0 홈     lucide home          → HomeView (기능)
+//   1 대시보드 lucide chart-column  → DashboardView (T3)
+//   2 발달    lucide sparkles      → DevelopmentView (T4)
+//   3 설정    lucide settings      → SettingsView
+// 아이콘: 웹(lucide-react)과 동일한 벡터 SVG 에셋(Tab*.imageset). 웹 정합.
 // selectedDate는 탭 전환해도 유지 (홈·대시보드 공유 예정).
 
 import SwiftUI
@@ -14,10 +15,10 @@ struct MainTabView: View {
     @Environment(\.theme)                 private var theme
 
     private let tabItems = [
-        DSTabItem(id: 0, systemName: "house.fill",              label: "홈"),
-        DSTabItem(id: 1, systemName: "heart.text.square.fill",  label: "대시보드"),
-        DSTabItem(id: 2, systemName: "figure.child",            label: "발달"),
-        DSTabItem(id: 3, systemName: "gearshape.fill",          label: "설정"),
+        DSTabItem(id: 0, systemName: "house.fill",             assetName: "TabHome",        label: "홈"),
+        DSTabItem(id: 1, systemName: "heart.text.square.fill", assetName: "TabDashboard",   label: "대시보드"),
+        DSTabItem(id: 2, systemName: "figure.child",           assetName: "TabDevelopment", label: "발달"),
+        DSTabItem(id: 3, systemName: "gearshape.fill",         assetName: "TabSettings",    label: "설정"),
     ]
 
     var body: some View {
