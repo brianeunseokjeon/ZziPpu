@@ -64,6 +64,26 @@ private struct DiaperInputContent: View {
                         }
                     }
 
+                    // 양 (소변·대변 공통)
+                    VStack(alignment: .leading, spacing: theme.space.xs) {
+                        Text("양")
+                            .font(theme.typography.captionStrong)
+                            .foregroundStyle(theme.color.textSecondary.color)
+                        HStack(spacing: theme.space.sm) {
+                            ForEach(DiaperAmount.allCases, id: \.self) { amount in
+                                DSChip(
+                                    label: amount.displayName,
+                                    isSelected: vm.selectedAmount == amount,
+                                    variant: .selectable,
+                                    onTap: {
+                                        vm.selectedAmount = vm.selectedAmount == amount ? nil : amount
+                                    }
+                                )
+                            }
+                            Spacer()
+                        }
+                    }
+
                     // 대변 색 (대변/소변+대변 선택 시)
                     if vm.selectedType.hasPoo {
                         VStack(alignment: .leading, spacing: theme.space.xs) {
@@ -88,15 +108,15 @@ private struct DiaperInputContent: View {
                             }
                         }
 
-                        // 대변 상태
+                        // 대변 질감 (묽음/보통/찰흙 = watery/normal/hard)
                         VStack(alignment: .leading, spacing: theme.space.xs) {
-                            Text("대변 상태")
+                            Text("질감")
                                 .font(theme.typography.captionStrong)
                                 .foregroundStyle(theme.color.textSecondary.color)
                             HStack(spacing: theme.space.sm) {
-                                ForEach(StoolState.allCases, id: \.self) { state in
+                                ForEach(StoolState.diaperTextureCases, id: \.self) { state in
                                     DSChip(
-                                        label: state.displayName,
+                                        label: state.textureShortLabel,
                                         isSelected: vm.selectedState == state,
                                         variant: .selectable,
                                         onTap: {
@@ -104,6 +124,7 @@ private struct DiaperInputContent: View {
                                         }
                                     )
                                 }
+                                Spacer()
                             }
                         }
                     }
@@ -148,6 +169,7 @@ private struct DiaperInputContent: View {
             recordedAt: vm.recordedAt,
             stoolColor: vm.selectedType.hasPoo ? vm.selectedColor : nil,
             stoolState: vm.selectedType.hasPoo ? vm.selectedState : nil,
+            amount: vm.selectedAmount,
             memo: vm.memo.isEmpty ? nil : vm.memo
         )
         vm.resetInputs()

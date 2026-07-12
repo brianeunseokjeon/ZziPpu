@@ -10,6 +10,8 @@ struct DiaperRecord: Identifiable, Equatable, Sendable, Codable {
     var diaperType: DiaperType
     var stoolColor: StoolColor?
     var stoolState: StoolState?
+    /// 양(소변·대변 공통). nullable — 하위호환.
+    var amount: DiaperAmount?
     var memo: String?
     let createdAt: Date
 
@@ -19,6 +21,7 @@ struct DiaperRecord: Identifiable, Equatable, Sendable, Codable {
         recordedAt: Date = .now,
         stoolColor: StoolColor? = nil,
         stoolState: StoolState? = nil,
+        amount: DiaperAmount? = nil,
         memo: String? = nil
     ) -> DiaperRecord {
         DiaperRecord(
@@ -28,6 +31,7 @@ struct DiaperRecord: Identifiable, Equatable, Sendable, Codable {
             diaperType: diaperType,
             stoolColor: stoolColor,
             stoolState: stoolState,
+            amount: amount,
             memo: memo,
             createdAt: .now
         )

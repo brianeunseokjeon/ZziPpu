@@ -650,6 +650,11 @@ extension SleepRecord {
 extension DiaperRecord {
     var timelineLabel: String {
         var label = diaperType.displayName
+        // 양·질감(있는 것만, 양→질감 순) 병기. 예: "소변 (보통)", "대변 (많이·찰흙)".
+        var parts: [String] = []
+        if let amount { parts.append(amount.displayName) }
+        if diaperType.hasPoo, let state = stoolState { parts.append(state.textureShortLabel) }
+        if !parts.isEmpty { label += " (\(parts.joined(separator: "·")))" }
         if let color = stoolColor { label += " · \(color.displayName)" }
         return label
     }

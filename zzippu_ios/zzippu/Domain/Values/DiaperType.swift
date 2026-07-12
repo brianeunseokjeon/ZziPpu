@@ -19,6 +19,21 @@ enum DiaperType: String, Codable, Sendable, CaseIterable {
     var hasPoo: Bool { self == .poo || self == .both }
 }
 
+/// 기저귀 양(소변·대변 공통). 백엔드 계약: little|normal|lot, nullable(snake_case 불필요 — 단일단어).
+enum DiaperAmount: String, Codable, Sendable, CaseIterable {
+    case little = "little"
+    case normal = "normal"
+    case lot    = "lot"
+
+    var displayName: String {
+        switch self {
+        case .little: return "적게"
+        case .normal: return "보통"
+        case .lot:    return "많이"
+        }
+    }
+}
+
 enum StoolColor: String, Codable, Sendable, CaseIterable {
     case yellow = "yellow"
     case green  = "green"
@@ -64,4 +79,18 @@ enum StoolState: String, Codable, Sendable, CaseIterable {
         case .hard:   return "딱딱함"
         }
     }
+
+    /// 기저귀 컨텍스트의 '질감' 라벨. 전역 displayName(딱딱함)과 분리.
+    /// watery=묽음 / normal=보통 / hard=찰흙 / soft=부드러움.
+    var textureShortLabel: String {
+        switch self {
+        case .watery: return "묽음"
+        case .soft:   return "부드러움"
+        case .normal: return "보통"
+        case .hard:   return "찰흙"
+        }
+    }
+
+    /// 기저귀 UI에 노출하는 질감 3칩(묽음/보통/찰흙). soft·기타는 미노출.
+    static let diaperTextureCases: [StoolState] = [.watery, .normal, .hard]
 }

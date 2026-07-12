@@ -26,6 +26,8 @@ struct RecordEditSheet: View {
     @State private var formulaMl: Int = 100
     @State private var breastSide: BreastSide = .both
     @State private var diaperType: DiaperType = .pee
+    @State private var diaperAmount: DiaperAmount? = nil
+    @State private var stoolTexture: StoolState? = nil
     @State private var playType: PlayType = .tummyTime
 
     @State private var startTime: Date = .now
@@ -204,20 +206,60 @@ struct RecordEditSheet: View {
 
     // ── 배변 ──
     private var diaperFields: some View {
-        VStack(alignment: .leading, spacing: theme.space.sm) {
-            Text("배변 종류")
-                .font(theme.typography.caption)
-                .foregroundStyle(theme.color.textSecondary.color)
-            HStack(spacing: theme.space.sm) {
-                ForEach(DiaperType.allCases, id: \.self) { t in
-                    DSChip(
-                        label: diaperLabel(t),
-                        isSelected: diaperType == t,
-                        variant: .selectable,
-                        tint: theme.color.tint(for: diaperKind(t)),
-                        onTap: { diaperType = t }
-                    )
-                    .frame(maxWidth: .infinity)
+        VStack(alignment: .leading, spacing: theme.space.md) {
+            VStack(alignment: .leading, spacing: theme.space.sm) {
+                Text("배변 종류")
+                    .font(theme.typography.caption)
+                    .foregroundStyle(theme.color.textSecondary.color)
+                HStack(spacing: theme.space.sm) {
+                    ForEach(DiaperType.allCases, id: \.self) { t in
+                        DSChip(
+                            label: diaperLabel(t),
+                            isSelected: diaperType == t,
+                            variant: .selectable,
+                            tint: theme.color.tint(for: diaperKind(t)),
+                            onTap: { diaperType = t }
+                        )
+                        .frame(maxWidth: .infinity)
+                    }
+                }
+            }
+
+            // 양 (소변·대변 공통)
+            VStack(alignment: .leading, spacing: theme.space.sm) {
+                Text("양")
+                    .font(theme.typography.caption)
+                    .foregroundStyle(theme.color.textSecondary.color)
+                HStack(spacing: theme.space.sm) {
+                    ForEach(DiaperAmount.allCases, id: \.self) { a in
+                        DSChip(
+                            label: a.displayName,
+                            isSelected: diaperAmount == a,
+                            variant: .selectable,
+                            onTap: { diaperAmount = diaperAmount == a ? nil : a }
+                        )
+                        .frame(maxWidth: .infinity)
+                    }
+                }
+            }
+
+            // 질감 (대변/둘다일 때만, 3칩 묽음/보통/찰흙)
+            if diaperType.hasPoo {
+                VStack(alignment: .leading, spacing: theme.space.sm) {
+                    Text("질감")
+                        .font(theme.typography.caption)
+                        .foregroundStyle(theme.color.textSecondary.color)
+                    HStack(spacing: theme.space.sm) {
+                        ForEach(StoolState.diaperTextureCases, id: \.self) { s in
+                            DSChip(
+                                label: s.textureShortLabel,
+                                isSelected: stoolTexture == s,
+                                variant: .selectable,
+                                onTap: { stoolTexture = stoolTexture == s ? nil : s }
+                            )
+                            .frame(maxWidth: .infinity)
+                        }
+                    }
                 }
             }
         }
@@ -320,6 +362,8 @@ struct RecordEditSheet: View {
             if let e = s.endedAt { endTime = e; hasEnd = true }
         case .diaper(let d):
             diaperType = d.diaperType
+            diaperAmount = d.amount
+            stoolTexture = d.stoolState
             startTime = d.recordedAt
         case .play(let p):
             playType = p.playType
@@ -354,9 +398,12 @@ struct RecordEditSheet: View {
             Task { @MainActor in await vm.updateFeeding(updated) }
 
         case .diaper(let d):
+            // 소변으로 바뀌면 색·질감 제거(가드).
+            let color = diaperType.hasPoo ? d.stoolColor : nil
+            let texture = diaperType.hasPoo ? stoolTexture : nil
             let new = DiaperRecord.new(
                 babyId: d.babyId, diaperType: diaperType, recordedAt: start,
-                stoolColor: d.stoolColor, stoolState: d.stoolState, memo: d.memo
+                stoolColor: color, stoolState: texture, amount: diaperAmount, memo: d.memo
             )
             Task { @MainActor in await vm.replaceDiaper(oldId: d.id, with: new) }
 

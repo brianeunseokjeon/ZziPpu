@@ -13,7 +13,8 @@ final class DiaperViewModel {
     // Input Sheet State
     var selectedType: DiaperType = .pee
     var selectedColor: StoolColor? = nil
-    var selectedState: StoolState? = nil
+    var selectedState: StoolState? = nil   // 대변 질감(묽음/보통/찰흙 = watery/normal/hard)
+    var selectedAmount: DiaperAmount? = nil // 양(소변·대변 공통)
     var recordedAt: Date = .now
     var memo: String = ""
 
@@ -49,6 +50,7 @@ final class DiaperViewModel {
             recordedAt: recordedAt,
             stoolColor: selectedType.hasPoo ? selectedColor : nil,
             stoolState: selectedType.hasPoo ? selectedState : nil,
+            amount: selectedAmount,
             memo: memo.isEmpty ? nil : memo
         )
         diapers.insert(optimistic, at: 0)
@@ -85,6 +87,7 @@ final class DiaperViewModel {
         selectedType = .pee
         selectedColor = nil
         selectedState = nil
+        selectedAmount = nil
         recordedAt = .now
         memo = ""
     }

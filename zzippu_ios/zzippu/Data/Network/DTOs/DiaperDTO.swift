@@ -12,6 +12,7 @@ struct DiaperResponseDTO: Decodable {
     let diaperType: String
     let stoolColor: String?
     let stoolState: String?
+    let amount: String?
     let memo: String?
     let createdAt: Date
 }
@@ -23,5 +24,6 @@ struct DiaperCreateRequestDTO: Encodable {
     let diaperType: String
     let stoolColor: String?
     let stoolState: String?
+    let amount: String?
     let memo: String?
 }

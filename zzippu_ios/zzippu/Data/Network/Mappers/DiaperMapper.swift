@@ -15,6 +15,7 @@ enum DiaperMapper {
             diaperType: DiaperType(rawValue: dto.diaperType) ?? .pee,
             stoolColor: dto.stoolColor.flatMap { StoolColor(rawValue: $0) },
             stoolState: dto.stoolState.flatMap { StoolState(rawValue: $0) },
+            amount: dto.amount.flatMap { DiaperAmount(rawValue: $0) },
             memo: dto.memo,
             createdAt: dto.createdAt
         )
@@ -28,6 +29,7 @@ enum DiaperMapper {
             diaperType: diaper.diaperType.rawValue,
             stoolColor: diaper.stoolColor?.rawValue,
             stoolState: diaper.stoolState?.rawValue,
+            amount: diaper.amount?.rawValue,
             memo: diaper.memo
         )
     }
