@@ -40,6 +40,7 @@
 		1F1215942FFE889600F02CA5 /* zzippuUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1F1215932FFE889600F02CA5 /* zzippuUITests.swift */; };
 		1F1215962FFE889600F02CA5 /* zzippuUITestsLaunchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1F1215952FFE889600F02CA5 /* zzippuUITestsLaunchTests.swift */; };
 		231731F2F57F90A0703C52C5 /* LocalFeedingRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7E4477BEDBCCAFD2798A27F7 /* LocalFeedingRepository.swift */; };
+		23A50A6DE840BC10C58DC0AC /* BloodType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D3A4BD464784A4D6712DFED /* BloodType.swift */; };
 		23DF12C0309FC6BC075773F0 /* BabyRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = A27FD59AFCABD2B6BDD8FB09 /* BabyRepository.swift */; };
 		25481A82A90269DCB51AC275 /* BuildMonthCalendarUseCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = C7060140A1A6A17F1229394C /* BuildMonthCalendarUseCase.swift */; };
 		27453046BD7CBC687AE4C35D /* DSDonutChart.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D167BF5C864319F99BFADB4 /* DSDonutChart.swift */; };
@@ -264,6 +265,7 @@
 		1BCAD8104026EE66E2C18481 /* EnvironmentTheme.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = EnvironmentTheme.swift; sourceTree = "<group>"; };
 		1BEB5534F7B49932733DC943 /* VaccinationMapper.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = VaccinationMapper.swift; path = Network/Mappers/VaccinationMapper.swift; sourceTree = "<group>"; };
 		1D167BF5C864319F99BFADB4 /* DSDonutChart.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DSDonutChart.swift; sourceTree = "<group>"; };
+		1D3A4BD464784A4D6712DFED /* BloodType.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = BloodType.swift; sourceTree = "<group>"; };
 		1F1215732FFE889300F02CA5 /* zzippu.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = zzippu.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		1F1215762FFE889300F02CA5 /* zzippuApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = zzippuApp.swift; sourceTree = "<group>"; };
 		1F1215782FFE889400F02CA5 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
@@ -1184,6 +1186,7 @@
 				734CF29084606CB53760BC23 /* DiaperType.swift */,
 				F0B7B9EBE9DE393D1D4B6ECF /* PlayType.swift */,
 				7A6D8B6EEC40287AF6B40AFF /* SyncState.swift */,
+				1D3A4BD464784A4D6712DFED /* BloodType.swift */,
 			);
 			name = Values;
 			path = Values;
@@ -1550,6 +1553,7 @@
 				A381BC6F44EDD89D7DB5F733 /* WeekdayHeaderView.swift in Sources */,
 				A50C9D4B8B6404BCDE456021 /* MonthHeaderView.swift in Sources */,
 				BF11DE2D228E70B23571BDC8 /* CheckupBannerView.swift in Sources */,
+				23A50A6DE840BC10C58DC0AC /* BloodType.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

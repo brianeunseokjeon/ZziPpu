@@ -209,6 +209,11 @@ private struct CalendarSectionPreviewContainer: View {
             birthDate: birthDate,
             gender: .male,
             birthWeightG: 3200,
+            birthHeightCm: nil,
+            birthHeadCircumferenceCm: nil,
+            birthChestCircumferenceCm: nil,
+            bloodType: nil,
+            rhFactor: nil,
             photoUrl: nil,
             createdAt: Date.now
         )

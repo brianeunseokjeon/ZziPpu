@@ -80,6 +80,35 @@ enum APIDateCodec {
     static func formatDateTime(_ date: Date) -> String {
         datetimeFormatter().string(from: date)
     }
+
+    // MARK: - time (HH:mm, KST — 서버 birth_time 등)
+
+    /// "HH:mm"(24h) 전용 포매터. KST 기준.
+    static let timeOnlyFormatter: DateFormatter = {
+        let f = DateFormatter()
+        f.dateFormat = "HH:mm"
+        f.locale = Locale(identifier: "en_US_POSIX")
+        f.timeZone = .kst
+        return f
+    }()
+
+    /// Date → "HH:mm" String (KST 시각 부분)
+    static func formatTime(_ date: Date) -> String {
+        timeOnlyFormatter.string(from: date)
+    }
+
+    /// KST 날짜(Date, 보통 자정)에 "HH:mm" 시각을 얹어 새 Date로 합성.
+    /// time 파싱 실패/nil이면 원본(자정) 그대로 반환.
+    static func combine(date: Date, time: String?) -> Date {
+        guard let time, !time.isEmpty else { return date }
+        let comps = time.split(separator: ":")
+        guard comps.count == 2,
+              let hour = Int(comps[0]),
+              let minute = Int(comps[1]) else { return date }
+        return Calendar.kst.date(
+            bySettingHour: hour, minute: minute, second: 0, of: date
+        ) ?? date
+    }
 }
 
 // MARK: - JSONDecoder/Encoder with datetime strategy
