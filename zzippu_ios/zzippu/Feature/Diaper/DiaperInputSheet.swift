@@ -7,6 +7,8 @@ struct DiaperInputSheet: View {
     @Environment(AppContainer.self) private var container
     @State private var vm: DiaperViewModel?
     @Binding var isPresented: Bool
+    /// 소변/대변은 버튼(진입점)이 결정 — 시트에서 종류 선택 없음. 기본 대변.
+    var diaperType: DiaperType = .poo
     var onSaved: ((DiaperRecord) -> Void)? = nil
 
     var body: some View {
@@ -24,10 +26,12 @@ struct DiaperInputSheet: View {
         }
         .task {
             if vm == nil {
-                vm = DiaperViewModel(
+                let model = DiaperViewModel(
                     repository: container.diaperRepository,
                     babyId: container.activeBabyId
                 )
+                model.prepare(type: diaperType)   // 타입 확정 + 기본값(보통)
+                vm = model
             }
         }
     }
@@ -46,23 +50,7 @@ private struct DiaperInputContent: View {
         VStack(spacing: 0) {
             ScrollView {
                 VStack(spacing: theme.space.md) {
-                    // 기저귀 종류 선택
-                    VStack(alignment: .leading, spacing: theme.space.xs) {
-                        Text("종류")
-                            .font(theme.typography.captionStrong)
-                            .foregroundStyle(theme.color.textSecondary.color)
-                        HStack(spacing: theme.space.sm) {
-                            ForEach(DiaperType.allCases, id: \.self) { type in
-                                DSChip(
-                                    label: type.displayName,
-                                    isSelected: vm.selectedType == type,
-                                    variant: .selectable,
-                                    onTap: { vm.selectedType = type }
-                                )
-                            }
-                            Spacer()
-                        }
-                    }
+                    // 종류(소변/대변)는 진입 버튼이 결정 → 시트에서 선택 없음.
 
                     // 양 (소변·대변 공통)
                     VStack(alignment: .leading, spacing: theme.space.xs) {
@@ -92,9 +80,10 @@ private struct DiaperInputContent: View {
                                 .foregroundStyle(theme.color.textSecondary.color)
                             ScrollView(.horizontal, showsIndicators: false) {
                                 HStack(spacing: theme.space.sm) {
-                                    ForEach(StoolColor.allCases, id: \.self) { color in
+                                    // 황금똥/초록색/검은색/붉은색/보통
+                                    ForEach(StoolColor.diaperColorCases, id: \.self) { color in
                                         DSChip(
-                                            label: color.displayName,
+                                            label: color.diaperColorLabel,
                                             isSelected: vm.selectedColor == color,
                                             variant: .selectable,
                                             tint: theme.color.swatch(for: color.stoolSwatch),

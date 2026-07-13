@@ -81,6 +81,22 @@ final class DiaperViewModel {
         }
     }
 
+    /// 시트 진입 시 타입 확정 + 기본값 세팅.
+    /// 대변: 양·질감·색 모두 "보통"(normal/normal/brown) 기본. 소변: 양 "보통".
+    func prepare(type: DiaperType, at date: Date = .now) {
+        selectedType = type
+        recordedAt = date
+        memo = ""
+        selectedAmount = .normal
+        if type.hasPoo {
+            selectedState = .normal
+            selectedColor = .brown        // brown=보통
+        } else {
+            selectedState = nil
+            selectedColor = nil
+        }
+    }
+
     // MARK: - Private
 
     func resetInputs() {

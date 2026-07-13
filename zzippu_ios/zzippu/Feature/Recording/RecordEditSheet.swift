@@ -28,6 +28,7 @@ struct RecordEditSheet: View {
     @State private var diaperType: DiaperType = .pee
     @State private var diaperAmount: DiaperAmount? = nil
     @State private var stoolTexture: StoolState? = nil
+    @State private var stoolColor: StoolColor? = nil
     @State private var playType: PlayType = .tummyTime
 
     @State private var startTime: Date = .now
@@ -204,27 +205,9 @@ struct RecordEditSheet: View {
         .frame(maxWidth: .infinity)
     }
 
-    // ── 배변 ──
+    // ── 배변 ── (종류는 기록 생성 시 확정 — 편집에선 변경 불가)
     private var diaperFields: some View {
         VStack(alignment: .leading, spacing: theme.space.md) {
-            VStack(alignment: .leading, spacing: theme.space.sm) {
-                Text("배변 종류")
-                    .font(theme.typography.caption)
-                    .foregroundStyle(theme.color.textSecondary.color)
-                HStack(spacing: theme.space.sm) {
-                    ForEach(DiaperType.allCases, id: \.self) { t in
-                        DSChip(
-                            label: diaperLabel(t),
-                            isSelected: diaperType == t,
-                            variant: .selectable,
-                            tint: theme.color.tint(for: diaperKind(t)),
-                            onTap: { diaperType = t }
-                        )
-                        .frame(maxWidth: .infinity)
-                    }
-                }
-            }
-
             // 양 (소변·대변 공통)
             VStack(alignment: .leading, spacing: theme.space.sm) {
                 Text("양")
@@ -259,6 +242,27 @@ struct RecordEditSheet: View {
                             )
                             .frame(maxWidth: .infinity)
                         }
+                    }
+                }
+
+                // 대변 색 (황금똥/초록색/검은색/붉은색/보통)
+                VStack(alignment: .leading, spacing: theme.space.sm) {
+                    Text("대변 색")
+                        .font(theme.typography.caption)
+                        .foregroundStyle(theme.color.textSecondary.color)
+                    ScrollView(.horizontal, showsIndicators: false) {
+                        HStack(spacing: theme.space.sm) {
+                            ForEach(StoolColor.diaperColorCases, id: \.self) { c in
+                                DSChip(
+                                    label: c.diaperColorLabel,
+                                    isSelected: stoolColor == c,
+                                    variant: .selectable,
+                                    tint: theme.color.swatch(for: c.stoolSwatch),
+                                    onTap: { stoolColor = stoolColor == c ? nil : c }
+                                )
+                            }
+                        }
+                        .padding(.horizontal, 1)
                     }
                 }
             }
@@ -364,6 +368,7 @@ struct RecordEditSheet: View {
             diaperType = d.diaperType
             diaperAmount = d.amount
             stoolTexture = d.stoolState
+            stoolColor = d.stoolColor
             startTime = d.recordedAt
         case .play(let p):
             playType = p.playType
@@ -398,8 +403,8 @@ struct RecordEditSheet: View {
             Task { @MainActor in await vm.updateFeeding(updated) }
 
         case .diaper(let d):
-            // 소변으로 바뀌면 색·질감 제거(가드).
-            let color = diaperType.hasPoo ? d.stoolColor : nil
+            // 대변만 색·질감 유지(소변이면 nil 가드). 색은 편집값 사용.
+            let color = diaperType.hasPoo ? stoolColor : nil
             let texture = diaperType.hasPoo ? stoolTexture : nil
             let new = DiaperRecord.new(
                 babyId: d.babyId, diaperType: diaperType, recordedAt: start,

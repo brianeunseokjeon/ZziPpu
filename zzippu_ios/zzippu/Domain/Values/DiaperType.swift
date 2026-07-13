@@ -63,6 +63,23 @@ enum StoolColor: String, Codable, Sendable, CaseIterable {
         case .white:  return .white
         }
     }
+
+    // MARK: - 기저귀(대변) 색 선택지 (사용자 요청: 황금똥/초록색/검은색/붉은색/보통)
+
+    /// 대변 색 칩 목록·순서. yellow=황금똥, brown=보통으로 컨텍스트 라벨링(흰색은 미노출).
+    static let diaperColorCases: [StoolColor] = [.yellow, .green, .black, .red, .brown]
+
+    /// 기저귀 컨텍스트 라벨. 전역 displayName과 별개(enum 값 불변 → 하위호환).
+    var diaperColorLabel: String {
+        switch self {
+        case .yellow: return "황금똥"
+        case .green:  return "초록색"
+        case .black:  return "검은색"
+        case .red:    return "붉은색"
+        case .brown:  return "보통"
+        case .white:  return "흰색"
+        }
+    }
 }
 
 enum StoolState: String, Codable, Sendable, CaseIterable {

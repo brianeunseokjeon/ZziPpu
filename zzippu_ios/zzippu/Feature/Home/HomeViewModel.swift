@@ -217,11 +217,20 @@ final class HomeViewModel {
         return "분유 \(ml)ml 기록됐어요"
     }
 
-    /// 소변 원탭.
+    /// 소변 원탭 — 양 기본 "보통".
     func quickSavePee() async -> String {
-        let diaper = DiaperRecord.new(babyId: babyId, diaperType: .pee, recordedAt: .now)
+        let diaper = DiaperRecord.new(babyId: babyId, diaperType: .pee, recordedAt: .now,
+                                      amount: .normal)
         await insertDiaper(diaper)
         return "소변 기록됐어요"
+    }
+
+    /// 대변 원탭 — 그냥 누르면 기본 보통/보통/보통(양·질감·색). 상세는 행 탭 모달에서 수정.
+    func quickSavePoo() async -> String {
+        let diaper = DiaperRecord.new(babyId: babyId, diaperType: .poo, recordedAt: .now,
+                                      stoolColor: .brown, stoolState: .normal, amount: .normal)
+        await insertDiaper(diaper)
+        return "대변 기록됐어요"
     }
 
     // MARK: - 활성 세션 토글
@@ -655,7 +664,7 @@ extension DiaperRecord {
         if let amount { parts.append(amount.displayName) }
         if diaperType.hasPoo, let state = stoolState { parts.append(state.textureShortLabel) }
         if !parts.isEmpty { label += " (\(parts.joined(separator: "·")))" }
-        if let color = stoolColor { label += " · \(color.displayName)" }
+        if diaperType.hasPoo, let color = stoolColor { label += " · \(color.diaperColorLabel)" }
         return label
     }
     var domainKind: DomainKind {

@@ -18,7 +18,8 @@ struct HomeView: View {
     // 상세 입력 시트 (모유 / 대변 / 과거 날짜 입력)
     @State private var feedingSheetType: FeedingType? = nil   // 모유 상세
     @State private var showBreastSheet  = false
-    @State private var showDiaperSheet  = false               // 대변 상세
+    @State private var showDiaperSheet  = false               // 기저귀 상세(과거 소변/대변)
+    @State private var pendingDiaperType: DiaperType = .poo   // 시트에 넘길 종류(버튼이 결정)
     @State private var showFeedingSheet = false               // 과거 분유
     @State private var showSleepSheet   = false               // 과거 수면
     @State private var showPlaySheet    = false               // 과거 터미타임
@@ -47,14 +48,19 @@ struct HomeView: View {
                 }
                 .dsBottomSheet(
                     isPresented: $showDiaperSheet,
-                    options: .init(title: "💩 대변 기록", detents: [.medium, .large])
+                    options: .init(
+                        title: pendingDiaperType == .pee ? "💧 소변 기록" : "💩 대변 기록",
+                        detents: [.medium, .large]
+                    )
                 ) {
                     DiaperInputSheet(
                         isPresented: $showDiaperSheet,
+                        diaperType: pendingDiaperType,
                         onSaved: { diaper in
                             Task { @MainActor in
                                 await vm.saveDiaper(diaper)
-                                toastCenter.show(.init(message: "대변 기록 완료!", variant: .success))
+                                let name = diaper.diaperType == .pee ? "소변" : "대변"
+                                toastCenter.show(.init(message: "\(name) 기록 완료!", variant: .success))
                             }
                         }
                     )
@@ -136,7 +142,8 @@ struct HomeView: View {
             switch action {
             case .formula:                 showFeedingSheet = true
             case .breast:                  showBreastSheet  = true
-            case .pee, .poo:               showDiaperSheet  = true
+            case .pee:                     pendingDiaperType = .pee; showDiaperSheet = true
+            case .poo:                     pendingDiaperType = .poo; showDiaperSheet = true
             case .sleep:                   showSleepSheet   = true
             case .play:                    showPlaySheet    = true
             }
@@ -157,7 +164,11 @@ struct HomeView: View {
                 toastCenter.show(.init(message: msg, variant: .success))
             }
         case .poo:
-            showDiaperSheet = true
+            // 그냥 누르면 즉시 기록(기본 보통/보통/보통). 상세는 행 탭 모달에서 수정.
+            Task { @MainActor in
+                let msg = await vm.quickSavePoo()
+                toastCenter.show(.init(message: msg, variant: .success))
+            }
         case .sleep:
             Task { @MainActor in
                 let msg = await vm.toggleSleep()
