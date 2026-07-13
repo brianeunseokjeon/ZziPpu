@@ -239,7 +239,8 @@ struct DashboardContentView: View {
                 calendarVM = CalendarViewModel(
                     feedingRepository: container.feedingRepository,
                     babyRepository:    container.babyRepository,
-                    babyId:            container.activeBabyId
+                    babyId:            container.activeBabyId,
+                    snapshotStore:     container.calendarSnapshotStore
                 )
             }
         }

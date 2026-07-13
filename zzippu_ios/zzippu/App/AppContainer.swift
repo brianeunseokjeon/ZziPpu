@@ -28,6 +28,10 @@ final class AppContainer {
     // 결합도↓: 이 프로퍼티 + DashboardView 주입만 제거하면 캐싱 완전 비활성화.
     let dashboardSnapshotStore: DashboardSnapshotStore
 
+    // MARK: - 달력 SWR 디스크 캐시 (월별 수유 총량 hydrate)
+    // 결합도↓: 이 프로퍼티 + DashboardView 주입만 제거하면 달력 캐싱 완전 비활성화.
+    let calendarSnapshotStore: CalendarSnapshotStore
+
     // MARK: - Session State (라우팅 전용)
     let sessionState: SessionState
 
@@ -84,6 +88,7 @@ final class AppContainer {
         self.caregiverRepository   = RemoteCaregiverRepository(api: api)
         self.guidelineRepository   = BundleGuidelineRepository()
         self.dashboardSnapshotStore = FileDashboardSnapshotStore()
+        self.calendarSnapshotStore  = FileCalendarSnapshotStore()
         self.sessionState = SessionState()
     }
 

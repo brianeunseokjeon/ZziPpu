@@ -1,6 +1,12 @@
 // Feature/Dashboard/CalendarViewModel.swift
-// 달력 상태 관리 ViewModel — 현재 월·이동·월 캐시.
+// 달력 상태 관리 ViewModel — 현재 월·이동·월 캐시 + SWR 디스크 스냅샷.
 // Domain 프로토콜만 의존(클린아키텍처). @Observable.
+//
+// SWR 캐싱(옵션 B):
+//   월 진입 → 디스크 스냅샷 즉시 hydrate(무-스피너) → 백그라운드 dailyTotals 재조회
+//   → 모델 재빌드(SwiftUI가 바뀐 셀만 재렌더) → 메모리캐시 갱신 + 스냅샷 save.
+// 검진 데코는 생일 기반 순수계산 → 캐시 금지, 항상 재계산·합성.
+// 결합도↓: snapshotStore 옵셔널 주입. nil이면 현행 메모리캐시 동작과 바이트-동일.
 
 import Foundation
 import Observation
@@ -62,28 +68,32 @@ final class CalendarViewModel {
     // MARK: - Month Cache (month → MonthCalendarModel)
     private var monthCache: [Date: MonthCalendarModel] = [:]
 
+    /// 과거 월은 이번 세션에서 1회 재대조하면 이후 스킵(변동 드묾 — 제안서 §3.5).
+    private var revalidatedPastMonths: Set<Date> = []
+
     // MARK: - Dependencies
 
-    private let buildCalendar: BuildMonthCalendarUseCase
+    private let feedingRepository: FeedingRepository
+    private let checkupProvider: CalendarDecorationProvider
     private let babyRepository: BabyRepository
     private let babyId: UUID
+
+    /// SWR 디스크 스냅샷 저장소 — nil이면 순수 메모리캐시(현행) 동작.
+    private let snapshotStore: CalendarSnapshotStore?
 
     // MARK: - Init
 
     init(
         feedingRepository: FeedingRepository,
         babyRepository:    BabyRepository,
-        babyId:            UUID
+        babyId:            UUID,
+        snapshotStore:     CalendarSnapshotStore? = nil
     ) {
-        self.babyRepository = babyRepository
-        self.babyId         = babyId
-
-        let feedingProvider  = FeedingVolumeDecorationProvider(feedingRepository: feedingRepository)
-        let checkupProvider  = CheckupDecorationProvider()
-
-        self.buildCalendar = BuildMonthCalendarUseCase(
-            providers: [feedingProvider, checkupProvider]
-        )
+        self.feedingRepository = feedingRepository
+        self.babyRepository    = babyRepository
+        self.babyId            = babyId
+        self.snapshotStore     = snapshotStore
+        self.checkupProvider   = CheckupDecorationProvider()
     }
 
     // MARK: - Actions
@@ -118,14 +128,16 @@ final class CalendarViewModel {
         Task { @MainActor in await loadCurrentMonth() }
     }
 
-    /// 새 기록 저장 후 해당 월 캐시 무효화 → 다음 로드 시 재계산.
+    /// 새 기록 저장/당겨서새로고침 후 현재 월 무효화 → 재조회.
+    /// 재조회 성공 시 스냅샷도 최신 volumes 로 save 되어 디스크 캐시까지 갱신됨(제안서 §3.4).
     func invalidateCurrentMonthCache() {
-        let cacheKey = cacheKey(for: currentMonth)
-        monthCache.removeValue(forKey: cacheKey)
+        let key = cacheKey(for: currentMonth)
+        monthCache.removeValue(forKey: key)
+        revalidatedPastMonths.remove(key)
         Task { @MainActor in await loadCurrentMonth() }
     }
 
-    // MARK: - Private
+    // MARK: - Load (hydrate → fetch → save)
 
     private func loadCurrentMonth() async {
         guard let baby else {
@@ -133,17 +145,92 @@ final class CalendarViewModel {
             return
         }
 
-        let key = cacheKey(for: currentMonth)
+        let key       = cacheKey(for: currentMonth)
+        let isToday   = Calendar.kst.isDate(currentMonth, equalTo: Date.now, toGranularity: .month)
+
+        // (a) 메모리 히트: 즉시 사용. 오늘 월(변동 활발)은 그래도 백그라운드 재대조.
         if let cached = monthCache[key] {
             calendarModel = cached
+            if isToday {
+                await revalidate(baby: baby, month: currentMonth, key: key)
+            }
             return
         }
 
+        // (b) 메모리 미스 + 디스크 스냅샷 히트: 네트워크 없이 즉시 표시(스피너 회피).
+        if let snap = snapshotStore?.load(babyId: babyId, month: currentMonth) {
+            let volumes = snap.volumes.map { DateVolume(day: $0.day, totalMl: $0.totalMl) }
+            let model   = await buildModel(month: currentMonth, baby: baby, volumes: volumes)
+            monthCache[key] = model
+            calendarModel   = model
+            isLoading       = false
+            // 이후 즉시 백그라운드 재대조로 최신화(과거 월은 세션 1회).
+            if isToday || !revalidatedPastMonths.contains(key) {
+                await revalidate(baby: baby, month: currentMonth, key: key)
+            }
+            return
+        }
+
+        // (c) 캐시 전무: 현행처럼 fetch(스피너).
         isLoading = true
-        let model = await buildCalendar(month: currentMonth, baby: baby)
-        monthCache[key] = model
-        calendarModel = model
+        await revalidate(baby: baby, month: currentMonth, key: key)
         isLoading = false
+    }
+
+    /// 백그라운드 재대조: dailyTotals 새로 받아 모델 재빌드 → 캐시·모델 갱신 → 스냅샷 save.
+    /// 실패 시 기존(hydrate/캐시) 표시 유지(대시보드 SWR 정책과 동일).
+    private func revalidate(baby: Baby, month: Date, key: Date) async {
+        guard let volumes = await fetchVolumes(month: month, baby: baby) else { return }
+
+        let model = await buildModel(month: month, baby: baby, volumes: volumes)
+        monthCache[key] = model
+        calendarModel   = model
+        revalidatedPastMonths.insert(key)
+
+        snapshotStore?.save(
+            CalendarMonthSnapshot(
+                month:   key,
+                volumes: volumes.map { DateVolumeSnapshot(day: $0.day, totalMl: $0.totalMl) },
+                savedAt: Date.now
+            ),
+            babyId: babyId,
+            month:  month
+        )
+    }
+
+    // MARK: - Build
+
+    /// 주입받은 총량(캐시 또는 재조회) + 검진(항상 계산)으로 MonthCalendarModel 조립.
+    /// 그리드/검진/배너 로직은 BuildMonthCalendarUseCase 를 그대로 재사용(중복 없음).
+    private func buildModel(month: Date, baby: Baby, volumes: [DateVolume]) async -> MonthCalendarModel {
+        let builder = BuildMonthCalendarUseCase(
+            providers: [StaticVolumeDecorationProvider(volumes: volumes), checkupProvider]
+        )
+        return await builder(month: month, baby: baby)
+    }
+
+    /// 월 42칸 범위 수유 총량 조회 (offline=로컬 SwiftData, serverOnly=API). 실패 → nil.
+    private func fetchVolumes(month: Date, baby: Baby) async -> [DateVolume]? {
+        let cal   = Calendar.kst
+        let days  = make42Days(for: month)
+        guard let first = days.first, let last = days.last else { return nil }
+        let start = cal.startOfDay(for: first)
+        let end   = cal.startOfDay(for: last)
+        return try? await feedingRepository.dailyTotals(babyId: baby.id, from: start, to: end)
+    }
+
+    // MARK: - Helpers
+
+    /// BuildMonthCalendarUseCase 와 동일 규칙의 42칸 범위 (수유 조회 범위 산정용).
+    private func make42Days(for month: Date) -> [Date] {
+        var cal = Calendar.kst
+        cal.firstWeekday = 1
+        let comps    = cal.dateComponents([.year, .month], from: month)
+        guard let firstDay = cal.date(from: comps) else { return [] }
+        let weekday   = cal.component(.weekday, from: firstDay)
+        let offset    = weekday - 1
+        guard let gridStart = cal.date(byAdding: .day, value: -offset, to: firstDay) else { return [] }
+        return (0..<42).compactMap { cal.date(byAdding: .day, value: $0, to: gridStart) }
     }
 
     private func cacheKey(for month: Date) -> Date {
