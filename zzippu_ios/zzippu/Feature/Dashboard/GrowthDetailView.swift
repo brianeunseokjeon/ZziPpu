@@ -136,18 +136,14 @@ struct GrowthDetailView: View {
                             }
                             .frame(height: 260)
 
-                            // WHO 백분위 코멘트 + 면책 (밴드가 있을 때만)
-                            if let comment = vm.whoPercentileComment {
-                                Text(comment)
-                                    .font(theme.typography.caption)
-                                    .foregroundStyle(theme.color.textSecondary.color)
-                                    .fixedSize(horizontal: false, vertical: true)
-                                DSDisclaimerCaption("WHO 성장표(2006) 참고 · 진단이 아니에요")
-                            }
                         }
                     }
                 }
                 .padding(.horizontal, 16)
+
+                // 기대 평균(p50) 요약 + 5카테고리 배지 + 엣지 안내
+                growthAssessmentCard
+                    .padding(.horizontal, 16)
 
                 // 성장 기록 목록
                 if !vm.series.isEmpty {
@@ -218,6 +214,53 @@ struct GrowthDetailView: View {
             }
         }
         .onAppear { vm.loadSeries() }
+    }
+
+    // MARK: - 성장 판정 카드 (기대 평균 + 배지 + 엣지)
+
+    @ViewBuilder
+    private var growthAssessmentCard: some View {
+        // 60개월 초과 → 판정·기대값 숨김 + 지원 범위 안내(클램프 금지).
+        if vm.isBeyondWHORange {
+            CardContainer(style: .sunken) {
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("성장 판정")
+                        .font(theme.typography.captionStrong)
+                        .foregroundStyle(theme.color.textSecondary.color)
+                    Text("WHO 성장표는 만 5세(60개월)까지 지원돼요. 이후 연령은 소아청소년과에서 확인해 주세요.")
+                        .font(theme.typography.caption)
+                        .foregroundStyle(theme.color.textSecondary.color)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+            }
+        // 성별 미상 → 판정 불가, 성별 선택 유도.
+        } else if vm.isGenderUnknown {
+            CardContainer(style: .sunken) {
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("성장 판정")
+                        .font(theme.typography.captionStrong)
+                        .foregroundStyle(theme.color.textSecondary.color)
+                    Text("아기 성별을 등록하면 또래 평균·백분위 판정을 볼 수 있어요.")
+                        .font(theme.typography.caption)
+                        .foregroundStyle(theme.color.textSecondary.color)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+            }
+        // 기대값 또는 판정이 있을 때만 카드 노출(실측 없으면 배지 자동 숨김).
+        } else if vm.expectedMedianSummary != nil || vm.percentileCategory != nil {
+            CardContainer {
+                VStack(alignment: .leading, spacing: 12) {
+                    GrowthAssessmentSection(
+                        expectedSummary: vm.expectedMedianSummary,
+                        category: vm.percentileCategory,
+                        showsPrematureNote: vm.ageMonths <= 24
+                    )
+                    DSDisclaimerCaption("WHO 성장표(2006) 참고 · 진단이 아니에요")
+                }
+            }
+        }
     }
 }
 

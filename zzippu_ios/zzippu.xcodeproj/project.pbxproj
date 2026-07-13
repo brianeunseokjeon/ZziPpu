@@ -53,6 +53,7 @@
 		2E8821CF269CD1F5C71E5D94 /* SyncState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7A6D8B6EEC40287AF6B40AFF /* SyncState.swift */; };
 		2F8C5CD010E08F492502DED6 /* DiaperViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = C6D2FA2E832505E2571BACE4 /* DiaperViewModel.swift */; };
 		30C37A9CE9991E330EDEB97E /* Feeding.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C316709D85EEE3F919AE448 /* Feeding.swift */; };
+		31DD36AB43D68F8D9A22701A /* GrowthAssessmentSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6F9AAF57310846B829A51661 /* GrowthAssessmentSection.swift */; };
 		334D0350B7903B22F50C026D /* ComputeDashboardSummaryUseCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = B4858A6EEF050640F3C98D07 /* ComputeDashboardSummaryUseCase.swift */; };
 		345D55D6A9F5031ECAFA8BB6 /* FeedingRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = D5970445AE2A0C60AA51E950 /* FeedingRepository.swift */; };
 		3492749A32794037B5B7110B /* CaregiverMember.swift in Sources */ = {isa = PBXBuildFile; fileRef = D06F39AB4E617AB598817C1B /* CaregiverMember.swift */; };
@@ -70,6 +71,7 @@
 		3E8628E7EA7E78B4D8E78021 /* RemoteDashboardRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40911B8DA1EF545615441B8F /* RemoteDashboardRepository.swift */; };
 		3F30A2A2C7203BF2581D6A8C /* VaccinationDTO.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB80B6331AAA33F2B625093A /* VaccinationDTO.swift */; };
 		3FB0E376733089F51D908DBE /* FeedingMapper.swift in Sources */ = {isa = PBXBuildFile; fileRef = A92B0E4985B7B7E16061A073 /* FeedingMapper.swift */; };
+		41F80DE8F3CC37A7007AC5A9 /* who_growth_height_boy.json in Resources */ = {isa = PBXBuildFile; fileRef = 0BF5B65D9AE8FF88BF3D73FC /* who_growth_height_boy.json */; };
 		424A23162701D85F60E191C3 /* DashboardRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B6171E96CF2A1847AAF433A /* DashboardRepository.swift */; };
 		435542E9111E97A042B502AF /* SaveFeedingUseCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3DD65B1970206F01A77B4967 /* SaveFeedingUseCase.swift */; };
 		43A8B50DDD9D79E4ABD8DC02 /* SyncableStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 058BC7F82714AF1B870DA684 /* SyncableStore.swift */; };
@@ -133,6 +135,7 @@
 		8EE5407833053DF141172941 /* RemoteDevelopmentDataSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4DFF67E806A6F8FA6C6CC222 /* RemoteDevelopmentDataSource.swift */; };
 		909947BD97313525F611E5D6 /* VaccinationMapper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1BEB5534F7B49932733DC943 /* VaccinationMapper.swift */; };
 		943E2108AFF677BCA4B7E9DE /* FeedingType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 47857ADDF84A6E7E15DAF0ED /* FeedingType.swift */; };
+		9652EF8C7AB3492858274BAC /* ClassifyGrowthPercentileUseCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = B97C404F8E9619C33C4BF03D /* ClassifyGrowthPercentileUseCase.swift */; };
 		967D0EA7AE7A72D6FD7C4A84 /* SyncingFeedingRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 847891C25C241E4E5FF2A435 /* SyncingFeedingRepository.swift */; };
 		972D9B6CFD99B9890CF6B555 /* GrowthDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9D471E90AC7CF6BF84018A5 /* GrowthDetailView.swift */; };
 		98685BED7B207B1F32ADE482 /* ComputeCheckupScheduleUseCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = F725520AAE3E8AF95D1943C3 /* ComputeCheckupScheduleUseCase.swift */; };
@@ -175,6 +178,7 @@
 		C5A6203AFAA539E417FE1EEF /* RemoteGrowthDataSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E139CB0E45BCF270F599ADE /* RemoteGrowthDataSource.swift */; };
 		C898ABA9B7B4A7F574396350 /* FeedingVolumeDecorationProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 957811D9E7D93440C169A02A /* FeedingVolumeDecorationProvider.swift */; };
 		CB3EC28F975C16F8E84DBF29 /* FeedingDTO.swift in Sources */ = {isa = PBXBuildFile; fileRef = ECED078EAFBF55ABCF767B56 /* FeedingDTO.swift */; };
+		CB84C21D8BF78C5BBDA33178 /* who_growth_height_girl.json in Resources */ = {isa = PBXBuildFile; fileRef = 858D7189BC4574C47A62A25C /* who_growth_height_girl.json */; };
 		CBF8F30CF886CCF40FD4A70E /* DSStatusPill.swift in Sources */ = {isa = PBXBuildFile; fileRef = E2F060B65255E1C2D2C3724D /* DSStatusPill.swift */; };
 		CE826B0D3BD4998D73F3F552 /* FeedingTrendCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 04DE0CE6356D994BECA2C6F8 /* FeedingTrendCard.swift */; };
 		D0F9133CF024DB5070893495 /* PlayInputSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 22F92D7416CF5079E647E6CA /* PlayInputSheet.swift */; };
@@ -252,6 +256,7 @@
 		0A84670C6CDDDBBFB60369B3 /* AnalysisCard.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AnalysisCard.swift; sourceTree = "<group>"; };
 		0BC021245A4DC5B0E7EF54B3 /* KeychainTokenStore.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = KeychainTokenStore.swift; sourceTree = "<group>"; };
 		0BC56F438465C84BCFA0613B /* InsightRow.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = InsightRow.swift; sourceTree = "<group>"; };
+		0BF5B65D9AE8FF88BF3D73FC /* who_growth_height_boy.json */ = {isa = PBXFileReference; includeInIndex = 1; path = who_growth_height_boy.json; sourceTree = "<group>"; };
 		0E423FC5865E6316007A1299 /* RemoteDevelopmentRepository.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = RemoteDevelopmentRepository.swift; sourceTree = "<group>"; };
 		105BA5A4800E331279400182 /* RangeBandChart.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = RangeBandChart.swift; sourceTree = "<group>"; };
 		11C5275F0A4564465AA8E687 /* DynamicColor.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DynamicColor.swift; sourceTree = "<group>"; };
@@ -353,6 +358,7 @@
 		6D4DF6AA22B1C02BEADDF6C7 /* VaccinationContentView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = VaccinationContentView.swift; sourceTree = "<group>"; };
 		6EA6678CDA6E85155283D437 /* AuthSession.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AuthSession.swift; sourceTree = "<group>"; };
 		6ED0B541A872DC7DFC8495E0 /* Typography.generated.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = Typography.generated.swift; sourceTree = "<group>"; };
+		6F9AAF57310846B829A51661 /* GrowthAssessmentSection.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = GrowthAssessmentSection.swift; sourceTree = "<group>"; };
 		6FC0D9020A699551DB49BB20 /* SyncCoordinator.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SyncCoordinator.swift; sourceTree = "<group>"; };
 		72B38D485AAB242759A838D2 /* CaregiverInvite.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CaregiverInvite.swift; sourceTree = "<group>"; };
 		734CF29084606CB53760BC23 /* DiaperType.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DiaperType.swift; sourceTree = "<group>"; };
@@ -371,6 +377,7 @@
 		80064DAC2E5FC1960E840826 /* TermDoc.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = TermDoc.swift; sourceTree = "<group>"; };
 		8340E850D26BB1D74C4A2CAA /* BabyDTO.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = BabyDTO.swift; path = Network/DTOs/BabyDTO.swift; sourceTree = "<group>"; };
 		847891C25C241E4E5FF2A435 /* SyncingFeedingRepository.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SyncingFeedingRepository.swift; sourceTree = "<group>"; };
+		858D7189BC4574C47A62A25C /* who_growth_height_girl.json */ = {isa = PBXFileReference; includeInIndex = 1; path = who_growth_height_girl.json; sourceTree = "<group>"; };
 		869D35FB41B35E590E5F7157 /* GrowthMapper.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = GrowthMapper.swift; path = Network/Mappers/GrowthMapper.swift; sourceTree = "<group>"; };
 		88A4849E3C418BCB8DF70E4B /* BabyAvatar.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = BabyAvatar.swift; sourceTree = "<group>"; };
 		8AB367D535416C42DBA06D6C /* SleepRecord.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SleepRecord.swift; sourceTree = "<group>"; };
@@ -407,6 +414,7 @@
 		B5245F3E41B8AC858E9CCBBA /* DSSectionHeader.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DSSectionHeader.swift; sourceTree = "<group>"; };
 		B6EFB11E405BF9DA251D23AF /* SleepViewModel.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SleepViewModel.swift; sourceTree = "<group>"; };
 		B70CA639B37513701C1E39FA /* EvaluateInsightsUseCase.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = EvaluateInsightsUseCase.swift; sourceTree = "<group>"; };
+		B97C404F8E9619C33C4BF03D /* ClassifyGrowthPercentileUseCase.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ClassifyGrowthPercentileUseCase.swift; sourceTree = "<group>"; };
 		B9D471E90AC7CF6BF84018A5 /* GrowthDetailView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = GrowthDetailView.swift; sourceTree = "<group>"; };
 		B9F2099E28FC13F347F86EFC /* SaveDiaperUseCase.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SaveDiaperUseCase.swift; sourceTree = "<group>"; };
 		BE6BD1EAD898C4CBDB103D4D /* DailySummary.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DailySummary.swift; sourceTree = "<group>"; };
@@ -516,6 +524,8 @@
 				7CA691FDE2EF6CED2F40EA87 /* pediatric_guidelines.json */,
 				4255C581698465DEB655CE81 /* who_growth_weight_boy.json */,
 				3D6ADB230FC5F7066A9E8071 /* who_growth_weight_girl.json */,
+				0BF5B65D9AE8FF88BF3D73FC /* who_growth_height_boy.json */,
+				858D7189BC4574C47A62A25C /* who_growth_height_girl.json */,
 			);
 			name = Guidelines;
 			path = Guidelines;
@@ -786,6 +796,7 @@
 				A19F37A99F272F216CA8B9F3 /* DashboardSnapshotStore.swift */,
 				5B780CC2EE39725C167F11AB /* CalendarViewModel.swift */,
 				E7FAA726948BD3F135B588D1 /* DashboardCalendarSection.swift */,
+				6F9AAF57310846B829A51661 /* GrowthAssessmentSection.swift */,
 			);
 			name = Dashboard;
 			path = Dashboard;
@@ -963,6 +974,7 @@
 				B70CA639B37513701C1E39FA /* EvaluateInsightsUseCase.swift */,
 				92234B38E5D5916C6609599D /* ComputeFeedingTrendUseCase.swift */,
 				7151E64A76B30CE4F1149728 /* Calendar */,
+				B97C404F8E9619C33C4BF03D /* ClassifyGrowthPercentileUseCase.swift */,
 			);
 			name = UseCases;
 			path = UseCases;
@@ -1326,6 +1338,8 @@
 				2E81D3F0A2067770155884C6 /* pediatric_guidelines.json in Resources */,
 				6E8A3894CF729FE356BF4843 /* who_growth_weight_boy.json in Resources */,
 				7A93C22C4D59F7BE1F1B6530 /* who_growth_weight_girl.json in Resources */,
+				41F80DE8F3CC37A7007AC5A9 /* who_growth_height_boy.json in Resources */,
+				CB84C21D8BF78C5BBDA33178 /* who_growth_height_girl.json in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1554,6 +1568,8 @@
 				A50C9D4B8B6404BCDE456021 /* MonthHeaderView.swift in Sources */,
 				BF11DE2D228E70B23571BDC8 /* CheckupBannerView.swift in Sources */,
 				23A50A6DE840BC10C58DC0AC /* BloodType.swift in Sources */,
+				9652EF8C7AB3492858274BAC /* ClassifyGrowthPercentileUseCase.swift in Sources */,
+				31DD36AB43D68F8D9A22701A /* GrowthAssessmentSection.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

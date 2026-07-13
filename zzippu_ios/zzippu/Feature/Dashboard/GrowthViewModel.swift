@@ -183,8 +183,8 @@ final class GrowthViewModel {
     private var whoMetric: WHOGrowthMetric? {
         switch selectedMetric {
         case .weight: return .weight
-        case .height: return nil   // WHO 데이터 미번들 → 생략
-        case .head:   return nil   // WHO 데이터 미번들 → 생략
+        case .height: return .height   // who_growth_height_{sex}.json 번들됨 → 활성화
+        case .head:   return nil       // WHO 데이터 미번들 → 생략
         }
     }
 
@@ -197,10 +197,52 @@ final class GrowthViewModel {
     }
 
     /// 출생일 → 오늘 개월수(0 이상).
-    private var ageMonths: Int {
+    var ageMonths: Int {
         guard let birth = activeBaby?.birthDate else { return 0 }
         let comps = Calendar.kst.dateComponents([.month], from: birth, to: .now)
         return max(0, comps.month ?? 0)
+    }
+
+    /// WHO 표 상한(만 5세). 초과 시 밴드·기대값·배지 숨김(클램프 대신 안내).
+    static let whoMaxMonths = 60
+
+    /// WHO 지원 범위(0~60개월) 초과 여부 — 초과 시 판정/기대값 미표시.
+    var isBeyondWHORange: Bool { ageMonths > Self.whoMaxMonths }
+
+    /// 성별 미상 여부(배지·기대값 표시 가드용).
+    var isGenderUnknown: Bool { whoSex == nil }
+
+    /// 성별 표시 어휘("남아"/"여아"). 미상 시 nil.
+    var sexDisplayName: String? {
+        switch activeBaby?.gender {
+        case .male:   return "남아"
+        case .female: return "여아"
+        default:      return nil
+        }
+    }
+
+    // MARK: - 기대 평균(p50) + 5카테고리 판정
+
+    /// 현재 월령·성별에서 보간한 기대 평균(p50). 범위 밖(>60개월)·미지원 시 nil.
+    var expectedMedian: Double? {
+        guard !isBeyondWHORange, let band = whoBand else { return nil }
+        return band.p50
+    }
+
+    /// "생후 N개월 {성별} 평균 {지표} ≈ p50값" 요약 라인. 조건 미충족 시 nil.
+    var expectedMedianSummary: String? {
+        guard let p50 = expectedMedian, let sex = sexDisplayName else { return nil }
+        let fmt = selectedMetric == .weight ? "%.1f" : "%.1f"
+        let valueText = String(format: fmt, p50) + selectedMetric.unit
+        return "생후 \(ageMonths)개월 \(sex) 평균 \(selectedMetric.rawValue) ≈ \(valueText)"
+    }
+
+    /// 실측 최신값의 WHO 5카테고리 판정. 밴드·실측 없음·범위 밖 시 nil.
+    var percentileCategory: GrowthPercentileCategory? {
+        guard !isBeyondWHORange,
+              let band = whoBand,
+              let latest = chartPoints.last?.value else { return nil }
+        return ClassifyGrowthPercentileUseCase()(value: latest, band: band)
     }
 
     /// 월령 사이 선형보간. 범위를 벗어나면 양끝값으로 클램프.
@@ -229,21 +271,6 @@ final class GrowthViewModel {
 
     private func spec(_ r: WHOGrowthRow) -> WHOBandSpec {
         WHOBandSpec(p3: r.p3, p15: r.p15, p50: r.p50, p85: r.p85, p97: r.p97)
-    }
-
-    /// 실측 최신값이 대략 몇 백분위 근처인지 완곡 코멘트(정밀 진단 아님).
-    var whoPercentileComment: String? {
-        guard let band = whoBand, let latest = chartPoints.last?.value else { return nil }
-        let label: String
-        switch latest {
-        case ..<band.p3:            label = "3백분위보다 낮은 편"
-        case band.p3..<band.p15:    label = "약 3~15백분위"
-        case band.p15..<band.p50:   label = "약 15~50백분위"
-        case band.p50..<band.p85:   label = "약 50~85백분위 (또래 평균 수준)"
-        case band.p85..<band.p97:   label = "약 85~97백분위"
-        default:                    label = "97백분위보다 높은 편"
-        }
-        return "\(label)예요. 개인차는 정상이며 정밀 진단은 아니에요."
     }
 
     var latestValueText: String {
