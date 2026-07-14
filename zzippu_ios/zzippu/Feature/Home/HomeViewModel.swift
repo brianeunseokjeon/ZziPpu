@@ -99,6 +99,16 @@ final class HomeViewModel {
     func loadAll(for date: Date? = nil) { loadInitial() }
     func loadFeedings(for date: Date? = nil) { loadInitial() }
 
+    /// 동기화(서버→로컬 pull) 완료 등으로 로컬이 갱신됐을 때 호출 —
+    /// 현재 보이는 날짜들을 다시 로드해 웹/타기기에서 만든 기록을 즉시 반영.
+    /// (홈은 로컬을 한 번 읽고 캐시하므로, sync가 끝나도 스스로 갱신하지 않기에 필요.)
+    func reloadVisibleDays() {
+        let days = loadedDays.isEmpty ? [Calendar.kst.startOfDay(for: Date())] : loadedDays
+        for day in days { loadDay(day) }
+        refreshActiveSessions()
+        refreshLastFormula()
+    }
+
     /// 피드 하단 도달 → 다음 과거 하루 append.
     func loadOlderDay() {
         guard loadedDays.count < Self.maxDays, let oldest = loadedDays.last else { return }

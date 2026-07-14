@@ -31,6 +31,11 @@ struct HomeView: View {
                     vm: vm,
                     onAction: { handleAction($0, vm: vm) }
                 )
+                // 서버→로컬 동기화(pull) 완료 시 보이는 날짜 재로드 →
+                // 웹/다른 기기에서 만든 기록이 앱에 즉시 반영된다(재시작 불필요).
+                .onChange(of: container.syncCoordinator?.lastSyncedAt) { _, _ in
+                    vm.reloadVisibleDays()
+                }
                 .dsBottomSheet(
                     isPresented: $showBreastSheet,
                     options: .init(title: "🤱 모유 기록", detents: [.medium, .large])
