@@ -127,23 +127,23 @@ final class HomeViewModel {
             recordsByDay[day] = DayRecords(isLoading: true)
         }
         Task { @MainActor in
-            do {
-                async let f = feedingRepository.list(babyId: babyId, on: day)
-                async let s = sleepRepository.list(babyId: babyId, on: day)
-                async let d = diaperRepository.list(babyId: babyId, on: day)
-                async let p = playRepository.list(babyId: babyId, on: day)
-                let rec = DayRecords(
-                    feedings: try await f,
-                    sleeps:   try await s,
-                    diapers:  try await d,
-                    plays:    try await p,
-                    isLoading: false
-                )
-                recordsByDay[day] = rec
-            } catch {
-                recordsByDay[day] = DayRecords(isLoading: false)
-                errorMessage = "기록 로드 실패: \(error.localizedDescription)"
-            }
+            // 도메인별 독립 로드 — 하나가 실패해도(서버 오류/디코드) 나머지는 보이게.
+            // (예: 오프라인 모드에서 분유는 로컬·정상인데 기저귀 서버호출이 실패하면
+            //  예전엔 그날 전체가 빈 값이 됐다. 각각 try? 로 분리해 부분 실패를 격리한다.)
+            async let f = feedingRepository.list(babyId: babyId, on: day)
+            async let s = sleepRepository.list(babyId: babyId, on: day)
+            async let d = diaperRepository.list(babyId: babyId, on: day)
+            async let p = playRepository.list(babyId: babyId, on: day)
+
+            let feedings = (try? await f) ?? []
+            let sleeps   = (try? await s) ?? []
+            let diapers  = (try? await d) ?? []
+            let plays    = (try? await p) ?? []
+
+            recordsByDay[day] = DayRecords(
+                feedings: feedings, sleeps: sleeps, diapers: diapers, plays: plays,
+                isLoading: false
+            )
         }
     }
 
