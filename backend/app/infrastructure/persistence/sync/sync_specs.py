@@ -184,6 +184,12 @@ _BABY = SyncSpec(
         FieldSpec("gender", parse_str, ser_passthrough),
         FieldSpec("birth_weight_g", parse_int, ser_passthrough),
         FieldSpec("photo_url", parse_str, ser_passthrough),
+        FieldSpec("birth_height_cm", parse_float, ser_passthrough),
+        FieldSpec("birth_head_circumference_cm", parse_float, ser_passthrough),
+        FieldSpec("birth_chest_circumference_cm", parse_float, ser_passthrough),
+        FieldSpec("blood_type", parse_str, ser_passthrough),
+        FieldSpec("rh_factor", parse_str, ser_passthrough),
+        FieldSpec("birth_time", parse_str, ser_passthrough),
     ],
 )
 

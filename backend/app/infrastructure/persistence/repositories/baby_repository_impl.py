@@ -23,6 +23,12 @@ class BabyRepositoryImpl(BabyRepository):
             birth_weight_g=model.birth_weight_g,
             created_at=model.created_at,
             photo_url=model.photo_url,
+            birth_height_cm=model.birth_height_cm,
+            birth_head_circumference_cm=model.birth_head_circumference_cm,
+            birth_chest_circumference_cm=model.birth_chest_circumference_cm,
+            blood_type=model.blood_type,
+            rh_factor=model.rh_factor,
+            birth_time=model.birth_time,
         )
 
     def _to_model(self, entity: Baby) -> BabyModel:
@@ -35,6 +41,12 @@ class BabyRepositoryImpl(BabyRepository):
             birth_weight_g=entity.birth_weight_g,
             created_at=entity.created_at,
             photo_url=entity.photo_url,
+            birth_height_cm=entity.birth_height_cm,
+            birth_head_circumference_cm=entity.birth_head_circumference_cm,
+            birth_chest_circumference_cm=entity.birth_chest_circumference_cm,
+            blood_type=entity.blood_type,
+            rh_factor=entity.rh_factor,
+            birth_time=entity.birth_time,
         )
 
     async def get(self, id: UUID) -> Baby | None:
@@ -67,6 +79,12 @@ class BabyRepositoryImpl(BabyRepository):
             model.gender = baby.gender
             model.birth_weight_g = baby.birth_weight_g
             model.photo_url = baby.photo_url
+            model.birth_height_cm = baby.birth_height_cm
+            model.birth_head_circumference_cm = baby.birth_head_circumference_cm
+            model.birth_chest_circumference_cm = baby.birth_chest_circumference_cm
+            model.blood_type = baby.blood_type
+            model.rh_factor = baby.rh_factor
+            model.birth_time = baby.birth_time
             model.deleted_at = None
             model.updated_at = now
         await self._session.flush()
@@ -81,6 +99,12 @@ class BabyRepositoryImpl(BabyRepository):
         model.gender = baby.gender
         model.birth_weight_g = baby.birth_weight_g
         model.photo_url = baby.photo_url
+        model.birth_height_cm = baby.birth_height_cm
+        model.birth_head_circumference_cm = baby.birth_head_circumference_cm
+        model.birth_chest_circumference_cm = baby.birth_chest_circumference_cm
+        model.blood_type = baby.blood_type
+        model.rh_factor = baby.rh_factor
+        model.birth_time = baby.birth_time
         model.updated_at = datetime.now(timezone.utc)
         await self._session.flush()
         return self._to_entity(model)

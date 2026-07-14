@@ -19,6 +19,12 @@ class RegisterBabyUseCase:
             gender=dto.gender,
             birth_weight_g=dto.birth_weight_g,
             created_at=datetime.now(timezone.utc),
+            birth_height_cm=dto.birth_height_cm,
+            birth_head_circumference_cm=dto.birth_head_circumference_cm,
+            birth_chest_circumference_cm=dto.birth_chest_circumference_cm,
+            blood_type=dto.blood_type,
+            rh_factor=dto.rh_factor,
+            birth_time=dto.birth_time,
         )
         saved = await self._repo.save(baby)
         return BabyResponseDTO(
@@ -31,4 +37,11 @@ class RegisterBabyUseCase:
             age_days=saved.age_days,
             age_months=saved.age_months,
             created_at=saved.created_at,
+            photo_url=saved.photo_url,
+            birth_height_cm=saved.birth_height_cm,
+            birth_head_circumference_cm=saved.birth_head_circumference_cm,
+            birth_chest_circumference_cm=saved.birth_chest_circumference_cm,
+            blood_type=saved.blood_type,
+            rh_factor=saved.rh_factor,
+            birth_time=saved.birth_time,
         )

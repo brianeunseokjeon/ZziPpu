@@ -1,7 +1,7 @@
 from datetime import date, datetime
 from uuid import UUID
 
-from sqlalchemy import Date, Integer, String, Text, Uuid
+from sqlalchemy import Date, Float, Integer, String, Text, Uuid
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.infrastructure.persistence.models.base import Base
@@ -19,4 +19,11 @@ class BabyModel(Base, SyncMixin):
     gender: Mapped[str | None] = mapped_column(String(20), nullable=True)
     birth_weight_g: Mapped[int | None] = mapped_column(Integer, nullable=True)
     photo_url: Mapped[str | None] = mapped_column(Text, nullable=True)
+    # ── 신규(전부 nullable · 하위호환) ────────────────────────────────────────
+    birth_height_cm: Mapped[float | None] = mapped_column(Float, nullable=True)
+    birth_head_circumference_cm: Mapped[float | None] = mapped_column(Float, nullable=True)
+    birth_chest_circumference_cm: Mapped[float | None] = mapped_column(Float, nullable=True)
+    blood_type: Mapped[str | None] = mapped_column(String(4), nullable=True)  # A|B|O|AB
+    rh_factor: Mapped[str | None] = mapped_column(String(10), nullable=True)  # positive|negative
+    birth_time: Mapped[str | None] = mapped_column(String(5), nullable=True)  # "HH:mm" (24h, KST)
     created_at: Mapped[datetime] = mapped_column(UTCDateTime, nullable=False)

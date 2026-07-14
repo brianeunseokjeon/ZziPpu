@@ -17,6 +17,12 @@ def _to_dto(baby) -> BabyResponseDTO:
         age_months=baby.age_months,
         created_at=baby.created_at,
         photo_url=baby.photo_url,
+        birth_height_cm=baby.birth_height_cm,
+        birth_head_circumference_cm=baby.birth_head_circumference_cm,
+        birth_chest_circumference_cm=baby.birth_chest_circumference_cm,
+        blood_type=baby.blood_type,
+        rh_factor=baby.rh_factor,
+        birth_time=baby.birth_time,
     )
 
 

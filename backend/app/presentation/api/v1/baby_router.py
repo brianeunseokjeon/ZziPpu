@@ -36,6 +36,12 @@ def _to_response(result) -> BabyResponse:
         age_months=result.age_months,
         created_at=result.created_at,
         photo_url=getattr(result, "photo_url", None),
+        birth_height_cm=getattr(result, "birth_height_cm", None),
+        birth_head_circumference_cm=getattr(result, "birth_head_circumference_cm", None),
+        birth_chest_circumference_cm=getattr(result, "birth_chest_circumference_cm", None),
+        blood_type=getattr(result, "blood_type", None),
+        rh_factor=getattr(result, "rh_factor", None),
+        birth_time=getattr(result, "birth_time", None),
     )
 
 
@@ -51,6 +57,12 @@ async def register_baby(
         birth_date=body.birth_date,
         gender=body.gender,
         birth_weight_g=body.birth_weight_g,
+        birth_height_cm=body.birth_height_cm,
+        birth_head_circumference_cm=body.birth_head_circumference_cm,
+        birth_chest_circumference_cm=body.birth_chest_circumference_cm,
+        blood_type=body.blood_type.value if body.blood_type is not None else None,
+        rh_factor=body.rh_factor.value if body.rh_factor is not None else None,
+        birth_time=body.birth_time,
     )
     return _to_response(await use_case.execute(dto))
 
@@ -91,6 +103,12 @@ async def update_baby(
             gender=body.gender,
             birth_weight_g=body.birth_weight_g,
             photo_url=body.photo_url,
+            birth_height_cm=body.birth_height_cm,
+            birth_head_circumference_cm=body.birth_head_circumference_cm,
+            birth_chest_circumference_cm=body.birth_chest_circumference_cm,
+            blood_type=body.blood_type.value if body.blood_type is not None else None,
+            rh_factor=body.rh_factor.value if body.rh_factor is not None else None,
+            birth_time=body.birth_time,
         )
         return _to_response(await use_case.execute(dto))
     except ValueError as e:

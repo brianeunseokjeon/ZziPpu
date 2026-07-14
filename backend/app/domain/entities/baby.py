@@ -13,6 +13,12 @@ class Baby:
     birth_weight_g: int | None
     created_at: datetime
     photo_url: str | None = None
+    birth_height_cm: float | None = None
+    birth_head_circumference_cm: float | None = None
+    birth_chest_circumference_cm: float | None = None
+    blood_type: str | None = None  # A|B|O|AB
+    rh_factor: str | None = None  # positive|negative
+    birth_time: str | None = None  # "HH:mm" (24h, KST)
 
     @property
     def age_days(self) -> int:
@@ -33,7 +39,9 @@ class Baby:
 
     def age_months_at(self, target_date: date) -> int:
         """target_date 기준 생후 개월 수."""
-        months = (target_date.year - self.birth_date.year) * 12 + (target_date.month - self.birth_date.month)
+        months = (target_date.year - self.birth_date.year) * 12 + (
+            target_date.month - self.birth_date.month
+        )
         if target_date.day < self.birth_date.day:
             months -= 1
         return max(0, months)

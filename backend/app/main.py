@@ -7,6 +7,25 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy import select
 
+# ── auth_svc (통합) ──────────────────────────────────────────────────────────
+from app.auth_svc.config import settings as auth_settings
+from app.auth_svc.infrastructure.persistence.database import (
+    AsyncSessionFactory as AuthAsyncSessionFactory,
+)
+from app.auth_svc.infrastructure.persistence.database import (
+    engine as auth_engine,
+)
+from app.auth_svc.infrastructure.persistence.models import (  # noqa: F401 — register auth models
+    EmailOtpModel,
+    TermModel,
+    TermsAgreementModel,
+)
+from app.auth_svc.infrastructure.persistence.models.base import Base as AuthBase
+from app.auth_svc.infrastructure.persistence.repositories.terms_repository_impl import (
+    TermsRepositoryImpl as AuthTermsRepositoryImpl,
+)
+from app.auth_svc.infrastructure.terms.seed import seed_terms
+from app.auth_svc.presentation.api.v1.router import v1_router as auth_v1_router
 from app.config import settings
 from app.domain.guidelines.vaccination_schedule import VACCINATION_SCHEDULE
 from app.infrastructure.persistence.database import AsyncSessionFactory, engine
@@ -28,25 +47,6 @@ from app.infrastructure.persistence.models.base import Base
 from app.presentation.api.internal_router import router as internal_router
 from app.presentation.api.v1.router import v1_router
 from app.presentation.middleware.error_handler import ErrorHandlerMiddleware
-
-# ── auth_svc (통합) ──────────────────────────────────────────────────────────
-from app.auth_svc.config import settings as auth_settings
-from app.auth_svc.infrastructure.persistence.database import (
-    AsyncSessionFactory as AuthAsyncSessionFactory,
-    engine as auth_engine,
-)
-from app.auth_svc.infrastructure.persistence.models.base import Base as AuthBase
-from app.auth_svc.infrastructure.persistence.models import (  # noqa: F401 — register auth models
-    EmailOtpModel,
-    TermModel,
-    TermsAgreementModel,
-    UserModel as AuthUserModel,
-)
-from app.auth_svc.infrastructure.persistence.repositories.terms_repository_impl import (
-    TermsRepositoryImpl as AuthTermsRepositoryImpl,
-)
-from app.auth_svc.infrastructure.terms.seed import seed_terms
-from app.auth_svc.presentation.api.v1.router import v1_router as auth_v1_router
 
 DEV_USER_ID = UUID("00000000-0000-0000-0000-000000000001")
 DEV_BABY_ID = UUID("00000000-0000-0000-0000-000000000002")
@@ -217,6 +217,45 @@ async def _migrate_sqlite() -> None:
 
             logging.getLogger(__name__).warning(
                 "diaper_records.amount 마이그레이션 실패(무시하고 기동 계속)",
+                exc_info=True,
+            )
+
+        # ── babies 신규 프로필 컬럼 (전부 nullable · 하위호환 · 멱등) ─────────
+        # 측정치 3개(키/두위/흉위)=DOUBLE PRECISION(PG)/REAL(SQLite),
+        # blood_type=VARCHAR(4), rh_factor=VARCHAR(10), birth_time=VARCHAR(5).
+        # 파괴적 변경 없음. 실패해도 앱 기동은 막지 않음(로그만).
+        try:
+            baby_cols = await _existing_columns(conn, "babies", is_sqlite)
+            if baby_cols:  # 테이블이 이미 존재할 때만(create_all 이 새로 만든 경우 skip)
+                float_type = "REAL" if is_sqlite else "DOUBLE PRECISION"
+                new_baby_cols = (
+                    ("birth_height_cm", float_type),
+                    ("birth_head_circumference_cm", float_type),
+                    ("birth_chest_circumference_cm", float_type),
+                    ("blood_type", "VARCHAR(4)"),
+                    ("rh_factor", "VARCHAR(10)"),
+                    ("birth_time", "VARCHAR(5)"),
+                )
+                for col_name, col_type in new_baby_cols:
+                    if col_name in baby_cols:
+                        continue  # 멱등 — 이미 있으면 skip
+                    if is_sqlite:
+                        await conn.execute(
+                            text(f"ALTER TABLE babies ADD COLUMN {col_name} {col_type}")
+                        )
+                    else:
+                        # PostgreSQL(Neon/Render): IF NOT EXISTS 로 멱등 보장
+                        await conn.execute(
+                            text(
+                                f"ALTER TABLE babies "
+                                f"ADD COLUMN IF NOT EXISTS {col_name} {col_type}"
+                            )
+                        )
+        except Exception:  # noqa: BLE001 — 마이그레이션 실패가 기동을 막지 않도록
+            import logging
+
+            logging.getLogger(__name__).warning(
+                "babies 신규 컬럼 마이그레이션 실패(무시하고 기동 계속)",
                 exc_info=True,
             )
 
