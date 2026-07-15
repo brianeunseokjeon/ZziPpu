@@ -27,9 +27,10 @@ struct zzippuApp: App {
                 .modifier(OfflineWiring(container: appContainer))
         }
         .onChange(of: scenePhase) { _, phase in
-            // 포그라운드 복귀 시 full sync(밤중 재개 최신화). server-only면 내부 no-op.
+            // 포그라운드 복귀(앱 시작 포함) 시: 서버 선제 워밍(콜드 완충) + full sync.
             if phase == .active {
-                appContainer.triggerFeedingFullSync()
+                appContainer.prewarmServer()          // /health 선제 핑 → 서버+Neon 각성
+                appContainer.triggerFeedingFullSync() // server-only면 내부 no-op
             }
         }
     }

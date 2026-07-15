@@ -114,6 +114,16 @@ final class AppContainer {
         offline?.engine.triggerFullSync()
     }
 
+    /// 콜드스타트 완충: 앱 시작·포그라운드 복귀 시 `/health`를 선제 핑해
+    /// 스플래시가 보이는 동안 서버(+DB touch로 Neon)를 미리 깨운다.
+    /// fire-and-forget — 실패 무시. 첫 실제 API 호출의 콜드 대기를 줄인다.
+    func prewarmServer() {
+        let url = AuthConfig.baseURL.appendingPathComponent("/health")
+        var req = URLRequest(url: url)
+        req.timeoutInterval = 60   // 콜드스타트 웨이크업 대기 허용
+        URLSession.shared.dataTask(with: req).resume()
+    }
+
     // MARK: - Preview Factory (Mock 리포지토리 — 네트워크 미접속)
 
     @MainActor
