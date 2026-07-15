@@ -212,6 +212,9 @@ private struct HomeContentView: View {
                 AppHeaderPlaceholder()
             }
 
+            // 동기화 상태 표시(콜드스타트/오프라인 완충) — 관련 있을 때만 나타남.
+            HomeSyncStatusBar()
+
             if vm.isFocusingPast {
                 PastFocusView(vm: vm, onAction: onAction)
             } else {
@@ -227,6 +230,72 @@ private struct HomeContentView: View {
             Button("확인", role: .cancel) { vm.errorMessage = nil }
         } message: {
             Text(vm.errorMessage ?? "")
+        }
+    }
+}
+
+// MARK: - HomeSyncStatusBar (동기화 상태 완충)
+
+/// 서버 동기화 상태를 홈 상단에 얇게 표시 — "동기화 중"·"오프라인"일 때만 나타난다.
+/// 콜드스타트로 웹/타기기 기록이 늦게 뜰 때 "왜 안 뜨지?" 불안을 "진행 중"으로 재프레이밍.
+/// server-only(syncCoordinator 없음)·idle이면 아무것도 안 그림.
+private struct HomeSyncStatusBar: View {
+    @Environment(AppContainer.self) private var container
+    @Environment(\.theme) private var theme
+
+    var body: some View {
+        if let coordinator = container.syncCoordinator,
+           let info = info(for: coordinator.status) {
+            HStack(spacing: theme.space.inlineGap) {
+                if info.spinning {
+                    ProgressView().controlSize(.mini).tint(info.fg)
+                } else {
+                    Image(systemName: info.icon)
+                        .font(.system(size: 12, weight: .semibold))
+                }
+                Text(info.text)
+                    .font(theme.typography.caption)
+                Spacer(minLength: 0)
+            }
+            .foregroundStyle(info.fg)
+            .padding(.horizontal, theme.space.screenPaddingX)
+            .padding(.vertical, 6)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .background(info.bg)
+            .transition(.opacity)
+            .animation(.easeInOut(duration: theme.motion.fast), value: coordinator.status)
+        }
+    }
+
+    private struct Info {
+        let text: String
+        let icon: String
+        let spinning: Bool
+        let fg: Color
+        let bg: Color
+    }
+
+    /// idle → nil(숨김). syncing/offline/error만 표시.
+    private func info(for status: SyncStatus) -> Info? {
+        switch status {
+        case .idle:
+            return nil
+        case .syncing:
+            return Info(
+                text: "동기화 중…", icon: "arrow.triangle.2.circlepath", spinning: true,
+                fg: theme.color.textSecondary.color, bg: theme.color.surfaceSunken.color
+            )
+        case .offline:
+            return Info(
+                text: "오프라인 — 기록은 안전하게 저장돼요", icon: "wifi.slash", spinning: false,
+                fg: theme.color.statusWarningFg.color, bg: theme.color.statusWarningBg.color
+            )
+        case .error:
+            return Info(
+                text: "동기화가 지연되고 있어요 · 곧 다시 시도해요", icon: "exclamationmark.arrow.triangle.2.circlepath",
+                spinning: false,
+                fg: theme.color.statusWarningFg.color, bg: theme.color.statusWarningBg.color
+            )
         }
     }
 }
