@@ -5,7 +5,7 @@ from uuid import UUID, uuid4
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from sqlalchemy import select
+from sqlalchemy import select, text
 
 # ── auth_svc (통합) ──────────────────────────────────────────────────────────
 from app.auth_svc.config import settings as auth_settings
@@ -312,4 +312,14 @@ app.include_router(auth_v1_router)  # auth: /api/v1/auth/*, /api/v1/auth/terms, 
 
 @app.get("/health")
 async def health_check() -> dict:
-    return {"status": "ok", "service": "muknoljam-unified"}
+    # keep-warm 핑 대상. DB를 가볍게 touch(SELECT 1)해서 Render 웹서비스뿐 아니라
+    # Neon(5분 유휴 시 컴퓨트 정지)까지 함께 깨워 둔다 — 그래야 첫 실제 쿼리 콜드가 없다.
+    # DB가 죽어도 200은 유지(핑 자체가 죽어 keep-warm이 끊기지 않도록). 상태만 바디에 표기.
+    db_ok = False
+    try:
+        async with AsyncSessionFactory() as session:
+            await session.execute(text("SELECT 1"))
+        db_ok = True
+    except Exception:  # noqa: BLE001 — health는 절대 500 내면 안 됨(핑 유지)
+        db_ok = False
+    return {"status": "ok", "service": "muknoljam-unified", "db": "ok" if db_ok else "down"}
