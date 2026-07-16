@@ -47,77 +47,71 @@ private struct DiaperInputContent: View {
     @Environment(\.theme) private var theme
 
     var body: some View {
-        GeometryReader { geo in
-            let safeBottom = geo.safeAreaInsets.bottom
-            VStack(spacing: 0) {
-                ScrollView {
-                    VStack(spacing: theme.space.md) {
-                        // 종류(소변/대변)는 진입 버튼이 결정 → 시트에서 선택 없음.
+        // ⚠️ DSBottomSheet가 이미 ScrollView로 감싸므로 여기서 GeometryReader/ScrollView를
+        // 또 쓰면 높이 붕괴로 내용이 사라진다. 단순 VStack만 둔다.
+        VStack(spacing: 0) {
+            VStack(spacing: theme.space.md) {
+                // 종류(소변/대변)는 진입 버튼이 결정 → 시트에서 선택 없음.
 
-                        // 양 (소변·대변 공통) — 3칩 균등폭, Spacer 제거
-                        VStack(alignment: .leading, spacing: theme.space.xs) {
-                            Text("양")
-                                .font(theme.typography.captionStrong)
-                                .foregroundStyle(theme.color.textSecondary.color)
-                            DSSegmentedChips(
-                                options:   DiaperAmount.allCases,
-                                selection: $vm.selectedAmount,
-                                label:     { $0.displayName }
-                            )
-                        }
+                // 양 (소변·대변 공통) — 3칩 균등폭
+                VStack(alignment: .leading, spacing: theme.space.xs) {
+                    Text("양")
+                        .font(theme.typography.captionStrong)
+                        .foregroundStyle(theme.color.textSecondary.color)
+                    DSSegmentedChips(
+                        options:   DiaperAmount.allCases,
+                        selection: $vm.selectedAmount,
+                        label:     { $0.displayName }
+                    )
+                }
 
-                        // 대변 색 + 질감 (대변/소변+대변 선택 시)
-                        if vm.selectedType.hasPoo {
-                            // 대변 색 — 5칩 compact 균등폭, 가로스크롤 제거
-                            VStack(alignment: .leading, spacing: theme.space.xs) {
-                                Text("대변 색")
-                                    .font(theme.typography.captionStrong)
-                                    .foregroundStyle(theme.color.textSecondary.color)
-                                DSSegmentedChips(
-                                    options:   StoolColor.diaperColorCases,
-                                    selection: $vm.selectedColor,
-                                    label:     { $0.diaperColorLabel },
-                                    tint:      { c in theme.color.swatch(for: c.stoolSwatch) },
-                                    compact:   true
-                                )
-                            }
-
-                            // 대변 질감 (묽음/보통/찰흙) — 3칩 균등폭, Spacer 제거
-                            VStack(alignment: .leading, spacing: theme.space.xs) {
-                                Text("질감")
-                                    .font(theme.typography.captionStrong)
-                                    .foregroundStyle(theme.color.textSecondary.color)
-                                DSSegmentedChips(
-                                    options:   StoolState.diaperTextureCases,
-                                    selection: $vm.selectedState,
-                                    label:     { $0.textureShortLabel }
-                                )
-                            }
-                        }
-
-                        // 기록 시각
-                        VStack(alignment: .leading, spacing: theme.space.xs) {
-                            Text("기록 시각")
-                                .font(theme.typography.captionStrong)
-                                .foregroundStyle(theme.color.textSecondary.color)
-                            DatePicker(
-                                "",
-                                selection: $vm.recordedAt,
-                                displayedComponents: [.date, .hourAndMinute]
-                            )
-                            .labelsHidden()
-                        }
+                // 대변 색 + 질감 (대변/소변+대변 선택 시)
+                if vm.selectedType.hasPoo {
+                    // 대변 색 — 5칩 compact 균등폭
+                    VStack(alignment: .leading, spacing: theme.space.xs) {
+                        Text("대변 색")
+                            .font(theme.typography.captionStrong)
+                            .foregroundStyle(theme.color.textSecondary.color)
+                        DSSegmentedChips(
+                            options:   StoolColor.diaperColorCases,
+                            selection: $vm.selectedColor,
+                            label:     { $0.diaperColorLabel },
+                            tint:      { c in theme.color.swatch(for: c.stoolSwatch) },
+                            compact:   true
+                        )
                     }
-                    .padding(.top, theme.space.sm)
-                    .padding(.bottom, theme.space.md)
+
+                    // 대변 질감 (묽음/보통/찰흙) — 3칩 균등폭
+                    VStack(alignment: .leading, spacing: theme.space.xs) {
+                        Text("질감")
+                            .font(theme.typography.captionStrong)
+                            .foregroundStyle(theme.color.textSecondary.color)
+                        DSSegmentedChips(
+                            options:   StoolState.diaperTextureCases,
+                            selection: $vm.selectedState,
+                            label:     { $0.textureShortLabel }
+                        )
+                    }
                 }
 
-                DSButton("저장", variant: .primary, size: .lg) {
-                    handleSave()
+                // 기록 시각
+                VStack(alignment: .leading, spacing: theme.space.xs) {
+                    Text("기록 시각")
+                        .font(theme.typography.captionStrong)
+                        .foregroundStyle(theme.color.textSecondary.color)
+                    DatePicker(
+                        "",
+                        selection: $vm.recordedAt,
+                        displayedComponents: [.date, .hourAndMinute]
+                    )
+                    .labelsHidden()
                 }
-                .padding(.top, theme.space.sm)
-                .padding(.bottom, max(theme.space.md, safeBottom))
             }
+
+            DSButton("저장", variant: .primary, size: .lg) {
+                handleSave()
+            }
+            .padding(.top, theme.space.md)
         }
         .alert("오류", isPresented: Binding(
             get: { vm.errorMessage != nil },

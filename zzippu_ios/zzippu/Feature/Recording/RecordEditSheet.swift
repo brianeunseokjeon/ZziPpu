@@ -43,55 +43,51 @@ struct RecordEditSheet: View {
     private static let mlPresets = [60, 80, 100, 120, 150, 180, 210, 240]
 
     var body: some View {
-        GeometryReader { geo in
-            let safeBottom = geo.safeAreaInsets.bottom
-            VStack(spacing: 0) {
-                ScrollView {
-                    VStack(alignment: .leading, spacing: theme.space.md) {
-                        typeFields
-                        timeFields
-                    }
-                    .padding(.top, theme.space.sm)
-                }
-
-                // ── 저장/삭제 ──
-                HStack(spacing: theme.space.sm) {
-                    Button {
-                        showDeleteConfirm = true
-                    } label: {
-                        Image(systemName: "trash")
-                            .font(.system(size: 17, weight: .semibold))
-                            .foregroundStyle(theme.color.statusDangerFg.color)
-                            .frame(width: 56, height: 56)
-                            .background(
-                                RoundedRectangle(cornerRadius: theme.component.button.radius, style: .continuous)
-                                    .fill(theme.color.statusDangerBg.color)
-                            )
-                    }
-                    .buttonStyle(.plain)
-                    .accessibilityLabel("삭제")
-
-                    DSButton("저장", variant: .primary, size: .lg) {
-                        handleSave()
-                        onClose()
-                    }
-                }
-                .padding(.top, theme.space.sm)
-                .padding(.bottom, max(theme.space.md, safeBottom))
+        // ⚠️ DSBottomSheet가 콘텐츠를 이미 ScrollView로 감싸고 하단 여백·네이티브 시트
+        // 세이프에어리어를 처리한다. 여기서 GeometryReader/ScrollView를 또 쓰면 높이가
+        // 붕괴돼 내용이 사라진다(버튼만 남음). 그래서 단순 VStack만 둔다.
+        VStack(spacing: 0) {
+            VStack(alignment: .leading, spacing: theme.space.md) {
+                typeFields
+                timeFields
             }
-            .background(theme.color.surface.color)
-            .onAppear(perform: seedState)
-            .confirmationDialog(
-                "이 기록을 삭제할까요?",
-                isPresented: $showDeleteConfirm,
-                titleVisibility: .visible
-            ) {
-                Button("삭제", role: .destructive) {
-                    handleDelete()
+
+            // ── 저장/삭제 ──
+            HStack(spacing: theme.space.sm) {
+                Button {
+                    showDeleteConfirm = true
+                } label: {
+                    Image(systemName: "trash")
+                        .font(.system(size: 17, weight: .semibold))
+                        .foregroundStyle(theme.color.statusDangerFg.color)
+                        .frame(width: 56, height: 56)
+                        .background(
+                            RoundedRectangle(cornerRadius: theme.component.button.radius, style: .continuous)
+                                .fill(theme.color.statusDangerBg.color)
+                        )
+                }
+                .buttonStyle(.plain)
+                .accessibilityLabel("삭제")
+
+                DSButton("저장", variant: .primary, size: .lg) {
+                    handleSave()
                     onClose()
                 }
-                Button("취소", role: .cancel) {}
             }
+            .padding(.top, theme.space.md)
+        }
+        .background(theme.color.surface.color)
+        .onAppear(perform: seedState)
+        .confirmationDialog(
+            "이 기록을 삭제할까요?",
+            isPresented: $showDeleteConfirm,
+            titleVisibility: .visible
+        ) {
+            Button("삭제", role: .destructive) {
+                handleDelete()
+                onClose()
+            }
+            Button("취소", role: .cancel) {}
         }
     }
 
