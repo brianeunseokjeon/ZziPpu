@@ -115,6 +115,25 @@ extension Theme {
                         idleBg: sc.quickButtonPlayIdleBg, idleBorder: sc.quickButtonPlayIdleBorder, idleText: sc.quickButtonPlayIdleText,
                         activeBg: sc.quickButtonPlayActiveBg, activeBorder: sc.quickButtonPlayActiveBorder, activeText: sc.quickButtonPlayActiveText
                     )
+                // 신규 — 기존 6색과 겹치지 않게: 영양제=teal, 약=red. (tokens 미추가, primitive 직접)
+                case .supplement:
+                    return QuickButtonColors(
+                        idleBg:   DynamicColor(light: PrimitiveColor.teal50,  dark: PrimitiveColor.teal500.opacity(0.18)),
+                        idleBorder: DynamicColor(light: PrimitiveColor.teal400.opacity(0.5), dark: PrimitiveColor.teal400.opacity(0.4)),
+                        idleText:   DynamicColor(light: PrimitiveColor.teal500, dark: PrimitiveColor.teal400),
+                        activeBg:   DynamicColor(light: PrimitiveColor.teal400.opacity(0.18), dark: PrimitiveColor.teal500.opacity(0.28)),
+                        activeBorder: DynamicColor(light: PrimitiveColor.teal500, dark: PrimitiveColor.teal400),
+                        activeText:   DynamicColor(light: PrimitiveColor.teal500, dark: PrimitiveColor.teal400)
+                    )
+                case .medicine:
+                    return QuickButtonColors(
+                        idleBg:   DynamicColor(light: PrimitiveColor.red50,  dark: PrimitiveColor.red500.opacity(0.18)),
+                        idleBorder: DynamicColor(light: PrimitiveColor.red100, dark: PrimitiveColor.red400.opacity(0.4)),
+                        idleText:   DynamicColor(light: PrimitiveColor.red700, dark: PrimitiveColor.red400),
+                        activeBg:   DynamicColor(light: PrimitiveColor.red100, dark: PrimitiveColor.red500.opacity(0.28)),
+                        activeBorder: DynamicColor(light: PrimitiveColor.red400, dark: PrimitiveColor.red400),
+                        activeText:   DynamicColor(light: PrimitiveColor.red700, dark: PrimitiveColor.red400)
+                    )
                 }
             }
         )

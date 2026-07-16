@@ -151,6 +151,7 @@ struct HomeView: View {
             case .poo:                     pendingDiaperType = .poo; showDiaperSheet = true
             case .sleep:                   showSleepSheet   = true
             case .play:                    showPlaySheet    = true
+            case .supplement, .medicine:   comingSoonToast(action)   // 기록 기능 준비 중
             }
             return
         }
@@ -184,13 +185,21 @@ struct HomeView: View {
                 let msg = await vm.recordPlay()   // 즉시 기록(분유처럼 시점만)
                 toastCenter.show(.init(message: msg, variant: .success))
             }
+        case .supplement, .medicine:
+            comingSoonToast(action)   // 기록 기능 준비 중(디자인 확정 후 구현)
         }
+    }
+
+    /// 영양제·약: 실제 기록 저장은 후속 기능 — 지금은 안내만.
+    private func comingSoonToast(_ action: HomeAction) {
+        let name = action == .supplement ? "영양제" : "약"
+        toastCenter.show(.init(message: "\(name) 기록 기능은 곧 추가돼요", variant: .info))
     }
 }
 
 // MARK: - HomeAction
 
-enum HomeAction { case formula, breast, pee, poo, sleep, play }
+enum HomeAction { case formula, breast, pee, poo, sleep, play, supplement, medicine }
 
 // MARK: - HomeContentView
 
@@ -310,12 +319,12 @@ private struct TodayView: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            // ── 고정 상단: 6버튼 ──
+            // ── 고정 상단: 퀵 버튼 1줄 가로 스크롤 ──
+            // 좌우 패딩은 스크롤 내부가 담당(full-bleed 스크롤) — 여기선 상하만.
             BigActionGrid(
                 hasActiveSleep: vm.activeSleepSession != nil,
                 onAction: onAction
             )
-            .padding(.horizontal, theme.space.screenPaddingX)
             .padding(.top, theme.space.sm)
             .padding(.bottom, theme.space.sm)
             .background(theme.color.surface.color)
@@ -576,21 +585,25 @@ private struct BigActionGrid: View {
     @Environment(\.theme) private var theme
 
     var body: some View {
-        LazyVGrid(
-            columns: Array(repeating: GridItem(.flexible(), spacing: theme.space.sm), count: 3),
-            spacing: theme.space.sm
-        ) {
-            BigActionButton(emoji: "🍼", label: "분유", kind: .formula) { onAction(.formula) }
-            BigActionButton(emoji: "🤱", label: "모유", kind: .breast) { onAction(.breast) }
-            BigActionButton(emoji: "💧", label: "소변", kind: .pee) { onAction(.pee) }
-            BigActionButton(emoji: "💩", label: "대변", kind: .poo) { onAction(.poo) }
-            BigActionButton(
-                emoji: "😴",
-                label: hasActiveSleep ? "수면 종료" : "수면 시작",
-                kind: .sleep, isActive: hasActiveSleep
-            ) { onAction(.sleep) }
-            // 터미타임: 즉시 기록(분유처럼 시점만) — 시작/종료 없음.
-            BigActionButton(emoji: "🎈", label: "터미타임", kind: .play) { onAction(.play) }
+        // 1줄 가로 스크롤 — 화면 폭보다 넓으면 옆으로 스크롤(끝단 살짝 보이게 full-bleed).
+        ScrollView(.horizontal, showsIndicators: false) {
+            HStack(spacing: theme.space.sm) {
+                BigActionButton(emoji: "🍼", label: "분유", kind: .formula) { onAction(.formula) }
+                BigActionButton(emoji: "🤱", label: "모유", kind: .breast) { onAction(.breast) }
+                BigActionButton(emoji: "💧", label: "소변", kind: .pee) { onAction(.pee) }
+                BigActionButton(emoji: "💩", label: "대변", kind: .poo) { onAction(.poo) }
+                BigActionButton(
+                    emoji: "😴",
+                    label: hasActiveSleep ? "수면 종료" : "수면 시작",
+                    kind: .sleep, isActive: hasActiveSleep
+                ) { onAction(.sleep) }
+                // 터미타임: 즉시 기록(분유처럼 시점만).
+                BigActionButton(emoji: "🎈", label: "터미타임", kind: .play) { onAction(.play) }
+                // 신규
+                BigActionButton(emoji: "🧴", label: "영양제", kind: .supplement) { onAction(.supplement) }
+                BigActionButton(emoji: "💊", label: "약", kind: .medicine) { onAction(.medicine) }
+            }
+            .padding(.horizontal, theme.space.screenPaddingX)   // 스크롤 내부 좌우 여백(full-bleed 스크롤)
         }
     }
 }
@@ -621,7 +634,7 @@ private struct BigActionButton: View {
                     .minimumScaleFactor(0.8)
             }
             .foregroundStyle((isActive ? palette.activeText : palette.idleText).color)
-            .frame(maxWidth: .infinity)
+            .frame(width: 72)   // 가로 스크롤: 고정 폭(그리드 flexible 대신)
             .padding(.vertical, theme.space.stackGapMd)   // py-3 = 12pt
             .background(
                 RoundedRectangle(cornerRadius: theme.radius.control, style: .continuous)

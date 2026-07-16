@@ -315,7 +315,7 @@ public enum DomainKind {
 
 /// 홈 퀵버튼(BigActionGrid) 도메인 키
 public enum QuickButtonKind {
-    case formula, breast, pee, poo, sleep, play
+    case formula, breast, pee, poo, sleep, play, supplement, medicine
 }
 
 /// 퀵버튼 상태별 색 묶음(idle/active × bg/border/text). 웹 BigActionGrid 상태 매핑.
