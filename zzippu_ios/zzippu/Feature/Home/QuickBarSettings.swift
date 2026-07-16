@@ -11,6 +11,8 @@ enum QuickBarSettings {
     // MARK: - Key
 
     private static let key = "quickbar.visibleKinds"
+    /// 사용자가 이미 "본" kind 집합 — 숨김과 신규를 구분하기 위함(숨김은 known에 남아 재노출 안 됨).
+    private static let knownKey = "quickbar.knownKinds"
     private static let log = Logger(subsystem: "com.zzippu.app", category: "QuickBarSettings")
 
     // MARK: - 기본값
@@ -67,21 +69,42 @@ enum QuickBarSettings {
         UserDefaults.standard.set(jsonString, forKey: key)
     }
 
+    // MARK: - known kinds (숨김 vs 신규 구분용)
+
+    /// 사용자가 이미 본 kind 집합. 미설정(최초)이면 현재 카탈로그 전체를 "이미 앎"으로 간주
+    /// → 기존 사용자가 하나 숨긴 상태여도 그 숨김이 존중된다.
+    private static func loadKnown() -> Set<QuickButtonKind> {
+        guard let s = UserDefaults.standard.string(forKey: knownKey),
+              let d = s.data(using: .utf8),
+              let raw = try? JSONDecoder().decode([String].self, from: d)
+        else {
+            return Set(defaultKinds)
+        }
+        return Set(raw.compactMap { QuickButtonKind(rawValue: $0) })
+    }
+
+    private static func saveKnown(_ kinds: Set<QuickButtonKind>) {
+        let raw = kinds.map(\.rawValue)
+        if let d = try? JSONEncoder().encode(raw), let s = String(data: d, encoding: .utf8) {
+            UserDefaults.standard.set(s, forKey: knownKey)
+        }
+    }
+
     // MARK: - 마이그레이션
 
-    /// 앱 업데이트로 신규 kind가 카탈로그에 추가된 경우:
-    ///   - 저장값에 없는 kind → 표시 목록 끝에 append (의도적 숨김이 아닌 "당시 없던 것"이므로 노출 안전).
-    /// 카탈로그에서 사라진 kind(폐기):
-    ///   - loadRaw()에서 이미 compactMap으로 드롭됨.
-    /// 변경이 있으면 즉시 저장(1회성 정규화).
+    /// 앱 업데이트로 **처음 등장한(사용자가 본 적 없는)** kind만 표시 목록 끝에 append.
+    /// 사용자가 의도적으로 숨긴 kind는 known에 남아있어 재노출되지 않는다(숨김 존중).
+    /// 폐기 kind는 loadRaw()의 compactMap에서 이미 드롭됨.
     private static func migrate(_ current: [QuickButtonKind]) -> [QuickButtonKind] {
-        let catalogKinds = defaultKinds
-        let missing = catalogKinds.filter { !current.contains($0) }
-        if missing.isEmpty { return current }
+        let known = loadKnown()
+        let newKinds = defaultKinds.filter { !known.contains($0) }   // 진짜 신규만
+        // known을 현재 카탈로그까지 확장·영속(다음부터 "본 것"으로 취급)
+        saveKnown(known.union(defaultKinds))
 
-        let migrated = current + missing
+        guard !newKinds.isEmpty else { return current }
+        let migrated = current + newKinds
         saveRaw(migrated)
-        log.notice("QuickBarSettings 마이그레이션: 신규 kind \(missing.map(\.rawValue), privacy: .public) append")
+        log.notice("QuickBarSettings 마이그레이션: 신규 kind \(newKinds.map(\.rawValue), privacy: .public) append")
         return migrated
     }
 }

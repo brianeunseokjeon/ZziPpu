@@ -661,10 +661,7 @@ private struct BigActionGrid: View {
             }
             .padding(.horizontal, theme.space.screenPaddingX)   // 스크롤 내부 좌우 여백(full-bleed 스크롤)
         }
-        // 바 영역 롱프레스 → 편집 시트(보조 진입점, 스펙 §3.3)
-        .onLongPressGesture(minimumDuration: 0.5, perform: {
-            if showEditChip { onEditTapped() }
-        })
+        // 롱프레스 진입점 제거 — 버튼 누름과 충돌·오작동 위험. 편집은 "편집" 칩으로.
     }
 }
 
@@ -675,16 +672,18 @@ private struct EditQuickBarChip: View {
     @Environment(\.theme) private var theme
 
     var body: some View {
+        // 다른 퀵버튼(BigActionButton)과 동일한 세로 카드(이모지+라벨, 폭72, 상하패딩12).
         Button(action: action) {
-            HStack(spacing: theme.space.xs) {
-                Image(systemName: "pencil")
-                    .font(.system(size: 12, weight: .semibold))
+            VStack(spacing: theme.space.xs) {
+                Text("✏️").font(.system(size: 20))
                 Text("편집")
                     .font(.system(size: 11, weight: .semibold))
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.8)
             }
             .foregroundStyle(theme.color.textSecondary.color)
-            .frame(height: 44)
-            .padding(.horizontal, theme.space.stackGapMd)
+            .frame(width: 72)
+            .padding(.vertical, theme.space.stackGapMd)   // 12 — 다른 버튼과 동일
             .background(
                 RoundedRectangle(cornerRadius: theme.radius.control, style: .continuous)
                     .fill(theme.color.surfaceSunken.color)
