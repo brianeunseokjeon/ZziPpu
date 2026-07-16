@@ -14,6 +14,7 @@ struct HomeView: View {
     @Environment(\.theme)           private var theme
 
     @State private var vm: HomeViewModel?
+    @State private var quickBarStore = QuickBarStore()
 
     // 상세 입력 시트 (모유 / 대변 / 과거 날짜 입력)
     @State private var feedingSheetType: FeedingType? = nil   // 모유 상세
@@ -23,13 +24,16 @@ struct HomeView: View {
     @State private var showFeedingSheet = false               // 과거 분유
     @State private var showSleepSheet   = false               // 과거 수면
     @State private var showPlaySheet    = false               // 과거 터미타임
+    @State private var showQuickBarEdit = false               // 빠른기록 편집 시트
 
     var body: some View {
         NavigationStack {
             if let vm {
                 HomeContentView(
                     vm: vm,
-                    onAction: { handleAction($0, vm: vm) }
+                    quickBarStore: quickBarStore,
+                    onAction: { handleAction($0, vm: vm) },
+                    onEditQuickBar: { showQuickBarEdit = true }
                 )
                 // 서버→로컬 동기화(pull) 완료 시 보이는 날짜 재로드 →
                 // 웹/다른 기기에서 만든 기록이 앱에 즉시 반영된다(재시작 불필요).
@@ -122,6 +126,15 @@ struct HomeView: View {
                     .background(theme.color.background.color)
             }
         }
+        .dsBottomSheet(
+            isPresented: $showQuickBarEdit,
+            options: .init(title: nil, showGrabber: true, detents: [.large])
+        ) {
+            QuickBarEditSheet(onDismiss: {
+                showQuickBarEdit = false
+                quickBarStore.reload()
+            })
+        }
         .task {
             if vm == nil {
                 let newVM = HomeViewModel(
@@ -201,11 +214,30 @@ struct HomeView: View {
 
 enum HomeAction { case formula, breast, pee, poo, sleep, play, supplement, medicine }
 
+// MARK: - QuickBarStore (@Observable, 선호 보유·구독)
+
+/// BigActionGrid 데이터 소스 — QuickBarSettings 변경을 관찰하고 뷰에 즉시 반영.
+@Observable
+final class QuickBarStore {
+    private(set) var visibleKinds: [QuickButtonKind]
+
+    init() {
+        self.visibleKinds = QuickBarSettings.visibleKinds
+    }
+
+    /// 편집 시트 닫힘 후 호출 → UserDefaults 최신값 재로드
+    func reload() {
+        visibleKinds = QuickBarSettings.visibleKinds
+    }
+}
+
 // MARK: - HomeContentView
 
 private struct HomeContentView: View {
     @Bindable var vm: HomeViewModel
+    let quickBarStore: QuickBarStore
     let onAction: (HomeAction) -> Void
+    let onEditQuickBar: () -> Void
 
     @Environment(\.theme) private var theme
 
@@ -225,9 +257,9 @@ private struct HomeContentView: View {
             HomeSyncStatusBar()
 
             if vm.isFocusingPast {
-                PastFocusView(vm: vm, onAction: onAction)
+                PastFocusView(vm: vm, quickBarStore: quickBarStore, onAction: onAction)
             } else {
-                TodayView(vm: vm, onAction: onAction)
+                TodayView(vm: vm, quickBarStore: quickBarStore, onAction: onAction, onEditQuickBar: onEditQuickBar)
             }
         }
         .background(theme.color.background.color)
@@ -313,7 +345,9 @@ private struct HomeSyncStatusBar: View {
 
 private struct TodayView: View {
     @Bindable var vm: HomeViewModel
+    let quickBarStore: QuickBarStore
     let onAction: (HomeAction) -> Void
+    let onEditQuickBar: () -> Void
 
     @Environment(\.theme) private var theme
 
@@ -322,8 +356,11 @@ private struct TodayView: View {
             // ── 고정 상단: 퀵 버튼 1줄 가로 스크롤 ──
             // 좌우 패딩은 스크롤 내부가 담당(full-bleed 스크롤) — 여기선 상하만.
             BigActionGrid(
+                visibleKinds: quickBarStore.visibleKinds,
                 hasActiveSleep: vm.activeSleepSession != nil,
-                onAction: onAction
+                onAction: onAction,
+                onEditTapped: onEditQuickBar,
+                showEditChip: true
             )
             .padding(.top, theme.space.sm)
             .padding(.bottom, theme.space.sm)
@@ -367,6 +404,7 @@ private struct TodayView: View {
 
 private struct PastFocusView: View {
     @Bindable var vm: HomeViewModel
+    let quickBarStore: QuickBarStore
     let onAction: (HomeAction) -> Void
 
     @Environment(\.theme) private var theme
@@ -387,9 +425,13 @@ private struct PastFocusView: View {
                 .background(theme.color.statusWarningBg.color)
                 .clipShape(RoundedRectangle(cornerRadius: theme.radius.control, style: .continuous))
 
+                // 과거 포커스 모드: 편집 칩/롱프레스 진입점 숨김(스펙 §5.5)
                 BigActionGrid(
+                    visibleKinds: quickBarStore.visibleKinds,
                     hasActiveSleep: false,
-                    onAction: onAction
+                    onAction: onAction,
+                    onEditTapped: {},
+                    showEditChip: false
                 )
             }
             .padding(.horizontal, theme.space.screenPaddingX)
@@ -576,35 +618,83 @@ private struct DayTimelineSection: View {
     }
 }
 
-// MARK: - BigActionGrid (6버튼 3열 x 2행)
+// MARK: - BigActionGrid (데이터 구동 1줄 가로 스크롤)
 
 private struct BigActionGrid: View {
+    /// 표시할 kind 배열(순서=배열순서). QuickBarStore.visibleKinds 전달.
+    let visibleKinds:   [QuickButtonKind]
     let hasActiveSleep: Bool
-    let onAction: (HomeAction) -> Void
+    let onAction:       (HomeAction) -> Void
+    /// "편집" 칩 탭 → 편집 시트 오픈
+    let onEditTapped:   () -> Void
+    /// 과거 포커스 모드에선 false(편집 진입점 숨김, 스펙 §5.5)
+    let showEditChip:   Bool
 
     @Environment(\.theme) private var theme
 
+    /// 렌더링할 QuickAction 목록 (활성 수면 자동 포함)
+    private var actions: [QuickAction] {
+        QuickActionCatalog.orderedActions(visibleKinds: visibleKinds, hasActiveSleep: hasActiveSleep)
+    }
+
     var body: some View {
         // 1줄 가로 스크롤 — 화면 폭보다 넓으면 옆으로 스크롤(끝단 살짝 보이게 full-bleed).
+        // 롱프레스 → 편집 시트 (보조 진입점, 스펙 §3.3)
         ScrollView(.horizontal, showsIndicators: false) {
             HStack(spacing: theme.space.sm) {
-                BigActionButton(emoji: "🍼", label: "분유", kind: .formula) { onAction(.formula) }
-                BigActionButton(emoji: "🤱", label: "모유", kind: .breast) { onAction(.breast) }
-                BigActionButton(emoji: "💧", label: "소변", kind: .pee) { onAction(.pee) }
-                BigActionButton(emoji: "💩", label: "대변", kind: .poo) { onAction(.poo) }
-                BigActionButton(
-                    emoji: "😴",
-                    label: hasActiveSleep ? "수면 종료" : "수면 시작",
-                    kind: .sleep, isActive: hasActiveSleep
-                ) { onAction(.sleep) }
-                // 터미타임: 즉시 기록(분유처럼 시점만).
-                BigActionButton(emoji: "🎈", label: "터미타임", kind: .play) { onAction(.play) }
-                // 신규
-                BigActionButton(emoji: "🧴", label: "영양제", kind: .supplement) { onAction(.supplement) }
-                BigActionButton(emoji: "💊", label: "약", kind: .medicine) { onAction(.medicine) }
+                ForEach(actions, id: \.kind) { qa in
+                    let isActive = qa.isSessionToggle && hasActiveSleep
+                    let label    = (qa.kind == .sleep && hasActiveSleep) ? "수면 종료" : qa.label
+                    BigActionButton(
+                        emoji:    qa.emoji,
+                        label:    label,
+                        kind:     qa.kind,
+                        isActive: isActive
+                    ) { onAction(qa.action) }
+                }
+
+                // 편집 칩 — 스크롤 맨 끝 고정(오늘 뷰만 표시)
+                if showEditChip {
+                    EditQuickBarChip(action: onEditTapped)
+                }
             }
             .padding(.horizontal, theme.space.screenPaddingX)   // 스크롤 내부 좌우 여백(full-bleed 스크롤)
         }
+        // 바 영역 롱프레스 → 편집 시트(보조 진입점, 스펙 §3.3)
+        .onLongPressGesture(minimumDuration: 0.5, perform: {
+            if showEditChip { onEditTapped() }
+        })
+    }
+}
+
+// MARK: - EditQuickBarChip (바 끝 "편집" 칩)
+
+private struct EditQuickBarChip: View {
+    let action: () -> Void
+    @Environment(\.theme) private var theme
+
+    var body: some View {
+        Button(action: action) {
+            HStack(spacing: theme.space.xs) {
+                Image(systemName: "pencil")
+                    .font(.system(size: 12, weight: .semibold))
+                Text("편집")
+                    .font(.system(size: 11, weight: .semibold))
+            }
+            .foregroundStyle(theme.color.textSecondary.color)
+            .frame(height: 44)
+            .padding(.horizontal, theme.space.stackGapMd)
+            .background(
+                RoundedRectangle(cornerRadius: theme.radius.control, style: .continuous)
+                    .fill(theme.color.surfaceSunken.color)
+            )
+            .overlay(
+                RoundedRectangle(cornerRadius: theme.radius.control, style: .continuous)
+                    .stroke(theme.color.border.color, lineWidth: 1)
+            )
+        }
+        .buttonStyle(QuickPressButtonStyle())
+        .accessibilityLabel("빠른기록 편집")
     }
 }
 

@@ -54,6 +54,7 @@
 		2E8821CF269CD1F5C71E5D94 /* SyncState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7A6D8B6EEC40287AF6B40AFF /* SyncState.swift */; };
 		2F8C5CD010E08F492502DED6 /* DiaperViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = C6D2FA2E832505E2571BACE4 /* DiaperViewModel.swift */; };
 		30C37A9CE9991E330EDEB97E /* Feeding.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C316709D85EEE3F919AE448 /* Feeding.swift */; };
+		312B82FFDFE4C5E5AADB8934 /* QuickBarEditSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37C58627571E434911C9B229 /* QuickBarEditSheet.swift */; };
 		31DD36AB43D68F8D9A22701A /* GrowthAssessmentSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6F9AAF57310846B829A51661 /* GrowthAssessmentSection.swift */; };
 		334D0350B7903B22F50C026D /* ComputeDashboardSummaryUseCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = B4858A6EEF050640F3C98D07 /* ComputeDashboardSummaryUseCase.swift */; };
 		345D55D6A9F5031ECAFA8BB6 /* FeedingRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = D5970445AE2A0C60AA51E950 /* FeedingRepository.swift */; };
@@ -130,6 +131,7 @@
 		837B311B5B38E5243629C3C3 /* RemoteBabyRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8DA5EBB3AAE3F6297E463E8D /* RemoteBabyRepository.swift */; };
 		84024EA2C3D78463CDC2FF4A /* DSEmptyState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5903311178AA9DB6CE12A6AB /* DSEmptyState.swift */; };
 		86E7BCE14675B91434DA66C6 /* MonthCalendarModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D11869DA3F744C46166D6D3 /* MonthCalendarModel.swift */; };
+		8B960B80474971175C46C250 /* QuickAction.swift in Sources */ = {isa = PBXBuildFile; fileRef = 80E4AB0B5B799E2D2F3D6466 /* QuickAction.swift */; };
 		8BDF0D41A0EBF8BE9A775E57 /* OtpView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 53AC5F4C5E9A32DC59575998 /* OtpView.swift */; };
 		8BF23724E0D84AD82CB96C47 /* Theme.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20A1B4DFCE9B542AAEA92808 /* Theme.swift */; };
 		8CFEFEE091745EE3282E69F2 /* DSSectionHeader.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5245F3E41B8AC858E9CCBBA /* DSSectionHeader.swift */; };
@@ -220,6 +222,7 @@
 		F856545684498C153DDF1374 /* CalendarDayDecoration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2F48A5C3C131AF3B2E654CC6 /* CalendarDayDecoration.swift */; };
 		F8574575533F40626B6861F0 /* DSBadge.swift in Sources */ = {isa = PBXBuildFile; fileRef = 94D1BF2EABC2F47645E26B45 /* DSBadge.swift */; };
 		F96DD47BD5871F7A6CCD0B1D /* TermsAgreementView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FD64E1CDCC8C9C3A4291A2BD /* TermsAgreementView.swift */; };
+		F9AE1B390BFA255C6587AB9E /* QuickBarSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5FE6F737C57EA35275D6E33B /* QuickBarSettings.swift */; };
 		FC4484E02D03748C600F01CD /* DomainError.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33166EE9764C26180E945643 /* DomainError.swift */; };
 		FC920F68E4579AC0876D25A2 /* LoginView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B3A120ABFD48850B4441677 /* LoginView.swift */; };
 		FE235807FC697663AA5BFC2C /* AuthViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC5E5BB66C303191729CAD07 /* AuthViewModel.swift */; };
@@ -307,6 +310,7 @@
 		33166EE9764C26180E945643 /* DomainError.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = DomainError.swift; path = DomainError.swift; sourceTree = "<group>"; };
 		355EF042D814185251B76CCD /* DevelopmentMapper.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = DevelopmentMapper.swift; path = Network/Mappers/DevelopmentMapper.swift; sourceTree = "<group>"; };
 		3788FF8F194F5CF3DBEF255A /* Theme+zzippu.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = "Theme+zzippu.swift"; sourceTree = "<group>"; };
+		37C58627571E434911C9B229 /* QuickBarEditSheet.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = QuickBarEditSheet.swift; sourceTree = "<group>"; };
 		38D60AF018F8B2A27291C57C /* NetworkMonitor.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = NetworkMonitor.swift; sourceTree = "<group>"; };
 		38DE4DD5318C4324FA7BA009 /* MetricDetailView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MetricDetailView.swift; sourceTree = "<group>"; };
 		395B2B7B3D458C92BB5A06F2 /* RemoteFeedingRepository.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = RemoteFeedingRepository.swift; sourceTree = "<group>"; };
@@ -354,6 +358,7 @@
 		5DC8D752514CCAF661FB026C /* DashboardSummaryCards.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DashboardSummaryCards.swift; sourceTree = "<group>"; };
 		5E10F1609A4E959470A7B664 /* RemoteBabyDataSource.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = RemoteBabyDataSource.swift; path = Network/DataSources/RemoteBabyDataSource.swift; sourceTree = "<group>"; };
 		5ECBE372DE6BB282762C8C40 /* DevelopmentView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DevelopmentView.swift; sourceTree = "<group>"; };
+		5FE6F737C57EA35275D6E33B /* QuickBarSettings.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = QuickBarSettings.swift; sourceTree = "<group>"; };
 		60FEA01C829FF6AD23FBE2D2 /* CaregiverDTO.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = CaregiverDTO.swift; path = Network/DTOs/CaregiverDTO.swift; sourceTree = "<group>"; };
 		62F5F367CC0FE94A12D61890 /* FeedingInputSheet.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = FeedingInputSheet.swift; path = FeedingInputSheet.swift; sourceTree = "<group>"; };
 		63AFBBB40633397B444604BE /* GrowthViewModel.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = GrowthViewModel.swift; sourceTree = "<group>"; };
@@ -381,6 +386,7 @@
 		7E4477BEDBCCAFD2798A27F7 /* LocalFeedingRepository.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = LocalFeedingRepository.swift; sourceTree = "<group>"; };
 		7E6F4322F8A48C775C715387 /* Milestone.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = Milestone.swift; sourceTree = "<group>"; };
 		80064DAC2E5FC1960E840826 /* TermDoc.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = TermDoc.swift; sourceTree = "<group>"; };
+		80E4AB0B5B799E2D2F3D6466 /* QuickAction.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = QuickAction.swift; sourceTree = "<group>"; };
 		8340E850D26BB1D74C4A2CAA /* BabyDTO.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = BabyDTO.swift; path = Network/DTOs/BabyDTO.swift; sourceTree = "<group>"; };
 		847891C25C241E4E5FF2A435 /* SyncingFeedingRepository.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SyncingFeedingRepository.swift; sourceTree = "<group>"; };
 		858D7189BC4574C47A62A25C /* who_growth_height_girl.json */ = {isa = PBXFileReference; includeInIndex = 1; path = who_growth_height_girl.json; sourceTree = "<group>"; };
@@ -1114,6 +1120,9 @@
 			children = (
 				F0B456FCC66069DCCB35A60E /* HomeView.swift */,
 				3DCB48126456D01CA517AC82 /* HomeViewModel.swift */,
+				80E4AB0B5B799E2D2F3D6466 /* QuickAction.swift */,
+				5FE6F737C57EA35275D6E33B /* QuickBarSettings.swift */,
+				37C58627571E434911C9B229 /* QuickBarEditSheet.swift */,
 			);
 			name = Home;
 			path = Home;
@@ -1586,6 +1595,9 @@
 				DA8C4CD53403CBDD35A92137 /* CalendarSnapshotStore.swift in Sources */,
 				1C1F04BCCCF47F9D3707EDC8 /* StaticVolumeDecorationProvider.swift in Sources */,
 				FF016E4CA33011880BB98FB4 /* DSSegmentedChips.swift in Sources */,
+				8B960B80474971175C46C250 /* QuickAction.swift in Sources */,
+				F9AE1B390BFA255C6587AB9E /* QuickBarSettings.swift in Sources */,
+				312B82FFDFE4C5E5AADB8934 /* QuickBarEditSheet.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

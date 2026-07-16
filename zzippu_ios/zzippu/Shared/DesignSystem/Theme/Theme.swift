@@ -313,9 +313,17 @@ public enum DomainKind {
     case checkup  // 영유아 검진 달력 표시
 }
 
-/// 홈 퀵버튼(BigActionGrid) 도메인 키
-public enum QuickButtonKind {
-    case formula, breast, pee, poo, sleep, play, supplement, medicine
+/// 홈 퀵버튼(BigActionGrid) 도메인 키.
+/// rawValue = 저장 ID (변경 금지 — UserDefaults 직렬화 키로 사용됨).
+public enum QuickButtonKind: String, CaseIterable {
+    case formula     = "formula"
+    case breast      = "breast"
+    case pee         = "pee"
+    case poo         = "poo"
+    case sleep       = "sleep"
+    case play        = "play"
+    case supplement  = "supplement"
+    case medicine    = "medicine"
 }
 
 /// 퀵버튼 상태별 색 묶음(idle/active × bg/border/text). 웹 BigActionGrid 상태 매핑.
