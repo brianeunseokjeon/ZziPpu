@@ -29,6 +29,7 @@ NEW_FILES = %w[
   Shared/DesignSystem/Components/Containers/DSCard.swift
   Shared/DesignSystem/Components/Inputs/DSTextField.swift
   Shared/DesignSystem/Components/Inputs/DSChip.swift
+  Shared/DesignSystem/Components/Inputs/DSSegmentedChips.swift
   Shared/DesignSystem/Components/Feedback/DSStatusPill.swift
   Shared/DesignSystem/Components/Feedback/DSBadge.swift
   Shared/DesignSystem/Components/Lists/DSSectionHeader.swift

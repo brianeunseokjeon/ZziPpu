@@ -43,54 +43,55 @@ struct RecordEditSheet: View {
     private static let mlPresets = [60, 80, 100, 120, 150, 180, 210, 240]
 
     var body: some View {
-        VStack(spacing: 0) {
-            ScrollView {
-                VStack(alignment: .leading, spacing: theme.space.lg) {
-                    typeFields
-                    timeFields
+        GeometryReader { geo in
+            let safeBottom = geo.safeAreaInsets.bottom
+            VStack(spacing: 0) {
+                ScrollView {
+                    VStack(alignment: .leading, spacing: theme.space.md) {
+                        typeFields
+                        timeFields
+                    }
+                    .padding(.top, theme.space.sm)
                 }
-                .padding(.horizontal, theme.space.screenPaddingX)
-                .padding(.top, theme.space.md)
+
+                // ── 저장/삭제 ──
+                HStack(spacing: theme.space.sm) {
+                    Button {
+                        showDeleteConfirm = true
+                    } label: {
+                        Image(systemName: "trash")
+                            .font(.system(size: 17, weight: .semibold))
+                            .foregroundStyle(theme.color.statusDangerFg.color)
+                            .frame(width: 56, height: 56)
+                            .background(
+                                RoundedRectangle(cornerRadius: theme.component.button.radius, style: .continuous)
+                                    .fill(theme.color.statusDangerBg.color)
+                            )
+                    }
+                    .buttonStyle(.plain)
+                    .accessibilityLabel("삭제")
+
+                    DSButton("저장", variant: .primary, size: .lg) {
+                        handleSave()
+                        onClose()
+                    }
+                }
+                .padding(.top, theme.space.sm)
+                .padding(.bottom, max(theme.space.md, safeBottom))
             }
-
-            // ── 저장/삭제 ──
-            HStack(spacing: theme.space.sm) {
-                Button {
-                    showDeleteConfirm = true
-                } label: {
-                    Image(systemName: "trash")
-                        .font(.system(size: 17, weight: .semibold))
-                        .foregroundStyle(theme.color.statusDangerFg.color)
-                        .frame(width: 56, height: 56)
-                        .background(
-                            RoundedRectangle(cornerRadius: theme.component.button.radius, style: .continuous)
-                                .fill(theme.color.statusDangerBg.color)
-                        )
-                }
-                .buttonStyle(.plain)
-                .accessibilityLabel("삭제")
-
-                DSButton("저장", variant: .primary, size: .lg) {
-                    handleSave()
+            .background(theme.color.surface.color)
+            .onAppear(perform: seedState)
+            .confirmationDialog(
+                "이 기록을 삭제할까요?",
+                isPresented: $showDeleteConfirm,
+                titleVisibility: .visible
+            ) {
+                Button("삭제", role: .destructive) {
+                    handleDelete()
                     onClose()
                 }
+                Button("취소", role: .cancel) {}
             }
-            .padding(.horizontal, theme.space.screenPaddingX)
-            .padding(.top, theme.space.sm)
-            .padding(.bottom, theme.space.md)
-        }
-        .background(theme.color.surface.color)
-        .onAppear(perform: seedState)
-        .confirmationDialog(
-            "이 기록을 삭제할까요?",
-            isPresented: $showDeleteConfirm,
-            titleVisibility: .visible
-        ) {
-            Button("삭제", role: .destructive) {
-                handleDelete()
-                onClose()
-            }
-            Button("취소", role: .cancel) {}
         }
     }
 
@@ -208,62 +209,43 @@ struct RecordEditSheet: View {
     // ── 배변 ── (종류는 기록 생성 시 확정 — 편집에선 변경 불가)
     private var diaperFields: some View {
         VStack(alignment: .leading, spacing: theme.space.md) {
-            // 양 (소변·대변 공통)
-            VStack(alignment: .leading, spacing: theme.space.sm) {
+            // 양 (소변·대변 공통) — 3칩 균등폭
+            VStack(alignment: .leading, spacing: theme.space.xs) {
                 Text("양")
                     .font(theme.typography.caption)
                     .foregroundStyle(theme.color.textSecondary.color)
-                HStack(spacing: theme.space.sm) {
-                    ForEach(DiaperAmount.allCases, id: \.self) { a in
-                        DSChip(
-                            label: a.displayName,
-                            isSelected: diaperAmount == a,
-                            variant: .selectable,
-                            onTap: { diaperAmount = diaperAmount == a ? nil : a }
-                        )
-                        .frame(maxWidth: .infinity)
-                    }
-                }
+                DSSegmentedChips(
+                    options:   DiaperAmount.allCases,
+                    selection: $diaperAmount,
+                    label:     { $0.displayName }
+                )
             }
 
             // 질감 (대변/둘다일 때만, 3칩 묽음/보통/찰흙)
             if diaperType.hasPoo {
-                VStack(alignment: .leading, spacing: theme.space.sm) {
+                VStack(alignment: .leading, spacing: theme.space.xs) {
                     Text("질감")
                         .font(theme.typography.caption)
                         .foregroundStyle(theme.color.textSecondary.color)
-                    HStack(spacing: theme.space.sm) {
-                        ForEach(StoolState.diaperTextureCases, id: \.self) { s in
-                            DSChip(
-                                label: s.textureShortLabel,
-                                isSelected: stoolTexture == s,
-                                variant: .selectable,
-                                onTap: { stoolTexture = stoolTexture == s ? nil : s }
-                            )
-                            .frame(maxWidth: .infinity)
-                        }
-                    }
+                    DSSegmentedChips(
+                        options:   StoolState.diaperTextureCases,
+                        selection: $stoolTexture,
+                        label:     { $0.textureShortLabel }
+                    )
                 }
 
-                // 대변 색 (황금똥/초록색/검은색/붉은색/보통)
-                VStack(alignment: .leading, spacing: theme.space.sm) {
+                // 대변 색 (5칩 compact 균등폭 — 가로스크롤 제거)
+                VStack(alignment: .leading, spacing: theme.space.xs) {
                     Text("대변 색")
                         .font(theme.typography.caption)
                         .foregroundStyle(theme.color.textSecondary.color)
-                    ScrollView(.horizontal, showsIndicators: false) {
-                        HStack(spacing: theme.space.sm) {
-                            ForEach(StoolColor.diaperColorCases, id: \.self) { c in
-                                DSChip(
-                                    label: c.diaperColorLabel,
-                                    isSelected: stoolColor == c,
-                                    variant: .selectable,
-                                    tint: theme.color.swatch(for: c.stoolSwatch),
-                                    onTap: { stoolColor = stoolColor == c ? nil : c }
-                                )
-                            }
-                        }
-                        .padding(.horizontal, 1)
-                    }
+                    DSSegmentedChips(
+                        options:   StoolColor.diaperColorCases,
+                        selection: $stoolColor,
+                        label:     { $0.diaperColorLabel },
+                        tint:      { c in theme.color.swatch(for: c.stoolSwatch) },
+                        compact:   true
+                    )
                 }
             }
         }

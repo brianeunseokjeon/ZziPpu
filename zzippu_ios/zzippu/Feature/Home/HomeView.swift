@@ -55,7 +55,7 @@ struct HomeView: View {
                     isPresented: $showDiaperSheet,
                     options: .init(
                         title: pendingDiaperType == .pee ? "💧 소변 기록" : "💩 대변 기록",
-                        detents: [.medium, .large]
+                        detents: [.fraction(0.62), .large]
                     )
                 ) {
                     DiaperInputSheet(
@@ -545,7 +545,7 @@ private struct DayTimelineSection: View {
                 get: { editRecord != nil },
                 set: { if !$0 { editRecord = nil } }
             ),
-            options: .init(title: editSheetTitle, detents: [.medium, .large])
+            options: .init(title: editSheetTitle, detents: [.fraction(0.62), .large])
         ) {
             if let record = editRecord {
                 RecordEditSheet(
