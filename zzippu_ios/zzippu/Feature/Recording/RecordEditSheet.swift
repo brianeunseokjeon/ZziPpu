@@ -41,7 +41,8 @@ struct RecordEditSheet: View {
 
     private enum BreastSide { case left, right, both }
 
-    private static let mlPresets = [60, 80, 100, 120, 150, 180, 210, 240]
+    // 20ml 배수로 쭉 (20 … 300).
+    private static let mlPresets = Array(stride(from: 20, through: 300, by: 20))
 
     var body: some View {
         // ⚠️ DSBottomSheet가 콘텐츠를 이미 ScrollView로 감싸고 하단 여백·네이티브 시트
@@ -126,20 +127,39 @@ struct RecordEditSheet: View {
             }
             DSNumberStepper(value: $formulaMl, range: 10...500, step: 10, unit: "ml")
 
-            // 프리셋 칩
-            ScrollView(.horizontal, showsIndicators: false) {
-                HStack(spacing: theme.space.sm) {
-                    ForEach(Self.mlPresets, id: \.self) { ml in
-                        DSChip(
-                            label: "\(ml)ml",
-                            isSelected: formulaMl == ml,
-                            variant: .quick,
-                            tint: theme.color.domainFeedingFormulaTint,
-                            onTap: { formulaMl = ml }
-                        )
+            // 프리셋 칩 — 현재 값에 해당(가장 가까운) 칩으로 자동 스크롤/센터.
+            ScrollViewReader { proxy in
+                ScrollView(.horizontal, showsIndicators: false) {
+                    HStack(spacing: theme.space.sm) {
+                        ForEach(Self.mlPresets, id: \.self) { ml in
+                            DSChip(
+                                label: "\(ml)ml",
+                                isSelected: formulaMl == ml,
+                                variant: .quick,
+                                tint: theme.color.domainFeedingFormulaTint,
+                                onTap: { formulaMl = ml }
+                            )
+                            .id(ml)
+                        }
                     }
+                    .padding(.horizontal, 1)
                 }
+                // 진입 시 + 값 변경 시 현재 값(가장 가까운 프리셋)으로 센터 스크롤.
+                .onAppear { scrollToCurrent(proxy, animated: false) }
+                .onChange(of: formulaMl) { scrollToCurrent(proxy, animated: true) }
             }
+        }
+    }
+
+    /// formulaMl에 가장 가까운 프리셋 칩으로 스크롤(정확히 일치하면 그 칩).
+    private func scrollToCurrent(_ proxy: ScrollViewProxy, animated: Bool) {
+        guard let nearest = Self.mlPresets.min(by: {
+            abs($0 - formulaMl) < abs($1 - formulaMl)
+        }) else { return }
+        if animated {
+            withAnimation(.easeOut(duration: 0.2)) { proxy.scrollTo(nearest, anchor: .center) }
+        } else {
+            proxy.scrollTo(nearest, anchor: .center)
         }
     }
 
