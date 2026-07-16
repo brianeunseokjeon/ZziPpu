@@ -27,7 +27,8 @@ struct QuickBarEditSheet: View {
     var body: some View {
         VStack(spacing: 0) {
             // ── 헤더 ──
-            HStack {
+            // 네이티브 시트라 상단 grabber 아래로 여백을 직접 줘야 함(안 주면 위에 딱 붙어 답답).
+            HStack(alignment: .firstTextBaseline) {
                 Text("빠른기록 편집")
                     .font(theme.typography.title)
                     .foregroundStyle(theme.color.textPrimary.color)
@@ -40,7 +41,8 @@ struct QuickBarEditSheet: View {
                 .foregroundStyle(theme.color.primary.color)
             }
             .padding(.horizontal, theme.space.componentPaddingX)
-            .padding(.bottom, theme.space.stackGapMd)
+            .padding(.top, theme.space.lg)        // grabber 아래 숨쉴 공간(24)
+            .padding(.bottom, theme.space.md)     // 리스트와 간격(16)
 
             Divider().foregroundStyle(theme.color.divider.color)
 
