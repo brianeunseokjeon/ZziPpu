@@ -618,7 +618,6 @@ private struct BigActionButton: View {
     let action: () -> Void
 
     @Environment(\.theme) private var theme
-    @State private var isPressed = false
 
     // 웹 BigActionGrid.tsx: idle=bg{50}/border{100}/text{700}, active=bg{100}/border{300}/text{800}.
     private var palette: QuickButtonColors { theme.color.quickButton(kind) }
@@ -644,15 +643,21 @@ private struct BigActionButton: View {
                 RoundedRectangle(cornerRadius: theme.radius.control, style: .continuous)
                     .stroke((isActive ? palette.activeBorder : palette.idleBorder).color, lineWidth: 1)
             )
-            .scaleEffect(isPressed ? 0.95 : 1.0)          // active:scale-95
-            .animation(.easeOut(duration: 0.12), value: isPressed)
         }
-        .buttonStyle(.plain)
-        .simultaneousGesture(
-            DragGesture(minimumDistance: 0)
-                .onChanged { _ in isPressed = true }
-                .onEnded   { _ in isPressed = false }
-        )
+        // 누름 효과는 ButtonStyle로 — DragGesture를 안 써야 가로 ScrollView가 스크롤됨.
+        .buttonStyle(QuickPressButtonStyle())
+    }
+}
+
+// MARK: - QuickPressButtonStyle (누름 스케일 — 스크롤 제스처 비차단)
+
+/// 퀵버튼 누름 시 scale 0.95. 별도 DragGesture 없이 ButtonStyle의 isPressed만 사용해
+/// 가로 ScrollView의 팬 제스처를 막지 않는다(가로 스크롤 정상 동작).
+private struct QuickPressButtonStyle: ButtonStyle {
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .scaleEffect(configuration.isPressed ? 0.95 : 1.0)
+            .animation(.easeOut(duration: 0.12), value: configuration.isPressed)
     }
 }
 
