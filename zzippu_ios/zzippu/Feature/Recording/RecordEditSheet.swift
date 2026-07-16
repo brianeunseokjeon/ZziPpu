@@ -36,7 +36,6 @@ struct RecordEditSheet: View {
     @State private var hasEnd: Bool = false
 
     @State private var showDeleteConfirm = false
-    @State private var addingDiaper = false
 
     private enum BreastSide { case left, right, both }
 
@@ -138,43 +137,7 @@ struct RecordEditSheet: View {
                     }
                 }
             }
-
-            // 배변 빠른 추가 (웹 handleAddDiaper 재현) — 시작 시각으로 별도 기록
-            Divider()
-            Text("이 시각에 배변도 함께 기록")
-                .font(theme.typography.caption)
-                .foregroundStyle(theme.color.textSecondary.color)
-            HStack(spacing: theme.space.sm) {
-                quickDiaperButton(.pee,  label: "💧 소변", kind: .diaperPee)
-                quickDiaperButton(.poo,  label: "💩 대변", kind: .diaperPoop)
-                quickDiaperButton(.both, label: "💧💩 둘다", kind: .diaperBoth)
-            }
         }
-    }
-
-    private func quickDiaperButton(_ type: DiaperType, label: String, kind: DomainKind) -> some View {
-        Button {
-            guard !addingDiaper else { return }
-            addingDiaper = true
-            let at = startTime
-            Task { @MainActor in
-                await vm.addDiaper(type: type, at: at)
-                addingDiaper = false
-                onToast?("\(label) 기록됐어요")
-            }
-        } label: {
-            Text(label)
-                .font(theme.typography.captionStrong)
-                .foregroundStyle(theme.color.solid(for: kind).color)
-                .frame(maxWidth: .infinity)
-                .frame(height: 44)
-                .background(
-                    RoundedRectangle(cornerRadius: theme.radius.control, style: .continuous)
-                        .fill(theme.color.tint(for: kind).color)
-                )
-        }
-        .buttonStyle(.plain)
-        .disabled(addingDiaper)
     }
 
     // ── 모유 ──

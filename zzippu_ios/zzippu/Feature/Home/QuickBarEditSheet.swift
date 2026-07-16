@@ -55,6 +55,7 @@ struct QuickBarEditSheet: View {
                     }
                     .onMove { indices, newOffset in
                         visibleKinds.move(fromOffsets: indices, toOffset: newOffset)
+                        commit()   // 순서 변경 즉시 영속
                     }
                 } header: {
                     Text("표시 중")
@@ -114,7 +115,6 @@ struct QuickBarEditSheet: View {
     @ViewBuilder
     private func visibleRow(_ qa: QuickAction) -> some View {
         let isLast = visibleKinds.count == 1
-        let palette = theme.color.quickButton(qa.kind) // for color preview dot
 
         HStack(spacing: 0) {
             // ⊟ 숨김 버튼
@@ -190,6 +190,7 @@ struct QuickBarEditSheet: View {
         if !hiddenKinds.contains(kind) {
             hiddenKinds.append(kind)
         }
+        commit()   // 즉시 영속 — 완료 버튼 없이 스와이프로 닫아도 반영
     }
 
     /// 숨김 → 표시(맨 끝) 이동
@@ -198,6 +199,7 @@ struct QuickBarEditSheet: View {
         if !visibleKinds.contains(kind) {
             visibleKinds.append(kind)
         }
+        commit()
     }
 
     // MARK: - 기본값 복원

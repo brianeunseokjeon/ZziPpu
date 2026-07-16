@@ -126,14 +126,14 @@ struct HomeView: View {
                     .background(theme.color.background.color)
             }
         }
-        .dsBottomSheet(
-            isPresented: $showQuickBarEdit,
-            options: .init(title: nil, showGrabber: true, detents: [.large])
-        ) {
-            QuickBarEditSheet(onDismiss: {
-                showQuickBarEdit = false
-                quickBarStore.reload()
-            })
+        // 네이티브 .sheet 사용 — QuickBarEditSheet는 List+EditMode라 DSBottomSheet의
+        // 콘텐츠 ScrollView 안에 넣으면 List가 깨진다(재정렬/삭제/추가 불가). 닫힐 때 바 갱신.
+        .sheet(isPresented: $showQuickBarEdit, onDismiss: { quickBarStore.reload() }) {
+            QuickBarEditSheet(onDismiss: { showQuickBarEdit = false })
+                .environment(\.theme, theme)
+                .environment(toastCenter)
+                .presentationDetents([.large])
+                .presentationDragIndicator(.visible)
         }
         .task {
             if vm == nil {
