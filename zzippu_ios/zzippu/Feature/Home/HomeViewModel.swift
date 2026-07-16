@@ -452,11 +452,12 @@ final class HomeViewModel {
     }
 
     /// 수면 수정 — PATCH 없음: 삭제→재생성(+종료). startedAt 기준 일자에 반영.
-    func replaceSleep(oldId: UUID, startedAt: Date, endedAt: Date?) async {
+    /// `memo`: 편집된 메모값(nil = 메모 없음). 기본값 nil로 기존 호출부 소스호환 유지.
+    func replaceSleep(oldId: UUID, startedAt: Date, endedAt: Date?, memo: String? = nil) async {
         let day = await dayKey(for: startedAt)
         let original = recordsByDay[day]?.sleeps.first { $0.id == oldId }
         let babyIdForRec = original?.babyId ?? babyId
-        let placeholder = SleepRecord.new(babyId: babyIdForRec, startedAt: startedAt)
+        let placeholder = SleepRecord.new(babyId: babyIdForRec, startedAt: startedAt, memo: memo)
         let optimistic: SleepRecord = {
             var s = placeholder
             s.endedAt = endedAt
@@ -605,30 +606,35 @@ struct TimelineItem: Identifiable {
     let id: UUID
     let time: Date
     let label: String
+    let memo: String?           // 원본 엔티티 memo 그대로 보유
     let domainKind: DomainKind
 
     init(from feeding: Feeding) {
         self.id = feeding.id
         self.time = feeding.startedAt
         self.label = feeding.timelineLabel
+        self.memo = feeding.memo
         self.domainKind = feeding.domainKind
     }
     init(from sleep: SleepRecord) {
         self.id = sleep.id
         self.time = sleep.startedAt
         self.label = sleep.timelineLabel
+        self.memo = sleep.memo
         self.domainKind = .sleep
     }
     init(from diaper: DiaperRecord) {
         self.id = diaper.id
         self.time = diaper.recordedAt
         self.label = diaper.timelineLabel
+        self.memo = diaper.memo
         self.domainKind = diaper.domainKind
     }
     init(from play: PlayRecord) {
         self.id = play.id
         self.time = play.startedAt
         self.label = play.timelineLabel
+        self.memo = play.memo
         self.domainKind = .play
     }
 }

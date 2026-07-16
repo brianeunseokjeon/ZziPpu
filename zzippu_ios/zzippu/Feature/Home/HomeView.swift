@@ -542,6 +542,7 @@ private struct DayTimelineSection: View {
                         TimelineItemRow(
                             time:     item.time.timeString,
                             label:    item.label,
+                            memo:     item.memo,
                             dotColor: theme.color.solid(for: item.domainKind).color,
                             variant:  rowVariant,
                             onEdit:   { editRecord = vm.editableRecord(for: item, on: day) }

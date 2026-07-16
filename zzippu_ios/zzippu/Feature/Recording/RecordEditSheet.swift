@@ -35,6 +35,8 @@ struct RecordEditSheet: View {
     @State private var endTime: Date = .now
     @State private var hasEnd: Bool = false
 
+    @State private var memoText: String = ""
+
     @State private var showDeleteConfirm = false
 
     private enum BreastSide { case left, right, both }
@@ -49,6 +51,7 @@ struct RecordEditSheet: View {
             VStack(alignment: .leading, spacing: theme.space.md) {
                 typeFields
                 timeFields
+                memoField
             }
 
             // ── 저장/삭제 ──
@@ -260,6 +263,16 @@ struct RecordEditSheet: View {
         }
     }
 
+    // MARK: - 메모 입력 필드 (모든 타입 공통)
+
+    private var memoField: some View {
+        DSTextField(
+            label:       "메모",
+            placeholder: "메모 (선택)",
+            text:        $memoText
+        )
+    }
+
     // MARK: - 판별 헬퍼
 
     private var isDiaper: Bool { if case .diaper = record { return true }; return false }
@@ -302,19 +315,23 @@ struct RecordEditSheet: View {
             }
             startTime = f.startedAt
             if let e = f.endedAt { endTime = e; hasEnd = true }
+            memoText = f.memo ?? ""
         case .sleep(let s):
             startTime = s.startedAt
             if let e = s.endedAt { endTime = e; hasEnd = true }
+            memoText = s.memo ?? ""
         case .diaper(let d):
             diaperType = d.diaperType
             diaperAmount = d.amount
             stoolTexture = d.stoolState
             stoolColor = d.stoolColor
             startTime = d.recordedAt
+            memoText = d.memo ?? ""
         case .play(let p):
             playType = p.playType
             startTime = p.startedAt
             if let e = p.endedAt { endTime = e; hasEnd = true }
+            memoText = p.memo ?? ""
         }
     }
 
@@ -325,11 +342,16 @@ struct RecordEditSheet: View {
         let start = combined(base: recordBaseDate, time: startTime)
         let end: Date? = (showsEnd && hasEnd) ? combined(base: recordBaseDate, time: endTime) : nil
 
+        // 편집된 메모 정규화: 공백·개행 trim 후 빈 문자열이면 nil.
+        let trimmed = memoText.trimmingCharacters(in: .whitespacesAndNewlines)
+        let memoOut: String? = trimmed.isEmpty ? nil : trimmed
+
         switch record {
         case .feeding(let f):
             let updated: Feeding = {
                 var u = f
                 u.startedAt = start
+                u.memo = memoOut       // 편집된 memo 반영
                 if f.type == .formula {
                     u.type = .formula
                     u.amountMl = formulaMl
@@ -344,23 +366,24 @@ struct RecordEditSheet: View {
             Task { @MainActor in await vm.updateFeeding(updated) }
 
         case .diaper(let d):
-            // 대변만 색·질감 유지(소변이면 nil 가드). 색은 편집값 사용.
+            // 대변만 색·질감 유지(소변이면 nil 가드). 색·메모는 편집값 사용.
             let color = diaperType.hasPoo ? stoolColor : nil
             let texture = diaperType.hasPoo ? stoolTexture : nil
             let new = DiaperRecord.new(
                 babyId: d.babyId, diaperType: diaperType, recordedAt: start,
-                stoolColor: color, stoolState: texture, amount: diaperAmount, memo: d.memo
+                stoolColor: color, stoolState: texture, amount: diaperAmount, memo: memoOut
             )
             Task { @MainActor in await vm.replaceDiaper(oldId: d.id, with: new) }
 
         case .sleep(let s):
-            Task { @MainActor in await vm.replaceSleep(oldId: s.id, startedAt: start, endedAt: end) }
+            // replaceSleep에 memo 전달 — T5 수면 memo 소실 버그 수정.
+            Task { @MainActor in await vm.replaceSleep(oldId: s.id, startedAt: start, endedAt: end, memo: memoOut) }
 
         case .play(let p):
             let duration = end.map { max(1, Int($0.timeIntervalSince(start) / 60)) } ?? 0
             let new = PlayRecord.new(
                 babyId: p.babyId, playType: playType, startedAt: start,
-                endedAt: end, durationMinutes: duration, memo: p.memo
+                endedAt: end, durationMinutes: duration, memo: memoOut
             )
             Task { @MainActor in await vm.replacePlay(oldId: p.id, with: new) }
         }

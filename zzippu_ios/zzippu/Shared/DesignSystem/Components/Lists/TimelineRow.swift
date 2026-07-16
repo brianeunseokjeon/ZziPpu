@@ -17,9 +17,11 @@ public enum TimelineRowVariant {
 /// DayTimeline 단일 행.
 /// `[mono 시각]  ●  [라벨]  [편집 아이콘버튼]`
 /// `dotColor`: theme.color.solid(for: kind).color 로 해석된 Color를 주입한다.
+/// `memo`: 라벨 아래 2번째 줄로 표시(caption/textTertiary). nil 또는 trim 후 빈 문자열이면 미표시.
 public struct TimelineItemRow: View {
     public let time:      String   // e.g. "09:30"
     public let label:     String
+    public var memo:      String?  // 선택적 메모 (기본 nil — 기존 호출부 소스호환)
     public let dotColor:  Color    // domain.*.solid.color 주입
     public var variant:   TimelineRowVariant
     public var onEdit:    (() -> Void)?
@@ -27,12 +29,14 @@ public struct TimelineItemRow: View {
     public init(
         time:     String,
         label:    String,
+        memo:     String? = nil,
         dotColor: Color,
         variant:  TimelineRowVariant = .normal,
         onEdit:   (() -> Void)? = nil
     ) {
         self.time     = time
         self.label    = label
+        self.memo     = memo
         self.dotColor = dotColor
         self.variant  = variant
         self.onEdit   = onEdit
@@ -42,9 +46,15 @@ public struct TimelineItemRow: View {
 
     private var isNewest: Bool { variant == .highlighted }
 
+    /// trim 후 빈 문자열/nil이면 nil 반환 → 뷰 미렌더.
+    private var trimmedMemo: String? {
+        let t = memo?.trimmingCharacters(in: .whitespacesAndNewlines)
+        return (t?.isEmpty == false) ? t : nil
+    }
+
     public var body: some View {
         // 웹 정합: [시간 w-16] gap-3 [ ●(dot) gap-2 라벨 … 연필 ]
-        HStack(spacing: theme.space.stackGapMd) {              // 12 — 웹 gap-3(시간↔내용)
+        HStack(alignment: .top, spacing: theme.space.stackGapMd) {  // .top: memo 2줄일 때 dot·시각을 상단 정렬
             // Mono time — 웹: mono. 일반=gray-400 normal / 최신=blue-500 bold, "최신" 9pt blue-400.
             VStack(alignment: .leading, spacing: 0) {
                 Text(time)
@@ -59,20 +69,34 @@ public struct TimelineItemRow: View {
                 }
             }
             .frame(width: 72, alignment: .leading)            // 오전/오후 병기 폭 확보(w-16→72)
+            .padding(.top, 2)                                 // dot을 라벨 baseline 근처에 맞추는 상단 여백
 
-            HStack(spacing: theme.space.stackGapSm) {          // 8 — 웹 gap-2(dot↔라벨)
-                // Dot — 웹: 최신 w-2(8pt) / 일반 w-1.5(6pt).
+            HStack(alignment: .top, spacing: theme.space.stackGapSm) {  // 8 — 웹 gap-2(dot↔라벨)
+                // Dot — 웹: 최신 w-2(8pt) / 일반 w-1.5(6pt). memo 있을 때도 라벨 첫 줄에 맞춤.
                 Circle()
                     .fill(dotColor)
                     .frame(width: isNewest ? 8 : 6,
                            height: isNewest ? 8 : 6)
+                    .padding(.top, 5)                         // 라벨 body 폰트 첫 줄 baseline 근사
 
-                // Label — 웹: 최신 semibold / 일반 normal.
-                Text(label)
-                    .font(theme.typography.body)
-                    .fontWeight(isNewest ? .semibold : .regular)  // 일반 normal — 웹과 동일 굵기
-                    .foregroundStyle(theme.color.textPrimary.color)
-                    .frame(maxWidth: .infinity, alignment: .leading)
+                // 라벨 + 메모 VStack — maxWidth는 여기서 잡아 chevron 정렬 유지.
+                VStack(alignment: .leading, spacing: 2) {
+                    // Label — 웹: 최신 semibold / 일반 normal.
+                    Text(label)
+                        .font(theme.typography.body)
+                        .fontWeight(isNewest ? .semibold : .regular)
+                        .foregroundStyle(theme.color.textPrimary.color)
+
+                    // Memo — trim 후 비어있지 않을 때만 렌더(행 높이 영향 0 when nil).
+                    if let m = trimmedMemo {
+                        Text(m)
+                            .font(theme.typography.caption)
+                            .foregroundStyle(theme.color.textTertiary.color)
+                            .lineLimit(2)
+                            .truncationMode(.tail)
+                    }
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
 
                 // 상세로 이동 표시(화살표) — 탭은 아이콘이 아니라 "행 전체"가 처리한다.
                 if onEdit != nil {
@@ -88,6 +112,15 @@ public struct TimelineItemRow: View {
         // 행 전체를 탭하면 편집 모달 오픈(아이콘만이 아니라 UI 전체).
         .contentShape(Rectangle())
         .onTapGesture { onEdit?() }
+        // VoiceOver: memo 있으면 접근성 레이블에 전문 포함(시각 truncation과 무관하게 전체 낭독).
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel(accessibilityLabelText)
+    }
+
+    private var accessibilityLabelText: String {
+        var parts = [time, label]
+        if let m = trimmedMemo { parts.append("메모 \(m)") }
+        return parts.joined(separator: ", ")
     }
 }
 
@@ -144,6 +177,7 @@ private struct TimelineRowPreview: View {
                 TimelineItemRow(
                     time:     "09:30",
                     label:    "분유 120ml",
+                    memo:     "잘 먹었어요 트림도 완료 😊",   // memo 있는 예시
                     dotColor: theme.color.domainFeedingFormulaSolid.color,
                     variant:  .highlighted,
                     onEdit:   {}
@@ -161,7 +195,14 @@ private struct TimelineRowPreview: View {
                 TimelineItemRow(
                     time:     "08:00",
                     label:    "수면 시작",
+                    memo:     "낮잠. 약간 칭얼거리다가 혼자 잠들었음. 내일도 이 시간에 재워봐야겠다.",  // 긴 memo → 2줄+… 예시
                     dotColor: theme.color.domainSleepSolid.color,
+                    onEdit:   {}
+                )
+                TimelineItemRow(
+                    time:     "07:00",
+                    label:    "소변 (보통)",
+                    dotColor: theme.color.domainDiaperPeeSolid.color,
                     onEdit:   {}
                 )
             }
