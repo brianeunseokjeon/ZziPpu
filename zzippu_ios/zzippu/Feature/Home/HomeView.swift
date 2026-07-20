@@ -673,19 +673,28 @@ private struct EditQuickBarChip: View {
     @Environment(\.theme) private var theme
 
     var body: some View {
-        // "+" 아이콘 버튼 — 배경 없음, 테두리만. 높이는 옆 버튼들에 맞춤(maxHeight 채움).
+        // "+" 아이콘 버튼 — 배경 없음, 점선 테두리만.
+        // 높이는 BigActionButton과 픽셀 동일: 같은 콘텐츠 구조(이모지20+라벨11+xs간격)를
+        // 숨김 미러로 깔고 동일 폭(72)·상하패딩(12)을 적용 → maxHeight 늘어남 문제 제거.
         Button(action: action) {
-            Image(systemName: "plus")
-                .font(.system(size: 22, weight: .semibold))
-                .foregroundStyle(theme.color.textSecondary.color)
-                .frame(width: 72)                     // 옆 퀵버튼과 동일 폭
-                .frame(maxHeight: .infinity)          // 옆 퀵버튼과 동일 높이로 채움
-                .background(
-                    RoundedRectangle(cornerRadius: theme.radius.control, style: .continuous)
-                        // 배경 없음 + 점선 테두리만
-                        .strokeBorder(theme.color.borderStrong.color,
-                                      style: StrokeStyle(lineWidth: 1.5, dash: [4, 4]))
-                )
+            ZStack {
+                VStack(spacing: theme.space.xs) {
+                    Text("＋").font(.system(size: 20))
+                    Text("편집").font(.system(size: 11, weight: .semibold))
+                }
+                .hidden()   // 높이 기준용(옆 버튼과 동일 구조)
+
+                Image(systemName: "plus")
+                    .font(.system(size: 22, weight: .semibold))
+                    .foregroundStyle(theme.color.textSecondary.color)
+            }
+            .frame(width: 72)                              // 옆 퀵버튼과 동일 폭
+            .padding(.vertical, theme.space.stackGapMd)    // py-3=12, 옆 버튼과 동일
+            .background(
+                RoundedRectangle(cornerRadius: theme.radius.control, style: .continuous)
+                    .strokeBorder(theme.color.borderStrong.color,
+                                  style: StrokeStyle(lineWidth: 1.5, dash: [4, 4]))
+            )
         }
         .buttonStyle(QuickPressButtonStyle())
         .accessibilityLabel("빠른기록 편집")
