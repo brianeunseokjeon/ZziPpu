@@ -15,4 +15,5 @@ class Feeding:
     amount_ml: int | None
     duration_minutes: int | None
     memo: str | None
+    did_vomit: bool
     created_at: datetime

@@ -14,6 +14,7 @@ class CreateFeedingDTO:
     amount_ml: int | None = None
     duration_minutes: int | None = None
     memo: str | None = None
+    did_vomit: bool = False
     id: UUID | None = None  # 클라 생성 UUID(있으면 사용, 없으면 서버 생성) — 멱등 upsert
 
 
@@ -26,6 +27,7 @@ class UpdateFeedingDTO:
     amount_ml: int | None = None
     duration_minutes: int | None = None
     memo: str | None = None
+    did_vomit: bool = False
 
 
 @dataclass
@@ -38,4 +40,5 @@ class FeedingResponseDTO:
     amount_ml: int | None
     duration_minutes: int | None
     memo: str | None
+    did_vomit: bool
     created_at: datetime

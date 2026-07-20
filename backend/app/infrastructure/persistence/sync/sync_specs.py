@@ -61,6 +61,14 @@ def parse_str(v: Any) -> str | None:
     return None if v is None else str(v)
 
 
+def parse_bool(v: Any) -> bool:
+    if isinstance(v, bool):
+        return v
+    if v is None:
+        return False
+    return str(v).lower() in ("1", "true", "yes")
+
+
 def ser_datetime(v: datetime | None) -> str | None:
     if v is None:
         return None
@@ -105,6 +113,7 @@ _FEEDING = SyncSpec(
         FieldSpec("amount_ml", parse_int, ser_passthrough),
         FieldSpec("duration_minutes", parse_int, ser_passthrough),
         FieldSpec("memo", parse_str, ser_passthrough),
+        FieldSpec("did_vomit", parse_bool, ser_passthrough),
     ],
 )
 

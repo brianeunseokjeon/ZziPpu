@@ -14,6 +14,7 @@ struct FeedingChange: Sendable {
     let amountMl: Int?
     let durationMinutes: Int?
     let memo: String?
+    let didVomit: Bool
     let createdAt: Date
     let updatedAt: Date
     let deletedAt: Date?

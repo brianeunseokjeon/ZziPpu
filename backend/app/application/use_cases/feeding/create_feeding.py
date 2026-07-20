@@ -20,6 +20,7 @@ class CreateFeedingUseCase:
             amount_ml=dto.amount_ml,
             duration_minutes=dto.duration_minutes,
             memo=dto.memo,
+            did_vomit=dto.did_vomit,
             created_at=datetime.now(timezone.utc),
         )
         saved = await self._repo.save(feeding)
@@ -32,5 +33,6 @@ class CreateFeedingUseCase:
             amount_ml=saved.amount_ml,
             duration_minutes=saved.duration_minutes,
             memo=saved.memo,
+            did_vomit=saved.did_vomit,
             created_at=saved.created_at,
         )

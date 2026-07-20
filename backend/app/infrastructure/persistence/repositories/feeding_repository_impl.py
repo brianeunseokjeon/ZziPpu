@@ -25,6 +25,7 @@ class FeedingRepositoryImpl(FeedingRepository):
             amount_ml=model.amount_ml,
             duration_minutes=model.duration_minutes,
             memo=model.memo,
+            did_vomit=model.did_vomit,
             created_at=model.created_at,
         )
 
@@ -36,6 +37,7 @@ class FeedingRepositoryImpl(FeedingRepository):
         model.amount_ml = entity.amount_ml
         model.duration_minutes = entity.duration_minutes
         model.memo = entity.memo
+        model.did_vomit = entity.did_vomit
 
     async def get(self, id: UUID) -> Feeding | None:
         result = await self._session.get(FeedingModel, id)

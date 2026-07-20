@@ -172,7 +172,7 @@ actor LocalFeedingRepository: FeedingRepository, SyncableStore {
         FeedingChange(
             id: m.id, babyId: m.babyId, feedingType: m.feedingTypeRaw,
             startedAt: m.startedAt, endedAt: m.endedAt, amountMl: m.amountMl,
-            durationMinutes: m.durationMinutes, memo: m.memo,
+            durationMinutes: m.durationMinutes, memo: m.memo, didVomit: m.didVomit,
             createdAt: m.createdAt, updatedAt: m.updatedAt, deletedAt: m.deletedAt
         )
     }
@@ -182,6 +182,7 @@ actor LocalFeedingRepository: FeedingRepository, SyncableStore {
             id: c.id, babyId: c.babyId, feedingTypeRaw: c.feedingType,
             amountMl: c.amountMl, durationMinutes: c.durationMinutes,
             startedAt: c.startedAt, endedAt: c.endedAt, memo: c.memo,
+            didVomit: c.didVomit,
             createdAt: c.createdAt, updatedAt: c.updatedAt,
             syncStateRaw: SyncState.synced.rawValue, deletedAt: c.deletedAt
         )
@@ -195,6 +196,7 @@ actor LocalFeedingRepository: FeedingRepository, SyncableStore {
         m.amountMl = c.amountMl
         m.durationMinutes = c.durationMinutes
         m.memo = c.memo
+        m.didVomit = c.didVomit
         m.updatedAt = c.updatedAt
         m.deletedAt = c.deletedAt
     }

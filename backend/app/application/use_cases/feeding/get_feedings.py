@@ -21,6 +21,7 @@ class GetFeedingsUseCase:
                 amount_ml=f.amount_ml,
                 duration_minutes=f.duration_minutes,
                 memo=f.memo,
+                did_vomit=f.did_vomit,
                 created_at=f.created_at,
             )
             for f in feedings

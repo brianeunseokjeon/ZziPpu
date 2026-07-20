@@ -17,6 +17,7 @@ class UpdateFeedingUseCase:
         feeding.amount_ml = dto.amount_ml
         feeding.duration_minutes = dto.duration_minutes
         feeding.memo = dto.memo
+        feeding.did_vomit = dto.did_vomit
 
         updated = await self._repo.update(feeding)
         return FeedingResponseDTO(
@@ -28,5 +29,6 @@ class UpdateFeedingUseCase:
             amount_ml=updated.amount_ml,
             duration_minutes=updated.duration_minutes,
             memo=updated.memo,
+            did_vomit=updated.did_vomit,
             created_at=updated.created_at,
         )

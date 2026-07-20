@@ -21,6 +21,8 @@ final class FeedingModel {
     var startedAt: Date
     var endedAt: Date?
     var memo: String?
+    /// 먹고 토함 여부. SwiftData 경량 마이그레이션 위해 기본값 지정(기존 행은 false).
+    var didVomit: Bool = false
     var createdAt: Date
 
     init(
@@ -32,6 +34,7 @@ final class FeedingModel {
         startedAt: Date,
         endedAt: Date?,
         memo: String?,
+        didVomit: Bool = false,
         createdAt: Date,
         updatedAt: Date,
         syncStateRaw: Int,
@@ -45,6 +48,7 @@ final class FeedingModel {
         self.startedAt = startedAt
         self.endedAt = endedAt
         self.memo = memo
+        self.didVomit = didVomit
         self.createdAt = createdAt
         self.updatedAt = updatedAt
         self.syncStateRaw = syncStateRaw

@@ -14,6 +14,7 @@ struct FeedingResponseDTO: Decodable {
     let amountMl: Int?
     let durationMinutes: Int?
     let memo: String?
+    let didVomit: Bool?          // 구서버 응답엔 없을 수 있어 옵셔널(매퍼에서 ?? false)
     let createdAt: Date
 }
 
@@ -26,6 +27,7 @@ struct FeedingCreateRequestDTO: Encodable {
     let amountMl: Int?
     let durationMinutes: Int?
     let memo: String?
+    let didVomit: Bool
 }
 
 // MARK: - Update Request DTO
@@ -37,4 +39,5 @@ struct FeedingUpdateRequestDTO: Encodable {
     let amountMl: Int?
     let durationMinutes: Int?
     let memo: String?
+    let didVomit: Bool?
 }

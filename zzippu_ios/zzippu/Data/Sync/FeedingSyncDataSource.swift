@@ -56,7 +56,7 @@ final class FeedingSyncDataSource {
         FeedingSyncDTO(
             id: c.id, babyId: c.babyId, feedingType: c.feedingType,
             startedAt: c.startedAt, endedAt: c.endedAt, amountMl: c.amountMl,
-            durationMinutes: c.durationMinutes, memo: c.memo,
+            durationMinutes: c.durationMinutes, memo: c.memo, didVomit: c.didVomit,
             createdAt: c.createdAt, updatedAt: nil, deletedAt: c.deletedAt
         )
     }
@@ -65,7 +65,7 @@ final class FeedingSyncDataSource {
         FeedingChange(
             id: d.id, babyId: d.babyId, feedingType: d.feedingType,
             startedAt: d.startedAt, endedAt: d.endedAt, amountMl: d.amountMl,
-            durationMinutes: d.durationMinutes, memo: d.memo,
+            durationMinutes: d.durationMinutes, memo: d.memo, didVomit: d.didVomit ?? false,
             createdAt: d.createdAt ?? d.startedAt,
             updatedAt: d.updatedAt ?? d.startedAt,
             deletedAt: d.deletedAt

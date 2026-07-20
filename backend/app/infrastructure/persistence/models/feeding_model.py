@@ -1,7 +1,7 @@
 from datetime import datetime
 from uuid import UUID
 
-from sqlalchemy import Integer, String, Text, Uuid
+from sqlalchemy import Boolean, Integer, String, Text, Uuid
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.infrastructure.persistence.models.base import Base
@@ -20,4 +20,5 @@ class FeedingModel(Base, SyncMixin):
     amount_ml: Mapped[int | None] = mapped_column(Integer, nullable=True)
     duration_minutes: Mapped[int | None] = mapped_column(Integer, nullable=True)
     memo: Mapped[str | None] = mapped_column(Text, nullable=True)
+    did_vomit: Mapped[bool] = mapped_column(Boolean, nullable=False, server_default="false")
     created_at: Mapped[datetime] = mapped_column(UTCDateTime, nullable=False)

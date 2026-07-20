@@ -43,6 +43,7 @@ async def create_feeding(
         amount_ml=body.amount_ml,
         duration_minutes=body.duration_minutes,
         memo=body.memo,
+        did_vomit=body.did_vomit,
     )
     result = await use_case.execute(dto)
     return FeedingResponse(
@@ -54,6 +55,7 @@ async def create_feeding(
         amount_ml=result.amount_ml,
         duration_minutes=result.duration_minutes,
         memo=result.memo,
+        did_vomit=result.did_vomit,
         created_at=result.created_at,
     )
 
@@ -76,6 +78,7 @@ async def get_feedings(
             amount_ml=r.amount_ml,
             duration_minutes=r.duration_minutes,
             memo=r.memo,
+            did_vomit=r.did_vomit,
             created_at=r.created_at,
         )
         for r in results
@@ -98,6 +101,7 @@ async def update_feeding(
         amount_ml=body.amount_ml,
         duration_minutes=body.duration_minutes,
         memo=body.memo,
+        did_vomit=body.did_vomit,
     )
     try:
         result = await use_case.execute(dto)
@@ -112,6 +116,7 @@ async def update_feeding(
         amount_ml=result.amount_ml,
         duration_minutes=result.duration_minutes,
         memo=result.memo,
+        did_vomit=result.did_vomit,
         created_at=result.created_at,
     )
 

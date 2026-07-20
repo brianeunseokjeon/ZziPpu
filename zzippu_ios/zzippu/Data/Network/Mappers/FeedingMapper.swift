@@ -18,6 +18,7 @@ enum FeedingMapper {
             startedAt: dto.startedAt,
             endedAt: dto.endedAt,
             memo: dto.memo,
+            didVomit: dto.didVomit ?? false,
             createdAt: dto.createdAt
         )
     }
@@ -31,7 +32,8 @@ enum FeedingMapper {
             endedAt: feeding.endedAt,
             amountMl: feeding.amountMl,
             durationMinutes: feeding.durationMinutes,
-            memo: feeding.memo
+            memo: feeding.memo,
+            didVomit: feeding.didVomit
         )
     }
 
@@ -44,7 +46,8 @@ enum FeedingMapper {
             endedAt: feeding.endedAt,
             amountMl: feeding.amountMl,
             durationMinutes: feeding.durationMinutes,
-            memo: feeding.memo
+            memo: feeding.memo,
+            didVomit: feeding.didVomit
         )
     }
 }

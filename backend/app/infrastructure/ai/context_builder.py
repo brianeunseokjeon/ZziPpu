@@ -85,8 +85,9 @@ def build_daily_context(
             type_label = type_map.get(f.feeding_type, f.feeding_type.value)
             amount = f"{f.amount_ml}ml" if f.amount_ml else ""
             duration = f"{f.duration_minutes}분" if f.duration_minutes else ""
+            vomit_note = "(먹고 토함 — 실제 섭취량 적음)" if f.did_vomit else ""
             detail = ", ".join(filter(None, [amount, duration]))
-            lines.append(f"  {time_str} - {type_label} {detail}")
+            lines.append(f"  {time_str} - {type_label} {detail} {vomit_note}".rstrip())
         total_ml = sum(f.amount_ml or 0 for f in feedings if f.feeding_type == FeedingType.FORMULA)
         lines.append(f"  합계: {len(feedings)}회, 분유 총 {total_ml}ml")
     else:

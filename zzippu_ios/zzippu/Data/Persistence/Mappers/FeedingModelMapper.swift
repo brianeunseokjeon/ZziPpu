@@ -18,6 +18,7 @@ enum FeedingModelMapper {
             startedAt: model.startedAt,
             endedAt: model.endedAt,
             memo: model.memo,
+            didVomit: model.didVomit,
             createdAt: model.createdAt
         )
     }
@@ -36,6 +37,7 @@ enum FeedingModelMapper {
             startedAt: entity.startedAt,
             endedAt: entity.endedAt,
             memo: entity.memo,
+            didVomit: entity.didVomit,
             createdAt: entity.createdAt,
             updatedAt: updatedAt,
             syncStateRaw: syncState.rawValue,
@@ -53,6 +55,7 @@ enum FeedingModelMapper {
         model.startedAt = entity.startedAt
         model.endedAt = entity.endedAt
         model.memo = entity.memo
+        model.didVomit = entity.didVomit
         // createdAt/id 는 불변
     }
 }

@@ -24,6 +24,7 @@ struct RecordEditSheet: View {
 
     // ─── 타입별 로컬 상태 ───
     @State private var formulaMl: Int = 100
+    @State private var didVomit: Bool = false
     @State private var breastSide: BreastSide = .both
     @State private var diaperType: DiaperType = .pee
     @State private var diaperAmount: DiaperAmount? = nil
@@ -148,6 +149,25 @@ struct RecordEditSheet: View {
                 .onAppear { scrollToCurrent(proxy, animated: false) }
                 .onChange(of: formulaMl) { scrollToCurrent(proxy, animated: true) }
             }
+
+            // 먹고 토함 토글 — 켜면 타임라인에 🤮, 실제 섭취량이 준 양보다 적을 수 있음.
+            Toggle(isOn: $didVomit) {
+                VStack(alignment: .leading, spacing: 2) {
+                    Text("먹고 토함 🤮")
+                        .font(theme.typography.body)
+                        .foregroundStyle(theme.color.textPrimary.color)
+                    Text("실제 섭취량이 적을 수 있어요")
+                        .font(theme.typography.caption)
+                        .foregroundStyle(theme.color.textTertiary.color)
+                }
+            }
+            .tint(theme.color.primary.color)
+            .padding(.horizontal, theme.space.md)
+            .padding(.vertical, theme.space.sm)
+            .background(
+                RoundedRectangle(cornerRadius: theme.radius.control, style: .continuous)
+                    .fill(theme.color.surfaceSunken.color)
+            )
         }
     }
 
@@ -336,6 +356,7 @@ struct RecordEditSheet: View {
             startTime = f.startedAt
             if let e = f.endedAt { endTime = e; hasEnd = true }
             memoText = f.memo ?? ""
+            didVomit = f.didVomit
         case .sleep(let s):
             startTime = s.startedAt
             if let e = s.endedAt { endTime = e; hasEnd = true }
@@ -375,6 +396,7 @@ struct RecordEditSheet: View {
                 if f.type == .formula {
                     u.type = .formula
                     u.amountMl = formulaMl
+                    u.didVomit = didVomit    // 분유만 토함 토글 반영
                     u.endedAt = nil
                 } else {
                     u.type = breastFeedingType

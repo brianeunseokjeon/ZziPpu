@@ -643,12 +643,15 @@ struct TimelineItem: Identifiable {
 
 extension Feeding {
     var timelineLabel: String {
+        let base: String
         switch type {
-        case .formula:     return amountMl.map { "분유 \($0)ml" } ?? "분유"
-        case .breastLeft:  return durationMinutes.map { "모유 왼쪽 (\($0)분)" } ?? "모유 왼쪽"
-        case .breastRight: return durationMinutes.map { "모유 오른쪽 (\($0)분)" } ?? "모유 오른쪽"
-        case .breastBoth:  return durationMinutes.map { "모유 양쪽 (\($0)분)" } ?? "모유 양쪽"
+        case .formula:     base = amountMl.map { "분유 \($0)ml" } ?? "분유"
+        case .breastLeft:  base = durationMinutes.map { "모유 왼쪽 (\($0)분)" } ?? "모유 왼쪽"
+        case .breastRight: base = durationMinutes.map { "모유 오른쪽 (\($0)분)" } ?? "모유 오른쪽"
+        case .breastBoth:  base = durationMinutes.map { "모유 양쪽 (\($0)분)" } ?? "모유 양쪽"
         }
+        // 먹고 토함 → 라벨 뒤 🤮 (실제 섭취량이 준 양보다 적을 수 있음).
+        return didVomit ? "\(base) 🤮" : base
     }
     var domainKind: DomainKind {
         switch type {

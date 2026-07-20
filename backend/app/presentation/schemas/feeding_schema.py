@@ -14,6 +14,7 @@ class FeedingCreateRequest(BaseModel):
     amount_ml: int | None = Field(None, gt=0)
     duration_minutes: int | None = Field(None, gt=0)
     memo: str | None = None
+    did_vomit: bool = False
 
 
 class FeedingUpdateRequest(BaseModel):
@@ -23,6 +24,7 @@ class FeedingUpdateRequest(BaseModel):
     amount_ml: int | None = Field(None, gt=0)
     duration_minutes: int | None = Field(None, gt=0)
     memo: str | None = None
+    did_vomit: bool = False
 
 
 class FeedingResponse(BaseModel):
@@ -34,6 +36,7 @@ class FeedingResponse(BaseModel):
     amount_ml: int | None
     duration_minutes: int | None
     memo: str | None
+    did_vomit: bool
     created_at: datetime
 
     model_config = {"from_attributes": True}

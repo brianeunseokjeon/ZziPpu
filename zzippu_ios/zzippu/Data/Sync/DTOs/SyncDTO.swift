@@ -15,6 +15,7 @@ struct FeedingSyncDTO: Codable {
     let amountMl: Int?
     let durationMinutes: Int?
     let memo: String?
+    let didVomit: Bool?      // 구서버 pull엔 없을 수 있어 옵셔널(소비 시 ?? false)
     let createdAt: Date?
     let updatedAt: Date?     // pull 응답에 포함, push 요청엔 생략 가능(서버 재타임스탬프)
     let deletedAt: Date?

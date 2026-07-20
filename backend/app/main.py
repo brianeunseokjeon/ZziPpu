@@ -220,6 +220,32 @@ async def _migrate_sqlite() -> None:
                 exc_info=True,
             )
 
+        # ── feedings.did_vomit (먹고 토했는지 여부) ──────────────────────────
+        # NOT NULL DEFAULT FALSE/0. 기존 행은 server_default 로 백필됨.
+        # 멱등 — 이미 있으면 skip. 실패해도 앱 기동은 막지 않음(로그만).
+        try:
+            feeding_cols = await _existing_columns(conn, "feedings", is_sqlite)
+            if feeding_cols and "did_vomit" not in feeding_cols:
+                if is_sqlite:
+                    await conn.execute(
+                        text("ALTER TABLE feedings ADD COLUMN did_vomit BOOLEAN NOT NULL DEFAULT 0")
+                    )
+                else:
+                    # PostgreSQL(Neon): IF NOT EXISTS 로 멱등 보장
+                    await conn.execute(
+                        text(
+                            "ALTER TABLE feedings "
+                            "ADD COLUMN IF NOT EXISTS did_vomit BOOLEAN NOT NULL DEFAULT FALSE"
+                        )
+                    )
+        except Exception:  # noqa: BLE001 — 마이그레이션 실패가 기동을 막지 않도록
+            import logging
+
+            logging.getLogger(__name__).warning(
+                "feedings.did_vomit 마이그레이션 실패(무시하고 기동 계속)",
+                exc_info=True,
+            )
+
         # ── babies 신규 프로필 컬럼 (전부 nullable · 하위호환 · 멱등) ─────────
         # 측정치 3개(키/두위/흉위)=DOUBLE PRECISION(PG)/REAL(SQLite),
         # blood_type=VARCHAR(4), rh_factor=VARCHAR(10), birth_time=VARCHAR(5).
