@@ -676,13 +676,15 @@ private struct EditQuickBarChip: View {
         // "+" 아이콘 버튼 — 배경 없음, 테두리만. 높이는 옆 버튼들에 맞춤(maxHeight 채움).
         Button(action: action) {
             Image(systemName: "plus")
-                .font(.system(size: 24, weight: .semibold))
+                .font(.system(size: 22, weight: .semibold))
                 .foregroundStyle(theme.color.textSecondary.color)
-                .frame(width: 56)
+                .frame(width: 72)                     // 옆 퀵버튼과 동일 폭
                 .frame(maxHeight: .infinity)          // 옆 퀵버튼과 동일 높이로 채움
                 .background(
                     RoundedRectangle(cornerRadius: theme.radius.control, style: .continuous)
-                        .stroke(theme.color.borderStrong.color, lineWidth: 1.5)   // 테두리만
+                        // 배경 없음 + 점선 테두리만
+                        .strokeBorder(theme.color.borderStrong.color,
+                                      style: StrokeStyle(lineWidth: 1.5, dash: [4, 4]))
                 )
         }
         .buttonStyle(QuickPressButtonStyle())
