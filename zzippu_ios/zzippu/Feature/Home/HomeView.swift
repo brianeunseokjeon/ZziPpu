@@ -123,7 +123,7 @@ struct HomeView: View {
             } else {
                 ProgressView()
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
-                    .background(theme.color.background.color)
+                    .background(theme.color.surface.color)
             }
         }
         // 네이티브 .sheet 사용 — QuickBarEditSheet는 List+EditMode라 DSBottomSheet의
@@ -262,7 +262,7 @@ private struct HomeContentView: View {
                 TodayView(vm: vm, quickBarStore: quickBarStore, onAction: onAction, onEditQuickBar: onEditQuickBar)
             }
         }
-        .background(theme.color.background.color)
+        .background(theme.color.surface.color)
         .navigationBarHidden(true)
         .alert("오류", isPresented: Binding(
             get: { vm.errorMessage != nil },
@@ -395,7 +395,7 @@ private struct TodayView: View {
                 }
                 .padding(.bottom, theme.space.lg)
             }
-            .background(theme.color.background.color)
+            .background(theme.color.surface.color)
         }
     }
 }
@@ -445,7 +445,7 @@ private struct PastFocusView: View {
                 DayTimelineSection(vm: vm, day: Calendar.kst.startOfDay(for: vm.selectedDate))
                     .padding(.bottom, theme.space.lg)
             }
-            .background(theme.color.background.color)
+            .background(theme.color.surface.color)
         }
     }
 }
@@ -503,7 +503,8 @@ private struct DateSectionHeader: View {
         .padding(.horizontal, theme.space.screenPaddingX)
         .padding(.vertical, theme.space.sm)
         .frame(maxWidth: .infinity)
-        .background(theme.color.surface.color.opacity(0.97))
+        // 날짜 헤더(오늘/어제)만 회색 band — 기록영역/페이지는 흰색이라 구분됨.
+        .background(theme.color.background.color)
         .overlay(alignment: .bottom) {
             Rectangle().fill(theme.color.divider.color).frame(height: 1)
         }
