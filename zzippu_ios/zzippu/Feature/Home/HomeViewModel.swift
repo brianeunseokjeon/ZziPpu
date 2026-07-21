@@ -501,6 +501,8 @@ final class HomeViewModel {
             }
             await MainActor.run { errorMessage = "수정 실패: \(error.localizedDescription)" }
         }
+        // 수유 시각을 수정하면 마지막 수유 기준이 바뀔 수 있음 → 간격 알림 재계산.
+        refreshFeedingRemindersIfInterval()
     }
 
     /// 배변 수정 — PATCH 없음: 삭제→재생성. recordedAt 기준 일자에 반영.
@@ -616,6 +618,8 @@ final class HomeViewModel {
             Task { @MainActor in
                 do { try await feedingRepository.delete(id: f.id, babyId: f.babyId) }
                 catch { recordsByDay[key]?.feedings.insert(f, at: 0); errorMessage = "삭제 실패: \(error.localizedDescription)" }
+                // 서버 삭제 반영 후 재계산(마지막 수유 기준이 바뀔 수 있음).
+                refreshFeedingRemindersIfInterval()
             }
         case .sleep:
             guard let s = recordsByDay[key]?.sleeps.first(where: { $0.id == item.id }) else { return }
