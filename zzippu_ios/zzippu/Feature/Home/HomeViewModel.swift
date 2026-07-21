@@ -378,6 +378,14 @@ final class HomeViewModel {
 
     // MARK: - 수유 알림(로컬 노티) 상태
 
+    /// 오늘(KST) 수유 기록이 하나라도 있는지 — 새벽/오전 육퇴 배너 유지 판단용.
+    /// 미로드면 false(없음 취급) → 배너 유지.
+    var hasFeedingToday: Bool {
+        let today = Calendar.kst.startOfDay(for: Date())
+        guard let rec = recordsByDay[today] else { return false }
+        return !rec.feedings.isEmpty
+    }
+
     /// 홈 진입/복귀 시 알림 설정을 미러(육퇴 배너 표시·상태).
     /// 오후 5시 이후면 밤 창을 연다(아직 안 열렸으면). 창은 다음날 수유까지 유지.
     func loadReminderState() {
@@ -386,7 +394,8 @@ final class HomeViewModel {
         nightOffActive = s.nightOff
         if s.enabled {
             let hour = Calendar.kst.component(.hour, from: Date())
-            if hour >= 17 && s.nightWindowStart == nil {
+            // 저녁(5시+)이거나, 이미 육퇴 상태인데 창이 없으면 연다(다음날 수유까지 유지 + 복귀 기준 확보).
+            if s.nightWindowStart == nil && (hour >= 17 || s.nightOff) {
                 s.nightWindowStart = Date()
                 s.save()
             }
