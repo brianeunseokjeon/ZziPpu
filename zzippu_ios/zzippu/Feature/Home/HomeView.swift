@@ -477,7 +477,7 @@ private struct TodayView: View {
                     .minimumScaleFactor(0.8)
                 Spacer(minLength: 0)
                 if vm.nightOffActive {
-                    Image(systemName: "star.fill").font(.system(size: 13))
+                    NightSkyBadge()   // 반달+반짝이는 별, 은하수 그라데이션
                 }
             }
             .foregroundStyle(vm.nightOffActive ? activeFg : theme.color.textSecondary.color)
@@ -876,6 +876,44 @@ private struct BigActionButton: View {
         }
         // 누름 효과는 ButtonStyle로 — DragGesture를 안 써야 가로 ScrollView가 스크롤됨.
         .buttonStyle(QuickPressButtonStyle())
+    }
+}
+
+// MARK: - NightSkyBadge (육퇴중 동화 밤하늘 배지)
+
+/// 반달(moon.stars.fill) + 반짝이는 별 2개 + 은하수 그라데이션(보라·핑크·골드) + 트윙클.
+private struct NightSkyBadge: View {
+    @State private var twinkle = false
+
+    var body: some View {
+        ZStack {
+            Image(systemName: "sparkle")
+                .font(.system(size: 9))
+                .offset(x: -15, y: -6)
+                .opacity(twinkle ? 1.0 : 0.45)
+                .scaleEffect(twinkle ? 1.05 : 0.75)
+            Image(systemName: "moon.stars.fill")
+                .font(.system(size: 17))
+            Image(systemName: "sparkle")
+                .font(.system(size: 6))
+                .offset(x: 12, y: 8)
+                .opacity(twinkle ? 0.55 : 1.0)   // 반대 위상 → 번갈아 반짝
+                .scaleEffect(twinkle ? 0.8 : 1.1)
+        }
+        .foregroundStyle(
+            LinearGradient(
+                colors: [PrimitiveColor.purple400, PrimitiveColor.pink300, PrimitiveColor.amber400],
+                startPoint: .topLeading,
+                endPoint: .bottomTrailing
+            )
+        )
+        .frame(width: 44, height: 24)
+        .onAppear {
+            withAnimation(.easeInOut(duration: 1.4).repeatForever(autoreverses: true)) {
+                twinkle = true
+            }
+        }
+        .accessibilityHidden(true)
     }
 }
 
