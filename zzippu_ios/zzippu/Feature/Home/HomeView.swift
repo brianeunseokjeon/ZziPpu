@@ -852,8 +852,10 @@ private struct BigActionButton: View {
                     .fill((isActive ? palette.activeBg : palette.idleBg).color)
             )
             .overlay(
+                // strokeBorder: 테두리를 프레임 '안쪽'에 그려 스크롤뷰 클리핑에 안 잘림.
+                // (.stroke는 경로 중앙 정렬이라 바깥 0.5pt가 잘려 버튼마다 테두리가 들쭉날쭉했음)
                 RoundedRectangle(cornerRadius: theme.radius.control, style: .continuous)
-                    .stroke((isActive ? palette.activeBorder : palette.idleBorder).color, lineWidth: 1)
+                    .strokeBorder((isActive ? palette.activeBorder : palette.idleBorder).color, lineWidth: 1)
             )
         }
         // 누름 효과는 ButtonStyle로 — DragGesture를 안 써야 가로 ScrollView가 스크롤됨.
