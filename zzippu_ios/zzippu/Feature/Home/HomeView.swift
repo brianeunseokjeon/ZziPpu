@@ -413,8 +413,8 @@ private struct TodayView: View {
                 Rectangle().fill(theme.color.divider.color).frame(height: 1)
             }
 
-            // ── 육퇴 배너(수유 알림 켜져 있을 때만) ──
-            if vm.reminderEnabled {
+            // ── 육퇴 배너(오후 5시 이후 또는 이미 육퇴중일 때만) ──
+            if showNightOffBar {
                 nightOffBar
             }
 
@@ -449,9 +449,22 @@ private struct TodayView: View {
         .onAppear { vm.loadReminderState() }   // 설정 화면 다녀온 뒤 육퇴/알림 상태 갱신
     }
 
+    /// 육퇴 배너 표시 조건: 알림 켜짐 + (오후 5시 이후 또는 이미 육퇴중).
+    private var showNightOffBar: Bool {
+        guard vm.reminderEnabled else { return false }
+        let hour = Calendar.kst.component(.hour, from: Date())
+        return hour >= 17 || vm.nightOffActive
+    }
+
     /// 육퇴 배너 — 탭하면 오늘 밤 수유 알림 끔/켬. 다음 수유 기록 시 자동 복귀.
+    /// 육퇴중 = 연보라 배경 + 오른쪽 별.
     private var nightOffBar: some View {
-        Button {
+        // 육퇴중 연보라 팔레트(라이트/다크 대응).
+        let activeBg = DynamicColor(light: PrimitiveColor.purple100,
+                                    dark: PrimitiveColor.purple500.opacity(0.28)).color
+        let activeFg = DynamicColor(light: PrimitiveColor.purple700,
+                                    dark: PrimitiveColor.purple100).color
+        return Button {
             vm.toggleNightOff()
         } label: {
             HStack(spacing: theme.space.sm) {
@@ -463,12 +476,15 @@ private struct TodayView: View {
                     .lineLimit(1)
                     .minimumScaleFactor(0.8)
                 Spacer(minLength: 0)
+                if vm.nightOffActive {
+                    Image(systemName: "star.fill").font(.system(size: 13))
+                }
             }
-            .foregroundStyle(vm.nightOffActive ? theme.color.onPrimary.color : theme.color.textSecondary.color)
+            .foregroundStyle(vm.nightOffActive ? activeFg : theme.color.textSecondary.color)
             .padding(.horizontal, theme.space.screenPaddingX)
             .padding(.vertical, theme.space.sm)
             .frame(maxWidth: .infinity)
-            .background(vm.nightOffActive ? theme.color.primary.color : theme.color.surfaceSunken.color)
+            .background(vm.nightOffActive ? activeBg : theme.color.surfaceSunken.color)
         }
         .buttonStyle(.plain)
     }
