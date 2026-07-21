@@ -31,6 +31,7 @@ struct zzippuApp: App {
             if phase == .active {
                 appContainer.prewarmServer()          // /health 선제 핑 → 서버+Neon 각성
                 appContainer.triggerFeedingFullSync() // server-only면 내부 no-op
+                appContainer.refreshFeedingReminders() // 간격 모드: 최신 수유 기준 알림 재조정
             }
         }
     }

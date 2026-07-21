@@ -126,6 +126,18 @@ final class AppContainer {
         URLSession.shared.dataTask(with: req).resume()
     }
 
+    /// 수유 로컬 알림 재조정 — 설정 + 서버의 마지막 수유시각 기준.
+    /// 앱 포그라운드 복귀·설정 변경 시 호출(간격 모드는 최신 수유 기준으로 갱신).
+    func refreshFeedingReminders() {
+        let settings = FeedingReminderSettings.load()
+        let repo = feedingRepository
+        let baby = activeBabyId
+        Task {
+            let last = try? await repo.lastFeeding(babyId: baby)
+            await FeedingNotificationScheduler.reschedule(settings, lastFeedingAt: last?.startedAt)
+        }
+    }
+
     // MARK: - Preview Factory (Mock 리포지토리 — 네트워크 미접속)
 
     @MainActor

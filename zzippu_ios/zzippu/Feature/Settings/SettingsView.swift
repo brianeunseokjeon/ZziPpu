@@ -58,6 +58,7 @@ private struct SettingsContent: View {
             VStack(spacing: theme.space.lg) {
                 profileHeader
                 babyProfileSection
+                notificationSection
                 caregiverSection
                 exportSection
                 accountSection
@@ -127,6 +128,23 @@ private struct SettingsContent: View {
                         .foregroundStyle(theme.color.primary.color)
                 } content: {
                     Text("프로필 편집").font(theme.typography.body)
+                }
+            }
+            .buttonStyle(.plain)
+        }
+    }
+
+    private var notificationSection: some View {
+        VStack(alignment: .leading, spacing: theme.space.sm) {
+            DSSectionHeader(title: "알림")
+            NavigationLink {
+                FeedingReminderView()
+            } label: {
+                DSListRow(variant: .navigable) {
+                    Image(systemName: "bell.badge")
+                        .foregroundStyle(theme.color.primary.color)
+                } content: {
+                    Text("수유 알림").font(theme.typography.body)
                 }
             }
             .buttonStyle(.plain)

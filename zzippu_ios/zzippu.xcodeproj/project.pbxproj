@@ -140,6 +140,7 @@
 		8BF23724E0D84AD82CB96C47 /* Theme.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20A1B4DFCE9B542AAEA92808 /* Theme.swift */; };
 		8CFEFEE091745EE3282E69F2 /* DSSectionHeader.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5245F3E41B8AC858E9CCBBA /* DSSectionHeader.swift */; };
 		8EE5407833053DF141172941 /* RemoteDevelopmentDataSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4DFF67E806A6F8FA6C6CC222 /* RemoteDevelopmentDataSource.swift */; };
+		8F0542FB14D6101D86E0966E /* FeedingReminderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C6665E23C67FF6D245C4EDF8 /* FeedingReminderView.swift */; };
 		909947BD97313525F611E5D6 /* VaccinationMapper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1BEB5534F7B49932733DC943 /* VaccinationMapper.swift */; };
 		943E2108AFF677BCA4B7E9DE /* FeedingType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 47857ADDF84A6E7E15DAF0ED /* FeedingType.swift */; };
 		9652EF8C7AB3492858274BAC /* ClassifyGrowthPercentileUseCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = B97C404F8E9619C33C4BF03D /* ClassifyGrowthPercentileUseCase.swift */; };
@@ -203,6 +204,7 @@
 		DA8C4CD53403CBDD35A92137 /* CalendarSnapshotStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 312E14537790B07590883E08 /* CalendarSnapshotStore.swift */; };
 		DB680E88325F27BA411A7986 /* SettingsViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A44EE147EB48348167C189D /* SettingsViewModel.swift */; };
 		DBAFFA6B2852AE72FA93D825 /* DSTrendBarChart.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2231CCC458DF2ADAED33CF66 /* DSTrendBarChart.swift */; };
+		DC857F7E499135F0449049F5 /* FeedingReminderSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7CEBAA8C670BF4078D78820 /* FeedingReminderSettings.swift */; };
 		DC9D89EC3581E866B2A70417 /* MetricDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 38DE4DD5318C4324FA7BA009 /* MetricDetailView.swift */; };
 		DDD587C8F47A5F3C600637DB /* DSNumberStepper.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9D7E9BCC3D0269738853326 /* DSNumberStepper.swift */; };
 		DE7CF49CC71C9C7146DDD96E /* APIClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9DAF399357A8600551960BA3 /* APIClient.swift */; };
@@ -215,6 +217,7 @@
 		E6891422AD8083153A30D501 /* SaveSleepUseCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = DCFF8FF117EEABBDEE84C4D7 /* SaveSleepUseCase.swift */; };
 		E6E9C2FFD75D0213C0DF79E6 /* DSRingGauge.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C4162B2CA40D989AB0198D8 /* DSRingGauge.swift */; };
 		E7947006F5DFCAC2CA4047A9 /* DiaperRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8D99E4EBFB60B2E1E16C24B /* DiaperRepository.swift */; };
+		E7A9AB074A6EA56A212F7DD2 /* FeedingNotificationScheduler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 66C7D50D2E8E7436ABD02A87 /* FeedingNotificationScheduler.swift */; };
 		E7CC68FFE9D64A147E184A73 /* RemotePlayDataSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = C723460CF9DA8ABDBD0A0D81 /* RemotePlayDataSource.swift */; };
 		E881245F458D5C5A794427F9 /* AnalysisCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0A84670C6CDDDBBFB60369B3 /* AnalysisCard.swift */; };
 		E9041C5333C24614E875D4DB /* RemoteSleepRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C89B7C446944FE978DC1309 /* RemoteSleepRepository.swift */; };
@@ -376,6 +379,7 @@
 		64D450C96E4C4CA2F67849E7 /* SettingsView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		6519A1126295CD014E06AC4F /* MainTabView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = MainTabView.swift; path = MainTabView.swift; sourceTree = "<group>"; };
 		665122C5F11382581CEA0FE6 /* DevelopmentStage.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DevelopmentStage.swift; sourceTree = "<group>"; };
+		66C7D50D2E8E7436ABD02A87 /* FeedingNotificationScheduler.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = FeedingNotificationScheduler.swift; sourceTree = "<group>"; };
 		66DA6970725512C7A9B4CD50 /* RemoteCareLogRepository.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = RemoteCareLogRepository.swift; sourceTree = "<group>"; };
 		6D222AAEB9D2A2630AB337E7 /* CareLogMapper.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = CareLogMapper.swift; path = Network/Mappers/CareLogMapper.swift; sourceTree = "<group>"; };
 		6D2751E5038B51444550AD65 /* PlayDTO.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = PlayDTO.swift; path = Network/DTOs/PlayDTO.swift; sourceTree = "<group>"; };
@@ -443,6 +447,7 @@
 		B5245F3E41B8AC858E9CCBBA /* DSSectionHeader.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DSSectionHeader.swift; sourceTree = "<group>"; };
 		B6EFB11E405BF9DA251D23AF /* SleepViewModel.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SleepViewModel.swift; sourceTree = "<group>"; };
 		B70CA639B37513701C1E39FA /* EvaluateInsightsUseCase.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = EvaluateInsightsUseCase.swift; sourceTree = "<group>"; };
+		B7CEBAA8C670BF4078D78820 /* FeedingReminderSettings.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = FeedingReminderSettings.swift; sourceTree = "<group>"; };
 		B97C404F8E9619C33C4BF03D /* ClassifyGrowthPercentileUseCase.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ClassifyGrowthPercentileUseCase.swift; sourceTree = "<group>"; };
 		B9D471E90AC7CF6BF84018A5 /* GrowthDetailView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = GrowthDetailView.swift; sourceTree = "<group>"; };
 		B9F2099E28FC13F347F86EFC /* SaveDiaperUseCase.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SaveDiaperUseCase.swift; sourceTree = "<group>"; };
@@ -455,6 +460,7 @@
 		C396CC363258B9C2C84B1443 /* SemanticColors.generated.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SemanticColors.generated.swift; sourceTree = "<group>"; };
 		C3A12FF2E001BD284C472953 /* SleepMapper.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = SleepMapper.swift; path = Network/Mappers/SleepMapper.swift; sourceTree = "<group>"; };
 		C5E6E7E8A577D08AC211BB7F /* CaregiverRepository.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CaregiverRepository.swift; sourceTree = "<group>"; };
+		C6665E23C67FF6D245C4EDF8 /* FeedingReminderView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = FeedingReminderView.swift; sourceTree = "<group>"; };
 		C6D2FA2E832505E2571BACE4 /* DiaperViewModel.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DiaperViewModel.swift; sourceTree = "<group>"; };
 		C7060140A1A6A17F1229394C /* BuildMonthCalendarUseCase.swift */ = {isa = PBXFileReference; explicitFileType = sourcecode.swift; includeInIndex = 1; path = BuildMonthCalendarUseCase.swift; sourceTree = "<group>"; };
 		C723460CF9DA8ABDBD0A0D81 /* RemotePlayDataSource.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = RemotePlayDataSource.swift; path = Network/DataSources/RemotePlayDataSource.swift; sourceTree = "<group>"; };
@@ -598,6 +604,8 @@
 				64D450C96E4C4CA2F67849E7 /* SettingsView.swift */,
 				58C3DDC56C3FB9C79CF22891 /* BabyProfileView.swift */,
 				A7B61589E08ED3148FD5DBEF /* CaregiverView.swift */,
+				B7CEBAA8C670BF4078D78820 /* FeedingReminderSettings.swift */,
+				C6665E23C67FF6D245C4EDF8 /* FeedingReminderView.swift */,
 			);
 			name = Settings;
 			path = Settings;
@@ -922,6 +930,15 @@
 			);
 			name = Components;
 			path = Components;
+			sourceTree = "<group>";
+		};
+		8E3DF552F6EC77D64EA0D9E1 /* Notifications */ = {
+			isa = PBXGroup;
+			children = (
+				66C7D50D2E8E7436ABD02A87 /* FeedingNotificationScheduler.swift */,
+			);
+			name = Notifications;
+			path = Notifications;
 			sourceTree = "<group>";
 		};
 		8E583A63DE0996FE4D8375D9 /* Recording */ = {
@@ -1258,6 +1275,7 @@
 				A59A28CEF4637F337F93AEA8 /* Extensions */,
 				2558BE443BC6154CDB3CA118 /* DesignSystem */,
 				BE52E95429D4C202CAFB2AB7 /* Resources */,
+				8E3DF552F6EC77D64EA0D9E1 /* Notifications */,
 			);
 			name = Shared;
 			path = Shared;
@@ -1634,6 +1652,9 @@
 				F3FFBB35AC25C9C6E10EE978 /* RemoteCareLogRepository.swift in Sources */,
 				6FB5DFE2A5067C4EFBE2A0DA /* CarePresetSettings.swift in Sources */,
 				ADF2E2DBD02E97E920B44DBA /* CareInputSheet.swift in Sources */,
+				DC857F7E499135F0449049F5 /* FeedingReminderSettings.swift in Sources */,
+				8F0542FB14D6101D86E0966E /* FeedingReminderView.swift in Sources */,
+				E7A9AB074A6EA56A212F7DD2 /* FeedingNotificationScheduler.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

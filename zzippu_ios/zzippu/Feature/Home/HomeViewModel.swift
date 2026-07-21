@@ -364,6 +364,18 @@ final class HomeViewModel {
             await mutate(day) { $0.feedings.removeAll { $0.id == feeding.id } }
             await MainActor.run { errorMessage = "수유 저장 실패: \(error.localizedDescription)" }
         }
+        // 간격 모드 알림: 최신 수유 기준으로 다음 알림 재계산.
+        refreshFeedingRemindersIfInterval()
+    }
+
+    /// 간격 모드일 때만 서버의 최신 수유 기준으로 로컬 알림 재조정(수유 기록 직후 호출).
+    private func refreshFeedingRemindersIfInterval() {
+        let s = FeedingReminderSettings.load()
+        guard s.enabled, s.mode == .interval else { return }
+        Task { @MainActor in
+            let last = try? await feedingRepository.lastFeeding(babyId: babyId)
+            await FeedingNotificationScheduler.reschedule(s, lastFeedingAt: last?.startedAt)
+        }
     }
 
     private func insertDiaper(_ diaper: DiaperRecord) async {
