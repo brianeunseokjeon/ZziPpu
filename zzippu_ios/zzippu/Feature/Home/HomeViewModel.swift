@@ -35,6 +35,11 @@ final class HomeViewModel {
     /// 마지막 분유량(퀵세이브 반복용). nil이면 기본값 사용.
     var lastFormulaMl: Int? = nil
 
+    /// 수유 알림 활성 여부(홈 육퇴 배너 표시 조건). FeedingReminderSettings 미러.
+    var reminderEnabled: Bool = false
+    /// 육퇴 중(오늘 밤 알림 끔). 배너 상태 + 다음 수유 기록 시 자동 해제.
+    var nightOffActive: Bool = false
+
     /// 과거 날짜 포커스 뷰 여부
     var isFocusingPast: Bool {
         !Calendar.kst.isDateInToday(selectedDate)
@@ -96,6 +101,7 @@ final class HomeViewModel {
         for day in loadedDays { loadDay(day) }
         refreshActiveSessions()
         refreshLastFormula()
+        loadReminderState()
     }
 
     /// 하위호환 (기존 loadAll/loadFeedings 호출부 방어)
@@ -364,11 +370,53 @@ final class HomeViewModel {
             await mutate(day) { $0.feedings.removeAll { $0.id == feeding.id } }
             await MainActor.run { errorMessage = "수유 저장 실패: \(error.localizedDescription)" }
         }
-        // 간격 모드 알림: 최신 수유 기준으로 다음 알림 재계산.
-        refreshFeedingRemindersIfInterval()
+        // 새 수유 기록 = 육퇴 복귀 + 간격 모드 재계산.
+        refreshFeedingRemindersAfterNewFeeding()
     }
 
-    /// 간격 모드일 때만 서버의 최신 수유 기준으로 로컬 알림 재조정(수유 기록 직후 호출).
+    // MARK: - 수유 알림(로컬 노티) 상태
+
+    /// 홈 진입/복귀 시 알림 설정을 미러(육퇴 배너 표시·상태).
+    func loadReminderState() {
+        let s = FeedingReminderSettings.load()
+        reminderEnabled = s.enabled
+        nightOffActive = s.nightOff
+    }
+
+    /// 육퇴 토글 — 저장 + 알림 재조정(켜면 전부 취소, 끄면 재무장).
+    func toggleNightOff() {
+        var s = FeedingReminderSettings.load()
+        s.nightOff.toggle()
+        s.save()
+        nightOffActive = s.nightOff
+        let settings = s   // 불변 스냅샷
+        Task { @MainActor in
+            let last = try? await feedingRepository.lastFeeding(babyId: babyId)
+            await FeedingNotificationScheduler.reschedule(settings, lastFeedingAt: last?.startedAt)
+        }
+    }
+
+    /// 새 수유 기록 직후: 육퇴 중이었다면 자동 복귀(해제) + 알림 재무장.
+    /// 간격 모드는 최신 수유 기준으로 다음 알림 재계산.
+    private func refreshFeedingRemindersAfterNewFeeding() {
+        Task { @MainActor in
+            var s = FeedingReminderSettings.load()
+            guard s.enabled else { return }
+            let wasNightOff = s.nightOff
+            if wasNightOff {
+                s.nightOff = false
+                s.save()
+                nightOffActive = false
+            }
+            // 간격 모드는 항상 재계산. 고정 모드는 육퇴 해제 시에만 재무장.
+            guard s.mode == .interval || wasNightOff else { return }
+            let settings = s   // await 경계 넘기기 전 불변 스냅샷
+            let last = try? await feedingRepository.lastFeeding(babyId: babyId)
+            await FeedingNotificationScheduler.reschedule(settings, lastFeedingAt: last?.startedAt)
+        }
+    }
+
+    /// 수유 편집·삭제 직후: 간격 모드만 재계산(육퇴 해제는 안 함 — 복귀는 '새 기록'만).
     private func refreshFeedingRemindersIfInterval() {
         let s = FeedingReminderSettings.load()
         guard s.enabled, s.mode == .interval else { return }

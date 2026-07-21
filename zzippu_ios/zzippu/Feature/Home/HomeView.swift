@@ -413,6 +413,11 @@ private struct TodayView: View {
                 Rectangle().fill(theme.color.divider.color).frame(height: 1)
             }
 
+            // ── 육퇴 배너(수유 알림 켜져 있을 때만) ──
+            if vm.reminderEnabled {
+                nightOffBar
+            }
+
             // ── 여러 날 스크롤 피드 ──
             ScrollView {
                 LazyVStack(spacing: 0, pinnedViews: [.sectionHeaders]) {
@@ -441,6 +446,31 @@ private struct TodayView: View {
             }
             .background(theme.color.surface.color)
         }
+        .onAppear { vm.loadReminderState() }   // 설정 화면 다녀온 뒤 육퇴/알림 상태 갱신
+    }
+
+    /// 육퇴 배너 — 탭하면 오늘 밤 수유 알림 끔/켬. 다음 수유 기록 시 자동 복귀.
+    private var nightOffBar: some View {
+        Button {
+            vm.toggleNightOff()
+        } label: {
+            HStack(spacing: theme.space.sm) {
+                Image(systemName: vm.nightOffActive ? "moon.zzz.fill" : "moon.zzz")
+                Text(vm.nightOffActive
+                     ? "육퇴 중 · 수유 알림 꺼짐 — 탭하면 다시 켜기"
+                     : "육퇴 · 오늘 밤 수유 알림 끄기")
+                    .font(theme.typography.caption)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.8)
+                Spacer(minLength: 0)
+            }
+            .foregroundStyle(vm.nightOffActive ? theme.color.onPrimary.color : theme.color.textSecondary.color)
+            .padding(.horizontal, theme.space.screenPaddingX)
+            .padding(.vertical, theme.space.sm)
+            .frame(maxWidth: .infinity)
+            .background(vm.nightOffActive ? theme.color.primary.color : theme.color.surfaceSunken.color)
+        }
+        .buttonStyle(.plain)
     }
 }
 

@@ -34,7 +34,8 @@ enum FeedingNotificationScheduler {
                            lastFeedingAt: Date?,
                            now: Date = .now) async {
         await cancelAll()
-        guard settings.enabled else { return }
+        // 비활성 또는 육퇴 중이면 아무 알림도 걸지 않는다(이미 전부 취소됨).
+        guard settings.enabled, !settings.nightOff else { return }
 
         switch settings.mode {
         case .fixed:

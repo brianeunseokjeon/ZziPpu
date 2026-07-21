@@ -19,6 +19,8 @@ struct FeedingReminderSettings: Codable, Equatable {
     var intervalMinutes: Int = 180
     /// 알림을 예정 시각 몇 분 전에 보낼지(10/20/30/60).
     var leadMinutes: Int = 30
+    /// 육퇴(오늘 밤 알림 끔). true면 알림 전부 억제. 다음 수유 기록 시 자동 해제.
+    var nightOff: Bool = false
 
     // MARK: - 선택지(정적)
 
