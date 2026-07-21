@@ -468,7 +468,6 @@ private struct TodayView: View {
             vm.toggleNightOff()
         } label: {
             HStack(spacing: theme.space.sm) {
-                Image(systemName: vm.nightOffActive ? "moon.zzz.fill" : "moon.zzz")
                 Text(vm.nightOffActive
                      ? "육퇴 중 · 수유 알림 꺼짐 — 탭하면 다시 켜기"
                      : "육퇴 · 오늘 밤 수유 알림 끄기")
@@ -480,6 +479,7 @@ private struct TodayView: View {
                     NightSkyBadge()   // 반달+반짝이는 별, 은하수 그라데이션
                 }
             }
+            .frame(height: 24)   // 육퇴중(배지)·육퇴 두 상태 높이 동일 고정
             .foregroundStyle(vm.nightOffActive ? activeFg : theme.color.textSecondary.color)
             .padding(.horizontal, theme.space.screenPaddingX)
             .padding(.vertical, theme.space.sm)
