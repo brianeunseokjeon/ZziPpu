@@ -114,6 +114,25 @@ private struct OnboardingContent: View {
                             }
                         }
 
+                        // 출생 키 (선택)
+                        FormField(
+                            label: "출생 키 (선택)",
+                            note: vm.birthHeightValidation
+                        ) {
+                            HStack {
+                                DSTextField(
+                                    placeholder: "예: 50.0",
+                                    text: $vm.birthHeightCmText,
+                                    keyboardType: .decimalPad
+                                )
+
+                                Text("cm")
+                                    .font(theme.typography.body)
+                                    .foregroundStyle(theme.color.textSecondary.color)
+                                    .frame(width: 32)
+                            }
+                        }
+
                         // 성별 — 웹: 이모지 3버튼 그리드(선택=bg-blue-50 border-blue-400 text-blue-700).
                         FormField(label: "성별") {
                             HStack(spacing: theme.space.sm) {
@@ -136,7 +155,7 @@ private struct OnboardingContent: View {
                         ) {
                             vm.save()
                         }
-                        .disabled(!vm.isFormValid || vm.birthWeightValidation != nil)
+                        .disabled(!vm.isFormValid || vm.birthWeightValidation != nil || vm.birthHeightValidation != nil)
                     }
                     .padding(theme.space.lg)
                     .dsCard()

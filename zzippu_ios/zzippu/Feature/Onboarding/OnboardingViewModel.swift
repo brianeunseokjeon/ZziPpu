@@ -15,6 +15,7 @@ final class OnboardingViewModel {
     ) ?? .now
     var gender: Gender = .unknown
     var birthWeightKgText: String = ""   // UI 입력: kg 단위 (0~15)
+    var birthHeightCmText: String = ""   // UI 입력: cm 단위 (0~120)
 
     // MARK: - Status
     var isLoading: Bool = false
@@ -56,22 +57,32 @@ final class OnboardingViewModel {
                     birthWeightG = Int(kg * 1000)
                 }
 
+                // 출생 키 (cm, 0~120 검증)
+                var birthHeightCm: Double? = nil
+                if !birthHeightCmText.isEmpty,
+                   let cm = Double(birthHeightCmText),
+                   (0...120).contains(cm) {
+                    birthHeightCm = cm
+                }
+
                 // Baby 생성 — 서버 POST, 반환값이 확정 엔티티
                 let babyDraft = Baby.new(
                     userId: userId,
                     name: babyName.trimmingCharacters(in: .whitespaces),
                     birthDate: birthDate,
                     gender: gender,
-                    birthWeightG: birthWeightG
+                    birthWeightG: birthWeightG,
+                    birthHeightCm: birthHeightCm
                 )
                 let savedBaby = try await babyRepository.create(babyDraft)
 
-                // 출생체중 있으면 GrowthRecord 1건 자동 생성 (recordedAt = birthDate)
-                if let weightG = birthWeightG {
+                // 출생체중·키 있으면 GrowthRecord 1건 자동 생성 (recordedAt = birthDate)
+                if birthWeightG != nil || birthHeightCm != nil {
                     let growth = GrowthRecord.new(
                         babyId: savedBaby.id,
                         recordedAt: savedBaby.birthDate,
-                        weightG: weightG
+                        weightG: birthWeightG,
+                        heightCm: birthHeightCm
                     )
                     _ = try await growthRepository.create(growth)
                 }
@@ -96,6 +107,17 @@ final class OnboardingViewModel {
         }
         guard (0...15).contains(kg) else {
             return "0~15 kg 범위로 입력해 주세요."
+        }
+        return nil
+    }
+
+    var birthHeightValidation: String? {
+        guard !birthHeightCmText.isEmpty else { return nil }
+        guard let cm = Double(birthHeightCmText) else {
+            return "숫자를 입력해 주세요."
+        }
+        guard (0...120).contains(cm) else {
+            return "0~120 cm 범위로 입력해 주세요."
         }
         return nil
     }
