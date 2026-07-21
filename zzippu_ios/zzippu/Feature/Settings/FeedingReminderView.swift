@@ -165,16 +165,12 @@ struct FeedingReminderView: View {
                 .foregroundStyle(theme.color.textSecondary.color)
 
             LazyVGrid(
-                columns: [GridItem(.adaptive(minimum: 72), spacing: theme.space.sm)],
-                alignment: .leading, spacing: theme.space.sm
+                columns: Array(repeating: GridItem(.flexible(), spacing: 12), count: 3),
+                spacing: 12
             ) {
                 ForEach(FeedingReminderSettings.intervalOptions, id: \.self) { m in
-                    DSChip(
-                        label: FeedingReminderSettings.intervalLabel(m),
-                        isSelected: settings.intervalMinutes == m,
-                        variant: .quick,
-                        onTap: { settings.intervalMinutes = m }
-                    )
+                    optionChip(FeedingReminderSettings.intervalLabel(m),
+                               selected: settings.intervalMinutes == m) { settings.intervalMinutes = m }
                 }
             }
 
@@ -204,19 +200,32 @@ struct FeedingReminderView: View {
                 .foregroundStyle(theme.color.textSecondary.color)
 
             LazyVGrid(
-                columns: [GridItem(.adaptive(minimum: 72), spacing: theme.space.sm)],
-                alignment: .leading, spacing: theme.space.sm
+                columns: Array(repeating: GridItem(.flexible(), spacing: 12), count: 4),
+                spacing: 12
             ) {
                 ForEach(FeedingReminderSettings.leadOptions, id: \.self) { m in
-                    DSChip(
-                        label: "\(m)분 전",
-                        isSelected: settings.leadMinutes == m,
-                        variant: .quick,
-                        onTap: { settings.leadMinutes = m }
-                    )
+                    optionChip("\(m)분 전", selected: settings.leadMinutes == m) { settings.leadMinutes = m }
                 }
             }
         }
+    }
+
+    /// 등폭·전폭 채움 커스텀 칩(라운드 축소). DSChip(캡슐) 대체.
+    private func optionChip(_ label: String, selected: Bool, _ tap: @escaping () -> Void) -> some View {
+        Button(action: tap) {
+            Text(label)
+                .font(theme.typography.captionStrong)
+                .foregroundStyle(selected ? theme.color.onPrimary.color : theme.color.textSecondary.color)
+                .lineLimit(1)
+                .minimumScaleFactor(0.8)
+                .frame(maxWidth: .infinity)
+                .frame(height: 40)
+                .background(
+                    RoundedRectangle(cornerRadius: 8, style: .continuous)
+                        .fill(selected ? theme.color.statusInfoSolid.color : theme.color.surfaceSunken.color)
+                )
+        }
+        .buttonStyle(.plain)
     }
 
     // MARK: - 조작
