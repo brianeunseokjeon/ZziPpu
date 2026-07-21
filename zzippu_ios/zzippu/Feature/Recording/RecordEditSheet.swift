@@ -506,6 +506,7 @@ private struct RecordEditSheetPreviewHost: View {
             sleepRepository:   PreviewSleepRepo(),
             diaperRepository:  PreviewDiaperRepo(),
             playRepository:    PreviewPlayRepo(),
+            careLogRepository: PreviewCareLogRepo(),
             babyId: babyId
         )
         let record: EditableRecord = {
@@ -559,4 +560,11 @@ private struct PreviewPlayRepo: PlayRepository {
     func create(_ play: PlayRecord) async throws -> PlayRecord { play }
     func delete(id: UUID, babyId: UUID) async throws {}
     func list(babyId: UUID, on day: Date) async throws -> [PlayRecord] { [] }
+}
+
+private struct PreviewCareLogRepo: CareLogRepository {
+    func create(_ log: CareLog) async throws -> CareLog { log }
+    func update(_ log: CareLog) async throws -> CareLog { log }
+    func delete(id: UUID, babyId: UUID) async throws {}
+    func list(babyId: UUID, on day: Date) async throws -> [CareLog] { [] }
 }

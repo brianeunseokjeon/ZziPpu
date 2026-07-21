@@ -4,6 +4,7 @@ from datetime import date
 
 from app.application.dto.ai_dto import DailyReviewDTO
 from app.domain.entities.baby import Baby
+from app.domain.entities.care_log import CareLog
 from app.domain.entities.chat_message import ChatMessage
 from app.domain.entities.diaper import DiaperRecord
 from app.domain.entities.feeding import Feeding
@@ -21,6 +22,7 @@ class AIService(ABC):
         diapers: list[DiaperRecord],
         plays: list[PlayRecord],
         review_date: date,
+        care_logs: list[CareLog] | None = None,
     ) -> DailyReviewDTO:
         ...
 
@@ -35,5 +37,6 @@ class AIService(ABC):
         sleeps: list[SleepRecord],
         diapers: list[DiaperRecord],
         plays: list[PlayRecord],
+        care_logs: list[CareLog] | None = None,
     ) -> AsyncIterator[str]:
         ...

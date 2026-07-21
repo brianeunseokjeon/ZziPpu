@@ -2,6 +2,7 @@ from fastapi import APIRouter
 
 from app.presentation.api.v1.ai_router import router as ai_router
 from app.presentation.api.v1.baby_router import router as baby_router
+from app.presentation.api.v1.care_log_router import router as care_log_router
 from app.presentation.api.v1.caregiver_router import router as caregiver_router
 from app.presentation.api.v1.dashboard_router import router as dashboard_router
 from app.presentation.api.v1.development_router import router as development_router
@@ -22,6 +23,7 @@ v1_router.include_router(feeding_router)
 v1_router.include_router(diaper_router)
 v1_router.include_router(sleep_router)
 v1_router.include_router(play_router)
+v1_router.include_router(care_log_router)
 v1_router.include_router(dashboard_router)
 v1_router.include_router(ai_router)
 v1_router.include_router(growth_router)

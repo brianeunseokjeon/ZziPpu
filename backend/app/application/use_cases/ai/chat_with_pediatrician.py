@@ -5,6 +5,7 @@ from uuid import UUID, uuid4
 from app.application.interfaces.ai_service import AIService
 from app.domain.entities.chat_message import ChatMessage
 from app.domain.repositories.baby_repository import BabyRepository
+from app.domain.repositories.care_log_repository import CareLogRepository
 from app.domain.repositories.chat_repository import ChatRepository
 from app.domain.repositories.diaper_repository import DiaperRepository
 from app.domain.repositories.feeding_repository import FeedingRepository
@@ -22,6 +23,7 @@ class ChatWithPediatricianUseCase:
         sleep_repo: SleepRepository,
         diaper_repo: DiaperRepository,
         play_repo: PlayRepository,
+        care_log_repo: CareLogRepository | None = None,
     ) -> None:
         self._baby_repo = baby_repo
         self._chat_repo = chat_repo
@@ -30,6 +32,7 @@ class ChatWithPediatricianUseCase:
         self._sleep_repo = sleep_repo
         self._diaper_repo = diaper_repo
         self._play_repo = play_repo
+        self._care_log_repo = care_log_repo
 
     async def execute(
         self,
@@ -62,8 +65,13 @@ class ChatWithPediatricianUseCase:
         sleeps = await self._sleep_repo.get_by_baby_and_date(baby_id, chat_date)
         diapers = await self._diaper_repo.get_by_baby_and_date(baby_id, chat_date)
         plays = await self._play_repo.get_by_baby_and_date(baby_id, chat_date)
+        care_logs = (
+            await self._care_log_repo.get_by_baby_and_date(baby_id, chat_date)
+            if self._care_log_repo is not None
+            else None
+        )
 
         stream = self._ai_service.chat_stream(
-            baby, history, user_message, chat_date, feedings, sleeps, diapers, plays
+            baby, history, user_message, chat_date, feedings, sleeps, diapers, plays, care_logs
         )
         return conversation_id, stream

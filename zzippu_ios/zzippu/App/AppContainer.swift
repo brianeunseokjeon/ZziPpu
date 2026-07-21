@@ -16,6 +16,7 @@ final class AppContainer {
     let sleepRepository:     SleepRepository
     let diaperRepository:    DiaperRepository
     let playRepository:      PlayRepository
+    let careLogRepository:   CareLogRepository
     let dashboardRepository: DashboardRepository
     let developmentRepository: DevelopmentRepository
     let vaccinationRepository: VaccinationRepository
@@ -82,6 +83,7 @@ final class AppContainer {
         self.sleepRepository     = RemoteSleepRepository(api: api)
         self.diaperRepository    = RemoteDiaperRepository(api: api)
         self.playRepository      = RemotePlayRepository(api: api)
+        self.careLogRepository   = RemoteCareLogRepository(api: api)
         self.dashboardRepository = RemoteDashboardRepository(api: api)
         self.developmentRepository = RemoteDevelopmentRepository(api: api)
         self.vaccinationRepository = RemoteVaccinationRepository(api: api)

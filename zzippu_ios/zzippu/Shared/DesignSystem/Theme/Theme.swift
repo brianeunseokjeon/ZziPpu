@@ -104,6 +104,9 @@ struct ThemeColor {
         case .diaperBoth:         return domainDiaperBothSolid
         case .sleep:              return domainSleepSolid
         case .play:               return domainPlaySolid
+        case .careBath:           return DynamicColor(light: PrimitiveColor.blue500, dark: PrimitiveColor.blue400)
+        case .careSupplement:     return DynamicColor(light: PrimitiveColor.teal500, dark: PrimitiveColor.teal400)
+        case .careMedicine:       return DynamicColor(light: PrimitiveColor.red500,  dark: PrimitiveColor.red400)
         case .checkup:            return domainCheckupSolid
         }
     }
@@ -120,6 +123,9 @@ struct ThemeColor {
         case .diaperBoth:         return domainDiaperBothTint
         case .sleep:              return domainSleepTint
         case .play:               return domainPlayTint
+        case .careBath:           return DynamicColor(light: PrimitiveColor.blue50, dark: PrimitiveColor.blue500.opacity(0.18))
+        case .careSupplement:     return DynamicColor(light: PrimitiveColor.teal50, dark: PrimitiveColor.teal500.opacity(0.18))
+        case .careMedicine:       return DynamicColor(light: PrimitiveColor.red50,  dark: PrimitiveColor.red500.opacity(0.18))
         case .checkup:            return domainCheckupTint
         }
     }
@@ -310,6 +316,9 @@ public enum DomainKind {
     case diaperBoth
     case sleep
     case play
+    case careBath        // 목욕
+    case careSupplement  // 영양제
+    case careMedicine    // 약
     case checkup  // 영유아 검진 달력 표시
 }
 

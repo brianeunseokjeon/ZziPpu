@@ -36,6 +36,12 @@ from app.application.use_cases.growth import (
     GetGrowthRecordsUseCase,
     UpdateGrowthRecordUseCase,
 )
+from app.application.use_cases.care_log import (
+    CreateCareLogUseCase,
+    DeleteCareLogUseCase,
+    GetCareLogsUseCase,
+    UpdateCareLogUseCase,
+)
 from app.application.use_cases.play import (
     CreatePlayRecordUseCase,
     DeletePlayUseCase,
@@ -58,6 +64,7 @@ from app.infrastructure.persistence.database import get_db
 from app.infrastructure.persistence.repositories import (
     AIReviewRepositoryImpl,
     BabyRepositoryImpl,
+    CareLogRepositoryImpl,
     CaregiverRepositoryImpl,
     ChatRepositoryImpl,
     DiaperRepositoryImpl,
@@ -263,6 +270,34 @@ def get_delete_play_use_case(
     return DeletePlayUseCase(play_repo)
 
 
+def get_care_log_repo(db: DbDep) -> CareLogRepositoryImpl:
+    return CareLogRepositoryImpl(db)
+
+
+def get_create_care_log_use_case(
+    care_log_repo: Annotated[CareLogRepositoryImpl, Depends(get_care_log_repo)],
+) -> CreateCareLogUseCase:
+    return CreateCareLogUseCase(care_log_repo)
+
+
+def get_get_care_logs_use_case(
+    care_log_repo: Annotated[CareLogRepositoryImpl, Depends(get_care_log_repo)],
+) -> GetCareLogsUseCase:
+    return GetCareLogsUseCase(care_log_repo)
+
+
+def get_update_care_log_use_case(
+    care_log_repo: Annotated[CareLogRepositoryImpl, Depends(get_care_log_repo)],
+) -> UpdateCareLogUseCase:
+    return UpdateCareLogUseCase(care_log_repo)
+
+
+def get_delete_care_log_use_case(
+    care_log_repo: Annotated[CareLogRepositoryImpl, Depends(get_care_log_repo)],
+) -> DeleteCareLogUseCase:
+    return DeleteCareLogUseCase(care_log_repo)
+
+
 def get_daily_summary_use_case(
     feeding_repo: Annotated[FeedingRepositoryImpl, Depends(get_feeding_repo)],
     sleep_repo: Annotated[SleepRepositoryImpl, Depends(get_sleep_repo)],
@@ -287,9 +322,11 @@ def get_generate_review_use_case(
     play_repo: Annotated[PlayRepositoryImpl, Depends(get_play_repo)],
     ai_review_repo: Annotated[AIReviewRepositoryImpl, Depends(get_ai_review_repo)],
     ai_service: Annotated[ClaudeService, Depends(get_claude_service)],
+    care_log_repo: Annotated[CareLogRepositoryImpl, Depends(get_care_log_repo)],
 ) -> GenerateDailyReviewUseCase:
     return GenerateDailyReviewUseCase(
-        baby_repo, feeding_repo, sleep_repo, diaper_repo, play_repo, ai_review_repo, ai_service
+        baby_repo, feeding_repo, sleep_repo, diaper_repo, play_repo, ai_review_repo, ai_service,
+        care_log_repo,
     )
 
 
@@ -301,9 +338,11 @@ def get_chat_use_case(
     sleep_repo: Annotated[SleepRepositoryImpl, Depends(get_sleep_repo)],
     diaper_repo: Annotated[DiaperRepositoryImpl, Depends(get_diaper_repo)],
     play_repo: Annotated[PlayRepositoryImpl, Depends(get_play_repo)],
+    care_log_repo: Annotated[CareLogRepositoryImpl, Depends(get_care_log_repo)],
 ) -> ChatWithPediatricianUseCase:
     return ChatWithPediatricianUseCase(
-        baby_repo, chat_repo, ai_service, feeding_repo, sleep_repo, diaper_repo, play_repo
+        baby_repo, chat_repo, ai_service, feeding_repo, sleep_repo, diaper_repo, play_repo,
+        care_log_repo,
     )
 
 

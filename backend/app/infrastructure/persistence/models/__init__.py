@@ -1,6 +1,7 @@
 from .ai_review_model import AIReviewModel
 from .baby_model import BabyModel
 from .base import Base
+from .care_log_model import CareLogModel
 from .caregiver_model import BabyCaregiverModel, CaregiverInviteModel
 from .chat_conversation_model import ChatConversationModel
 from .chat_message_model import ChatMessageModel
@@ -21,6 +22,7 @@ __all__ = [
     "DiaperModel",
     "SleepModel",
     "PlayModel",
+    "CareLogModel",
     "AIReviewModel",
     "ChatConversationModel",
     "ChatMessageModel",

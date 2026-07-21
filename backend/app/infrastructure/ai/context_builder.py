@@ -1,6 +1,7 @@
 from datetime import date, datetime, timedelta, timezone
 
 from app.domain.entities.baby import Baby
+from app.domain.entities.care_log import CareCategory, CareLog
 from app.domain.entities.diaper import DiaperRecord
 from app.domain.entities.feeding import Feeding
 from app.domain.entities.play_record import PlayRecord
@@ -61,6 +62,7 @@ def build_daily_context(
     diapers: list[DiaperRecord],
     plays: list[PlayRecord],
     review_date: date | None = None,
+    care_logs: list[CareLog] | None = None,
 ) -> str:
     # review_date 가 주어지면 그날 기준 나이로 표기 (없으면 오늘 기준).
     age_days = baby.age_days_at(review_date) if review_date else baby.age_days
@@ -133,6 +135,28 @@ def build_daily_context(
             total_play += dur
             lines.append(f"  {start_str} - {p.play_type} ({dur}분)")
         lines.append(f"  합계: {len(plays)}회, 총 {total_play}분")
+    else:
+        lines.append("  기록 없음")
+
+    lines.append("")
+    lines.append("돌봄 기록:")
+    if care_logs:
+        bath_count = 0
+        for c in care_logs:
+            time_str = _kst_hhmm(c.recorded_at)
+            if c.category == CareCategory.BATH:
+                bath_count += 1
+                lines.append(f"  {time_str} - 목욕")
+            elif c.category == CareCategory.MEDICINE:
+                name_str = c.name or "미상"
+                dose_str = f" {c.dose}" if c.dose else ""
+                lines.append(f"  {time_str} - 약: {name_str}{dose_str}")
+            elif c.category == CareCategory.SUPPLEMENT:
+                name_str = c.name or "미상"
+                dose_str = f" {c.dose}" if c.dose else ""
+                lines.append(f"  {time_str} - 영양제: {name_str}{dose_str}")
+        if bath_count:
+            lines.append(f"  목욕 {bath_count}회")
     else:
         lines.append("  기록 없음")
 

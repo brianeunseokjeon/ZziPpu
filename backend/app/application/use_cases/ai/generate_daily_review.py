@@ -6,6 +6,7 @@ from app.application.interfaces.ai_service import AIService
 from app.domain.entities.ai_review import AIReview
 from app.domain.repositories.ai_review_repository import AIReviewRepository
 from app.domain.repositories.baby_repository import BabyRepository
+from app.domain.repositories.care_log_repository import CareLogRepository
 from app.domain.repositories.diaper_repository import DiaperRepository
 from app.domain.repositories.feeding_repository import FeedingRepository
 from app.domain.repositories.play_repository import PlayRepository
@@ -22,6 +23,7 @@ class GenerateDailyReviewUseCase:
         play_repo: PlayRepository,
         ai_review_repo: AIReviewRepository,
         ai_service: AIService,
+        care_log_repo: CareLogRepository | None = None,
     ) -> None:
         self._baby_repo = baby_repo
         self._feeding_repo = feeding_repo
@@ -30,6 +32,7 @@ class GenerateDailyReviewUseCase:
         self._play_repo = play_repo
         self._ai_review_repo = ai_review_repo
         self._ai_service = ai_service
+        self._care_log_repo = care_log_repo
 
     async def execute(self, baby_id: UUID, review_date: date) -> DailyReviewDTO:
         existing = await self._ai_review_repo.get_by_baby_and_date(baby_id, review_date)
@@ -58,9 +61,14 @@ class GenerateDailyReviewUseCase:
         sleeps = await self._sleep_repo.get_by_baby_and_date(baby_id, review_date)
         diapers = await self._diaper_repo.get_by_baby_and_date(baby_id, review_date)
         plays = await self._play_repo.get_by_baby_and_date(baby_id, review_date)
+        care_logs = (
+            await self._care_log_repo.get_by_baby_and_date(baby_id, review_date)
+            if self._care_log_repo is not None
+            else None
+        )
 
         dto = await self._ai_service.generate_review(
-            baby, feedings, sleeps, diapers, plays, review_date
+            baby, feedings, sleeps, diapers, plays, review_date, care_logs
         )
 
         review = AIReview(

@@ -8,6 +8,7 @@ from app.application.dto.ai_dto import DailyReviewDTO
 from app.application.interfaces.ai_service import AIService
 from app.config import settings
 from app.domain.entities.baby import Baby
+from app.domain.entities.care_log import CareLog
 from app.domain.entities.chat_message import ChatMessage
 from app.domain.entities.diaper import DiaperRecord
 from app.domain.entities.feeding import Feeding
@@ -30,10 +31,11 @@ class ClaudeService(AIService):
         diapers: list[DiaperRecord],
         plays: list[PlayRecord],
         review_date: date,
+        care_logs: list[CareLog] | None = None,
     ) -> DailyReviewDTO:
         age_days = baby.age_days_at(review_date)
         age_months = baby.age_months_at(review_date)
-        context = build_daily_context(baby, feedings, sleeps, diapers, plays, review_date)
+        context = build_daily_context(baby, feedings, sleeps, diapers, plays, review_date, care_logs)
         prompt = build_daily_review_prompt(context, age_days=age_days)
 
         message = await self._client.messages.create(
@@ -83,10 +85,11 @@ class ClaudeService(AIService):
         sleeps: list[SleepRecord],
         diapers: list[DiaperRecord],
         plays: list[PlayRecord],
+        care_logs: list[CareLog] | None = None,
     ) -> AsyncIterator[str]:
         baby_context = build_chat_context(baby, chat_date)
         # 해당 날짜 기록을 컨텍스트에 포함 → "오늘 기록 어때?" 류 질문에 답변 가능
-        daily_records = build_daily_context(baby, feedings, sleeps, diapers, plays, chat_date)
+        daily_records = build_daily_context(baby, feedings, sleeps, diapers, plays, chat_date, care_logs)
         system_prompt = (
             f"{PEDIATRICIAN_SYSTEM_PROMPT}\n\n{baby_context}\n\n"
             f"【{chat_date.strftime('%Y년 %m월 %d일')}의 기록】\n{daily_records}"

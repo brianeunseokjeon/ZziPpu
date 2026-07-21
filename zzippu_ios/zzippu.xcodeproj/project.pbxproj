@@ -97,6 +97,7 @@
 		594D0CCFF4818BFEF6E7080F /* RemoteFeedingRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 395B2B7B3D458C92BB5A06F2 /* RemoteFeedingRepository.swift */; };
 		59C2C1B346147BFAF930873E /* SleepDTO.swift in Sources */ = {isa = PBXBuildFile; fileRef = D6043B500B1FBE1229A0A2B5 /* SleepDTO.swift */; };
 		5B4CD6B035191FA6F83A5E44 /* SessionState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 036CF36678A053C3DB145BDC /* SessionState.swift */; };
+		5BF2FFF0345D68637D19F04C /* CareLogRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EF7FD349672184266E523E3 /* CareLogRepository.swift */; };
 		5C0669B9B35F2EB7EF5AAE90 /* GrowthMapper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 869D35FB41B35E590E5F7157 /* GrowthMapper.swift */; };
 		5C530D710EB01E074F21CD59 /* SleepViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6EFB11E405BF9DA251D23AF /* SleepViewModel.swift */; };
 		6093B533A61555D2B7080D9D /* PediatricGuideline.swift in Sources */ = {isa = PBXBuildFile; fileRef = 574481ADFD8ED7E01AADBD69 /* PediatricGuideline.swift */; };
@@ -119,6 +120,7 @@
 		6D09DD029EDAAA9F34617C0F /* CaregiverRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = C5E6E7E8A577D08AC211BB7F /* CaregiverRepository.swift */; };
 		6E05E18CF231F34B749CE031 /* DevelopmentViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC241B57F9B896477724FC6F /* DevelopmentViewModel.swift */; };
 		6E8A3894CF729FE356BF4843 /* who_growth_weight_boy.json in Resources */ = {isa = PBXBuildFile; fileRef = 4255C581698465DEB655CE81 /* who_growth_weight_boy.json */; };
+		6FB5DFE2A5067C4EFBE2A0DA /* CarePresetSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6E32FF1BE782E2F76E95EC61 /* CarePresetSettings.swift */; };
 		719A1AEF745E481899ECB069 /* DomainInsight.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2DE7101621317FD16031294 /* DomainInsight.swift */; };
 		71A4D6C72A30D211DC76265C /* DiaperMapper.swift in Sources */ = {isa = PBXBuildFile; fileRef = BEEAB43AF153B171E135890A /* DiaperMapper.swift */; };
 		7606BF2525D016D0AF8B79E7 /* DashboardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 08CA2CCB34272F21A6F934BF /* DashboardView.swift */; };
@@ -130,7 +132,9 @@
 		80B78F7A0F2F933EED1227B9 /* DynamicColor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 11C5275F0A4564465AA8E687 /* DynamicColor.swift */; };
 		837B311B5B38E5243629C3C3 /* RemoteBabyRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8DA5EBB3AAE3F6297E463E8D /* RemoteBabyRepository.swift */; };
 		84024EA2C3D78463CDC2FF4A /* DSEmptyState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5903311178AA9DB6CE12A6AB /* DSEmptyState.swift */; };
+		85C7FBF27847D47C974ADE37 /* CareCategory.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1767BBF36C667B775488EDF /* CareCategory.swift */; };
 		86E7BCE14675B91434DA66C6 /* MonthCalendarModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D11869DA3F744C46166D6D3 /* MonthCalendarModel.swift */; };
+		88B304CA8CEF3AC87DB73FF9 /* RemoteCareLogDataSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = 449DFDCA484BCBE082906644 /* RemoteCareLogDataSource.swift */; };
 		8B960B80474971175C46C250 /* QuickAction.swift in Sources */ = {isa = PBXBuildFile; fileRef = 80E4AB0B5B799E2D2F3D6466 /* QuickAction.swift */; };
 		8BDF0D41A0EBF8BE9A775E57 /* OtpView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 53AC5F4C5E9A32DC59575998 /* OtpView.swift */; };
 		8BF23724E0D84AD82CB96C47 /* Theme.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20A1B4DFCE9B542AAEA92808 /* Theme.swift */; };
@@ -165,6 +169,8 @@
 		AB24EA15EB80A6C6E4EA98D7 /* SleepRecord.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8AB367D535416C42DBA06D6C /* SleepRecord.swift */; };
 		AC453B903112BAA43B7D9DB8 /* PlayDTO.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6D2751E5038B51444550AD65 /* PlayDTO.swift */; };
 		AC76D41EFA2622DAB1A477EB /* SaveDiaperUseCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9F2099E28FC13F347F86EFC /* SaveDiaperUseCase.swift */; };
+		ADF2E2DBD02E97E920B44DBA /* CareInputSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2E3C7CC7EAC7D041DBB53510 /* CareInputSheet.swift */; };
+		AF59B258DBA3FB0F0B726CD0 /* CareLogMapper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6D222AAEB9D2A2630AB337E7 /* CareLogMapper.swift */; };
 		B54B6106D2D020F544647AB8 /* EvaluateInsightsUseCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = B70CA639B37513701C1E39FA /* EvaluateInsightsUseCase.swift */; };
 		B61681F61E86A9AB68AE3B86 /* Vaccination.swift in Sources */ = {isa = PBXBuildFile; fileRef = 046BBD6EE0B74130611A76F0 /* Vaccination.swift */; };
 		BA956E62959602826CE418CD /* SparklineChart.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41958C109B68743DFEC0BF74 /* SparklineChart.swift */; };
@@ -218,6 +224,8 @@
 		EE819CAA98E1D5BEC0257365 /* DashboardCalendarSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = E7FAA726948BD3F135B588D1 /* DashboardCalendarSection.swift */; };
 		F0BACF58A7B2FC59B4EA0E26 /* DashboardSummaryCards.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5DC8D752514CCAF661FB026C /* DashboardSummaryCards.swift */; };
 		F264BA19F247AC4926D27A15 /* DSCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A4CB70DFEB907BFAF984313 /* DSCard.swift */; };
+		F3FFBB35AC25C9C6E10EE978 /* RemoteCareLogRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 66DA6970725512C7A9B4CD50 /* RemoteCareLogRepository.swift */; };
+		F5669E7052C44E9CC1E40247 /* CareLogDTO.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9854C5F607B7D5A479BE993 /* CareLogDTO.swift */; };
 		F662BAAA143A9C5F259C219D /* SavePlayUseCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 28DC2E03620FB1804D341F67 /* SavePlayUseCase.swift */; };
 		F856545684498C153DDF1374 /* CalendarDayDecoration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2F48A5C3C131AF3B2E654CC6 /* CalendarDayDecoration.swift */; };
 		F8574575533F40626B6861F0 /* DSBadge.swift in Sources */ = {isa = PBXBuildFile; fileRef = 94D1BF2EABC2F47645E26B45 /* DSBadge.swift */; };
@@ -228,6 +236,7 @@
 		FE235807FC697663AA5BFC2C /* AuthViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC5E5BB66C303191729CAD07 /* AuthViewModel.swift */; };
 		FEBC9F4C4E442BCD4573BA86 /* DashboardSnapshot.swift in Sources */ = {isa = PBXBuildFile; fileRef = EFB322BD681EE90EBCA729FC /* DashboardSnapshot.swift */; };
 		FEC52097C96ECFE610DDEC53 /* DiaperRecord.swift in Sources */ = {isa = PBXBuildFile; fileRef = 461B2AD016FE8779CEBA3C4E /* DiaperRecord.swift */; };
+		FF001F3737BC89A9DFC75834 /* CareLog.swift in Sources */ = {isa = PBXBuildFile; fileRef = 91A5D845968869EE1A20845C /* CareLog.swift */; };
 		FF016E4CA33011880BB98FB4 /* DSSegmentedChips.swift in Sources */ = {isa = PBXBuildFile; fileRef = C81B331E2848D4A6B7458451 /* DSSegmentedChips.swift */; };
 		FF3417C96429D55E89C07F10 /* Date+.swift in Sources */ = {isa = PBXBuildFile; fileRef = 217B6B25134223FE24756126 /* Date+.swift */; };
 /* End PBXBuildFile section */
@@ -301,6 +310,7 @@
 		28DC2E03620FB1804D341F67 /* SavePlayUseCase.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SavePlayUseCase.swift; sourceTree = "<group>"; };
 		2AEA429545D9F2DB9583AC6E /* Color+Hex.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = "Color+Hex.swift"; sourceTree = "<group>"; };
 		2D49E7F6D7D91051EEA5D767 /* RemoteFeedingDataSource.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = RemoteFeedingDataSource.swift; path = Network/DataSources/RemoteFeedingDataSource.swift; sourceTree = "<group>"; };
+		2E3C7CC7EAC7D041DBB53510 /* CareInputSheet.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CareInputSheet.swift; sourceTree = "<group>"; };
 		2EFD722E2D53031EBAE5837A /* ShareSheet.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ShareSheet.swift; sourceTree = "<group>"; };
 		2F48A5C3C131AF3B2E654CC6 /* CalendarDayDecoration.swift */ = {isa = PBXFileReference; explicitFileType = sourcecode.swift; includeInIndex = 1; path = CalendarDayDecoration.swift; sourceTree = "<group>"; };
 		312E14537790B07590883E08 /* CalendarSnapshotStore.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CalendarSnapshotStore.swift; sourceTree = "<group>"; };
@@ -325,6 +335,7 @@
 		40911B8DA1EF545615441B8F /* RemoteDashboardRepository.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = RemoteDashboardRepository.swift; sourceTree = "<group>"; };
 		41958C109B68743DFEC0BF74 /* SparklineChart.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SparklineChart.swift; sourceTree = "<group>"; };
 		4255C581698465DEB655CE81 /* who_growth_weight_boy.json */ = {isa = PBXFileReference; includeInIndex = 1; path = who_growth_weight_boy.json; sourceTree = "<group>"; };
+		449DFDCA484BCBE082906644 /* RemoteCareLogDataSource.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = RemoteCareLogDataSource.swift; path = Network/DataSources/RemoteCareLogDataSource.swift; sourceTree = "<group>"; };
 		44B90CF02498087E4EF2542B /* DSDisclaimerCaption.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DSDisclaimerCaption.swift; sourceTree = "<group>"; };
 		461B2AD016FE8779CEBA3C4E /* DiaperRecord.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DiaperRecord.swift; sourceTree = "<group>"; };
 		462279624CC6352D8362F327 /* AuthRemoteDataSource.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AuthRemoteDataSource.swift; sourceTree = "<group>"; };
@@ -365,8 +376,11 @@
 		64D450C96E4C4CA2F67849E7 /* SettingsView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		6519A1126295CD014E06AC4F /* MainTabView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = MainTabView.swift; path = MainTabView.swift; sourceTree = "<group>"; };
 		665122C5F11382581CEA0FE6 /* DevelopmentStage.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DevelopmentStage.swift; sourceTree = "<group>"; };
+		66DA6970725512C7A9B4CD50 /* RemoteCareLogRepository.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = RemoteCareLogRepository.swift; sourceTree = "<group>"; };
+		6D222AAEB9D2A2630AB337E7 /* CareLogMapper.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = CareLogMapper.swift; path = Network/Mappers/CareLogMapper.swift; sourceTree = "<group>"; };
 		6D2751E5038B51444550AD65 /* PlayDTO.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = PlayDTO.swift; path = Network/DTOs/PlayDTO.swift; sourceTree = "<group>"; };
 		6D4DF6AA22B1C02BEADDF6C7 /* VaccinationContentView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = VaccinationContentView.swift; sourceTree = "<group>"; };
+		6E32FF1BE782E2F76E95EC61 /* CarePresetSettings.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CarePresetSettings.swift; sourceTree = "<group>"; };
 		6EA6678CDA6E85155283D437 /* AuthSession.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AuthSession.swift; sourceTree = "<group>"; };
 		6ED0B541A872DC7DFC8495E0 /* Typography.generated.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = Typography.generated.swift; sourceTree = "<group>"; };
 		6F9AAF57310846B829A51661 /* GrowthAssessmentSection.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = GrowthAssessmentSection.swift; sourceTree = "<group>"; };
@@ -395,6 +409,7 @@
 		8AB367D535416C42DBA06D6C /* SleepRecord.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SleepRecord.swift; sourceTree = "<group>"; };
 		8DA5EBB3AAE3F6297E463E8D /* RemoteBabyRepository.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = RemoteBabyRepository.swift; sourceTree = "<group>"; };
 		8E139CB0E45BCF270F599ADE /* RemoteGrowthDataSource.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = RemoteGrowthDataSource.swift; path = Network/DataSources/RemoteGrowthDataSource.swift; sourceTree = "<group>"; };
+		91A5D845968869EE1A20845C /* CareLog.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CareLog.swift; sourceTree = "<group>"; };
 		92234B38E5D5916C6609599D /* ComputeFeedingTrendUseCase.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ComputeFeedingTrendUseCase.swift; sourceTree = "<group>"; };
 		93547A4CA98E50F1ECE734AA /* RemoteDashboardDataSource.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = RemoteDashboardDataSource.swift; path = Network/DataSources/RemoteDashboardDataSource.swift; sourceTree = "<group>"; };
 		944C2512A90ABEED4AA5E150 /* DSButton.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DSButton.swift; sourceTree = "<group>"; };
@@ -403,6 +418,7 @@
 		97C9C2D4F6C93F92F5D1E2ED /* GrowthRecord.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = GrowthRecord.swift; sourceTree = "<group>"; };
 		9B6171E96CF2A1847AAF433A /* DashboardRepository.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DashboardRepository.swift; sourceTree = "<group>"; };
 		9DAF399357A8600551960BA3 /* APIClient.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = APIClient.swift; path = Network/APIClient.swift; sourceTree = "<group>"; };
+		9EF7FD349672184266E523E3 /* CareLogRepository.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CareLogRepository.swift; sourceTree = "<group>"; };
 		A03E7FF4C92BF8917D4687F0 /* DSIconButton.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DSIconButton.swift; sourceTree = "<group>"; };
 		A0D0864C2FB51D07D7BB7F87 /* AppNavigationState.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AppNavigationState.swift; sourceTree = "<group>"; };
 		A19F37A99F272F216CA8B9F3 /* DashboardSnapshotStore.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DashboardSnapshotStore.swift; sourceTree = "<group>"; };
@@ -420,6 +436,7 @@
 		AC241B57F9B896477724FC6F /* DevelopmentViewModel.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DevelopmentViewModel.swift; sourceTree = "<group>"; };
 		AC5E5BB66C303191729CAD07 /* AuthViewModel.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AuthViewModel.swift; sourceTree = "<group>"; };
 		B0874B4E4D94E1D2CEE82E85 /* GuidelineRepository.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = GuidelineRepository.swift; sourceTree = "<group>"; };
+		B1767BBF36C667B775488EDF /* CareCategory.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CareCategory.swift; sourceTree = "<group>"; };
 		B2DE7101621317FD16031294 /* DomainInsight.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DomainInsight.swift; sourceTree = "<group>"; };
 		B3AF575A40C09CC2E16FB452 /* Baby.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = Baby.swift; sourceTree = "<group>"; };
 		B4858A6EEF050640F3C98D07 /* ComputeDashboardSummaryUseCase.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ComputeDashboardSummaryUseCase.swift; sourceTree = "<group>"; };
@@ -443,6 +460,7 @@
 		C723460CF9DA8ABDBD0A0D81 /* RemotePlayDataSource.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = RemotePlayDataSource.swift; path = Network/DataSources/RemotePlayDataSource.swift; sourceTree = "<group>"; };
 		C81B331E2848D4A6B7458451 /* DSSegmentedChips.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DSSegmentedChips.swift; sourceTree = "<group>"; };
 		C8D99E4EBFB60B2E1E16C24B /* DiaperRepository.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DiaperRepository.swift; sourceTree = "<group>"; };
+		C9854C5F607B7D5A479BE993 /* CareLogDTO.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = CareLogDTO.swift; path = Network/DTOs/CareLogDTO.swift; sourceTree = "<group>"; };
 		C9D7E9BCC3D0269738853326 /* DSNumberStepper.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DSNumberStepper.swift; sourceTree = "<group>"; };
 		D0131C1DCE6062E2E8F3F880 /* RecordEditSheet.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = RecordEditSheet.swift; sourceTree = "<group>"; };
 		D06F39AB4E617AB598817C1B /* CaregiverMember.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CaregiverMember.swift; sourceTree = "<group>"; };
@@ -517,6 +535,7 @@
 				4DFF67E806A6F8FA6C6CC222 /* RemoteDevelopmentDataSource.swift */,
 				4EA72C7C7398E326E12C5DCB /* RemoteVaccinationDataSource.swift */,
 				49349B2E176D814BB9BE5204 /* RemoteCaregiverDataSource.swift */,
+				449DFDCA484BCBE082906644 /* RemoteCareLogDataSource.swift */,
 			);
 			name = DataSources;
 			sourceTree = "<group>";
@@ -695,6 +714,7 @@
 				140E4D00F9FC2774D872B6BA /* VaccinationRepository.swift */,
 				C5E6E7E8A577D08AC211BB7F /* CaregiverRepository.swift */,
 				B0874B4E4D94E1D2CEE82E85 /* GuidelineRepository.swift */,
+				9EF7FD349672184266E523E3 /* CareLogRepository.swift */,
 			);
 			name = Repositories;
 			path = Repositories;
@@ -730,6 +750,7 @@
 				355EF042D814185251B76CCD /* DevelopmentMapper.swift */,
 				1BEB5534F7B49932733DC943 /* VaccinationMapper.swift */,
 				7BED2A76C40FDFD4111AC2C6 /* CaregiverMapper.swift */,
+				6D222AAEB9D2A2630AB337E7 /* CareLogMapper.swift */,
 			);
 			name = Mappers;
 			sourceTree = "<group>";
@@ -1011,6 +1032,7 @@
 				0A790C8145B8840974514CEC /* DevelopmentDTO.swift */,
 				DB80B6331AAA33F2B625093A /* VaccinationDTO.swift */,
 				60FEA01C829FF6AD23FBE2D2 /* CaregiverDTO.swift */,
+				C9854C5F607B7D5A479BE993 /* CareLogDTO.swift */,
 			);
 			name = DTOs;
 			sourceTree = "<group>";
@@ -1110,6 +1132,7 @@
 				574481ADFD8ED7E01AADBD69 /* PediatricGuideline.swift */,
 				B2DE7101621317FD16031294 /* DomainInsight.swift */,
 				241E0257193D1F5A9C51A2E4 /* Calendar */,
+				91A5D845968869EE1A20845C /* CareLog.swift */,
 			);
 			name = Entities;
 			path = Entities;
@@ -1123,6 +1146,8 @@
 				80E4AB0B5B799E2D2F3D6466 /* QuickAction.swift */,
 				5FE6F737C57EA35275D6E33B /* QuickBarSettings.swift */,
 				37C58627571E434911C9B229 /* QuickBarEditSheet.swift */,
+				6E32FF1BE782E2F76E95EC61 /* CarePresetSettings.swift */,
+				2E3C7CC7EAC7D041DBB53510 /* CareInputSheet.swift */,
 			);
 			name = Home;
 			path = Home;
@@ -1191,6 +1216,7 @@
 				7A64E18D9DFB4BB7FAC85B0F /* RemoteCaregiverRepository.swift */,
 				7E4477BEDBCCAFD2798A27F7 /* LocalFeedingRepository.swift */,
 				847891C25C241E4E5FF2A435 /* SyncingFeedingRepository.swift */,
+				66DA6970725512C7A9B4CD50 /* RemoteCareLogRepository.swift */,
 			);
 			name = Repositories;
 			path = Repositories;
@@ -1220,6 +1246,7 @@
 				F0B7B9EBE9DE393D1D4B6ECF /* PlayType.swift */,
 				7A6D8B6EEC40287AF6B40AFF /* SyncState.swift */,
 				1D3A4BD464784A4D6712DFED /* BloodType.swift */,
+				B1767BBF36C667B775488EDF /* CareCategory.swift */,
 			);
 			name = Values;
 			path = Values;
@@ -1598,6 +1625,15 @@
 				8B960B80474971175C46C250 /* QuickAction.swift in Sources */,
 				F9AE1B390BFA255C6587AB9E /* QuickBarSettings.swift in Sources */,
 				312B82FFDFE4C5E5AADB8934 /* QuickBarEditSheet.swift in Sources */,
+				85C7FBF27847D47C974ADE37 /* CareCategory.swift in Sources */,
+				FF001F3737BC89A9DFC75834 /* CareLog.swift in Sources */,
+				5BF2FFF0345D68637D19F04C /* CareLogRepository.swift in Sources */,
+				F5669E7052C44E9CC1E40247 /* CareLogDTO.swift in Sources */,
+				AF59B258DBA3FB0F0B726CD0 /* CareLogMapper.swift in Sources */,
+				88B304CA8CEF3AC87DB73FF9 /* RemoteCareLogDataSource.swift in Sources */,
+				F3FFBB35AC25C9C6E10EE978 /* RemoteCareLogRepository.swift in Sources */,
+				6FB5DFE2A5067C4EFBE2A0DA /* CarePresetSettings.swift in Sources */,
+				ADF2E2DBD02E97E920B44DBA /* CareInputSheet.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -25,6 +25,7 @@ struct HomeView: View {
     @State private var showSleepSheet   = false               // 과거 수면
     @State private var showPlaySheet    = false               // 과거 터미타임
     @State private var showQuickBarEdit = false               // 빠른기록 편집 시트
+    @State private var careCreateCategory: CareCategory? = nil // 영양제·약·목욕(과거) 생성 시트
 
     var body: some View {
         NavigationStack {
@@ -120,6 +121,33 @@ struct HomeView: View {
                     )
                     .environment(container)
                 }
+                // 영양제·약(과거 목욕 포함) 생성 시트
+                .dsBottomSheet(
+                    isPresented: Binding(
+                        get: { careCreateCategory != nil },
+                        set: { if !$0 { careCreateCategory = nil } }
+                    ),
+                    options: .init(title: careCreateTitle, detents: [.fraction(0.7), .large])
+                ) {
+                    if let cat = careCreateCategory {
+                        CareInputSheet(
+                            isPresented: Binding(
+                                get: { careCreateCategory != nil },
+                                set: { if !$0 { careCreateCategory = nil } }
+                            ),
+                            babyId: container.activeBabyId,
+                            category: cat,
+                            defaultDate: vm.isFocusingPast ? vm.selectedDate : .now,
+                            onSaved: { log in
+                                Task { @MainActor in
+                                    await vm.saveCareLog(log)
+                                    toastCenter.show(.init(message: "\(cat.displayName) 기록 완료!", variant: .success))
+                                }
+                            }
+                        )
+                        .environment(container)
+                    }
+                }
             } else {
                 ProgressView()
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -143,6 +171,7 @@ struct HomeView: View {
                     sleepRepository:   container.sleepRepository,
                     diaperRepository:  container.diaperRepository,
                     playRepository:    container.playRepository,
+                    careLogRepository: container.careLogRepository,
                     babyId:            container.activeBabyId
                 )
                 vm = newVM
@@ -164,7 +193,10 @@ struct HomeView: View {
             case .poo:                     pendingDiaperType = .poo; showDiaperSheet = true
             case .sleep:                   showSleepSheet   = true
             case .play:                    showPlaySheet    = true
-            case .supplement, .medicine, .bath: comingSoonToast(action)   // 기록 기능 준비 중
+            // 과거 날짜: 목욕도 시각 입력이 필요하므로 셋 다 시트로.
+            case .bath:                    careCreateCategory = .bath
+            case .supplement:              careCreateCategory = .supplement
+            case .medicine:                careCreateCategory = .medicine
             }
             return
         }
@@ -198,21 +230,27 @@ struct HomeView: View {
                 let msg = await vm.recordPlay()   // 즉시 기록(분유처럼 시점만)
                 toastCenter.show(.init(message: msg, variant: .success))
             }
-        case .supplement, .medicine, .bath:
-            comingSoonToast(action)   // 기록 기능 준비 중(디자인 확정 후 구현)
+        case .bath:
+            // 목욕: 원탭 즉시 기록(시점만).
+            Task { @MainActor in
+                let msg = await vm.quickSaveBath()
+                toastCenter.show(.init(message: msg, variant: .success))
+            }
+        case .supplement:
+            careCreateCategory = .supplement   // 이름·용량 시트
+        case .medicine:
+            careCreateCategory = .medicine     // 이름·용량 시트
         }
     }
 
-    /// 영양제·약·목욕: 실제 기록 저장은 후속 기능 — 지금은 안내만.
-    private func comingSoonToast(_ action: HomeAction) {
-        let name: String
-        switch action {
-        case .supplement: name = "영양제"
-        case .medicine:   name = "약"
-        case .bath:       name = "목욕"
-        default:          name = "기록"
+    /// 돌봄기록 생성 시트 타이틀.
+    private var careCreateTitle: String {
+        switch careCreateCategory {
+        case .bath:       return "🛁 목욕 기록"
+        case .supplement: return "🧴 영양제 기록"
+        case .medicine:   return "💊 약 기록"
+        case .none:       return "기록"
         }
-        toastCenter.show(.init(message: "\(name) 기록 기능은 곧 추가돼요", variant: .info))
     }
 }
 
@@ -527,8 +565,18 @@ private struct DayTimelineSection: View {
     @Environment(ToastCenter.self) private var toastCenter
     @State private var deleteTarget: TimelineItem? = nil
     @State private var editRecord: EditableRecord? = nil
+    @State private var editCareLog: CareLog? = nil
 
     private var isToday: Bool { Calendar.kst.isDateInToday(day) }
+
+    /// 타임라인 탭 → 돌봄기록이면 CareInputSheet, 아니면 RecordEditSheet.
+    private func startEdit(_ item: TimelineItem) {
+        if let c = vm.careLog(for: item, on: day) {
+            editCareLog = c
+        } else {
+            editRecord = vm.editableRecord(for: item, on: day)
+        }
+    }
 
     var body: some View {
         let items = vm.timelineItems(for: day)
@@ -552,13 +600,13 @@ private struct DayTimelineSection: View {
                             memo:     item.memo,
                             dotColor: theme.color.solid(for: item.domainKind).color,
                             variant:  rowVariant,
-                            onEdit:   { editRecord = vm.editableRecord(for: item, on: day) }
+                            onEdit:   { startEdit(item) }
                         )
                         // LazyVStack 에서는 swipeActions 가 동작하지 않으므로
                         // 길게 눌러 편집/삭제하는 컨텍스트 메뉴로 제공.
                         .contextMenu {
                             Button {
-                                editRecord = vm.editableRecord(for: item, on: day)
+                                startEdit(item)
                             } label: {
                                 Label("편집", systemImage: "pencil")
                             }
@@ -606,6 +654,41 @@ private struct DayTimelineSection: View {
                 )
             }
         }
+        // 돌봄기록 편집(목욕·영양제·약)
+        .dsBottomSheet(
+            isPresented: Binding(
+                get: { editCareLog != nil },
+                set: { if !$0 { editCareLog = nil } }
+            ),
+            options: .init(title: careEditTitle, detents: [.fraction(0.7), .large])
+        ) {
+            if let log = editCareLog {
+                CareInputSheet(
+                    isPresented: Binding(
+                        get: { editCareLog != nil },
+                        set: { if !$0 { editCareLog = nil } }
+                    ),
+                    babyId: log.babyId,
+                    category: log.category,
+                    editing: log,
+                    onSaved: { updated in
+                        Task { @MainActor in
+                            await vm.updateCareLog(updated)
+                            toastCenter.show(.init(message: "\(updated.category.displayName) 수정 완료!", variant: .success))
+                        }
+                    },
+                    onDelete: {
+                        vm.delete(TimelineItem(from: log), on: day)
+                    }
+                )
+            }
+        }
+    }
+
+    /// 돌봄기록 편집 시트 타이틀.
+    private var careEditTitle: String {
+        guard let c = editCareLog else { return "수정" }
+        return "\(c.category.emoji) \(c.category.displayName) 수정"
     }
 
     /// 편집 시트 타이틀 (웹 titleMap 재현).

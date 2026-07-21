@@ -1,5 +1,6 @@
 from .ai_review_repository_impl import AIReviewRepositoryImpl
 from .baby_repository_impl import BabyRepositoryImpl
+from .care_log_repository_impl import CareLogRepositoryImpl
 from .caregiver_repository_impl import CaregiverRepositoryImpl
 from .chat_repository_impl import ChatRepositoryImpl
 from .diaper_repository_impl import DiaperRepositoryImpl
@@ -17,6 +18,7 @@ __all__ = [
     "DiaperRepositoryImpl",
     "SleepRepositoryImpl",
     "PlayRepositoryImpl",
+    "CareLogRepositoryImpl",
     "AIReviewRepositoryImpl",
     "ChatRepositoryImpl",
     "SavedInfoRepositoryImpl",

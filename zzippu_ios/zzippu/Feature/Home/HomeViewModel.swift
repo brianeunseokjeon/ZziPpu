@@ -47,6 +47,7 @@ final class HomeViewModel {
     private let sleepRepository: SleepRepository
     private let diaperRepository: DiaperRepository
     private let playRepository: PlayRepository
+    private let careLogRepository: CareLogRepository
     private let babyId: UUID
 
     // MARK: - Init
@@ -57,6 +58,7 @@ final class HomeViewModel {
         sleepRepository: SleepRepository,
         diaperRepository: DiaperRepository,
         playRepository: PlayRepository,
+        careLogRepository: CareLogRepository,
         babyId: UUID
     ) {
         self.feedingRepository = feedingRepository
@@ -64,6 +66,7 @@ final class HomeViewModel {
         self.sleepRepository   = sleepRepository
         self.diaperRepository  = diaperRepository
         self.playRepository    = playRepository
+        self.careLogRepository = careLogRepository
         self.babyId            = babyId
     }
 
@@ -144,15 +147,17 @@ final class HomeViewModel {
             async let s = sleepRepository.list(babyId: babyId, on: day)
             async let d = diaperRepository.list(babyId: babyId, on: day)
             async let p = playRepository.list(babyId: babyId, on: day)
+            async let c = careLogRepository.list(babyId: babyId, on: day)
 
             let feedings = (try? await f) ?? []
             let sleeps   = (try? await s) ?? []
             let diapers  = (try? await d) ?? []
             let plays    = (try? await p) ?? []
+            let careLogs = (try? await c) ?? []
 
             recordsByDay[day] = DayRecords(
                 feedings: feedings, sleeps: sleeps, diapers: diapers, plays: plays,
-                isLoading: false
+                careLogs: careLogs, isLoading: false
             )
         }
     }
@@ -202,6 +207,7 @@ final class HomeViewModel {
         items += rec.sleeps.map   { TimelineItem(from: $0) }
         items += rec.diapers.map  { TimelineItem(from: $0) }
         items += rec.plays.map    { TimelineItem(from: $0) }
+        items += rec.careLogs.map { TimelineItem(from: $0) }
         return items.sorted { $0.time > $1.time }
     }
 
@@ -211,7 +217,7 @@ final class HomeViewModel {
 
     func isEmpty(for day: Date) -> Bool {
         guard let rec = recordsByDay[day], !rec.isLoading else { return false }
-        return rec.feedings.isEmpty && rec.sleeps.isEmpty && rec.diapers.isEmpty && rec.plays.isEmpty
+        return rec.feedings.isEmpty && rec.sleeps.isEmpty && rec.diapers.isEmpty && rec.plays.isEmpty && rec.careLogs.isEmpty
     }
 
     // MARK: - 퀵세이브 (오늘 기록)
@@ -263,6 +269,61 @@ final class HomeViewModel {
         let play = PlayRecord.new(babyId: babyId, playType: .tummyTime, startedAt: .now)
         await insertPlay(play, markActive: false)
         return "터미타임 기록됐어요"
+    }
+
+    // MARK: - 돌봄기록(목욕·영양제·약)
+
+    /// 목욕 원탭 즉시 기록 — 시점만(이름·용량 없음).
+    func quickSaveBath() async -> String {
+        let log = CareLog.new(babyId: babyId, category: .bath, recordedAt: .now)
+        await insertCareLog(log)
+        return "목욕 기록됐어요"
+    }
+
+    /// 영양제·약 시트 저장 콜백(신규 생성).
+    func saveCareLog(_ log: CareLog) async {
+        await insertCareLog(log)
+    }
+
+    /// 타임라인 아이템 → 편집용 CareLog 원본.
+    func careLog(for item: TimelineItem, on day: Date) -> CareLog? {
+        let key = Calendar.kst.startOfDay(for: day)
+        return recordsByDay[key]?.careLogs.first { $0.id == item.id }
+    }
+
+    private func insertCareLog(_ log: CareLog) async {
+        let day = await dayKey(for: log.recordedAt)
+        await mutate(day) { $0.careLogs.insert(log, at: 0) }
+        do {
+            let confirmed = try await careLogRepository.create(log)
+            await mutate(day) { r in
+                if let i = r.careLogs.firstIndex(where: { $0.id == log.id }) { r.careLogs[i] = confirmed }
+            }
+        } catch {
+            await mutate(day) { $0.careLogs.removeAll { $0.id == log.id } }
+            await MainActor.run { errorMessage = "\(log.category.displayName) 저장 실패: \(error.localizedDescription)" }
+        }
+    }
+
+    /// 돌봄기록 편집 저장 — PATCH(update) 낙관적 반영. recordedAt 변경 시 일자 이동 반영.
+    func updateCareLog(_ updated: CareLog) async {
+        let day = await dayKey(for: updated.recordedAt)
+        // 원본 위치(다른 일자일 수 있음) 탐색·롤백용.
+        let originalDay = recordsByDay.first { $0.value.careLogs.contains(where: { $0.id == updated.id }) }?.key
+        let original = originalDay.flatMap { recordsByDay[$0]?.careLogs.first { $0.id == updated.id } }
+        // 낙관적: 기존 위치 제거 후 새 일자에 삽입.
+        if let od = originalDay { await mutate(od) { $0.careLogs.removeAll { $0.id == updated.id } } }
+        await mutate(day) { $0.careLogs.insert(updated, at: 0) }
+        do {
+            let confirmed = try await careLogRepository.update(updated)
+            await mutate(day) { r in
+                if let i = r.careLogs.firstIndex(where: { $0.id == confirmed.id }) { r.careLogs[i] = confirmed }
+            }
+        } catch {
+            await mutate(day) { $0.careLogs.removeAll { $0.id == updated.id } }
+            if let od = originalDay, let o = original { await mutate(od) { $0.careLogs.insert(o, at: 0) } }
+            await MainActor.run { errorMessage = "\(updated.category.displayName) 수정 실패: \(error.localizedDescription)" }
+        }
     }
 
     // MARK: - 시트 저장 콜백 (모유/대변 상세, 과거 날짜 입력)
@@ -396,6 +457,8 @@ final class HomeViewModel {
             return rec.diapers.first { $0.id == item.id }.map(EditableRecord.diaper)
         case .play:
             return rec.plays.first { $0.id == item.id }.map(EditableRecord.play)
+        case .careBath, .careSupplement, .careMedicine:
+            return nil   // 돌봄기록은 CareInputSheet(편집모드)로 별도 처리 — vm.careLog(for:) 사용
         case .checkup:
             return nil   // 검진은 타임라인 편집 없음(달력 표시 전용)
         }
@@ -565,6 +628,13 @@ final class HomeViewModel {
                 do { try await playRepository.delete(id: p.id, babyId: p.babyId) }
                 catch { recordsByDay[key]?.plays.insert(p, at: 0); errorMessage = "삭제 실패: \(error.localizedDescription)" }
             }
+        case .careBath, .careSupplement, .careMedicine:
+            guard let c = recordsByDay[key]?.careLogs.first(where: { $0.id == item.id }) else { return }
+            recordsByDay[key]?.careLogs.removeAll { $0.id == c.id }
+            Task { @MainActor in
+                do { try await careLogRepository.delete(id: c.id, babyId: c.babyId) }
+                catch { recordsByDay[key]?.careLogs.insert(c, at: 0); errorMessage = "삭제 실패: \(error.localizedDescription)" }
+            }
         case .checkup:
             break   // 검진은 달력 전용 — 타임라인 삭제 없음
         }
@@ -578,6 +648,7 @@ struct DayRecords {
     var sleeps:   [SleepRecord] = []
     var diapers:  [DiaperRecord] = []
     var plays:    [PlayRecord] = []
+    var careLogs: [CareLog] = []
     var isLoading: Bool = false
 }
 
@@ -636,6 +707,13 @@ struct TimelineItem: Identifiable {
         self.label = play.timelineLabel
         self.memo = play.memo
         self.domainKind = .play
+    }
+    init(from care: CareLog) {
+        self.id = care.id
+        self.time = care.recordedAt
+        self.label = care.timelineLabel
+        self.memo = care.memo
+        self.domainKind = care.domainKind
     }
 }
 
@@ -704,6 +782,28 @@ extension PlayRecord {
             return "\(playType.displayName) (\(m)분)"
         }
         return playType.displayName
+    }
+}
+
+extension CareLog {
+    /// 예: "목욕 🛁", "영양제 · 비타민D 5방울", "약 · 감기약". name 없으면 카테고리명만.
+    var timelineLabel: String {
+        switch category {
+        case .bath:
+            return "목욕 🛁"
+        case .supplement, .medicine:
+            var s = category.displayName   // "영양제" | "약"
+            if let n = name, !n.isEmpty { s += " · \(n)" }
+            if let d = dose, !d.isEmpty { s += " \(d)" }
+            return s
+        }
+    }
+    var domainKind: DomainKind {
+        switch category {
+        case .bath:       return .careBath
+        case .supplement: return .careSupplement
+        case .medicine:   return .careMedicine
+        }
     }
 }
 
