@@ -449,11 +449,12 @@ private struct TodayView: View {
         .onAppear { vm.loadReminderState() }   // 설정 화면 다녀온 뒤 육퇴/알림 상태 갱신
     }
 
-    /// 육퇴 배너 표시 조건: 알림 켜짐 + (오후 5시 이후 또는 이미 육퇴중).
+    /// 육퇴 배너 표시 조건: 알림 켜짐 + 밤 창 열림(오후 5시~다음날 첫 수유까지, 자정 넘어도 유지).
+    /// hour>=17은 5시 즉시 노출용(창 영속은 loadReminderState가 담당).
     private var showNightOffBar: Bool {
         guard vm.reminderEnabled else { return false }
         let hour = Calendar.kst.component(.hour, from: Date())
-        return hour >= 17 || vm.nightOffActive
+        return vm.nightWindowOpen || hour >= 17
     }
 
     /// 육퇴 배너 — 탭하면 오늘 밤 수유 알림 끔/켬. 다음 수유 기록 시 자동 복귀.

@@ -37,8 +37,10 @@ final class HomeViewModel {
 
     /// 수유 알림 활성 여부(홈 육퇴 배너 표시 조건). FeedingReminderSettings 미러.
     var reminderEnabled: Bool = false
-    /// 육퇴 중(오늘 밤 알림 끔). 배너 상태 + 다음 수유 기록 시 자동 해제.
+    /// 육퇴 중(오늘 밤 알림 끔). 배너 상태 + 다음날 수유 기록 시 자동 해제.
     var nightOffActive: Bool = false
+    /// 밤 배너 창 열림(오후 5시~다음날 첫 수유). 자정 넘어도 유지 → 배너 지속 표시.
+    var nightWindowOpen: Bool = false
 
     /// 과거 날짜 포커스 뷰 여부
     var isFocusingPast: Bool {
@@ -377,18 +379,30 @@ final class HomeViewModel {
     // MARK: - 수유 알림(로컬 노티) 상태
 
     /// 홈 진입/복귀 시 알림 설정을 미러(육퇴 배너 표시·상태).
+    /// 오후 5시 이후면 밤 창을 연다(아직 안 열렸으면). 창은 다음날 수유까지 유지.
     func loadReminderState() {
-        let s = FeedingReminderSettings.load()
+        var s = FeedingReminderSettings.load()
         reminderEnabled = s.enabled
         nightOffActive = s.nightOff
+        if s.enabled {
+            let hour = Calendar.kst.component(.hour, from: Date())
+            if hour >= 17 && s.nightWindowStart == nil {
+                s.nightWindowStart = Date()
+                s.save()
+            }
+        }
+        nightWindowOpen = (s.nightWindowStart != nil)
     }
 
     /// 육퇴 토글 — 저장 + 알림 재조정(켜면 전부 취소, 끄면 재무장).
     func toggleNightOff() {
         var s = FeedingReminderSettings.load()
         s.nightOff.toggle()
+        // 육퇴를 켜면 밤 창도 확실히 열어 둔다(다음날 수유 전까지 배너 유지).
+        if s.nightOff && s.nightWindowStart == nil { s.nightWindowStart = Date() }
         s.save()
         nightOffActive = s.nightOff
+        nightWindowOpen = (s.nightWindowStart != nil)
         let settings = s   // 불변 스냅샷
         Task { @MainActor in
             let last = try? await feedingRepository.lastFeeding(babyId: babyId)
@@ -402,14 +416,19 @@ final class HomeViewModel {
         Task { @MainActor in
             var s = FeedingReminderSettings.load()
             guard s.enabled else { return }
-            let wasNightOff = s.nightOff
-            if wasNightOff {
+            // 밤 창이 열려 있고 '시작일보다 늦은 날'의 수유면 = 다음날 첫 수유 → 창 닫고 육퇴 복귀.
+            var closedWindow = false
+            if let start = s.nightWindowStart,
+               Calendar.kst.startOfDay(for: Date()) > Calendar.kst.startOfDay(for: start) {
+                s.nightWindowStart = nil
                 s.nightOff = false
                 s.save()
+                nightWindowOpen = false
                 nightOffActive = false
+                closedWindow = true
             }
-            // 간격 모드는 항상 재계산. 고정 모드는 육퇴 해제 시에만 재무장.
-            guard s.mode == .interval || wasNightOff else { return }
+            // 간격 모드는 항상 재계산. 육퇴 해제(창 닫힘) 시 고정 모드도 재무장.
+            guard s.mode == .interval || closedWindow else { return }
             let settings = s   // await 경계 넘기기 전 불변 스냅샷
             let last = try? await feedingRepository.lastFeeding(babyId: babyId)
             await FeedingNotificationScheduler.reschedule(settings, lastFeedingAt: last?.startedAt)

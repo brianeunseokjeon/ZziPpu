@@ -19,8 +19,11 @@ struct FeedingReminderSettings: Codable, Equatable {
     var intervalMinutes: Int = 180
     /// 알림을 예정 시각 몇 분 전에 보낼지(10/20/30/60).
     var leadMinutes: Int = 30
-    /// 육퇴(오늘 밤 알림 끔). true면 알림 전부 억제. 다음 수유 기록 시 자동 해제.
+    /// 육퇴(오늘 밤 알림 끔). true면 알림 전부 억제. 다음날 수유 기록 시 자동 해제.
     var nightOff: Bool = false
+    /// 밤 배너 창이 열린 시각. 오후 5시에 열려 자정을 넘겨 유지되고,
+    /// '시작일보다 늦은 날'의 첫 수유 기록 때 닫힌다(nil=닫힘). 자정에 사라지는 문제 해결용.
+    var nightWindowStart: Date? = nil
 
     // MARK: - 선택지(정적)
 
