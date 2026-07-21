@@ -134,6 +134,16 @@ extension Theme {
                         activeBorder: DynamicColor(light: PrimitiveColor.red400, dark: PrimitiveColor.red400),
                         activeText:   DynamicColor(light: PrimitiveColor.red700, dark: PrimitiveColor.red400)
                     )
+                // 목욕 = blue(물). 소변(cyan)과 구분.
+                case .bath:
+                    return QuickButtonColors(
+                        idleBg:   DynamicColor(light: PrimitiveColor.blue50,  dark: PrimitiveColor.blue500.opacity(0.18)),
+                        idleBorder: DynamicColor(light: PrimitiveColor.blue400.opacity(0.5), dark: PrimitiveColor.blue400.opacity(0.4)),
+                        idleText:   DynamicColor(light: PrimitiveColor.blue700, dark: PrimitiveColor.blue400),
+                        activeBg:   DynamicColor(light: PrimitiveColor.blue100, dark: PrimitiveColor.blue500.opacity(0.28)),
+                        activeBorder: DynamicColor(light: PrimitiveColor.blue400, dark: PrimitiveColor.blue400),
+                        activeText:   DynamicColor(light: PrimitiveColor.blue700, dark: PrimitiveColor.blue400)
+                    )
                 }
             }
         )

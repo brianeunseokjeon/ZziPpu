@@ -164,7 +164,7 @@ struct HomeView: View {
             case .poo:                     pendingDiaperType = .poo; showDiaperSheet = true
             case .sleep:                   showSleepSheet   = true
             case .play:                    showPlaySheet    = true
-            case .supplement, .medicine:   comingSoonToast(action)   // 기록 기능 준비 중
+            case .supplement, .medicine, .bath: comingSoonToast(action)   // 기록 기능 준비 중
             }
             return
         }
@@ -198,21 +198,27 @@ struct HomeView: View {
                 let msg = await vm.recordPlay()   // 즉시 기록(분유처럼 시점만)
                 toastCenter.show(.init(message: msg, variant: .success))
             }
-        case .supplement, .medicine:
+        case .supplement, .medicine, .bath:
             comingSoonToast(action)   // 기록 기능 준비 중(디자인 확정 후 구현)
         }
     }
 
-    /// 영양제·약: 실제 기록 저장은 후속 기능 — 지금은 안내만.
+    /// 영양제·약·목욕: 실제 기록 저장은 후속 기능 — 지금은 안내만.
     private func comingSoonToast(_ action: HomeAction) {
-        let name = action == .supplement ? "영양제" : "약"
+        let name: String
+        switch action {
+        case .supplement: name = "영양제"
+        case .medicine:   name = "약"
+        case .bath:       name = "목욕"
+        default:          name = "기록"
+        }
         toastCenter.show(.init(message: "\(name) 기록 기능은 곧 추가돼요", variant: .info))
     }
 }
 
 // MARK: - HomeAction
 
-enum HomeAction { case formula, breast, pee, poo, sleep, play, supplement, medicine }
+enum HomeAction { case formula, breast, pee, poo, sleep, play, supplement, medicine, bath }
 
 // MARK: - QuickBarStore (@Observable, 선호 보유·구독)
 

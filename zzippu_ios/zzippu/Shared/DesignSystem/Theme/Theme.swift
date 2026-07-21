@@ -324,6 +324,7 @@ public enum QuickButtonKind: String, CaseIterable {
     case play        = "play"
     case supplement  = "supplement"
     case medicine    = "medicine"
+    case bath        = "bath"
 }
 
 /// 퀵버튼 상태별 색 묶음(idle/active × bg/border/text). 웹 BigActionGrid 상태 매핑.
