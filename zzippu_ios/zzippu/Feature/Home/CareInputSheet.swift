@@ -28,6 +28,7 @@ struct CareInputSheet: View {
     @State private var recordedAt: Date
     @State private var addingPreset: Bool = false
     @State private var newPresetText: String = ""
+    @State private var showDeleteConfirm: Bool = false
 
     init(
         isPresented: Binding<Bool>,
@@ -100,18 +101,43 @@ struct CareInputSheet: View {
             // ── 메모 ──
             DSTextField(label: "메모 (선택)", placeholder: "메모", text: $memoText)
 
-            // ── 저장/삭제 ──
-            DSButton(isEditing ? "수정" : "저장", variant: .primary, size: .lg) { save() }
+            // ── 저장/삭제 (다른 편집 시트와 동일: 휴지통 + 저장) ──
+            if isEditing {
+                HStack(spacing: theme.space.sm) {
+                    Button {
+                        showDeleteConfirm = true
+                    } label: {
+                        Image(systemName: "trash")
+                            .font(.system(size: 17, weight: .semibold))
+                            .foregroundStyle(theme.color.statusDangerFg.color)
+                            .frame(width: 56, height: 56)
+                            .background(
+                                RoundedRectangle(cornerRadius: theme.component.button.radius, style: .continuous)
+                                    .fill(theme.color.statusDangerBg.color)
+                            )
+                    }
+                    .buttonStyle(.plain)
+                    .accessibilityLabel("삭제")
 
-            if isEditing, let onDelete {
-                DSButton("삭제", variant: .destructive, size: .lg) {
-                    onDelete()
-                    isPresented = false
+                    DSButton("저장", variant: .primary, size: .lg) { save() }
                 }
+            } else {
+                DSButton("저장", variant: .primary, size: .lg) { save() }
             }
         }
         .padding(.horizontal, theme.space.screenPaddingX)
         .padding(.vertical, theme.space.md)
+        .confirmationDialog(
+            "이 기록을 삭제할까요?",
+            isPresented: $showDeleteConfirm,
+            titleVisibility: .visible
+        ) {
+            Button("삭제", role: .destructive) {
+                onDelete?()
+                isPresented = false
+            }
+            Button("취소", role: .cancel) {}
+        }
     }
 
     // MARK: - 조작
