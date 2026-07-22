@@ -62,14 +62,14 @@ struct BabyProfileView: View {
                     note: vm.birthHeightValidation
                 )
                 measurementField(
-                    label: "머리 둘레 (선택)",
+                    label: "출생 머리둘레 (선택)",
                     placeholder: "예: 34",
                     unit: "cm",
                     text: $vm.birthHeadCircumferenceCmText,
                     note: vm.birthHeadValidation
                 )
                 measurementField(
-                    label: "가슴 둘레 (선택)",
+                    label: "출생 가슴둘레 (선택)",
                     placeholder: "예: 33",
                     unit: "cm",
                     text: $vm.birthChestCircumferenceCmText,

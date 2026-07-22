@@ -307,6 +307,7 @@ private struct SettingsContent: View {
             ProfileEditLoader(
                 baby: baby,
                 babyRepository: container.babyRepository,
+                growthRepository: container.growthRepository,
                 onSaved: { vm.applyUpdatedBaby($0) }
             )
         } else {
@@ -330,8 +331,8 @@ private struct SettingsContent: View {
 private struct ProfileEditLoader: View {
     @State private var vm: BabyProfileViewModel
 
-    init(baby: Baby, babyRepository: BabyRepository, onSaved: @escaping (Baby) -> Void) {
-        let model = BabyProfileViewModel(baby: baby, babyRepository: babyRepository)
+    init(baby: Baby, babyRepository: BabyRepository, growthRepository: GrowthRepository, onSaved: @escaping (Baby) -> Void) {
+        let model = BabyProfileViewModel(baby: baby, babyRepository: babyRepository, growthRepository: growthRepository)
         model.onSaved = onSaved
         _vm = State(initialValue: model)
     }

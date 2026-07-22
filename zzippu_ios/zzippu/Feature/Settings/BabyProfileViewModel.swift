@@ -30,14 +30,17 @@ final class BabyProfileViewModel {
     // MARK: - Dependencies
 
     private let babyRepository: BabyRepository
+    /// 출생 측정 → 출생일 성장기록 동기화용(옵셔널 — 미주입 시 동기화 생략).
+    private let growthRepository: GrowthRepository?
     private let original: Baby
 
     /// 저장 성공 시 서버 확정 Baby 전달 (상위에서 낙관적 반영)
     var onSaved: ((Baby) -> Void)?
 
-    init(baby: Baby, babyRepository: BabyRepository) {
+    init(baby: Baby, babyRepository: BabyRepository, growthRepository: GrowthRepository? = nil) {
         self.original = baby
         self.babyRepository = babyRepository
+        self.growthRepository = growthRepository
         self.name = baby.name
         self.birthDate = baby.birthDate
         self.gender = baby.gender
@@ -132,12 +135,42 @@ final class BabyProfileViewModel {
                 updated.rhFactor = rhFactor
 
                 let saved = try await babyRepository.update(updated)
+                // 출생 측정(체중/키/머리둘레) → 출생일 성장기록으로 동기화(발달에도 추가/갱신).
+                await upsertBirthGrowthRecord(for: saved)
                 onSaved?(saved)
                 didSave = true
             } catch {
                 errorMessage = "저장에 실패했어요. 다시 시도해 주세요."
             }
         }
+    }
+
+    /// 프로필 출생 측정 → 출생일 성장기록 upsert. 가슴둘레는 성장기록에 없어 제외.
+    /// 이미 출생일 기록이 있으면 값 갱신, 없으면 생성. 실패해도 프로필 저장은 유지(무음).
+    private func upsertBirthGrowthRecord(for baby: Baby) async {
+        guard let growthRepository else { return }
+        let w = baby.birthWeightG
+        let h = baby.birthHeightCm
+        let hc = baby.birthHeadCircumferenceCm
+        guard w != nil || h != nil || hc != nil else { return }
+        do {
+            let series = try await growthRepository.series(babyId: baby.id)
+            if let existing = series.first(where: {
+                Calendar.kst.isDate($0.recordedAt, inSameDayAs: baby.birthDate)
+            }) {
+                var rec = existing
+                if let w { rec.weightG = w }
+                if let h { rec.heightCm = h }
+                if let hc { rec.headCircumferenceCm = hc }
+                if rec != existing { _ = try await growthRepository.update(rec) }
+            } else {
+                let rec = GrowthRecord.new(
+                    babyId: baby.id, recordedAt: baby.birthDate,
+                    weightG: w, heightCm: h, headCircumferenceCm: hc
+                )
+                _ = try await growthRepository.create(rec)
+            }
+        } catch { /* 무음: 프로필 저장은 이미 성공 */ }
     }
 
     private static func parseCm(_ text: String) -> Double? {

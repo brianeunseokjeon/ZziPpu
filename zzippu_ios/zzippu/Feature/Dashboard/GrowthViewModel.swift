@@ -98,10 +98,31 @@ final class GrowthViewModel {
                 series.append(confirmed)
                 series.sort { $0.recordedAt < $1.recordedAt }
             }
+            syncProfileBirthMeasurements(from: confirmed)
         } catch {
             await MainActor.run {
                 errorMessage = "성장 기록 저장 실패: \(error.localizedDescription)"
             }
+        }
+    }
+
+    /// 출생일과 같은 날의 성장기록이면 → 프로필 출생 측정(체중/키/머리둘레)도 갱신.
+    /// (역방향: 프로필 저장 시 출생일 기록 upsert는 BabyProfileViewModel에서 처리.)
+    private func syncProfileBirthMeasurements(from record: GrowthRecord) {
+        guard let baby = activeBaby, let repo = babyRepository,
+              Calendar.kst.isDate(record.recordedAt, inSameDayAs: baby.birthDate) else { return }
+        var updated = baby
+        if let w = record.weightG { updated.birthWeightG = w }
+        if let h = record.heightCm { updated.birthHeightCm = h }
+        if let hc = record.headCircumferenceCm { updated.birthHeadCircumferenceCm = hc }
+        let changed = updated.birthWeightG != baby.birthWeightG
+            || updated.birthHeightCm != baby.birthHeightCm
+            || updated.birthHeadCircumferenceCm != baby.birthHeadCircumferenceCm
+        guard changed else { return }
+        let payload = updated   // await 경계 넘기기 전 불변 스냅샷
+        Task { @MainActor in
+            do { activeBaby = try await repo.update(payload) }
+            catch { /* 무음: 성장 저장은 이미 성공 */ }
         }
     }
 
@@ -118,6 +139,7 @@ final class GrowthViewModel {
                     series[i] = confirmed
                     series.sort { $0.recordedAt < $1.recordedAt }
                 }
+                syncProfileBirthMeasurements(from: confirmed)
             } catch {
                 if let i = series.firstIndex(where: { $0.id == previous.id }) {
                     series[i] = previous
