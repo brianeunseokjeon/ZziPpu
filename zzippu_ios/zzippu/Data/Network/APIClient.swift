@@ -9,7 +9,7 @@ final class APIClient {
 
     private let baseURL: URL
     private let tokenProvider: () -> String?
-    private let onUnauthorized: () -> Void
+    private let onUnauthorized: () -> Void   // 401 시 호출(현재: .zzippuUnauthorized 알림 게시)
     private let session: URLSession
 
     private let decoder = JSONDecoder.apiDecoder()

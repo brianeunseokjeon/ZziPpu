@@ -44,6 +44,10 @@ struct AppRootView: View {
         .task {
             await hydrateSession()
         }
+        // 서버 401(토큰 무효) → 메인에서 로그아웃 + 로그인 화면으로 라우팅.
+        .onReceive(NotificationCenter.default.publisher(for: .zzippuUnauthorized)) { _ in
+            container.handleUnauthorized()
+        }
     }
 
     // MARK: - Session Hydration (S2 핵심: GET /babies로 기존 데이터 확인)

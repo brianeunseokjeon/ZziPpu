@@ -57,7 +57,8 @@ final class AppContainer {
     init() {
         let api = APIClient(
             tokenProvider: { KeychainTokenStore().load() },
-            onUnauthorized: { /* handleUnauthorized는 sessionState 접근이 필요 — 후처리 */ }
+            // 401 → 알림 게시(자기참조 없음). AppRootView가 메인에서 받아 handleUnauthorized 호출.
+            onUnauthorized: { NotificationCenter.default.post(name: .zzippuUnauthorized, object: nil) }
         )
 
         // --- 모드 스위치: 오프라인(Local+Sync) vs 서버-전용(Remote) ---
@@ -96,6 +97,8 @@ final class AppContainer {
 
     // MARK: - Unauthorized Handler (로그인 화면으로)
 
+    /// 401(토큰 무효) → 로그아웃 + 세션 비움 → AppRootView가 로그인 화면으로 라우팅.
+    /// AppRootView의 .onReceive(메인)에서 호출되므로 여기선 메인 스레드 보장됨.
     func handleUnauthorized() {
         authRepository.signOut()
         sessionState.setSession(nil)
@@ -158,4 +161,11 @@ final class ActiveBabyBox: @unchecked Sendable {
         get { lock.lock(); defer { lock.unlock() }; return _id }
         set { lock.lock(); _id = newValue; lock.unlock() }
     }
+}
+
+// MARK: - Notifications
+
+extension Notification.Name {
+    /// 서버 401(토큰 무효) 감지 → AppRootView가 로그아웃/로그인 라우팅.
+    static let zzippuUnauthorized = Notification.Name("zzippu.unauthorized")
 }
