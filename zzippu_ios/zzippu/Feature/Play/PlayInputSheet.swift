@@ -42,32 +42,19 @@ private struct PlayInputContent: View {
 
     @Environment(\.theme) private var theme
 
+    /// 지속시간 프리셋(분). nil 선택 = "시작만 기록".
+    @State private var durationChoice: Int? = nil
+    @State private var customMode: Bool = false
+    @State private var customText: String = ""
+
+    private static let presets = [1, 2, 3, 5, 7, 10]
+
     var body: some View {
         VStack(spacing: 0) {
             VStack(spacing: theme.space.md) {
-                // 놀이 종류 선택
+                // 시작 시각
                 VStack(alignment: .leading, spacing: theme.space.xs) {
-                    Text("놀이 종류")
-                        .font(theme.typography.captionStrong)
-                        .foregroundStyle(theme.color.textSecondary.color)
-                    ScrollView(.horizontal, showsIndicators: false) {
-                        HStack(spacing: theme.space.sm) {
-                            ForEach(PlayType.allCases, id: \.self) { type in
-                                DSChip(
-                                    label: type.displayName,
-                                    isSelected: vm.selectedType == type,
-                                    variant: .selectable,
-                                    onTap: { vm.selectedType = type }
-                                )
-                            }
-                        }
-                        .padding(.horizontal, 1)
-                    }
-                }
-
-                // 시각 — 터미타임은 즉시 기록(분유처럼 시점만). 기간 입력 없음.
-                VStack(alignment: .leading, spacing: theme.space.xs) {
-                    Text("시각")
+                    Text("시작 시각")
                         .font(theme.typography.captionStrong)
                         .foregroundStyle(theme.color.textSecondary.color)
                     DatePicker(
@@ -76,6 +63,35 @@ private struct PlayInputContent: View {
                         displayedComponents: [.date, .hourAndMinute]
                     )
                     .labelsHidden()
+                }
+
+                // 지속시간 — 시작만 기록 / 프리셋 / 직접입력 (공용 DSSelectChip·FlowLayout)
+                VStack(alignment: .leading, spacing: theme.space.sm) {
+                    Text("지속시간")
+                        .font(theme.typography.captionStrong)
+                        .foregroundStyle(theme.color.textSecondary.color)
+                    FlowLayout(spacing: theme.space.sm) {
+                        DSSelectChip(label: "시작만", isSelected: durationChoice == nil && !customMode) {
+                            durationChoice = nil; customMode = false
+                        }
+                        ForEach(Self.presets, id: \.self) { m in
+                            DSSelectChip(label: "\(m)분", isSelected: !customMode && durationChoice == m) {
+                                durationChoice = m; customMode = false
+                            }
+                        }
+                        DSSelectChip(label: "직접입력", isSelected: customMode) {
+                            customMode = true; durationChoice = nil
+                        }
+                    }
+                    .frame(maxWidth: .infinity, alignment: .leading)
+
+                    if customMode {
+                        HStack(spacing: theme.space.sm) {
+                            DSTextField(placeholder: "분", text: $customText, keyboardType: .numberPad)
+                            Text("분").font(theme.typography.body)
+                                .foregroundStyle(theme.color.textSecondary.color)
+                        }
+                    }
                 }
             }
             .padding(.horizontal, theme.space.screenPaddingX)
@@ -100,19 +116,24 @@ private struct PlayInputContent: View {
     }
 
     private func handleSave() {
-        // 즉시 기록 — 분유처럼 시점만. 종료·기간 없음.
-        let play = PlayRecord.new(
-            babyId: vm.babyId,
-            playType: vm.selectedType,
-            startedAt: vm.startedAt
-        )
+        // 지속시간: 직접입력이면 입력값, 아니면 프리셋. "시작만"이면 nil(시점만 기록).
+        let minutes: Int? = customMode ? Int(customText).flatMap { $0 > 0 ? $0 : nil } : durationChoice
+        let play: PlayRecord
+        if let m = minutes {
+            play = PlayRecord.new(
+                babyId: vm.babyId,
+                playType: .tummyTime,
+                startedAt: vm.startedAt,
+                endedAt: vm.startedAt.addingTimeInterval(Double(m) * 60),
+                durationMinutes: m
+            )
+        } else {
+            // 시작만 기록(시점만).
+            play = PlayRecord.new(babyId: vm.babyId, playType: .tummyTime, startedAt: vm.startedAt)
+        }
         vm.resetInputs()
         isPresented = false
-        if let onSaved {
-            onSaved(play)
-        } else {
-            vm.savePlay()
-        }
+        onSaved?(play)
     }
 }
 

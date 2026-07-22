@@ -254,25 +254,8 @@ struct RecordEditSheet: View {
     }
 
     // ── 놀이 ──
-    private var playFields: some View {
-        VStack(alignment: .leading, spacing: theme.space.sm) {
-            Text("놀이 종류")
-                .font(theme.typography.caption)
-                .foregroundStyle(theme.color.textSecondary.color)
-            HStack(spacing: theme.space.sm) {
-                ForEach(PlayType.allCases, id: \.self) { t in
-                    DSChip(
-                        label: t.displayName,
-                        isSelected: playType == t,
-                        variant: .selectable,
-                        tint: theme.color.domainPlayTint,
-                        onTap: { playType = t }
-                    )
-                    .frame(maxWidth: .infinity)
-                }
-            }
-        }
-    }
+    // 터미타임만 존재 → 종류 선택 없음(시각/종료·메모만 편집).
+    private var playFields: some View { EmptyView() }
 
     // MARK: - 시각 입력
 

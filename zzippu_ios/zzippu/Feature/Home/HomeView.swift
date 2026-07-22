@@ -108,7 +108,7 @@ struct HomeView: View {
                 }
                 .dsBottomSheet(
                     isPresented: $showPlaySheet,
-                    options: .init(title: "🎈 터미타임 기록", detents: [.medium, .large])
+                    options: .init(title: "🤸 터미타임 기록", detents: [.medium, .large])
                 ) {
                     PlayInputSheet(
                         isPresented: $showPlaySheet,
@@ -223,10 +223,7 @@ struct HomeView: View {
         case .sleep:
             showSleepSheet = true   // 세션 토글 대신 기록 시트(잠든~기상 시각 + 잔 시간)
         case .play:
-            Task { @MainActor in
-                let msg = await vm.recordPlay()   // 즉시 기록(분유처럼 시점만)
-                toastCenter.show(.init(message: msg, variant: .success))
-            }
+            showPlaySheet = true   // 시작시간 또는 지속시간(1·2·3·5·7·10분/직접) 선택
         case .bath:
             // 목욕: 원탭 즉시 기록(시점만).
             Task { @MainActor in
@@ -756,7 +753,7 @@ private struct DayTimelineSection: View {
             case .both: return "💧💩 배변 수정"
             }
         case .sleep: return "😴 수면 수정"
-        case .play:  return "🎈 놀이 수정"
+        case .play:  return "🤸 터미타임 수정"
         case .none:  return "수정"
         }
     }

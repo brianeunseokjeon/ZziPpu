@@ -38,7 +38,7 @@ enum QuickActionCatalog {
         QuickAction(kind: .pee,        emoji: "💧", label: "소변",    action: .pee,        isSessionToggle: false),
         QuickAction(kind: .poo,        emoji: "💩", label: "대변",    action: .poo,        isSessionToggle: false),
         QuickAction(kind: .sleep,      emoji: "😴", label: "수면",     action: .sleep,      isSessionToggle: false),
-        QuickAction(kind: .play,       emoji: "🎈", label: "터미타임", action: .play,       isSessionToggle: false),
+        QuickAction(kind: .play,       emoji: "🤸", label: "터미타임", action: .play,       isSessionToggle: false),
         QuickAction(kind: .supplement, emoji: "🧴", label: "영양제",  action: .supplement, isSessionToggle: false),
         QuickAction(kind: .medicine,   emoji: "💊", label: "약",      action: .medicine,   isSessionToggle: false),
         QuickAction(kind: .bath,       emoji: "🛁", label: "목욕",    action: .bath,       isSessionToggle: false),

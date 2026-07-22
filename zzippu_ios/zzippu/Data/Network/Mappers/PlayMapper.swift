@@ -11,7 +11,7 @@ enum PlayMapper {
         PlayRecord(
             id: dto.id,
             babyId: dto.babyId,
-            playType: PlayType(rawValue: dto.playType) ?? .freePlay,
+            playType: PlayType(rawValue: dto.playType) ?? .tummyTime,
             startedAt: dto.startedAt,
             endedAt: dto.endedAt,
             durationMinutes: dto.durationMinutes,

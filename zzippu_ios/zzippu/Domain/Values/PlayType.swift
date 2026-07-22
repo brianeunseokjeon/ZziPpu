@@ -4,15 +4,7 @@
 import Foundation
 
 enum PlayType: String, Codable, Sendable, CaseIterable {
-    case tummyTime  = "tummy_time"
-    case freePlay   = "free_play"
-    case sensoryPlay = "sensory_play"
+    case tummyTime = "tummy_time"   // 터미타임만 사용(자유/감각놀이 제거)
 
-    var displayName: String {
-        switch self {
-        case .tummyTime:   return "터미타임"
-        case .freePlay:    return "자유놀이"
-        case .sensoryPlay: return "감각놀이"
-        }
-    }
+    var displayName: String { "터미타임" }
 }
