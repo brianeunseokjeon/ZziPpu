@@ -93,7 +93,7 @@ struct HomeView: View {
                 }
                 .dsBottomSheet(
                     isPresented: $showSleepSheet,
-                    options: .init(title: "😴 수면 기록", detents: [.medium])
+                    options: .init(title: "😴 수면 기록", detents: [.medium, .large])
                 ) {
                     SleepInputSheet(
                         isPresented: $showSleepSheet,
@@ -221,10 +221,7 @@ struct HomeView: View {
                 toastCenter.show(.init(message: msg, variant: .success))
             }
         case .sleep:
-            Task { @MainActor in
-                let msg = await vm.toggleSleep()
-                toastCenter.show(.init(message: msg, variant: .success))
-            }
+            showSleepSheet = true   // 세션 토글 대신 기록 시트(잠든~기상 시각 + 잔 시간)
         case .play:
             Task { @MainActor in
                 let msg = await vm.recordPlay()   // 즉시 기록(분유처럼 시점만)
@@ -784,7 +781,7 @@ private struct BigActionGrid: View {
             HStack(spacing: theme.space.sm) {
                 ForEach(actions, id: \.kind) { qa in
                     let isActive = qa.isSessionToggle && hasActiveSleep
-                    let label    = (qa.kind == .sleep && hasActiveSleep) ? "수면 종료" : qa.label
+                    let label    = qa.label   // 수면도 기록 방식으로 전환 — "수면 종료" 토글 라벨 제거
                     BigActionButton(
                         emoji:    qa.emoji,
                         label:    label,

@@ -14,9 +14,17 @@ final class RemoteSleepRepository: SleepRepository {
     // MARK: - SleepRepository
 
     func create(_ sleep: SleepRecord) async throws -> SleepRecord {
-        let request = SleepMapper.toStartRequest(sleep)
-        let dto = try await dataSource.create(babyId: sleep.babyId, request: request)
-        return SleepMapper.toEntity(dto)
+        let created = try await dataSource.create(babyId: sleep.babyId, request: SleepMapper.toStartRequest(sleep))
+        // 기상 시각이 있으면(완료된 수면 기록) 바로 종료 처리 → 서버가 duration 계산.
+        if let endedAt = sleep.endedAt {
+            let ended = try await dataSource.end(
+                babyId: sleep.babyId,
+                sleepId: created.id,
+                request: SleepMapper.toEndRequest(endedAt: endedAt)
+            )
+            return SleepMapper.toEntity(ended)
+        }
+        return SleepMapper.toEntity(created)
     }
 
     func endSleep(id: UUID, babyId: UUID, endedAt: Date) async throws -> SleepRecord {

@@ -21,13 +21,14 @@ struct SleepRecord: Identifiable, Equatable, Sendable, Codable {
         return max(0, Int(end.timeIntervalSince(startedAt) / 60))
     }
 
-    static func new(babyId: UUID, startedAt: Date = .now, memo: String? = nil) -> SleepRecord {
+    static func new(babyId: UUID, startedAt: Date = .now, endedAt: Date? = nil,
+                    durationMinutes: Int? = nil, memo: String? = nil) -> SleepRecord {
         SleepRecord(
             id: UUID(),
             babyId: babyId,
             startedAt: startedAt,
-            endedAt: nil,
-            durationMinutes: nil,
+            endedAt: endedAt,
+            durationMinutes: durationMinutes,
             memo: memo,
             createdAt: .now
         )

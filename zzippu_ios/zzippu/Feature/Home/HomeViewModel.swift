@@ -835,13 +835,12 @@ extension Feeding {
 
 extension SleepRecord {
     var timelineLabel: String {
-        if isActive { return "수면 중 · \(elapsedMinutes())분 경과" }
-        if let min = durationMinutes {
-            let h = min / 60, m = min % 60
-            if h > 0 { return "수면 (\(h)시간\(m > 0 ? " \(m)분" : ""))" }
-            return "수면 (\(m)분)"
-        }
-        return "수면 시작"
+        guard let end = endedAt else { return "수면 중 · \(elapsedMinutes())분 경과" }
+        // 서버 duration 없으면 기상-시작으로 계산(다음날 기상 포함).
+        let min = durationMinutes ?? max(0, Int(end.timeIntervalSince(startedAt) / 60))
+        let h = min / 60, m = min % 60
+        if h > 0 { return "수면 (\(h)시간\(m > 0 ? " \(m)분" : ""))" }
+        return "수면 (\(m)분)"
     }
 }
 
