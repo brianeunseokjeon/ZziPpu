@@ -273,18 +273,33 @@ final class GrowthViewModel {
         WHOBandSpec(p3: r.p3, p15: r.p15, p50: r.p50, p85: r.p85, p97: r.p97)
     }
 
-    var latestValueText: String {
-        guard let last = series.last else { return "—" }
-        switch selectedMetric {
-        case .weight:
-            guard let w = last.weightG else { return "—" }
-            return String(format: "%.2fkg", Double(w) / 1000.0)
-        case .height:
-            guard let h = last.heightCm else { return "—" }
-            return String(format: "%.1fcm", h)
-        case .head:
-            guard let hc = last.headCircumferenceCm else { return "—" }
-            return String(format: "%.1fcm", hc)
+    /// 지표별 값 추출(kg/cm 단위, 없으면 nil).
+    private func value(_ record: GrowthRecord, for metric: GrowthMetric) -> Double? {
+        switch metric {
+        case .weight: return record.weightG.map { Double($0) / 1000.0 }
+        case .height: return record.heightCm
+        case .head:   return record.headCircumferenceCm
         }
+    }
+
+    /// 해당 지표 값이 있는 '가장 최근' 기록. series는 오름차순 정렬이라 last(where:)가 최신.
+    /// 예: 오늘은 몸무게만 입력했어도 키·머리둘레는 값이 있던 이전 기록으로 폴백.
+    private func latestRecord(for metric: GrowthMetric) -> GrowthRecord? {
+        series.last { value($0, for: metric) != nil }
+    }
+
+    /// 최근값 텍스트 — 최신 기록에 값이 없으면 그 값이 있는 이전 기록의 값을 표시.
+    var latestValueText: String {
+        guard let rec = latestRecord(for: selectedMetric),
+              let v = value(rec, for: selectedMetric) else { return "—" }
+        switch selectedMetric {
+        case .weight:         return String(format: "%.2fkg", v)
+        case .height, .head:  return String(format: "%.1fcm", v)
+        }
+    }
+
+    /// 최근값을 제공한 기록의 날짜(폴백된 기록 기준). 값이 없으면 nil.
+    var latestDate: Date? {
+        latestRecord(for: selectedMetric)?.recordedAt
     }
 }

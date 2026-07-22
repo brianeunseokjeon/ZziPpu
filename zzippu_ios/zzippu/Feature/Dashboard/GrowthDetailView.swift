@@ -42,12 +42,12 @@ struct GrowthDetailView: View {
                                 .foregroundStyle(theme.color.textPrimary.color)
                         }
                         Spacer()
-                        if let last = vm.series.last {
+                        if let date = vm.latestDate {
                             VStack(alignment: .trailing, spacing: 4) {
                                 Text("기록일")
                                     .font(theme.typography.caption)
                                     .foregroundStyle(theme.color.textTertiary.color)
-                                Text(last.recordedAt, format: .dateTime.month().day())
+                                Text(date, format: .dateTime.month().day())
                                     .font(theme.typography.bodyStrong)
                                     .foregroundStyle(theme.color.textPrimary.color)
                             }
