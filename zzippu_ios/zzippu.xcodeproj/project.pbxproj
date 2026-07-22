@@ -36,6 +36,7 @@
 		1ECAD8AFD9A65542762DF182 /* RemoteCaregiverRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7A64E18D9DFB4BB7FAC85B0F /* RemoteCaregiverRepository.swift */; };
 		1F1215772FFE889300F02CA5 /* zzippuApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1F1215762FFE889300F02CA5 /* zzippuApp.swift */; };
 		1F12157D2FFE889600F02CA5 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 1F12157C2FFE889600F02CA5 /* Assets.xcassets */; };
+		AAAAAAAAAAAAAAAAAAAA0011 /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = AAAAAAAAAAAAAAAAAAAA0010 /* Localizable.xcstrings */; };
 		1F1215802FFE889600F02CA5 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 1F12157F2FFE889600F02CA5 /* Preview Assets.xcassets */; };
 		1F12158A2FFE889600F02CA5 /* zzippuTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1F1215892FFE889600F02CA5 /* zzippuTests.swift */; };
 		1F1215942FFE889600F02CA5 /* zzippuUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1F1215932FFE889600F02CA5 /* zzippuUITests.swift */; };
@@ -295,6 +296,7 @@
 		1F1215762FFE889300F02CA5 /* zzippuApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = zzippuApp.swift; sourceTree = "<group>"; };
 		1F1215782FFE889400F02CA5 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		1F12157C2FFE889600F02CA5 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		AAAAAAAAAAAAAAAAAAAA0010 /* Localizable.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = Localizable.xcstrings; sourceTree = "<group>"; };
 		1F12157F2FFE889600F02CA5 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
 		1F1215852FFE889600F02CA5 /* zzippuTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = zzippuTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		1F1215892FFE889600F02CA5 /* zzippuTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = zzippuTests.swift; sourceTree = "<group>"; };
@@ -649,6 +651,7 @@
 				1F1215762FFE889300F02CA5 /* zzippuApp.swift */,
 				1F1215782FFE889400F02CA5 /* ContentView.swift */,
 				1F12157C2FFE889600F02CA5 /* Assets.xcassets */,
+				AAAAAAAAAAAAAAAAAAAA0010 /* Localizable.xcstrings */,
 				1F12157E2FFE889600F02CA5 /* Preview Content */,
 				654EB42B603A490CB505FD42 /* Domain */,
 				F68655A98AF86BCE121878FC /* Data */,
@@ -1376,11 +1379,12 @@
 			};
 			buildConfigurationList = 1F12156E2FFE889300F02CA5 /* Build configuration list for PBXProject "zzippu" */;
 			compatibilityVersion = "Xcode 14.0";
-			developmentRegion = en;
+			developmentRegion = ko;
 			hasScannedForEncodings = 0;
 			knownRegions = (
 				en,
 				Base,
+				ko,
 			);
 			mainGroup = 1F12156A2FFE889300F02CA5;
 			productRefGroup = 1F1215742FFE889300F02CA5 /* Products */;
@@ -1401,6 +1405,7 @@
 			files = (
 				1F1215802FFE889600F02CA5 /* Preview Assets.xcassets in Resources */,
 				1F12157D2FFE889600F02CA5 /* Assets.xcassets in Resources */,
+				AAAAAAAAAAAAAAAAAAAA0011 /* Localizable.xcstrings in Resources */,
 				2E81D3F0A2067770155884C6 /* pediatric_guidelines.json in Resources */,
 				6E8A3894CF729FE356BF4843 /* who_growth_weight_boy.json in Resources */,
 				7A93C22C4D59F7BE1F1B6530 /* who_growth_weight_girl.json in Resources */,

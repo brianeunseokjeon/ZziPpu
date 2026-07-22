@@ -566,9 +566,9 @@ private struct DateSectionHeader: View {
         if let two = cal.date(byAdding: .day, value: -2, to: cal.startOfDay(for: Date())),
            cal.isDate(day, inSameDayAs: two) { return "그제" }
         let fmt = DateFormatter()
-        fmt.locale = Locale(identifier: "ko_KR")
+        fmt.locale = .current
         fmt.timeZone = .kst
-        fmt.dateFormat = "M월 d일 (E)"
+        fmt.setLocalizedDateFormatFromTemplate("MMMMdEEE")   // 기기 언어. ko "7월 12일 (일)"
         return fmt.string(from: day)
     }
 

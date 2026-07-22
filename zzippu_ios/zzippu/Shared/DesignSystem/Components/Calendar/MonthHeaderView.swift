@@ -17,9 +17,9 @@ struct MonthHeaderView: View {
 
     private var monthTitle: String {
         let fmt = DateFormatter()
-        fmt.locale = Locale(identifier: "ko_KR")
+        fmt.locale = .current
         fmt.timeZone = .kst
-        fmt.dateFormat = "yyyy년 M월"
+        fmt.setLocalizedDateFormatFromTemplate("yMMMM")   // 기기 언어. ko "2026년 7월"
         return fmt.string(from: month)
     }
 

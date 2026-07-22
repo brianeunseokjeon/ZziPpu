@@ -29,21 +29,21 @@ extension Date {
 
     // MARK: - 공용 KST 포맷터 (재사용)
 
-    /// "M월 d일" (KST)
+    /// 월·일 (기기 언어). ko "7월 12일" / en "Jul 12". 타임존은 KST 고정.
     static let krMonthDayFormatter: DateFormatter = {
         let f = DateFormatter()
-        f.locale = Locale(identifier: "ko_KR")
+        f.locale = .current
         f.timeZone = .kst
-        f.dateFormat = "M월 d일"
+        f.setLocalizedDateFormatFromTemplate("MMMMd")
         return f
     }()
 
-    /// "오전/오후 h:mm" (KST) — 웹 formatTime(Intl ko-KR, hour12) 정합. 예: "오후 2:30".
+    /// 시:분 (기기 언어). ko "오후 2:30" / en "2:30 PM". 타임존은 KST 고정.
     static let krTimeFormatter: DateFormatter = {
         let f = DateFormatter()
-        f.locale = Locale(identifier: "ko_KR")
+        f.locale = .current
         f.timeZone = .kst
-        f.dateFormat = "a h:mm"
+        f.setLocalizedDateFormatFromTemplate("jmm")
         return f
     }()
 }

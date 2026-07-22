@@ -5,7 +5,12 @@ import SwiftUI
 
 struct WeekdayHeaderView: View {
 
-    private let weekdays = ["일", "월", "화", "수", "목", "금", "토"]
+    // 기기 언어 요일 심볼(일요일 시작 — 배열 index 0=일). ko "일월화…" / en "SMTWTFS".
+    private let weekdays: [String] = {
+        var cal = Calendar(identifier: .gregorian)
+        cal.locale = .current
+        return cal.veryShortWeekdaySymbols
+    }()
 
     @Environment(\.theme) private var theme
 

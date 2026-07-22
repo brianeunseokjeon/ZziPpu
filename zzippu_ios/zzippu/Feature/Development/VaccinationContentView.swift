@@ -112,9 +112,9 @@ struct VaccinationContentView: View {
 
     static func dateText(_ date: Date) -> String {
         let f = DateFormatter()
-        f.locale = Locale(identifier: "ko_KR")
+        f.locale = .current
         f.timeZone = .kst
-        f.dateFormat = "yyyy.M.d"
+        f.setLocalizedDateFormatFromTemplate("yMd")   // 기기 언어
         return f.string(from: date)
     }
 }

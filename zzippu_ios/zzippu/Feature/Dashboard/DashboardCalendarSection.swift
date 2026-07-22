@@ -99,9 +99,9 @@ struct DashboardCalendarSection: View {
 
     private let monthFormatter: DateFormatter = {
         let f = DateFormatter()
-        f.locale = Locale(identifier: "ko_KR")
+        f.locale = .current
         f.timeZone = .kst
-        f.dateFormat = "M월"
+        f.setLocalizedDateFormatFromTemplate("MMMM")   // 기기 언어. ko "7월" / en "July"
         return f
     }()
 

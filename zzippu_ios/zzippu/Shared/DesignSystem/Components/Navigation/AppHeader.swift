@@ -66,9 +66,9 @@ public struct AppHeader: View {
         // 웹정합: 웹 헤더는 오늘도 "M월 d일"을 그대로 노출(formatDate). "오늘" 치환 폐기.
         // 요일(E) 병기 — 예: "7월 12일 (일)". ko_KR에서 E=일/월/…
         let fmt = DateFormatter()
-        fmt.locale = Locale(identifier: "ko_KR")
+        fmt.locale = .current
         fmt.timeZone = .kst
-        fmt.dateFormat = "M월 d일 (E)"
+        fmt.setLocalizedDateFormatFromTemplate("MMMMdEEE")   // 기기 언어. ko "7월 12일 (일)"
         return fmt.string(from: selectedDate)
     }
 

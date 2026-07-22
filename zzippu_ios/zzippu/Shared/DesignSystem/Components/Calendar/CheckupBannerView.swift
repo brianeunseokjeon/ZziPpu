@@ -11,9 +11,9 @@ struct CheckupBannerView: View {
 
     private let dateFmt: DateFormatter = {
         let f = DateFormatter()
-        f.locale = Locale(identifier: "ko_KR")
+        f.locale = .current
         f.timeZone = .kst
-        f.dateFormat = "M/d"
+        f.setLocalizedDateFormatFromTemplate("Md")   // 기기 언어
         return f
     }()
 

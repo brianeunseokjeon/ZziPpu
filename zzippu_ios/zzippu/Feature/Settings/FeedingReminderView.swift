@@ -240,10 +240,10 @@ struct FeedingReminderView: View {
 
     private func clock(_ date: Date) -> String {
         let f = DateFormatter()
-        f.locale = Locale(identifier: "ko_KR")
+        f.locale = .current
         f.calendar = Calendar.kst
         f.timeZone = Calendar.kst.timeZone
-        f.dateFormat = "a h:mm"
+        f.setLocalizedDateFormatFromTemplate("jmm")   // 기기 언어. ko "오후 4:30"
         return f.string(from: date)
     }
 
