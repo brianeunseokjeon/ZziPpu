@@ -44,11 +44,14 @@ private struct SleepInputContent: View {
 
     /// 기상 시각(다음날 가능). 기본 .now — 사용자가 조정.
     @State private var endedAt: Date = .now
+    /// 아직 자는 중(기상 시각 미정) — 진행중 수면으로 기록.
+    @State private var stillSleeping: Bool = false
 
     private var durationMinutes: Int {
         max(0, Int(endedAt.timeIntervalSince(vm.startedAt) / 60))
     }
-    private var isValid: Bool { endedAt > vm.startedAt }
+    /// 진행중이면 잠든 시각만 있으면 됨. 완료면 기상 > 잠든.
+    private var isValid: Bool { stillSleeping || endedAt > vm.startedAt }
     private var durationText: String {
         let h = durationMinutes / 60, m = durationMinutes % 60
         if h > 0 { return "\(h)시간\(m > 0 ? " \(m)분" : "")" }
@@ -71,28 +74,43 @@ private struct SleepInputContent: View {
                     .labelsHidden()
                 }
 
-                // 기상 시각 (다음날 가능)
-                VStack(alignment: .leading, spacing: theme.space.xs) {
-                    Text("기상 시각")
-                        .font(theme.typography.captionStrong)
-                        .foregroundStyle(theme.color.textSecondary.color)
-                    DatePicker(
-                        "",
-                        selection: $endedAt,
-                        displayedComponents: [.date, .hourAndMinute]
-                    )
-                    .labelsHidden()
+                // 아직 자는 중 토글 — 켜면 기상 시각/잔 시간 숨김(진행중 기록)
+                Toggle(isOn: $stillSleeping) {
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("아직 자는 중이에요")
+                            .font(theme.typography.body)
+                            .foregroundStyle(theme.color.textPrimary.color)
+                        Text("기상 시각은 나중에 기록할 수 있어요")
+                            .font(theme.typography.caption)
+                            .foregroundStyle(theme.color.textTertiary.color)
+                    }
                 }
+                .tint(theme.color.primary.color)
 
-                // 잔 시간
-                HStack {
-                    Text("잔 시간")
-                        .font(theme.typography.captionStrong)
-                        .foregroundStyle(theme.color.textSecondary.color)
-                    Spacer()
-                    Text(isValid ? durationText : "기상 시각을 잠든 시각 이후로")
-                        .font(theme.typography.bodyStrong)
-                        .foregroundStyle(isValid ? theme.color.primary.color : theme.color.textTertiary.color)
+                if !stillSleeping {
+                    // 기상 시각 (다음날 가능)
+                    VStack(alignment: .leading, spacing: theme.space.xs) {
+                        Text("기상 시각")
+                            .font(theme.typography.captionStrong)
+                            .foregroundStyle(theme.color.textSecondary.color)
+                        DatePicker(
+                            "",
+                            selection: $endedAt,
+                            displayedComponents: [.date, .hourAndMinute]
+                        )
+                        .labelsHidden()
+                    }
+
+                    // 잔 시간
+                    HStack {
+                        Text("잔 시간")
+                            .font(theme.typography.captionStrong)
+                            .foregroundStyle(theme.color.textSecondary.color)
+                        Spacer()
+                        Text(endedAt > vm.startedAt ? durationText : "기상 시각을 잠든 시각 이후로")
+                            .font(theme.typography.bodyStrong)
+                            .foregroundStyle(endedAt > vm.startedAt ? theme.color.primary.color : theme.color.textTertiary.color)
+                    }
                 }
 
                 // 메모 (optional)
@@ -128,14 +146,12 @@ private struct SleepInputContent: View {
 
     private func handleSave() {
         guard isValid else { return }
-        // 잠든~기상까지 완료된 수면 기록(기상 다음날 가능). duration 로컬 계산(서버도 재계산).
-        let sleep = SleepRecord.new(
-            babyId: vm.babyId,
-            startedAt: vm.startedAt,
-            endedAt: endedAt,
-            durationMinutes: durationMinutes,
-            memo: vm.memo.isEmpty ? nil : vm.memo
-        )
+        let memo = vm.memo.isEmpty ? nil : vm.memo
+        // 자는 중이면 진행중(endedAt nil), 아니면 완료(잠든~기상 + duration).
+        let sleep: SleepRecord = stillSleeping
+            ? SleepRecord.new(babyId: vm.babyId, startedAt: vm.startedAt, memo: memo)
+            : SleepRecord.new(babyId: vm.babyId, startedAt: vm.startedAt,
+                              endedAt: endedAt, durationMinutes: durationMinutes, memo: memo)
         vm.resetInputs()
         isPresented = false
         onSaved?(sleep)

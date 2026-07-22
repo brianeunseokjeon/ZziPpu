@@ -438,9 +438,11 @@ final class HomeViewModel {
             }
             // 간격 모드는 항상 재계산. 육퇴 해제(창 닫힘) 시 고정 모드도 재무장.
             guard s.mode == .interval || closedWindow else { return }
-            let settings = s   // await 경계 넘기기 전 불변 스냅샷
             let last = try? await feedingRepository.lastFeeding(babyId: babyId)
-            await FeedingNotificationScheduler.reschedule(settings, lastFeedingAt: last?.startedAt)
+            // await 사이 육퇴 토글 등으로 설정이 바뀌었을 수 있어 최신값으로 재조정(경쟁 방지).
+            let fresh = FeedingReminderSettings.load()
+            guard fresh.enabled else { return }
+            await FeedingNotificationScheduler.reschedule(fresh, lastFeedingAt: last?.startedAt)
         }
     }
 

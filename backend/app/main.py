@@ -32,6 +32,7 @@ from app.infrastructure.persistence.database import AsyncSessionFactory, engine
 from app.infrastructure.persistence.models import (  # noqa: F401 — ensure all models are registered
     AIReviewModel,
     BabyModel,
+    CareLogModel,
     ChatConversationModel,
     ChatMessageModel,
     DiaperModel,
@@ -122,6 +123,7 @@ _SYNC_TABLES = (
     "diaper_records",
     "play_records",
     "growth_records",
+    "care_logs",
     "vaccinations",
     "babies",
 )

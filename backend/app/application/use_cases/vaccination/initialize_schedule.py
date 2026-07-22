@@ -15,7 +15,13 @@ class InitializeVaccinationScheduleUseCase:
         now = datetime.now(timezone.utc)
         saved_vaccinations: list[VaccinationResponseDTO] = []
 
+        # 멱등: 이미 있는 (백신명, 차수)는 건너뛴다 → 재호출/재시드 시 중복 삽입 방지.
+        existing = await self._repo.get_by_baby_id(baby_id)
+        existing_keys = {(v.vaccine_name, v.dose_number) for v in existing}
+
         for entry in VACCINATION_SCHEDULE:
+            if (entry["name"], entry["dose"]) in existing_keys:
+                continue
             scheduled_date = birth_date + timedelta(days=entry["offset_days"])
             vaccination = Vaccination(
                 id=uuid4(),

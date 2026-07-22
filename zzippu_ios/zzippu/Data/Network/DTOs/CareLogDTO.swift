@@ -30,8 +30,9 @@ struct CareLogCreateRequestDTO: Encodable {
 // MARK: - Update Request DTO
 
 struct CareLogUpdateRequestDTO: Encodable {
+    let category: String        // 백엔드 필수(카테고리 불변이라도 전송) — 누락 시 422
     let name: String?
     let dose: String?
-    let recordedAt: Date?
+    let recordedAt: Date        // 백엔드 필수 — 옵셔널 아님
     let memo: String?
 }

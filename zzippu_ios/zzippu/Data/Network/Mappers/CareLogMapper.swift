@@ -36,6 +36,7 @@ enum CareLogMapper {
 
     static func toUpdateRequest(_ log: CareLog) -> CareLogUpdateRequestDTO {
         CareLogUpdateRequestDTO(
+            category: log.category.rawValue,   // 백엔드 필수 — 누락 시 422
             name: log.name,
             dose: log.dose,
             recordedAt: log.recordedAt,

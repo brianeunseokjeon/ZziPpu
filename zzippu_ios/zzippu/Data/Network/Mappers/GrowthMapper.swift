@@ -39,7 +39,7 @@ enum GrowthMapper {
 
     static func toUpdateRequest(_ record: GrowthRecord) -> GrowthUpdateRequestDTO {
         GrowthUpdateRequestDTO(
-            recordedAt: record.recordedAt,   // Date → apiEncoder가 ISO datetime으로 인코딩
+            recordedAt: APIDateCodec.formatDate(record.recordedAt),   // YYYY-MM-DD(백엔드 date)
             weightG: record.weightG,
             heightCm: record.heightCm,
             headCircumferenceCm: record.headCircumferenceCm,

@@ -17,12 +17,18 @@ final class RemoteSleepRepository: SleepRepository {
         let created = try await dataSource.create(babyId: sleep.babyId, request: SleepMapper.toStartRequest(sleep))
         // 기상 시각이 있으면(완료된 수면 기록) 바로 종료 처리 → 서버가 duration 계산.
         if let endedAt = sleep.endedAt {
-            let ended = try await dataSource.end(
-                babyId: sleep.babyId,
-                sleepId: created.id,
-                request: SleepMapper.toEndRequest(endedAt: endedAt)
-            )
-            return SleepMapper.toEntity(ended)
+            do {
+                let ended = try await dataSource.end(
+                    babyId: sleep.babyId,
+                    sleepId: created.id,
+                    request: SleepMapper.toEndRequest(endedAt: endedAt)
+                )
+                return SleepMapper.toEntity(ended)
+            } catch {
+                // end 실패 → 방금 만든 미종료 세션을 정리(고아 세션·유령 "수면 중" 배너 방지) 후 에러 전파.
+                try? await dataSource.delete(babyId: sleep.babyId, sleepId: created.id)
+                throw error
+            }
         }
         return SleepMapper.toEntity(created)
     }

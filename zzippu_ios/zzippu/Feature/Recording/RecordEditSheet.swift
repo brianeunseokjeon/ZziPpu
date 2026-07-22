@@ -381,7 +381,10 @@ struct RecordEditSheet: View {
     private func handleSave() {
         // 지정한 시각(HH:mm)을 원본 일자에 적용.
         let start = combined(base: recordBaseDate, time: startTime)
-        let end: Date? = (showsEnd && hasEnd) ? combined(base: recordBaseDate, time: endTime) : nil
+        var endMut: Date? = (showsEnd && hasEnd) ? combined(base: recordBaseDate, time: endTime) : nil
+        // 종료가 시작보다 앞이면 자정을 넘긴 것(예: 23:50 잠들어 다음날 01:30 기상) → 하루 더함.
+        if let e = endMut, e <= start { endMut = e.addingTimeInterval(24 * 60 * 60) }
+        let end = endMut   // 불변 스냅샷(Task 캡처 안전)
 
         // 편집된 메모 정규화: 공백·개행 trim 후 빈 문자열이면 nil.
         let trimmed = memoText.trimmingCharacters(in: .whitespacesAndNewlines)

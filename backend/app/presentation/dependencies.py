@@ -55,6 +55,7 @@ from app.application.use_cases.sleep import (
 )
 from app.application.use_cases.vaccination import (
     GetVaccinationsUseCase,
+    InitializeVaccinationScheduleUseCase,
     MarkAdministeredUseCase,
 )
 from app.config import settings
@@ -402,6 +403,12 @@ def get_mark_administered_use_case(
     vaccination_repo: Annotated[VaccinationRepositoryImpl, Depends(get_vaccination_repo)],
 ) -> MarkAdministeredUseCase:
     return MarkAdministeredUseCase(vaccination_repo)
+
+
+def get_initialize_vaccination_schedule_use_case(
+    vaccination_repo: Annotated[VaccinationRepositoryImpl, Depends(get_vaccination_repo)],
+) -> InitializeVaccinationScheduleUseCase:
+    return InitializeVaccinationScheduleUseCase(vaccination_repo)
 
 
 # ── 내부 서비스 호출 인증 (auth-service → core) ──────────────────────

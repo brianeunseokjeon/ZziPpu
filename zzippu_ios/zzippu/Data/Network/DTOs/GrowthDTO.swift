@@ -33,7 +33,7 @@ struct GrowthCreateRequestDTO: Encodable {
 /// 서버 PATCH /growth/{id} 대응. recorded_at은 ISO datetime(apiEncoder가 Date→ISO 인코딩).
 /// 나머지는 옵셔널이나 편집 시 전체 전송(전체교체 의미).
 struct GrowthUpdateRequestDTO: Encodable {
-    let recordedAt: Date            // datetime — apiEncoder가 ISO8601로 인코딩
+    let recordedAt: String          // YYYY-MM-DD — 백엔드가 date 타입이라 datetime(비자정) 거부됨
     let weightG: Int?
     let heightCm: Double?
     let headCircumferenceCm: Double?

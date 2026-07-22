@@ -12,10 +12,12 @@ from app.application.use_cases.baby import (
     UpdateBabyUseCase,
 )
 from app.application.use_cases.export import ExportBabyDataUseCase
+from app.application.use_cases.vaccination import InitializeVaccinationScheduleUseCase
 from app.presentation.dependencies import (
     CurrentUserDep,
     DbDep,
     get_baby_profile_use_case,
+    get_initialize_vaccination_schedule_use_case,
     get_register_baby_use_case,
     get_update_baby_use_case,
 )
@@ -50,6 +52,10 @@ async def register_baby(
     body: BabyCreateRequest,
     user_id: CurrentUserDep,
     use_case: Annotated[RegisterBabyUseCase, Depends(get_register_baby_use_case)],
+    init_vaccinations: Annotated[
+        InitializeVaccinationScheduleUseCase,
+        Depends(get_initialize_vaccination_schedule_use_case),
+    ],
 ) -> BabyResponse:
     dto = CreateBabyDTO(
         user_id=user_id,
@@ -64,7 +70,14 @@ async def register_baby(
         rh_factor=body.rh_factor.value if body.rh_factor is not None else None,
         birth_time=body.birth_time,
     )
-    return _to_response(await use_case.execute(dto))
+    saved = await use_case.execute(dto)
+    # 신규 아기 → 표준 예방접종 일정 생성(멱등). 실패해도 등록은 유지.
+    try:
+        await init_vaccinations.execute(saved.id, saved.birth_date)
+    except Exception:  # noqa: BLE001
+        import logging
+        logging.getLogger(__name__).warning("예방접종 일정 초기화 실패(등록은 성공)", exc_info=True)
+    return _to_response(saved)
 
 
 @router.get("", response_model=list[BabyResponse])
