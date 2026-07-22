@@ -147,27 +147,40 @@ final class HomeViewModel {
         if recordsByDay[day] == nil {
             recordsByDay[day] = DayRecords(isLoading: true)
         }
-        Task { @MainActor in
-            // 도메인별 독립 로드 — 하나가 실패해도(서버 오류/디코드) 나머지는 보이게.
-            // (예: 오프라인 모드에서 분유는 로컬·정상인데 기저귀 서버호출이 실패하면
-            //  예전엔 그날 전체가 빈 값이 됐다. 각각 try? 로 분리해 부분 실패를 격리한다.)
-            async let f = feedingRepository.list(babyId: babyId, on: day)
-            async let s = sleepRepository.list(babyId: babyId, on: day)
-            async let d = diaperRepository.list(babyId: babyId, on: day)
-            async let p = playRepository.list(babyId: babyId, on: day)
-            async let c = careLogRepository.list(babyId: babyId, on: day)
+        Task { @MainActor in await loadDayAsync(day) }
+    }
 
-            let feedings = (try? await f) ?? []
-            let sleeps   = (try? await s) ?? []
-            let diapers  = (try? await d) ?? []
-            let plays    = (try? await p) ?? []
-            let careLogs = (try? await c) ?? []
+    /// 단일 일자 로드(await 가능) — 도메인별 독립 로드로 부분 실패 격리.
+    @MainActor
+    private func loadDayAsync(_ day: Date) async {
+        async let f = feedingRepository.list(babyId: babyId, on: day)
+        async let s = sleepRepository.list(babyId: babyId, on: day)
+        async let d = diaperRepository.list(babyId: babyId, on: day)
+        async let p = playRepository.list(babyId: babyId, on: day)
+        async let c = careLogRepository.list(babyId: babyId, on: day)
 
-            recordsByDay[day] = DayRecords(
-                feedings: feedings, sleeps: sleeps, diapers: diapers, plays: plays,
-                careLogs: careLogs, isLoading: false
-            )
+        let feedings = (try? await f) ?? []
+        let sleeps   = (try? await s) ?? []
+        let diapers  = (try? await d) ?? []
+        let plays    = (try? await p) ?? []
+        let careLogs = (try? await c) ?? []
+
+        recordsByDay[day] = DayRecords(
+            feedings: feedings, sleeps: sleeps, diapers: diapers, plays: plays,
+            careLogs: careLogs, isLoading: false
+        )
+    }
+
+    /// 당겨서 새로고침 — 보이는 날짜들을 실제 완료까지 await(스피너 유지).
+    @MainActor
+    func refresh() async {
+        let days = loadedDays.isEmpty ? [Calendar.kst.startOfDay(for: Date())] : loadedDays
+        await withTaskGroup(of: Void.self) { group in
+            for day in days { group.addTask { @MainActor in await self.loadDayAsync(day) } }
         }
+        refreshActiveSessions()
+        refreshLastFormula()
+        loadReminderState()
     }
 
     /// "최근" 활성으로 인정할 최대 경과(초). 이보다 오래된 미종료 세션은

@@ -242,6 +242,7 @@
 		FEC52097C96ECFE610DDEC53 /* DiaperRecord.swift in Sources */ = {isa = PBXBuildFile; fileRef = 461B2AD016FE8779CEBA3C4E /* DiaperRecord.swift */; };
 		FF001F3737BC89A9DFC75834 /* CareLog.swift in Sources */ = {isa = PBXBuildFile; fileRef = 91A5D845968869EE1A20845C /* CareLog.swift */; };
 		FF016E4CA33011880BB98FB4 /* DSSegmentedChips.swift in Sources */ = {isa = PBXBuildFile; fileRef = C81B331E2848D4A6B7458451 /* DSSegmentedChips.swift */; };
+		AAAAAAAAAAAAAAAAAAAA0021 /* DSSelectChip.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAAAAAAAAAAAAAAAAAAA0020 /* DSSelectChip.swift */; };
 		FF3417C96429D55E89C07F10 /* Date+.swift in Sources */ = {isa = PBXBuildFile; fileRef = 217B6B25134223FE24756126 /* Date+.swift */; };
 /* End PBXBuildFile section */
 
@@ -467,6 +468,7 @@
 		C7060140A1A6A17F1229394C /* BuildMonthCalendarUseCase.swift */ = {isa = PBXFileReference; explicitFileType = sourcecode.swift; includeInIndex = 1; path = BuildMonthCalendarUseCase.swift; sourceTree = "<group>"; };
 		C723460CF9DA8ABDBD0A0D81 /* RemotePlayDataSource.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = RemotePlayDataSource.swift; path = Network/DataSources/RemotePlayDataSource.swift; sourceTree = "<group>"; };
 		C81B331E2848D4A6B7458451 /* DSSegmentedChips.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DSSegmentedChips.swift; sourceTree = "<group>"; };
+		AAAAAAAAAAAAAAAAAAAA0020 /* DSSelectChip.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DSSelectChip.swift; sourceTree = "<group>"; };
 		C8D99E4EBFB60B2E1E16C24B /* DiaperRepository.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DiaperRepository.swift; sourceTree = "<group>"; };
 		C9854C5F607B7D5A479BE993 /* CareLogDTO.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = CareLogDTO.swift; path = Network/DTOs/CareLogDTO.swift; sourceTree = "<group>"; };
 		C9D7E9BCC3D0269738853326 /* DSNumberStepper.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DSNumberStepper.swift; sourceTree = "<group>"; };
@@ -555,6 +557,7 @@
 				315945215111404F6AFE33D2 /* DSChip.swift */,
 				C9D7E9BCC3D0269738853326 /* DSNumberStepper.swift */,
 				C81B331E2848D4A6B7458451 /* DSSegmentedChips.swift */,
+				AAAAAAAAAAAAAAAAAAAA0020 /* DSSelectChip.swift */,
 			);
 			name = Inputs;
 			path = Inputs;
@@ -1645,6 +1648,7 @@
 				DA8C4CD53403CBDD35A92137 /* CalendarSnapshotStore.swift in Sources */,
 				1C1F04BCCCF47F9D3707EDC8 /* StaticVolumeDecorationProvider.swift in Sources */,
 				FF016E4CA33011880BB98FB4 /* DSSegmentedChips.swift in Sources */,
+				AAAAAAAAAAAAAAAAAAAA0021 /* DSSelectChip.swift in Sources */,
 				8B960B80474971175C46C250 /* QuickAction.swift in Sources */,
 				F9AE1B390BFA255C6587AB9E /* QuickBarSettings.swift in Sources */,
 				312B82FFDFE4C5E5AADB8934 /* QuickBarEditSheet.swift in Sources */,

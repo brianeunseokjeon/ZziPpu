@@ -64,21 +64,16 @@ struct CareInputSheet: View {
                         .font(theme.typography.captionStrong)
                         .foregroundStyle(theme.color.textSecondary.color)
 
-                    LazyVGrid(
-                        columns: [GridItem(.adaptive(minimum: 76), spacing: theme.space.sm)],
-                        alignment: .leading,
-                        spacing: theme.space.sm
-                    ) {
+                    // 종류 칩 — 라디우스 8·가로패딩 12·왼쪽정렬 자동 줄바꿈(DSSelectChip/FlowLayout 공용).
+                    FlowLayout(spacing: theme.space.sm) {
                         ForEach(presets, id: \.self) { p in
-                            DSChip(
-                                label: p,
-                                isSelected: selectedName == p,
-                                variant: .selectable,
-                                onTap: { selectedName = (selectedName == p ? nil : p) }
-                            )
+                            DSSelectChip(label: p, isSelected: selectedName == p) {
+                                selectedName = (selectedName == p ? nil : p)
+                            }
                         }
-                        DSChip(label: "＋ 추가", variant: .quick, onTap: { addingPreset = true })
+                        DSSelectChip(label: "＋ 추가") { addingPreset = true }
                     }
+                    .frame(maxWidth: .infinity, alignment: .leading)
 
                     if addingPreset {
                         HStack(spacing: theme.space.sm) {

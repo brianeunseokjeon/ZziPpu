@@ -442,6 +442,7 @@ private struct TodayView: View {
                 .padding(.bottom, theme.space.lg)
             }
             .background(theme.color.surface.color)
+            .refreshable { await vm.refresh() }   // 아래로 당겨서 새로고침
         }
         .onAppear { vm.loadReminderState() }   // 설정 화면 다녀온 뒤 육퇴/알림 상태 갱신
     }
@@ -468,12 +469,18 @@ private struct TodayView: View {
             vm.toggleNightOff()
         } label: {
             HStack(spacing: theme.space.sm) {
-                Text(vm.nightOffActive
-                     ? "육퇴 중 · 수유 알림 꺼짐 — 탭하면 다시 켜기"
-                     : "육퇴 · 오늘 밤 수유 알림 끄기")
-                    .font(theme.typography.caption)
-                    .lineLimit(1)
-                    .minimumScaleFactor(0.8)
+                Group {
+                    if vm.nightOffActive {
+                        // "탭하면 다시 켜기"는 연하게(안내용) — 본문과 헷갈리지 않게.
+                        Text("육퇴 중 · 수유 알림 꺼짐  ")
+                            + Text("· 탭하면 다시 켜기").foregroundColor(activeFg.opacity(0.5))
+                    } else {
+                        Text("육퇴 · 오늘 밤 수유 알림 끄기")
+                    }
+                }
+                .font(theme.typography.caption)
+                .lineLimit(1)
+                .minimumScaleFactor(0.8)
                 Spacer(minLength: 0)
                 if vm.nightOffActive {
                     NightSkyBadge()   // 반달+반짝이는 별, 은하수 그라데이션
