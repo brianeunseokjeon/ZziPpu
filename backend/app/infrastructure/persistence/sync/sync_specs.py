@@ -164,6 +164,7 @@ _GROWTH = SyncSpec(
         FieldSpec("weight_g", parse_int, ser_passthrough),
         FieldSpec("height_cm", parse_float, ser_passthrough),
         FieldSpec("head_circumference_cm", parse_float, ser_passthrough),
+        FieldSpec("temperature_c", parse_float, ser_passthrough),
         FieldSpec("memo", parse_str, ser_passthrough),
     ],
 )

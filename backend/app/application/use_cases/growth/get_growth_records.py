@@ -18,6 +18,7 @@ class GetGrowthRecordsUseCase:
                 weight_g=r.weight_g,
                 height_cm=r.height_cm,
                 head_circumference_cm=r.head_circumference_cm,
+                temperature_c=r.temperature_c,
                 memo=r.memo,
                 created_at=r.created_at,
             )

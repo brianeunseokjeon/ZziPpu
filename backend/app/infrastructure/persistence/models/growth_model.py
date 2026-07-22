@@ -18,5 +18,6 @@ class GrowthModel(Base, SyncMixin):
     weight_g: Mapped[int | None] = mapped_column(Integer, nullable=True)
     height_cm: Mapped[float | None] = mapped_column(Float, nullable=True)
     head_circumference_cm: Mapped[float | None] = mapped_column(Float, nullable=True)
+    temperature_c: Mapped[float | None] = mapped_column(Float, nullable=True)
     memo: Mapped[str | None] = mapped_column(Text, nullable=True)
     created_at: Mapped[datetime] = mapped_column(UTCDateTime, nullable=False)

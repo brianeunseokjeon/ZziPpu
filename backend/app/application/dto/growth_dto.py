@@ -10,6 +10,7 @@ class CreateGrowthDTO:
     weight_g: int | None = None
     height_cm: float | None = None
     head_circumference_cm: float | None = None
+    temperature_c: float | None = None
     memo: str | None = None
     id: UUID | None = None  # 클라 생성 UUID(멱등 upsert)
 
@@ -23,6 +24,7 @@ class UpdateGrowthDTO:
     weight_g: int | None = None
     height_cm: float | None = None
     head_circumference_cm: float | None = None
+    temperature_c: float | None = None
     memo: str | None = None
 
 
@@ -34,5 +36,6 @@ class GrowthResponseDTO:
     weight_g: int | None
     height_cm: float | None
     head_circumference_cm: float | None
+    temperature_c: float | None
     memo: str | None
     created_at: datetime

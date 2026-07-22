@@ -285,6 +285,30 @@ async def _migrate_sqlite() -> None:
                 exc_info=True,
             )
 
+        # ── growth_records.temperature_c (체온 섭씨, nullable REAL) ──────────
+        # 멱등 — 이미 있으면 skip. 실패해도 앱 기동은 막지 않음(로그만).
+        try:
+            growth_cols = await _existing_columns(conn, "growth_records", is_sqlite)
+            if growth_cols and "temperature_c" not in growth_cols:
+                if is_sqlite:
+                    await conn.execute(
+                        text("ALTER TABLE growth_records ADD COLUMN temperature_c REAL")
+                    )
+                else:
+                    await conn.execute(
+                        text(
+                            "ALTER TABLE growth_records "
+                            "ADD COLUMN IF NOT EXISTS temperature_c DOUBLE PRECISION"
+                        )
+                    )
+        except Exception:  # noqa: BLE001 — 마이그레이션 실패가 기동을 막지 않도록
+            import logging
+
+            logging.getLogger(__name__).warning(
+                "growth_records.temperature_c 마이그레이션 실패(무시하고 기동 계속)",
+                exc_info=True,
+            )
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncIterator[None]:

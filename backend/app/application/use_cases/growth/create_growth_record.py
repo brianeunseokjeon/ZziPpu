@@ -18,6 +18,7 @@ class CreateGrowthRecordUseCase:
             weight_g=dto.weight_g,
             height_cm=dto.height_cm,
             head_circumference_cm=dto.head_circumference_cm,
+            temperature_c=dto.temperature_c,
             memo=dto.memo,
             created_at=datetime.now(timezone.utc),
         )
@@ -29,6 +30,7 @@ class CreateGrowthRecordUseCase:
             weight_g=saved.weight_g,
             height_cm=saved.height_cm,
             head_circumference_cm=saved.head_circumference_cm,
+            temperature_c=saved.temperature_c,
             memo=saved.memo,
             created_at=saved.created_at,
         )

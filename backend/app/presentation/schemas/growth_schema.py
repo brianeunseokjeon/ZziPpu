@@ -10,6 +10,7 @@ class CreateGrowthRequest(BaseModel):
     weight_g: int | None = Field(None, gt=0, description="체중 (그램)")
     height_cm: float | None = Field(None, gt=0, description="키 (cm)")
     head_circumference_cm: float | None = Field(None, gt=0, description="머리둘레 (cm)")
+    temperature_c: float | None = Field(None, gt=0, description="체온 (섭씨)")
     memo: str | None = None
 
 
@@ -19,6 +20,7 @@ class UpdateGrowthRequest(BaseModel):
     weight_g: int | None = Field(None, gt=0, description="체중 (그램)")
     height_cm: float | None = Field(None, gt=0, description="키 (cm)")
     head_circumference_cm: float | None = Field(None, gt=0, description="머리둘레 (cm)")
+    temperature_c: float | None = Field(None, gt=0, description="체온 (섭씨)")
     memo: str | None = None
 
 
@@ -29,6 +31,7 @@ class GrowthResponse(BaseModel):
     weight_g: int | None
     height_cm: float | None
     head_circumference_cm: float | None
+    temperature_c: float | None
     memo: str | None
     created_at: datetime
 

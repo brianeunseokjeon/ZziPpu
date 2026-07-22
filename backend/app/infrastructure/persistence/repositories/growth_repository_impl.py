@@ -21,6 +21,7 @@ class GrowthRepositoryImpl(GrowthRepository):
             weight_g=model.weight_g,
             height_cm=model.height_cm,
             head_circumference_cm=model.head_circumference_cm,
+            temperature_c=model.temperature_c,
             memo=model.memo,
             created_at=model.created_at,
         )
@@ -31,6 +32,7 @@ class GrowthRepositoryImpl(GrowthRepository):
         model.weight_g = entity.weight_g
         model.height_cm = entity.height_cm
         model.head_circumference_cm = entity.head_circumference_cm
+        model.temperature_c = entity.temperature_c
         model.memo = entity.memo
 
     async def get(self, id: UUID) -> GrowthRecord | None:

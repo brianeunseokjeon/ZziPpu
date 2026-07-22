@@ -16,6 +16,7 @@ enum GrowthMapper {
             weightG: dto.weightG,
             heightCm: dto.heightCm,
             headCircumferenceCm: dto.headCircumferenceCm,
+            temperatureC: dto.temperatureC,
             memo: dto.memo,
             createdAt: dto.createdAt
         )
@@ -29,6 +30,7 @@ enum GrowthMapper {
             weightG: record.weightG,
             heightCm: record.heightCm,
             headCircumferenceCm: record.headCircumferenceCm,
+            temperatureC: record.temperatureC,
             memo: record.memo
         )
     }
@@ -41,6 +43,7 @@ enum GrowthMapper {
             weightG: record.weightG,
             heightCm: record.heightCm,
             headCircumferenceCm: record.headCircumferenceCm,
+            temperatureC: record.temperatureC,
             memo: record.memo
         )
     }

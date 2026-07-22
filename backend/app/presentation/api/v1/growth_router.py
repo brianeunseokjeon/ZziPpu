@@ -40,6 +40,7 @@ async def create_growth_record(
         weight_g=body.weight_g,
         height_cm=body.height_cm,
         head_circumference_cm=body.head_circumference_cm,
+        temperature_c=body.temperature_c,
         memo=body.memo,
     )
     result = await use_case.execute(dto)
@@ -50,6 +51,7 @@ async def create_growth_record(
         weight_g=result.weight_g,
         height_cm=result.height_cm,
         head_circumference_cm=result.head_circumference_cm,
+        temperature_c=result.temperature_c,
         memo=result.memo,
         created_at=result.created_at,
     )
@@ -70,6 +72,7 @@ async def get_growth_records(
             weight_g=r.weight_g,
             height_cm=r.height_cm,
             head_circumference_cm=r.head_circumference_cm,
+            temperature_c=r.temperature_c,
             memo=r.memo,
             created_at=r.created_at,
         )
@@ -92,6 +95,7 @@ async def update_growth_record(
         weight_g=body.weight_g,
         height_cm=body.height_cm,
         head_circumference_cm=body.head_circumference_cm,
+        temperature_c=body.temperature_c,
         memo=body.memo,
     )
     try:
@@ -105,6 +109,7 @@ async def update_growth_record(
         weight_g=result.weight_g,
         height_cm=result.height_cm,
         head_circumference_cm=result.head_circumference_cm,
+        temperature_c=result.temperature_c,
         memo=result.memo,
         created_at=result.created_at,
     )

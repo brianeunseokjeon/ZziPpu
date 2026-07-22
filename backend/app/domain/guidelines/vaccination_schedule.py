@@ -39,6 +39,7 @@ VACCINATION_SCHEDULE: list[VaccineEntry] = [
     {"name": "로타바이러스", "dose": 1, "offset_days": 60, "grace_days": 30, "description": "장염 경구 백신 (2개월)"},
     {"name": "로타바이러스", "dose": 2, "offset_days": 120, "grace_days": 30, "description": "장염 경구 백신 (4개월)"},
     {"name": "로타바이러스", "dose": 3, "offset_days": 180, "grace_days": 30, "description": "장염 경구 백신 (6개월, RV5에 해당)"},
+    {"name": "수막구균", "dose": 1, "offset_days": 60, "grace_days": 365, "description": "수막구균 (선택접종, 생후 2개월~ 고위험군)"},
 
     # ── 12-18개월: 추가 접종 ───────────────────────
     {"name": "Hib", "dose": 4, "offset_days": 365, "grace_days": 90, "description": "뇌수막염 추가 (12-15개월)"},
@@ -57,6 +58,11 @@ VACCINATION_SCHEDULE: list[VaccineEntry] = [
     {"name": "IPV", "dose": 4, "offset_days": 1460, "grace_days": 365, "description": "폴리오 4차 (만 4-6세)"},
     {"name": "MMR", "dose": 2, "offset_days": 1460, "grace_days": 365, "description": "MMR 2차 (만 4-6세)"},
     {"name": "일본뇌염(불활화)", "dose": 4, "offset_days": 2190, "grace_days": 365, "description": "일본뇌염 4차 (만 6세)"},
+
+    # ── 만 11-12세 (청소년) ────────────────────────
+    {"name": "Tdap/Td", "dose": 1, "offset_days": 4015, "grace_days": 730, "description": "파상풍/디프테리아/백일해 추가 (만 11-12세)"},
+    {"name": "HPV", "dose": 1, "offset_days": 4015, "grace_days": 730, "description": "사람유두종바이러스 1차 (만 11-12세)"},
+    {"name": "HPV", "dose": 2, "offset_days": 4200, "grace_days": 365, "description": "사람유두종바이러스 2차 (1차 후 6개월)"},
 
     # ── 매년 ──────────────────────────────────────
     {"name": "인플루엔자", "dose": 1, "offset_days": 180, "grace_days": 365, "description": "독감 (생후 6개월부터, 매년)"},

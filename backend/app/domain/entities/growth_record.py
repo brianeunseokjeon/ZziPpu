@@ -11,5 +11,6 @@ class GrowthRecord:
     weight_g: int | None
     height_cm: float | None
     head_circumference_cm: float | None
+    temperature_c: float | None
     memo: str | None
     created_at: datetime

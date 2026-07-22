@@ -12,6 +12,7 @@ struct GrowthResponseDTO: Decodable {
     let weightG: Int?
     let heightCm: Double?
     let headCircumferenceCm: Double?
+    let temperatureC: Double?
     let memo: String?
     let createdAt: Date             // datetime — 자동 디코딩
 }
@@ -23,6 +24,7 @@ struct GrowthCreateRequestDTO: Encodable {
     let weightG: Int?
     let heightCm: Double?
     let headCircumferenceCm: Double?
+    let temperatureC: Double?
     let memo: String?
 }
 
@@ -35,5 +37,6 @@ struct GrowthUpdateRequestDTO: Encodable {
     let weightG: Int?
     let heightCm: Double?
     let headCircumferenceCm: Double?
+    let temperatureC: Double?
     let memo: String?
 }

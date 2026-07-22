@@ -296,6 +296,11 @@ struct GrowthRecordRow: View {
                             .font(theme.typography.body)
                             .foregroundStyle(theme.color.textPrimary.color)
                     }
+                    if let t = record.temperatureC {
+                        Text(String(format: "%.1f°C", t))
+                            .font(theme.typography.body)
+                            .foregroundStyle(theme.color.textPrimary.color)
+                    }
                 }
             }
             Spacer()
@@ -324,10 +329,11 @@ struct GrowthInputSheet: View {
     let editing: GrowthRecord?
     let onSaved: (GrowthRecord) -> Void
 
-    @State private var weightKgStr: String
-    @State private var heightCmStr: String
-    @State private var headCmStr:   String
-    @State private var recordedAt:  Date
+    @State private var weightKgStr:    String
+    @State private var heightCmStr:    String
+    @State private var headCmStr:      String
+    @State private var temperatureStr: String
+    @State private var recordedAt:     Date
 
     @Environment(\.theme) private var theme
 
@@ -344,6 +350,7 @@ struct GrowthInputSheet: View {
         _weightKgStr = State(initialValue: editing?.weightG.map { String(format: "%.2f", Double($0) / 1000.0) } ?? "")
         _heightCmStr = State(initialValue: editing?.heightCm.map { String(format: "%.1f", $0) } ?? "")
         _headCmStr   = State(initialValue: editing?.headCircumferenceCm.map { String(format: "%.1f", $0) } ?? "")
+        _temperatureStr = State(initialValue: editing?.temperatureC.map { String(format: "%.1f", $0) } ?? "")
         _recordedAt  = State(initialValue: editing?.recordedAt ?? .now)
     }
 
@@ -356,6 +363,19 @@ struct GrowthInputSheet: View {
                 DatePicker("기록 날짜", selection: $recordedAt, displayedComponents: .date)
                     .font(theme.typography.body)
                     .padding(.horizontal, 16)
+
+                // 체온
+                VStack(alignment: .leading, spacing: 6) {
+                    Text("체온 (°C)")
+                        .font(theme.typography.captionStrong)
+                        .foregroundStyle(theme.color.textSecondary.color)
+                    DSTextField(
+                        placeholder: "예: 36.5",
+                        text: $temperatureStr,
+                        keyboardType: .decimalPad
+                    )
+                }
+                .padding(.horizontal, 16)
 
                 // 체중
                 VStack(alignment: .leading, spacing: 6) {
@@ -409,13 +429,14 @@ struct GrowthInputSheet: View {
     }
 
     private var isValid: Bool {
-        !weightKgStr.isEmpty || !heightCmStr.isEmpty || !headCmStr.isEmpty
+        !weightKgStr.isEmpty || !heightCmStr.isEmpty || !headCmStr.isEmpty || !temperatureStr.isEmpty
     }
 
     private func save() {
         let weightG: Int? = Double(weightKgStr).map { Int($0 * 1000) }
         let heightCm: Double? = Double(heightCmStr)
         let headCm: Double? = Double(headCmStr)
+        let tempC: Double? = Double(temperatureStr)
 
         let record: GrowthRecord
         if let editing {
@@ -427,6 +448,7 @@ struct GrowthInputSheet: View {
                 weightG: weightG,
                 heightCm: heightCm,
                 headCircumferenceCm: headCm,
+                temperatureC: tempC,
                 memo: editing.memo,
                 createdAt: editing.createdAt
             )
@@ -436,7 +458,8 @@ struct GrowthInputSheet: View {
                 recordedAt: recordedAt,
                 weightG: weightG,
                 heightCm: heightCm,
-                headCircumferenceCm: headCm
+                headCircumferenceCm: headCm,
+                temperatureC: tempC
             )
         }
         onSaved(record)
