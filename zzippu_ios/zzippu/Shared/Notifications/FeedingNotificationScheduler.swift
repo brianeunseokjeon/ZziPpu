@@ -67,6 +67,15 @@ enum FeedingNotificationScheduler {
         }
     }
 
+    /// 테스트 알림 — 지금부터 seconds 후 1회. 권한·델리게이트·전달을 직접 확인용.
+    static func sendTest(after seconds: TimeInterval = 5) async {
+        let granted = await requestAuthorization()   // 미허용이면 요청
+        guard granted else { return }
+        let content = makeContent(body: "테스트 알림이에요 🍼 실제 알림도 이렇게 옵니다.")
+        let trigger = UNTimeIntervalNotificationTrigger(timeInterval: max(1, seconds), repeats: false)
+        await add(id: "feeding.reminder.test", content: content, trigger: trigger)
+    }
+
     /// 우리 식별자 접두사의 대기 알림 전부 취소.
     static func cancelAll() async {
         let pending = await center.pendingNotificationRequests()

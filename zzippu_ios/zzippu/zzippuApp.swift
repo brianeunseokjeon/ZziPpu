@@ -3,10 +3,13 @@
 
 import SwiftUI
 import SwiftData
+import UserNotifications
 
 @main
 @MainActor
 struct zzippuApp: App {
+    // 알림 델리게이트 배선(포그라운드 표시 + 탭 처리). 로컬 알림은 Info.plist/백그라운드모드 불필요.
+    @UIApplicationDelegateAdaptor(NotificationAppDelegate.self) private var appDelegate
     @State private var appContainer = AppContainer()
     @State private var toastCenter = ToastCenter()
     @Environment(\.scenePhase) private var scenePhase
@@ -34,6 +37,26 @@ struct zzippuApp: App {
                 appContainer.refreshFeedingReminders() // 간격 모드: 최신 수유 기준 알림 재조정
             }
         }
+    }
+}
+
+/// 알림 델리게이트 — 앱 시작 시 UNUserNotificationCenter.delegate 설정.
+/// 이게 없으면 앱이 켜져 있을 때(포그라운드) 로컬 알림 배너가 안 뜬다(iOS 기본 억제).
+final class NotificationAppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCenterDelegate {
+    func application(
+        _ application: UIApplication,
+        didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]? = nil
+    ) -> Bool {
+        UNUserNotificationCenter.current().delegate = self
+        return true
+    }
+
+    /// 포그라운드에서도 배너·소리·목록으로 표시.
+    func userNotificationCenter(
+        _ center: UNUserNotificationCenter,
+        willPresent notification: UNNotification
+    ) async -> UNNotificationPresentationOptions {
+        [.banner, .sound, .list]
     }
 }
 

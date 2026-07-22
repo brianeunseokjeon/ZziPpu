@@ -40,6 +40,12 @@ struct FeedingReminderView: View {
                     modeSection
                     if settings.mode == .fixed { fixedSection } else { intervalSection }
                     leadSection
+
+                    // 알림이 실제로 오는지 바로 확인
+                    DSButton("테스트 알림 보내기 (5초 후)", variant: .tertiary, size: .md) {
+                        Task { await FeedingNotificationScheduler.sendTest() }
+                        toastCenter.show(.init(message: "5초 후 알림이 와요 — 잠금화면이나 홈에서 확인해 보세요", variant: .info))
+                    }
                 }
             }
             .padding(theme.space.screenPaddingX)
