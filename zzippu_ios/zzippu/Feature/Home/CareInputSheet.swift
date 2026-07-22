@@ -94,9 +94,14 @@ struct CareInputSheet: View {
                 DSTextField(label: "용량 (선택)", placeholder: "예: 5방울, 2.5ml", text: $doseText)
             }
 
-            // ── 시각 ──
-            DatePicker("기록 시각", selection: $recordedAt)
-                .font(theme.typography.body)
+            // ── 시각 ── (라벨은 다른 필드와 동일한 captionStrong)
+            VStack(alignment: .leading, spacing: theme.space.xs) {
+                Text("기록 시각")
+                    .font(theme.typography.captionStrong)
+                    .foregroundStyle(theme.color.textSecondary.color)
+                DatePicker("", selection: $recordedAt)
+                    .labelsHidden()
+            }
 
             // ── 메모 ──
             DSTextField(label: "메모 (선택)", placeholder: "메모", text: $memoText)

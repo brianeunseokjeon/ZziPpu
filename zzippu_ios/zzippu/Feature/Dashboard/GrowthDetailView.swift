@@ -359,10 +359,15 @@ struct GrowthInputSheet: View {
     var body: some View {
         ScrollView {
             VStack(spacing: 20) {
-                // 기록일
-                DatePicker("기록 날짜", selection: $recordedAt, displayedComponents: .date)
-                    .font(theme.typography.body)
-                    .padding(.horizontal, 16)
+                // 기록일 (라벨은 다른 필드와 동일한 captionStrong)
+                VStack(alignment: .leading, spacing: 6) {
+                    Text("기록 날짜")
+                        .font(theme.typography.captionStrong)
+                        .foregroundStyle(theme.color.textSecondary.color)
+                    DatePicker("", selection: $recordedAt, displayedComponents: .date)
+                        .labelsHidden()
+                }
+                .padding(.horizontal, 16)
 
                 // 체온
                 VStack(alignment: .leading, spacing: 6) {
