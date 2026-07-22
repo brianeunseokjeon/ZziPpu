@@ -908,7 +908,13 @@ extension Baby {
         case .female:  gender = .female
         case .unknown: gender = .unknown
         }
-        let photoURL: URL? = photoUrl.flatMap { URL(string: $0) }
+        // http(s) 원격 URL만 — 스킴 없는 값을 AsyncImage에 주면 LocalDownloadTask -10 발생.
+        let photoURL: URL? = photoUrl.flatMap { s -> URL? in
+            guard let url = URL(string: s),
+                  let scheme = url.scheme?.lowercased(),
+                  scheme == "http" || scheme == "https" else { return nil }
+            return url
+        }
         return AppHeaderBaby(name: name, birthDate: birthDate, gender: gender, photoURL: photoURL)
     }
 }

@@ -53,9 +53,18 @@ public struct BabyAvatar: View {
 
     @Environment(\.theme) private var theme
 
+    /// AsyncImage는 http(s) 원격 URL만 로드해야 함. 스킴 없는/로컬 URL을 주면
+    /// LocalDownloadTask로 시도하다 error -10을 뱉으므로, 원격 URL만 통과시킨다.
+    private var remotePhotoURL: URL? {
+        guard let url = photoURL,
+              let scheme = url.scheme?.lowercased(),
+              scheme == "http" || scheme == "https" else { return nil }
+        return url
+    }
+
     public var body: some View {
         Group {
-            if let url = photoURL {
+            if let url = remotePhotoURL {
                 AsyncImage(url: url) { phase in
                     switch phase {
                     case .success(let image):

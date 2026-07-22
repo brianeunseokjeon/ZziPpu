@@ -60,8 +60,11 @@ final class SettingsViewModel {
     }
 
     var photoURL: URL? {
-        guard let s = baby?.photoUrl, !s.isEmpty else { return nil }
-        return URL(string: s)
+        guard let s = baby?.photoUrl, !s.isEmpty,
+              let url = URL(string: s),
+              let scheme = url.scheme?.lowercased(),
+              scheme == "http" || scheme == "https" else { return nil }
+        return url
     }
 
     // MARK: - Export
