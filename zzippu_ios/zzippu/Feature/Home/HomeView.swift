@@ -467,7 +467,7 @@ private struct TodayView: View {
     /// 생일 하한 푸터 — 태어난 날에서 자동 로드가 멈췄음을 알리고, 원하면 그 이전도 볼 수 있게.
     private var birthBoundaryFooter: some View {
         VStack(spacing: theme.space.sm) {
-            Text("🌱 태어난 날이에요 · 이전엔 기록이 없어요")
+            Text("🍀 태어난 날이에요 · 이전엔 기록이 없어요")
                 .font(theme.typography.caption)
                 .foregroundStyle(theme.color.textTertiary.color)
                 .multilineTextAlignment(.center)
