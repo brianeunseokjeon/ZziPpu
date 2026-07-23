@@ -123,17 +123,33 @@ private struct BabyLoadErrorView: View {
 private struct SplashView: View {
     @Environment(\.theme) private var theme
 
+    // 서로 다른 주기의 모션을 겹쳐 "몽글몽글/말캉말캉" 유기적 느낌을 낸다(이미지 변경 없음).
+    @State private var breathe = false   // 숨쉬듯 전체 크기
+    @State private var squish  = false   // 젤리 스쿼시(가로↔세로)
+    @State private var float   = false   // 위아래 부유(구름)
+    @State private var sway    = false   // 살짝 갸웃
+
     var body: some View {
-        VStack(spacing: theme.space.md) {
-            Image("Mascot")
-                .resizable()
-                .scaledToFit()
-                .frame(width: 120, height: 120)
-            Text("찌뿌둥")
-                .font(theme.typography.display)
-        }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .background(theme.color.background.color)
+        Image("Mascot")
+            .resizable()
+            .scaledToFit()
+            .frame(width: 120, height: 120)
+            // 겹쳐지는 변형: 균등 숨쉬기 + 젤리(비균등) + 회전 + 부유
+            .scaleEffect(breathe ? 1.04 : 0.97)
+            .scaleEffect(x: squish ? 1.05 : 0.96, y: squish ? 0.96 : 1.05, anchor: .bottom)
+            .rotationEffect(.degrees(sway ? 3.5 : -3.5))
+            .offset(y: float ? -10 : 8)
+            // 구름같은 말랑한 그림자(같이 호흡)
+            .shadow(color: theme.color.primary.color.opacity(0.18),
+                    radius: breathe ? 28 : 14, y: float ? 12 : 4)
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .background(theme.color.background.color)
+            .onAppear {
+                withAnimation(.easeInOut(duration: 1.9).repeatForever(autoreverses: true)) { breathe = true }
+                withAnimation(.easeInOut(duration: 1.3).repeatForever(autoreverses: true)) { squish  = true }
+                withAnimation(.easeInOut(duration: 2.6).repeatForever(autoreverses: true)) { float   = true }
+                withAnimation(.easeInOut(duration: 3.1).repeatForever(autoreverses: true)) { sway    = true }
+            }
     }
 }
 
