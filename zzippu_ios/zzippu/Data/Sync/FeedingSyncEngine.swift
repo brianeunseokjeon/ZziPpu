@@ -58,17 +58,25 @@ actor FeedingSyncEngine {
         Task { await self.scheduleDebouncedPush(debounce: seconds) }
     }
 
-    /// 로그아웃/계정 전환: 진행 중 push 취소 + 로컬 전량 삭제 + pull 커서 리셋.
-    /// 다음 로그인 때 since=nil 전량 pull로 서버에서 새로 받아온다(계정 간 기록 잔존·재push 오염 방지).
-    nonisolated func resetForLogout() {
-        Task { await self.performLogoutReset() }
+    /// 로그아웃 전 best-effort push — 토큰이 유효할 때 미동기화분을 서버로 올린다(실패 무시).
+    /// 로그아웃 직전에 만든 기록도 유실 없이 서버에 보존하기 위함.
+    func flushPendingBestEffort() async {
+        guard let babyId = babyIdProvider() else { return }
+        try? await push(babyId: babyId)
     }
 
-    private func performLogoutReset() async {
+    /// 로컬 전량 삭제 + pull 커서 리셋(다음 로그인 때 since=nil 전량 pull).
+    /// 계정 간 기록 잔존·stale 재push 오염 방지.
+    func wipeAndResetCursor() async {
         debounceTask?.cancel()
         debounceTask = nil
         try? await store.deleteAllLocal()
-        lastPulledAt = nil            // 커서 리셋 → 다음 로그인 전량 pull
+        lastPulledAt = nil
+    }
+
+    /// 401(토큰 무효): 즉시 로컬 삭제(토큰이 없어 push 불가).
+    nonisolated func resetForLogout() {
+        Task { await self.wipeAndResetCursor() }
     }
 
     private func scheduleDebouncedPush(debounce seconds: Double) {

@@ -22,7 +22,8 @@ final class SettingsViewModel {
     private let babyId: UUID
 
     /// 로그아웃 실행 시 라우팅 무효화(SessionState.setSession(nil)) 콜백
-    var onSignedOut: (() -> Void)?
+    /// 로그아웃 실행(상위에서 AppContainer.performLogout 주입). async — push 완료 후 세션 종료.
+    var onLogout: (() async -> Void)?
 
     init(
         babyRepository: BabyRepository,
@@ -103,10 +104,10 @@ final class SettingsViewModel {
         self.baby = updated
     }
 
-    /// 명시적 로그아웃: 토큰 폐기 → 세션 무효화(로그인 화면 전환).
+    /// 명시적 로그아웃: 미동기화 push → 토큰 폐기 → 로컬 삭제 → 세션 무효화.
+    /// 실제 순서는 상위(AppContainer.performLogout)에서 보장(토큰 유효 상태에서 push 먼저).
     func signOut() {
-        authRepository.signOut()
-        onSignedOut?()
+        Task { @MainActor in await onLogout?() }
     }
 
     // MARK: - Helpers

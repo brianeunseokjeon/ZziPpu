@@ -32,10 +32,9 @@ struct SettingsView: View {
                     babyId: container.activeBabyId
                 )
                 let captured = container
-                newVM.onSignedOut = {
-                    captured.clearLocalOnLogout()   // 로컬 수유 데이터 삭제(계정 전환 시 기록 잔존 방지)
-                    captured.sessionState.setSession(nil)
-                    captured.sessionState.activeBabyRegistered = false
+                newVM.onLogout = {
+                    // 미동기화 push → 토큰삭제 → 로컬 wipe → 세션 비움(순서 보장).
+                    await captured.performLogout()
                 }
                 vm = newVM
                 newVM.load()
