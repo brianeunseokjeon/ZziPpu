@@ -35,21 +35,32 @@ public struct AppHeader: View {
     public let baby:         AppHeaderBaby
     @Binding public var selectedDate: Date
     public let onDateChange: (Date) -> Void
+    /// 생일 이전 이동 허용(기본 false → 생일에서 ◀ 정지). 홈에서 “그 이전 보기” 선택 시 true.
+    public let allowBeforeBirth: Bool
 
     public init(
-        baby:         AppHeaderBaby,
-        selectedDate: Binding<Date>,
-        onDateChange: @escaping (Date) -> Void
+        baby:             AppHeaderBaby,
+        selectedDate:     Binding<Date>,
+        allowBeforeBirth: Bool = false,
+        onDateChange:     @escaping (Date) -> Void
     ) {
-        self.baby          = baby
-        self._selectedDate = selectedDate
-        self.onDateChange  = onDateChange
+        self.baby             = baby
+        self._selectedDate    = selectedDate
+        self.allowBeforeBirth = allowBeforeBirth
+        self.onDateChange     = onDateChange
     }
 
     @Environment(\.theme) private var theme
 
     private var isToday: Bool {
         Calendar.kst.isDateInToday(selectedDate)
+    }
+
+    /// 생일 하한 도달 여부(◀ 비활성 조건). allowBeforeBirth면 항상 false.
+    private var isAtBirthFloor: Bool {
+        guard !allowBeforeBirth else { return false }
+        let cal = Calendar.kst
+        return cal.startOfDay(for: selectedDate) <= cal.startOfDay(for: baby.birthDate)
     }
 
     private var ageText: String {
@@ -95,10 +106,13 @@ public struct AppHeader: View {
                 // 웹정합: chevron 웹 w-4(16px) lucide 얇은 선. SF 심볼은 같은 pt에서 더 두꺼워 보여
                 // 시각 크기를 맞추려 12pt로 축소(색 gray-500=textSecondary는 DSIconButton 기본).
                 DSIconButton(systemName: "chevron.left", iconSize: 12) {
+                    guard !isAtBirthFloor else { return }
                     let prev = Calendar.kst.date(byAdding: .day, value: -1, to: selectedDate) ?? selectedDate
                     selectedDate = prev
                     onDateChange(prev)
                 }
+                .opacity(isAtBirthFloor ? 0.3 : 1.0)
+                .disabled(isAtBirthFloor)
 
                 // 웹정합: 날짜 text-sm(14) medium(=body) + gray-700(textStrong). min-w 110(웹 동일, 흔들림 방지).
                 Text(dateText)

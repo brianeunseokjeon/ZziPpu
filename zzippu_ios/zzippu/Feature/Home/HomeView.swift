@@ -285,6 +285,7 @@ private struct HomeContentView: View {
                 AppHeader(
                     baby: baby.toHeaderBaby(),
                     selectedDate: $vm.selectedDate,
+                    allowBeforeBirth: vm.showPreBirth,
                     onDateChange: { vm.changeDate($0) }
                 )
             } else if vm.isLoadingBaby {
@@ -429,6 +430,9 @@ private struct TodayView: View {
                             .foregroundStyle(theme.color.textTertiary.color)
                             .frame(maxWidth: .infinity)
                             .padding(.vertical, theme.space.md)
+                    } else if vm.atBirthBoundary {
+                        // 생일 하한 도달 — 자동 로드 정지 + "그 이전도 보기" 소프트 이스케이프
+                        birthBoundaryFooter
                     } else {
                         // 하단 sentinel — 나타나면 과거 하루 append
                         Color.clear
@@ -452,6 +456,22 @@ private struct TodayView: View {
         let hour = Calendar.kst.component(.hour, from: Date())
         if hour >= 17 { return true }
         return hour < 11 && !vm.hasFeedingToday
+    }
+
+    /// 생일 하한 푸터 — 태어난 날에서 자동 로드가 멈췄음을 알리고, 원하면 그 이전도 볼 수 있게.
+    private var birthBoundaryFooter: some View {
+        VStack(spacing: theme.space.sm) {
+            Text("🌱 태어난 날이에요 · 이전엔 기록이 없어요")
+                .font(theme.typography.caption)
+                .foregroundStyle(theme.color.textTertiary.color)
+                .multilineTextAlignment(.center)
+            DSButton("그 이전 날짜도 보기", variant: .tertiary, size: .sm) {
+                vm.revealPreBirth()
+            }
+            .fixedSize()
+        }
+        .frame(maxWidth: .infinity)
+        .padding(.vertical, theme.space.md)
     }
 
     /// 육퇴 배너 — 탭하면 오늘 밤 수유 알림 끔/켬. 다음 수유 기록 시 자동 복귀.
@@ -619,6 +639,21 @@ private struct DayTimelineSection: View {
 
     private var isToday: Bool { Calendar.kst.isDateInToday(day) }
 
+    /// 빈 날 상태 — "없음"이 아니라 맥락(생후일수)+안내로. 생일 이전은 존재불가 구간으로 구분.
+    private var emptyStateView: DSEmptyState {
+        if vm.isBeforeBirth(day) {
+            return DSEmptyState(icon: "hourglass", message: "아직 태어나기 전이에요 🌱")
+        }
+        let prefix = vm.ageDays(for: day).map { "생후 \($0)일" }
+        let message: String
+        if isToday {
+            message = prefix.map { "\($0) · 오늘의 첫 기록을 남겨볼까요?" } ?? "오늘의 첫 기록을 남겨볼까요?"
+        } else {
+            message = prefix.map { "\($0) · 이 날은 기록이 없어요" } ?? "이 날은 기록이 없어요"
+        }
+        return DSEmptyState(icon: "square.and.pencil", message: message)
+    }
+
     /// 타임라인 탭 → 돌봄기록이면 CareInputSheet, 아니면 RecordEditSheet.
     private func startEdit(_ item: TimelineItem) {
         if let c = vm.careLog(for: item, on: day) {
@@ -636,7 +671,7 @@ private struct DayTimelineSection: View {
                 ProgressView()
                     .frame(maxWidth: .infinity, minHeight: 60)
             } else if items.isEmpty {
-                DSEmptyState(icon: "list.bullet", message: "이 날의 기록이 없어요")
+                emptyStateView
                     .padding(.vertical, theme.space.md)
             } else {
                 ForEach(Array(items.enumerated()), id: \.element.id) { index, item in

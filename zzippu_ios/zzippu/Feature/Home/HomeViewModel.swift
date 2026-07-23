@@ -47,6 +47,52 @@ final class HomeViewModel {
         !Calendar.kst.isDateInToday(selectedDate)
     }
 
+    // MARK: - 생일 경계(soft)
+    // 태어나기 전 날짜는 "기록이 없는" 게 아니라 "존재할 수 없는" 구간 → 피드/네비를 생일에서 정지.
+    // 단, 사용자가 원하면(showPreBirth) 그 이전도 계속 볼 수 있는 소프트 경계.
+
+    /// 생일 이전 열람 허용(“그 이전 날짜도 보기” 선택 시 true).
+    var showPreBirth: Bool = false
+
+    /// 생일 자정(피드 하한). activeBaby 미로드면 nil → 경계 미적용.
+    private var birthDay: Date? {
+        activeBaby.map { Calendar.kst.startOfDay(for: $0.birthDate) }
+    }
+
+    /// 생후 일수(태어난 날 당일 = 1일, AppHeader.ageText와 동일 규칙). 생일 이전이면 0 이하.
+    func ageDays(for day: Date) -> Int? {
+        guard let birth = birthDay else { return nil }
+        let d = Calendar.kst.startOfDay(for: day)
+        let diff = Calendar.kst.dateComponents([.day], from: birth, to: d).day ?? 0
+        return diff + 1
+    }
+
+    /// 해당 날짜가 태어나기 전인지.
+    func isBeforeBirth(_ day: Date) -> Bool {
+        guard let n = ageDays(for: day) else { return false }
+        return n < 1
+    }
+
+    /// 피드가 생일 하한에 닿았는지(자동 과거 로드 정지 + “이전 보기” 안내 노출 조건).
+    var atBirthBoundary: Bool {
+        guard !showPreBirth, let birth = birthDay, let oldest = loadedDays.last,
+              let next = Calendar.kst.date(byAdding: .day, value: -1, to: oldest) else { return false }
+        return next < birth
+    }
+
+    /// “그 이전 날짜도 보기” — 소프트 경계 해제 후 계속 로드.
+    func revealPreBirth() {
+        showPreBirth = true
+        loadOlderDay()
+    }
+
+    /// activeBaby 로드 후: 이미 로드된 생일 이전 날짜를 피드에서 제거(비동기 로드 레이스 방어).
+    private func clampToBirthIfNeeded() {
+        guard !showPreBirth, let birth = birthDay else { return }
+        let trimmed = loadedDays.filter { $0 >= birth }
+        if !trimmed.isEmpty { loadedDays = trimmed }
+    }
+
     // MARK: - Dependencies (Domain 프로토콜만)
 
     private let feedingRepository: FeedingRepository
@@ -85,6 +131,7 @@ final class HomeViewModel {
             defer { isLoadingBaby = false }
             do {
                 activeBaby = try await babyRepository.fetch(id: babyId)
+                clampToBirthIfNeeded()   // 생일 확보 후 이미 로드된 생일-이전 날짜 정리
             } catch {
                 errorMessage = "아기 정보 로드 실패: \(error.localizedDescription)"
             }
@@ -100,6 +147,7 @@ final class HomeViewModel {
         loadedDays = (0..<Self.initialDays).compactMap {
             cal.date(byAdding: .day, value: -$0, to: today)
         }
+        clampToBirthIfNeeded()   // 생일 이전 날짜는 초기 피드에서 제외(정지)
         for day in loadedDays { loadDay(day) }
         refreshActiveSessions()
         refreshLastFormula()
@@ -124,6 +172,8 @@ final class HomeViewModel {
     func loadOlderDay() {
         guard loadedDays.count < Self.maxDays, let oldest = loadedDays.last else { return }
         guard let next = Calendar.kst.date(byAdding: .day, value: -1, to: oldest) else { return }
+        // 생일 하한: showPreBirth 아니면 생일 이전으로는 자동 로드하지 않음(경계 정지).
+        if !showPreBirth, let birth = birthDay, next < birth { return }
         loadedDays.append(next)
         loadDay(next)
     }
