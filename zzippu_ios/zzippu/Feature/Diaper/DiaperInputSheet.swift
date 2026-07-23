@@ -105,6 +105,7 @@ private struct DiaperInputContent: View {
                         displayedComponents: [.date, .hourAndMinute]
                     )
                     .labelsHidden()
+                    .frame(maxWidth: .infinity, alignment: .leading)
                 }
             }
 

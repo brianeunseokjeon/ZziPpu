@@ -101,6 +101,7 @@ struct CareInputSheet: View {
                     .foregroundStyle(theme.color.textSecondary.color)
                 DatePicker("", selection: $recordedAt)
                     .labelsHidden()
+                    .frame(maxWidth: .infinity, alignment: .leading)
             }
 
             // ── 메모 ──

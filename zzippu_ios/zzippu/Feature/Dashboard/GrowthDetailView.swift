@@ -366,6 +366,7 @@ struct GrowthInputSheet: View {
                         .foregroundStyle(theme.color.textSecondary.color)
                     DatePicker("", selection: $recordedAt, displayedComponents: .date)
                         .labelsHidden()
+                        .frame(maxWidth: .infinity, alignment: .leading)
                 }
                 .padding(.horizontal, 16)
 

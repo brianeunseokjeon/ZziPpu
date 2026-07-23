@@ -72,6 +72,7 @@ private struct SleepInputContent: View {
                         displayedComponents: [.date, .hourAndMinute]
                     )
                     .labelsHidden()
+                    .frame(maxWidth: .infinity, alignment: .leading)
                 }
 
                 // 아직 자는 중 토글 — 켜면 기상 시각/잔 시간 숨김(진행중 기록)
@@ -99,6 +100,7 @@ private struct SleepInputContent: View {
                             displayedComponents: [.date, .hourAndMinute]
                         )
                         .labelsHidden()
+                        .frame(maxWidth: .infinity, alignment: .leading)
                     }
 
                     // 잔 시간

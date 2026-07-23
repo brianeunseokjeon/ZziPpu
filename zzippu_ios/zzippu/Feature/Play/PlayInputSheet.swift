@@ -63,6 +63,7 @@ private struct PlayInputContent: View {
                         displayedComponents: [.date, .hourAndMinute]
                     )
                     .labelsHidden()
+                    .frame(maxWidth: .infinity, alignment: .leading)
                 }
 
                 // 지속시간 — 시작만 기록 / 프리셋 / 직접입력 (공용 DSSelectChip·FlowLayout)

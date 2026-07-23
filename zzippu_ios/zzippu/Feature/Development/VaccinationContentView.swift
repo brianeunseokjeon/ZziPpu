@@ -145,6 +145,7 @@ private struct VaccinationAdministerSheet: View {
                         displayedComponents: [.date]
                     )
                     .labelsHidden()
+                    .frame(maxWidth: .infinity, alignment: .leading)
 
                     fieldLabel("병원명 (선택)")
                     TextField("예: 우리아이소아과", text: $hospitalName)

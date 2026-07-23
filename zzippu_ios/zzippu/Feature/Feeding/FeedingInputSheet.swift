@@ -152,6 +152,7 @@ private struct FeedingInputContent: View {
                     displayedComponents: [.date, .hourAndMinute]
                 )
                 .labelsHidden()
+                .frame(maxWidth: .infinity, alignment: .leading)
             }
 
             // 저장 버튼

@@ -267,6 +267,7 @@ struct RecordEditSheet: View {
                     .foregroundStyle(theme.color.textSecondary.color)
                 DatePicker("", selection: $startTime, displayedComponents: [.hourAndMinute])
                     .labelsHidden()
+                    .frame(maxWidth: .infinity, alignment: .leading)
             }
 
             if showsEnd {
@@ -280,6 +281,7 @@ struct RecordEditSheet: View {
                     if hasEnd {
                         DatePicker("", selection: $endTime, displayedComponents: [.hourAndMinute])
                             .labelsHidden()
+                            .frame(maxWidth: .infinity, alignment: .leading)
                     }
                 }
             }
