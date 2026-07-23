@@ -278,6 +278,8 @@ private struct HomeContentView: View {
     let onEditQuickBar: () -> Void
 
     @Environment(\.theme) private var theme
+    /// 로컬 대표 이미지 변경 시 헤더 아바타 강제 갱신용.
+    @State private var avatarRefresh = UUID()
 
     var body: some View {
         VStack(spacing: 0) {
@@ -288,6 +290,7 @@ private struct HomeContentView: View {
                     allowBeforeBirth: vm.showPreBirth,
                     onDateChange: { vm.changeDate($0) }
                 )
+                .id(avatarRefresh)
             } else if vm.isLoadingBaby {
                 AppHeaderPlaceholder()
             }
@@ -303,6 +306,9 @@ private struct HomeContentView: View {
         }
         .background(theme.color.surface.color)
         .navigationBarHidden(true)
+        .onReceive(NotificationCenter.default.publisher(for: LocalBabyImageStore.didChange)) { _ in
+            avatarRefresh = UUID()   // 프로필에서 대표 이미지 변경 → 홈 헤더 아바타 갱신
+        }
         .alert("오류", isPresented: Binding(
             get: { vm.errorMessage != nil },
             set: { if !$0 { vm.errorMessage = nil } }

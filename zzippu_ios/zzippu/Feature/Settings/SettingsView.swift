@@ -52,6 +52,8 @@ private struct SettingsContent: View {
 
     @State private var showLogoutConfirm = false
     @State private var exportShareItems: [Any]?
+    /// 로컬 대표 이미지 변경 시 아바타 강제 갱신용.
+    @State private var avatarRefresh = UUID()
 
     var body: some View {
         ScrollView {
@@ -80,6 +82,9 @@ private struct SettingsContent: View {
             Button("로그아웃", role: .destructive) { vm.signOut() }
             Button("취소", role: .cancel) {}
         }
+        .onReceive(NotificationCenter.default.publisher(for: LocalBabyImageStore.didChange)) { _ in
+            avatarRefresh = UUID()   // 프로필에서 대표 이미지 변경 → 헤더 아바타 갱신
+        }
     }
 
     // MARK: - Profile Header
@@ -89,7 +94,8 @@ private struct SettingsContent: View {
             profileEditDestination
         } label: {
             HStack(spacing: theme.space.md) {
-                BabyAvatar(photoURL: vm.photoURL, gender: vm.avatarGender, size: .lg)
+                BabyAvatar(photoURL: vm.photoURL, localImage: vm.localImage, gender: vm.avatarGender, size: .lg)
+                    .id(avatarRefresh)
                 VStack(alignment: .leading, spacing: theme.space.xs) {
                     Text(vm.baby?.name ?? "아기 정보")
                         .font(theme.typography.headline)

@@ -4,6 +4,7 @@
 
 import Foundation
 import Observation
+import UIKit
 
 @Observable
 final class SettingsViewModel {
@@ -65,6 +66,11 @@ final class SettingsViewModel {
               let scheme = url.scheme?.lowercased(),
               scheme == "http" || scheme == "https" else { return nil }
         return url
+    }
+
+    /// 기기-로컬 대표 이미지(있으면 아바타 최우선). 서버 미업로드.
+    var localImage: UIImage? {
+        LocalBabyImageStore.shared.loadImage(for: babyId)
     }
 
     // MARK: - Export

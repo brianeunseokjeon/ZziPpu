@@ -2,15 +2,22 @@
 // 아기 프로필 편집 (설정 → push). 이름/생년월일/성별/사진URL → PATCH /babies/{id}.
 
 import SwiftUI
+import PhotosUI
 
 struct BabyProfileView: View {
     @Bindable var vm: BabyProfileViewModel
     @Environment(\.theme) private var theme
     @Environment(\.dismiss) private var dismiss
 
+    /// PhotosPicker 선택 항목(로드 후 로컬 저장).
+    @State private var pickedItem: PhotosPickerItem?
+
     var body: some View {
         ScrollView {
             VStack(spacing: theme.space.lg) {
+
+                representativeImageSection
+
                 DSTextField(
                     label: "아이 이름 *",
                     placeholder: "예: 준서",
@@ -119,6 +126,16 @@ struct BabyProfileView: View {
         .onChange(of: vm.didSave) { _, saved in
             if saved { dismiss() }
         }
+        .onChange(of: pickedItem) { _, item in
+            guard let item else { return }
+            Task {
+                if let data = try? await item.loadTransferable(type: Data.self),
+                   let image = UIImage(data: data) {
+                    vm.setLocalImage(image)
+                }
+                pickedItem = nil
+            }
+        }
         .alert("오류", isPresented: Binding(
             get: { vm.errorMessage != nil },
             set: { if !$0 { vm.errorMessage = nil } }
@@ -127,6 +144,42 @@ struct BabyProfileView: View {
         } message: {
             Text(vm.errorMessage ?? "")
         }
+    }
+
+    // 대표 이미지 — 기기-로컬 저장(서버 미업로드·다중기기 공유 안 됨). 기본은 마스코트.
+    private var representativeImageSection: some View {
+        VStack(spacing: theme.space.sm) {
+            BabyAvatar(localImage: vm.localImage, size: .lg)
+
+            HStack(spacing: theme.space.sm) {
+                PhotosPicker(selection: $pickedItem, matching: .images) {
+                    Text(vm.localImage == nil ? "대표 이미지 선택" : "이미지 변경")
+                        .font(theme.typography.bodyStrong)
+                        .foregroundStyle(theme.color.primary.color)
+                        .padding(.horizontal, theme.space.md)
+                        .padding(.vertical, theme.space.sm)
+                        .background(
+                            RoundedRectangle(cornerRadius: theme.radius.control, style: .continuous)
+                                .fill(theme.color.primaryTint.color)
+                        )
+                }
+
+                if vm.localImage != nil {
+                    Button("기본으로") { vm.clearLocalImage() }
+                        .font(theme.typography.body)
+                        .foregroundStyle(theme.color.textSecondary.color)
+                        .padding(.horizontal, theme.space.md)
+                        .padding(.vertical, theme.space.sm)
+                }
+            }
+
+            Text("이 이미지는 이 기기에만 저장돼요 (다른 기기와 공유되지 않아요).")
+                .font(theme.typography.caption)
+                .foregroundStyle(theme.color.textTertiary.color)
+                .multilineTextAlignment(.center)
+        }
+        .frame(maxWidth: .infinity)
+        .padding(.bottom, theme.space.xs)
     }
 
     // 측정치 입력(decimalPad + 단위 라벨). 빈 값 허용.

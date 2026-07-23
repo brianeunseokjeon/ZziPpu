@@ -5,6 +5,7 @@
 // baby 파라미터: DesignSystem 내부 표시용 struct (도메인 엔티티 비의존).
 
 import SwiftUI
+import UIKit
 
 // MARK: - AppHeaderBaby (DS 내부 표시용 뷰 모델 구조체)
 
@@ -15,17 +16,21 @@ public struct AppHeaderBaby {
     public let birthDate:   Date
     public let gender:      BabyGender
     public let photoURL:    URL?
+    /// 기기-로컬 대표 이미지(서버 미업로드). 있으면 아바타 최우선.
+    public let localImage:  UIImage?
 
     public init(
-        name:      String,
-        birthDate: Date,
-        gender:    BabyGender = .unknown,
-        photoURL:  URL? = nil
+        name:       String,
+        birthDate:  Date,
+        gender:     BabyGender = .unknown,
+        photoURL:   URL? = nil,
+        localImage: UIImage? = nil
     ) {
-        self.name      = name
-        self.birthDate = birthDate
-        self.gender    = gender
-        self.photoURL  = photoURL
+        self.name       = name
+        self.birthDate  = birthDate
+        self.gender     = gender
+        self.photoURL   = photoURL
+        self.localImage = localImage
     }
 }
 
@@ -86,7 +91,7 @@ public struct AppHeader: View {
     public var body: some View {
         HStack(spacing: theme.space.stackGapSm) {   // 8 — 웹 좌측 gap-2(아바타↔이름)
             // Avatar + name/age
-            BabyAvatar(photoURL: baby.photoURL, gender: baby.gender, size: .sm)
+            BabyAvatar(photoURL: baby.photoURL, localImage: baby.localImage, gender: baby.gender, size: .sm)
 
             VStack(alignment: .leading, spacing: 1) {
                 // R4(웹정합): 아기이름 웹 text-base(16) bold.

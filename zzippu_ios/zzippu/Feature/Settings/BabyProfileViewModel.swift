@@ -4,6 +4,7 @@
 
 import Foundation
 import Observation
+import UIKit
 
 @Observable
 final class BabyProfileViewModel {
@@ -20,6 +21,9 @@ final class BabyProfileViewModel {
     var birthChestCircumferenceCmText: String
     var bloodType: BloodType?        // 미선택 허용
     var rhFactor: RhFactor?          // 미선택 허용
+
+    /// 기기-로컬 대표 이미지(서버 미업로드·다중기기 공유 안 됨). nil이면 기본 마스코트.
+    var localImage: UIImage?
 
     // MARK: - Status
 
@@ -57,6 +61,27 @@ final class BabyProfileViewModel {
         self.birthHeightCmText = baby.birthHeightCm.map(Self.trimNumber) ?? ""
         self.birthHeadCircumferenceCmText = baby.birthHeadCircumferenceCm.map(Self.trimNumber) ?? ""
         self.birthChestCircumferenceCmText = baby.birthChestCircumferenceCm.map(Self.trimNumber) ?? ""
+        self.localImage = LocalBabyImageStore.shared.loadImage(for: baby.id)
+    }
+
+    // MARK: - 로컬 대표 이미지
+
+    /// 편집 대상 babyId.
+    var babyId: UUID { original.id }
+
+    /// 선택한 이미지를 기기에 저장(즉시 반영, 서버 미업로드). 실패 시 에러 표시.
+    func setLocalImage(_ image: UIImage) {
+        guard LocalBabyImageStore.shared.save(image, for: original.id) else {
+            errorMessage = "이미지를 저장하지 못했어요. 다시 시도해 주세요."
+            return
+        }
+        localImage = image
+    }
+
+    /// 로컬 대표 이미지 삭제 → 기본 마스코트로 복귀.
+    func clearLocalImage() {
+        LocalBabyImageStore.shared.delete(for: original.id)
+        localImage = nil
     }
 
     /// 소수 불필요한 0 제거(3.20 → 3.2, 3.0 → 3).

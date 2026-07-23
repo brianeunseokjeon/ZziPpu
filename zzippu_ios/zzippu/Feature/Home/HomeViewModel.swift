@@ -980,6 +980,9 @@ extension Baby {
                   scheme == "http" || scheme == "https" else { return nil }
             return url
         }
-        return AppHeaderBaby(name: name, birthDate: birthDate, gender: gender, photoURL: photoURL)
+        // 기기-로컬 대표 이미지(있으면 아바타 최우선). 서버 미업로드.
+        let localImage = LocalBabyImageStore.shared.loadImage(for: id)
+        return AppHeaderBaby(name: name, birthDate: birthDate, gender: gender,
+                             photoURL: photoURL, localImage: localImage)
     }
 }

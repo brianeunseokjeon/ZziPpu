@@ -10,10 +10,12 @@ struct LoginView: View {
     var body: some View {
         ScrollView {
             VStack(spacing: theme.space.lg) {
-                // 로고/타이틀 — 마스코트 얼굴(DefaultBabyFace) + "찌뿌둥" + 서브.
-                // 이모지(👶)는 폰트 환경에 따라 두부 글리프로 깨질 수 있어 벡터 마스코트로 대체.
+                // 로고/타이틀 — 마스코트 이미지(MascotDefault 에셋) + "찌뿌둥" + 서브.
+                // 이모지(👶)는 폰트 환경에 따라 두부 글리프로 깨질 수 있어 에셋 이미지로 대체.
                 VStack(spacing: theme.space.xs) {
-                    DefaultBabyFace()
+                    Image("MascotDefault")
+                        .resizable()
+                        .scaledToFill()
                         .frame(width: 72, height: 72)
                         .clipShape(Circle())
                     Text("찌뿌둥")
