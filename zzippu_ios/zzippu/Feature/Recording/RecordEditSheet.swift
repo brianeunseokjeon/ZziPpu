@@ -198,14 +198,27 @@ struct RecordEditSheet: View {
     }
 
     private func sideChip(_ side: BreastSide, _ label: String) -> some View {
-        DSChip(
-            label: label,
-            isSelected: breastSide == side,
-            variant: .selectable,
-            tint: theme.color.domainFeedingBreastBothTint,
-            onTap: { breastSide = side }
-        )
-        .frame(maxWidth: .infinity)
+        let selected = breastSide == side
+        return Button {
+            breastSide = side
+        } label: {
+            Text(label)
+                .font(theme.typography.captionStrong)
+                .foregroundStyle(selected ? theme.color.primary.color : theme.color.textSecondary.color)
+                // 꽉 채우고 3개 균등 폭. 배경(알약)도 함께 늘어나 크기 동일.
+                .frame(maxWidth: .infinity)
+                .frame(height: theme.component.chip.height)
+                .background(
+                    RoundedRectangle(cornerRadius: 8, style: .continuous)
+                        .fill(selected ? theme.color.domainFeedingBreastBothTint.color
+                                       : theme.color.surfaceSunken.color)
+                )
+                .overlay(
+                    RoundedRectangle(cornerRadius: 8, style: .continuous)
+                        .stroke(theme.color.borderStrong.color, lineWidth: selected ? 0 : 1)
+                )
+        }
+        .buttonStyle(.plain)
     }
 
     // ── 배변 ── (종류는 기록 생성 시 확정 — 편집에선 변경 불가)
