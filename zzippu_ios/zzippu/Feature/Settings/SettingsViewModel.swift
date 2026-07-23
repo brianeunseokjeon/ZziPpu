@@ -25,6 +25,11 @@ final class SettingsViewModel {
     /// 로그아웃 실행(상위에서 AppContainer.performLogout 주입). async — push 완료 후 세션 종료.
     var onLogout: (() async -> Void)?
 
+    /// 회원 탈퇴 실행(상위에서 AppContainer.withdrawAccount 주입).
+    var onWithdraw: (() async throws -> Void)?
+    var isWithdrawing: Bool = false
+    var withdrawError: String?
+
     init(
         babyRepository: BabyRepository,
         authRepository: AuthRepository,
@@ -108,6 +113,20 @@ final class SettingsViewModel {
     /// 실제 순서는 상위(AppContainer.performLogout)에서 보장(토큰 유효 상태에서 push 먼저).
     func signOut() {
         Task { @MainActor in await onLogout?() }
+    }
+
+    /// 회원 탈퇴: 서버 소프트삭제 요청 → 성공 시 로컬 정리 + 로그인 화면. 실패 시 에러 표시.
+    func withdraw() {
+        guard !isWithdrawing else { return }
+        isWithdrawing = true
+        Task { @MainActor in
+            defer { isWithdrawing = false }
+            do {
+                try await onWithdraw?()
+            } catch {
+                withdrawError = "탈퇴에 실패했어요. 잠시 후 다시 시도해 주세요."
+            }
+        }
     }
 
     // MARK: - Helpers

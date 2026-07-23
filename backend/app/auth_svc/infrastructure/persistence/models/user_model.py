@@ -16,3 +16,6 @@ class UserModel(Base):
     name: Mapped[str | None] = mapped_column(String(100), nullable=True)
     is_caregiver: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
     created_at: Mapped[datetime] = mapped_column(UTCDateTime, nullable=False)
+    # 회원 탈퇴(소프트삭제) 시각. 설정되면 유예상태, 재로그인 시 해제(복구),
+    # 30일 경과분은 기동 시 완전삭제(계정+전 기록). None이면 정상 계정.
+    deleted_at: Mapped[datetime | None] = mapped_column(UTCDateTime, nullable=True)

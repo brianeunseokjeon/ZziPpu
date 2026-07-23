@@ -10,6 +10,7 @@ from app.auth_svc.application.interfaces.terms_checker import TermsChecker
 from app.auth_svc.application.use_cases.auth.redeem_invite_code import RedeemInviteCodeUseCase
 from app.auth_svc.application.use_cases.auth.request_email_otp import RequestEmailOtpUseCase
 from app.auth_svc.application.use_cases.auth.verify_email_otp import VerifyEmailOtpUseCase
+from app.auth_svc.application.use_cases.auth.withdraw_account import WithdrawAccountUseCase
 from app.auth_svc.application.use_cases.terms.agree_terms import AgreeTermsUseCase
 from app.auth_svc.application.use_cases.terms.get_active_terms import GetActiveTermsUseCase
 from app.auth_svc.domain.repositories.email_otp_repository import EmailOtpRepository
@@ -69,6 +70,12 @@ def get_verify_email_otp_use_case(
     terms_checker: Annotated[TermsChecker, Depends(get_terms_checker)],
 ) -> VerifyEmailOtpUseCase:
     return VerifyEmailOtpUseCase(otp_repo, user_repo, terms_checker)
+
+
+def get_withdraw_account_use_case(
+    user_repo: Annotated[UserRepository, Depends(get_user_repo)],
+) -> WithdrawAccountUseCase:
+    return WithdrawAccountUseCase(user_repo)
 
 
 def get_caregiver_redeem_client() -> CaregiverRedeemClient:

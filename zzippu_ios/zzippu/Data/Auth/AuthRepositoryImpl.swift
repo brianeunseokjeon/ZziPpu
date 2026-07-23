@@ -62,6 +62,13 @@ final class AuthRepositoryImpl: AuthRepository {
         }
     }
 
+    func withdraw() async throws {
+        guard let token = tokenStore.load() else {
+            throw DomainError.unauthorized
+        }
+        try await remote.withdraw(token: token)
+    }
+
     func agreeTerms(_ agreements: [(type: TermType, version: String)]) async throws {
         guard let token = tokenStore.load() else {
             throw DomainError.unauthorized

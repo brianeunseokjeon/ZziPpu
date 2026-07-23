@@ -1,3 +1,4 @@
+from datetime import datetime
 from uuid import UUID
 
 from sqlalchemy import select
@@ -19,6 +20,7 @@ class UserRepositoryImpl(UserRepository):
             name=model.name,
             is_caregiver=model.is_caregiver,
             created_at=model.created_at,
+            deleted_at=model.deleted_at,
         )
 
     async def get(self, user_id: UUID) -> User | None:
@@ -54,3 +56,22 @@ class UserRepositoryImpl(UserRepository):
         if model is not None:
             await self._session.delete(model)
             await self._session.flush()
+
+    async def soft_delete(self, user_id: UUID, when: datetime) -> None:
+        model = await self._session.get(UserModel, user_id)
+        if model is not None:
+            model.deleted_at = when
+            await self._session.flush()
+
+    async def restore(self, user_id: UUID) -> None:
+        model = await self._session.get(UserModel, user_id)
+        if model is not None and model.deleted_at is not None:
+            model.deleted_at = None
+            await self._session.flush()
+
+    async def list_purgeable_ids(self, before: datetime) -> list[UUID]:
+        stmt = select(UserModel.id).where(
+            UserModel.deleted_at.is_not(None), UserModel.deleted_at < before
+        )
+        result = await self._session.execute(stmt)
+        return list(result.scalars().all())

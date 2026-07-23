@@ -60,6 +60,18 @@ final class AuthRemoteDataSource {
         try validateStatus(response, expected: 204)
     }
 
+    // MARK: - Withdraw Account (DELETE /api/v1/auth/account, Bearer required)
+
+    func withdraw(token: String) async throws {
+        let url = AuthConfig.baseURL.appendingPathComponent("/api/v1/auth/account")
+        var request = URLRequest(url: url)
+        request.httpMethod = "DELETE"
+        request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+
+        let (_, response) = try await URLSession.shared.data(for: request)
+        try validateStatus(response, expected: 204)
+    }
+
     // MARK: - Redeem Code (POST /api/v1/auth/code/redeem) — stub
 
     func redeemCode(_ code: String) async throws -> AuthSessionDTO {

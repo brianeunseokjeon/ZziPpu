@@ -78,6 +78,9 @@ class VerifyEmailOtpUseCase:
                     created_at=now,
                 )
             )
+        elif user.deleted_at is not None:
+            # 유예기간 내 재로그인 → 회원 탈퇴 취소(복구). 데이터는 그대로 유지된다.
+            await self._user_repo.restore(user.id)
 
         terms_required = await self._terms_checker.is_agreement_required(user.id)
         token = create_access_token(user.id)

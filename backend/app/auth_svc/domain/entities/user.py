@@ -16,3 +16,4 @@ class User:
     name: str | None
     is_caregiver: bool
     created_at: datetime
+    deleted_at: datetime | None = None   # 탈퇴(소프트삭제) 시각. None이면 정상.

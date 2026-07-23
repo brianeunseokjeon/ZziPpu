@@ -18,6 +18,9 @@ protocol AuthRepository {
     func loginEmail() -> String?
     /// 로그아웃 (Keychain + UserDefaults 초기화)
     func signOut()
+
+    /// 회원 탈퇴(서버 소프트삭제, 30일 유예). 유예 내 재로그인 시 자동 복구.
+    func withdraw() async throws
     /// 공동양육자 코드 redeem (시그니처만 — 미구현 stub 허용)
     func redeemCode(_ code: String) async throws -> AuthSession
 }

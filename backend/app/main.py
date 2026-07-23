@@ -312,6 +312,90 @@ async def _migrate_sqlite() -> None:
             )
 
 
+_WITHDRAW_GRACE_DAYS = 30
+
+
+async def _purge_withdrawn_accounts() -> None:
+    """유예(30일) 만료된 탈퇴 계정 완전삭제: 계정 + 소유 아기 + 전 기록 + 양육자/약관.
+    기동 시 1회 실행. 크로스-DB(main 기록 / auth 계정)를 각 세션으로 처리한다.
+    NOTE: 대량 삭제 — 운영 반영 전 스테이징에서 검증 권장.
+    """
+    from datetime import datetime, timedelta, timezone
+
+    from sqlalchemy import delete, select
+
+    from app.auth_svc.infrastructure.persistence.models.term_model import (
+        TermsAgreementModel,
+    )
+    from app.auth_svc.infrastructure.persistence.models.user_model import (
+        UserModel as AuthUserModel,
+    )
+    from app.infrastructure.persistence.models.ai_review_model import AIReviewModel
+    from app.infrastructure.persistence.models.baby_model import BabyModel
+    from app.infrastructure.persistence.models.care_log_model import CareLogModel
+    from app.infrastructure.persistence.models.caregiver_model import (
+        BabyCaregiverModel,
+        CaregiverInviteModel,
+    )
+    from app.infrastructure.persistence.models.chat_conversation_model import (
+        ChatConversationModel,
+    )
+    from app.infrastructure.persistence.models.chat_message_model import ChatMessageModel
+    from app.infrastructure.persistence.models.diaper_model import DiaperModel
+    from app.infrastructure.persistence.models.feeding_model import FeedingModel
+    from app.infrastructure.persistence.models.growth_model import GrowthModel
+    from app.infrastructure.persistence.models.play_model import PlayModel
+    from app.infrastructure.persistence.models.saved_info_model import SavedInfoModel
+    from app.infrastructure.persistence.models.sleep_model import SleepModel
+    from app.infrastructure.persistence.models.vaccination_model import VaccinationModel
+
+    cutoff = datetime.now(timezone.utc) - timedelta(days=_WITHDRAW_GRACE_DAYS)
+
+    # 1) 유예 만료 user_id (auth)
+    async with AuthAsyncSessionFactory() as auth_session:
+        res = await auth_session.execute(
+            select(AuthUserModel.id).where(
+                AuthUserModel.deleted_at.is_not(None),
+                AuthUserModel.deleted_at < cutoff,
+            )
+        )
+        user_ids = list(res.scalars().all())
+
+    if not user_ids:
+        return
+
+    # 2) main: 소유 아기 + 전 기록(baby_id 스코프) + 양육자 링크/초대
+    async with AsyncSessionFactory() as session:
+        res = await session.execute(
+            select(BabyModel.id).where(BabyModel.user_id.in_(user_ids))
+        )
+        baby_ids = list(res.scalars().all())
+        if baby_ids:
+            for model in (
+                FeedingModel, SleepModel, DiaperModel, PlayModel, CareLogModel,
+                GrowthModel, VaccinationModel, ChatConversationModel,
+                ChatMessageModel, AIReviewModel, SavedInfoModel,
+                BabyCaregiverModel, CaregiverInviteModel,
+            ):
+                await session.execute(delete(model).where(model.baby_id.in_(baby_ids)))
+        # 이 유저가 '추가 양육자'로 들어간 다른 아기의 멤버십도 제거
+        await session.execute(
+            delete(BabyCaregiverModel).where(BabyCaregiverModel.user_id.in_(user_ids))
+        )
+        await session.execute(delete(BabyModel).where(BabyModel.user_id.in_(user_ids)))
+        await session.commit()
+
+    # 3) auth: 약관동의 + 계정
+    async with AuthAsyncSessionFactory() as auth_session:
+        await auth_session.execute(
+            delete(TermsAgreementModel).where(TermsAgreementModel.user_id.in_(user_ids))
+        )
+        await auth_session.execute(
+            delete(AuthUserModel).where(AuthUserModel.id.in_(user_ids))
+        )
+        await auth_session.commit()
+
+
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     # ── core DB init ─────────────────────────────────────────────────────────
@@ -324,10 +408,20 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     # ── auth_svc DB init ─────────────────────────────────────────────────────
     async with auth_engine.begin() as conn:
         await conn.run_sync(AuthBase.metadata.create_all)
+        # users.deleted_at (회원탈퇴 소프트삭제) — 기존 테이블 보강(idempotent, sqlite/pg)
+        from sqlalchemy import text as _text
+
+        auth_is_sqlite = auth_settings.AUTH_DATABASE_URL.startswith("sqlite")
+        _ucols = await _existing_columns(conn, "users", auth_is_sqlite)
+        if _ucols and "deleted_at" not in _ucols:
+            await conn.execute(_text("ALTER TABLE users ADD COLUMN deleted_at TIMESTAMP"))
     # 약관 seed (마크다운 → terms upsert)
     async with AuthAsyncSessionFactory() as session:
         await seed_terms(AuthTermsRepositoryImpl(session))
         await session.commit()
+
+    # 유예 만료된 탈퇴 계정 완전삭제(기동 시 1회)
+    await _purge_withdrawn_accounts()
 
     yield
 

@@ -36,6 +36,10 @@ struct SettingsView: View {
                     // 미동기화 push → 토큰삭제 → 로컬 wipe → 세션 비움(순서 보장).
                     await captured.performLogout()
                 }
+                newVM.onWithdraw = {
+                    // 서버 소프트삭제(30일 유예) → 로컬 정리 + 로그인 화면.
+                    try await captured.withdrawAccount()
+                }
                 vm = newVM
                 newVM.load()
             }
@@ -52,6 +56,8 @@ private struct SettingsContent: View {
 
     @State private var showLogoutConfirm = false
     @State private var exportShareItems: [Any]?
+    @State private var showWithdrawSheet = false
+    @State private var withdrawConfirmText = ""
     /// 로컬 대표 이미지 변경 시 아바타 강제 갱신용.
     @State private var avatarRefresh = UUID()
 
@@ -81,6 +87,17 @@ private struct SettingsContent: View {
         .confirmationDialog("로그아웃 하시겠어요?", isPresented: $showLogoutConfirm, titleVisibility: .visible) {
             Button("로그아웃", role: .destructive) { vm.signOut() }
             Button("취소", role: .cancel) {}
+        }
+        .sheet(isPresented: $showWithdrawSheet, onDismiss: { withdrawConfirmText = "" }) {
+            withdrawConfirmSheet
+        }
+        .alert("오류", isPresented: Binding(
+            get: { vm.withdrawError != nil },
+            set: { if !$0 { vm.withdrawError = nil } }
+        )) {
+            Button("확인", role: .cancel) { vm.withdrawError = nil }
+        } message: {
+            Text(vm.withdrawError ?? "")
         }
         .onReceive(NotificationCenter.default.publisher(for: LocalBabyImageStore.didChange)) { _ in
             avatarRefresh = UUID()   // 프로필에서 대표 이미지 변경 → 헤더 아바타 갱신
@@ -119,6 +136,52 @@ private struct SettingsContent: View {
             .padding(.horizontal, theme.space.screenPaddingX)
         }
         .buttonStyle(.plain)
+    }
+
+    // MARK: - 회원 탈퇴 확인 시트
+
+    private var withdrawConfirmSheet: some View {
+        let confirmed = withdrawConfirmText.trimmingCharacters(in: .whitespaces) == "탈퇴"
+        return ScrollView {
+            VStack(alignment: .leading, spacing: theme.space.lg) {
+                VStack(alignment: .leading, spacing: theme.space.sm) {
+                    Text("정말 탈퇴하시겠어요?")
+                        .font(theme.typography.title)
+                        .foregroundStyle(theme.color.textPrimary.color)
+                    Text("• 탈퇴하면 로그아웃되고, 이 기기의 기록이 지워져요.\n• 계정과 모든 기록은 30일 뒤 완전히 삭제돼요.\n• 30일 안에 같은 이메일로 다시 로그인하면 복구돼요.")
+                        .font(theme.typography.body)
+                        .foregroundStyle(theme.color.textSecondary.color)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+
+                VStack(alignment: .leading, spacing: theme.space.xs) {
+                    Text("확인을 위해 ‘탈퇴’를 입력해 주세요")
+                        .font(theme.typography.captionStrong)
+                        .foregroundStyle(theme.color.textSecondary.color)
+                    DSTextField(placeholder: "탈퇴", text: $withdrawConfirmText)
+                        .autocorrectionDisabled()
+                }
+
+                if vm.isWithdrawing {
+                    ProgressView().frame(maxWidth: .infinity)
+                } else {
+                    DSButton("회원 탈퇴", variant: .destructive, size: .lg) {
+                        showWithdrawSheet = false
+                        vm.withdraw()
+                    }
+                    .disabled(!confirmed)
+                    .opacity(confirmed ? 1 : 0.5)
+                }
+
+                Button("취소") { showWithdrawSheet = false }
+                    .font(theme.typography.body)
+                    .foregroundStyle(theme.color.textSecondary.color)
+                    .frame(maxWidth: .infinity)
+            }
+            .padding(theme.space.lg)
+        }
+        .background(theme.color.background.color)
+        .presentationDetents([.medium, .large])
     }
 
     // MARK: - Sections
@@ -246,6 +309,22 @@ private struct SettingsContent: View {
                         Text("로그아웃")
                             .font(theme.typography.body)
                             .foregroundStyle(theme.color.statusDangerFg.color)
+                    }
+                }
+                .buttonStyle(.plain)
+
+                DSListRowDivider()
+
+                Button {
+                    showWithdrawSheet = true
+                } label: {
+                    DSListRow(variant: .plain) {
+                        Image(systemName: "person.crop.circle.badge.xmark")
+                            .foregroundStyle(theme.color.textTertiary.color)
+                    } content: {
+                        Text("회원 탈퇴")
+                            .font(theme.typography.body)
+                            .foregroundStyle(theme.color.textTertiary.color)
                     }
                 }
                 .buttonStyle(.plain)

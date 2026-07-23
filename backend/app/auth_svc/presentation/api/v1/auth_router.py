@@ -11,9 +11,12 @@ from app.auth_svc.application.use_cases.auth.verify_email_otp import (
     OtpInvalidError,
     VerifyEmailOtpUseCase,
 )
+from app.auth_svc.application.use_cases.auth.withdraw_account import WithdrawAccountUseCase
 from app.auth_svc.presentation.dependencies import (
+    CurrentUserDep,
     get_request_email_otp_use_case,
     get_verify_email_otp_use_case,
+    get_withdraw_account_use_case,
 )
 from app.auth_svc.presentation.schemas.auth_schema import (
     EmailOtpRequestRequest,
@@ -52,3 +55,12 @@ async def verify_email_otp(
         is_new_user=result.is_new_user,
         terms_required=result.terms_required,
     )
+
+
+@router.delete("/account", status_code=status.HTTP_204_NO_CONTENT)
+async def withdraw_account(
+    user_id: CurrentUserDep,
+    use_case: Annotated[WithdrawAccountUseCase, Depends(get_withdraw_account_use_case)],
+) -> None:
+    """회원 탈퇴(소프트삭제). 30일 유예 후 완전삭제. 유예 중 재로그인 시 자동 복구."""
+    await use_case.execute(user_id)

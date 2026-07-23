@@ -119,6 +119,14 @@ final class AppContainer {
         sessionState.activeBabyRegistered = false
     }
 
+    /// 회원 탈퇴: 서버 소프트삭제(30일 유예) 요청 → 성공 시 로컬 정리 + 세션 종료(로그인 화면).
+    /// 30일 내 재로그인하면 서버가 자동 복구(데이터 보존).
+    @MainActor
+    func withdrawAccount() async throws {
+        try await authRepository.withdraw()
+        await performLogout()
+    }
+
     // MARK: - Sync 트리거 (Feature 는 이 존재를 모른다 — App 레이어에서만 호출)
 
     /// 네트워크 감시 시작 (앱 기동 1회). 오프라인→온라인 전환 시 full sync.
