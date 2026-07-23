@@ -102,6 +102,8 @@ struct OtpView: View {
                 .padding(.horizontal, theme.space.screenPaddingX)
             }
         }
+        // 내용이 화면에 다 들어오면 스크롤/바운스 없음. 키보드로 가려질 땐 스크롤 허용.
+        .scrollBounceBehavior(.basedOnSize)
         .background(theme.color.background.color)
         .onAppear { otpFocused = true }
     }

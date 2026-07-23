@@ -13,7 +13,7 @@ struct LoginView: View {
                 // 로고/타이틀 — 마스코트 이미지(MascotDefault 에셋) + "찌뿌둥" + 서브.
                 // 이모지(👶)는 폰트 환경에 따라 두부 글리프로 깨질 수 있어 에셋 이미지로 대체.
                 VStack(spacing: theme.space.xs) {
-                    Image("MascotDefault")
+                    Image("Mascot")
                         .resizable()
                         .scaledToFill()
                         .frame(width: 72, height: 72)
@@ -70,6 +70,8 @@ struct LoginView: View {
                 .padding(.horizontal, theme.space.screenPaddingX)
             }
         }
+        // 내용이 화면에 다 들어오면 스크롤/바운스 없음. 키보드로 가려질 땐 스크롤 허용.
+        .scrollBounceBehavior(.basedOnSize)
         .background(theme.color.background.color)
     }
 }
