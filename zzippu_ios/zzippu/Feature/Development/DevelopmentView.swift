@@ -68,8 +68,9 @@ struct DevelopmentView: View {
             }
             .background(theme.color.background.color)
             // 성장 세그먼트는 GrowthDetailView가 자체 타이틀("성장곡선")을 갖는다.
+            // 인라인 고정 타이틀 → 스크롤/새로고침해도 타이틀·세그먼트바가 함께 상단 고정.
             .navigationTitle(segment == .growth ? "" : "발달")
-            .navigationBarTitleDisplayMode(.large)
+            .navigationBarTitleDisplayMode(.inline)
         }
         .onAppear {
             if developmentVM == nil {
