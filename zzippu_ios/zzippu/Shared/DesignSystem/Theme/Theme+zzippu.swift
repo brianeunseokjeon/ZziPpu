@@ -153,6 +153,15 @@ extension Theme {
                         activeBorder: DynamicColor(light: PrimitiveColor.purple400, dark: PrimitiveColor.purple400),
                         activeText:   DynamicColor(light: PrimitiveColor.purple700, dark: PrimitiveColor.purple400)
                     )
+                case .walk:
+                    return QuickButtonColors(
+                        idleBg:   DynamicColor(light: PrimitiveColor.green50,  dark: PrimitiveColor.green500.opacity(0.18)),
+                        idleBorder: DynamicColor(light: PrimitiveColor.green400.opacity(0.5), dark: PrimitiveColor.green400.opacity(0.4)),
+                        idleText:   DynamicColor(light: PrimitiveColor.green700, dark: PrimitiveColor.green400),
+                        activeBg:   DynamicColor(light: PrimitiveColor.green100, dark: PrimitiveColor.green500.opacity(0.28)),
+                        activeBorder: DynamicColor(light: PrimitiveColor.green400, dark: PrimitiveColor.green400),
+                        activeText:   DynamicColor(light: PrimitiveColor.green700, dark: PrimitiveColor.green400)
+                    )
                 }
             }
         )

@@ -22,6 +22,7 @@ enum CarePresetSettings {
         case .medicine:   return ["감기약", "장염약", "해열제"]
         case .bath:       return []
         case .hospital:   return []
+        case .walk:       return []
         }
     }
 

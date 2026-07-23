@@ -108,6 +108,7 @@ struct ThemeColor {
         case .careSupplement:     return DynamicColor(light: PrimitiveColor.teal500, dark: PrimitiveColor.teal400)
         case .careMedicine:       return DynamicColor(light: PrimitiveColor.red500,  dark: PrimitiveColor.red400)
         case .careHospital:       return DynamicColor(light: PrimitiveColor.purple500, dark: PrimitiveColor.purple400)
+        case .careWalk:           return DynamicColor(light: PrimitiveColor.green500, dark: PrimitiveColor.green400)
         case .checkup:            return domainCheckupSolid
         }
     }
@@ -128,6 +129,7 @@ struct ThemeColor {
         case .careSupplement:     return DynamicColor(light: PrimitiveColor.teal50, dark: PrimitiveColor.teal500.opacity(0.18))
         case .careMedicine:       return DynamicColor(light: PrimitiveColor.red50,  dark: PrimitiveColor.red500.opacity(0.18))
         case .careHospital:       return DynamicColor(light: PrimitiveColor.purple50, dark: PrimitiveColor.purple500.opacity(0.18))
+        case .careWalk:           return DynamicColor(light: PrimitiveColor.green50, dark: PrimitiveColor.green500.opacity(0.18))
         case .checkup:            return domainCheckupTint
         }
     }
@@ -322,6 +324,7 @@ public enum DomainKind {
     case careSupplement  // 영양제
     case careMedicine    // 약
     case careHospital    // 병원
+    case careWalk        // 산책
     case checkup  // 영유아 검진 달력 표시
 }
 
@@ -338,6 +341,7 @@ public enum QuickButtonKind: String, CaseIterable {
     case medicine    = "medicine"
     case bath        = "bath"
     case hospital    = "hospital"
+    case walk        = "walk"
 }
 
 /// 퀵버튼 상태별 색 묶음(idle/active × bg/border/text). 웹 BigActionGrid 상태 매핑.
