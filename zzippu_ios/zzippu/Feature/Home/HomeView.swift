@@ -471,10 +471,23 @@ private struct TodayView: View {
                 .font(theme.typography.caption)
                 .foregroundStyle(theme.color.textTertiary.color)
                 .multilineTextAlignment(.center)
-            DSButton("그 이전 날짜도 보기", variant: .tertiary, size: .sm) {
+
+            // 좌우 패딩이 확실한 커스텀 pill (DSButton은 가로 꽉 채움 전제라 인라인엔 부적합).
+            Button {
                 vm.revealPreBirth()
+            } label: {
+                Text("그 이전 날짜도 보기")
+                    .font(theme.typography.body)
+                    .fontWeight(.medium)
+                    .foregroundStyle(theme.color.textSecondary.color)
+                    .padding(.horizontal, theme.space.lg)
+                    .padding(.vertical, theme.space.sm)
+                    .background(
+                        Capsule(style: .continuous)
+                            .fill(theme.color.surfaceSunken.color)
+                    )
             }
-            .fixedSize()
+            .buttonStyle(.plain)
         }
         .frame(maxWidth: .infinity)
         .padding(.vertical, theme.space.md)
