@@ -130,26 +130,43 @@ private struct SplashView: View {
     @State private var sway    = false   // 살짝 갸웃
 
     var body: some View {
-        Image("Mascot")
-            .resizable()
-            .scaledToFit()
-            .frame(width: 120, height: 120)
-            // 겹쳐지는 변형: 균등 숨쉬기 + 젤리(비균등) + 회전 + 부유
-            .scaleEffect(breathe ? 1.04 : 0.97)
-            .scaleEffect(x: squish ? 1.05 : 0.96, y: squish ? 0.96 : 1.05, anchor: .bottom)
-            .rotationEffect(.degrees(sway ? 3.5 : -3.5))
-            .offset(y: float ? -10 : 8)
-            // 구름같은 말랑한 그림자(같이 호흡)
-            .shadow(color: theme.color.primary.color.opacity(0.18),
-                    radius: breathe ? 28 : 14, y: float ? 12 : 4)
-            .frame(maxWidth: .infinity, maxHeight: .infinity)
-            .background(theme.color.background.color)
-            .onAppear {
-                withAnimation(.easeInOut(duration: 1.35).repeatForever(autoreverses: true)) { breathe = true }
-                withAnimation(.easeInOut(duration: 0.95).repeatForever(autoreverses: true)) { squish  = true }
-                withAnimation(.easeInOut(duration: 1.85).repeatForever(autoreverses: true)) { float   = true }
-                withAnimation(.easeInOut(duration: 2.2).repeatForever(autoreverses: true))  { sway    = true }
+        ZStack {
+            theme.color.background.color.ignoresSafeArea()
+
+            // 마스코트 (중앙, 몽글몽글 애니메이션)
+            Image("Mascot")
+                .resizable()
+                .scaledToFit()
+                .frame(width: 140, height: 140)
+                // 겹쳐지는 변형: 균등 숨쉬기 + 젤리(비균등) + 회전 + 부유
+                .scaleEffect(breathe ? 1.04 : 0.97)
+                .scaleEffect(x: squish ? 1.05 : 0.96, y: squish ? 0.96 : 1.05, anchor: .bottom)
+                .rotationEffect(.degrees(sway ? 3.5 : -3.5))
+                .offset(y: float ? -10 : 8)
+                // 구름같은 말랑한 그림자(같이 호흡)
+                .shadow(color: theme.color.primary.color.opacity(0.18),
+                        radius: breathe ? 28 : 14, y: float ? 12 : 4)
+
+            // 하단 브랜드·저작권 (Meta/Instagram 스플래시 스타일)
+            VStack {
+                Spacer()
+                VStack(spacing: 3) {
+                    Text("찌뿌둥")
+                        .font(.system(size: 15, weight: .semibold))
+                        .foregroundStyle(theme.color.textSecondary.color)
+                    Text("© 2026 zzippu")
+                        .font(theme.typography.caption)
+                        .foregroundStyle(theme.color.textTertiary.color)
+                }
+                .padding(.bottom, theme.space.xl)
             }
+        }
+        .onAppear {
+            withAnimation(.easeInOut(duration: 1.35).repeatForever(autoreverses: true)) { breathe = true }
+            withAnimation(.easeInOut(duration: 0.95).repeatForever(autoreverses: true)) { squish  = true }
+            withAnimation(.easeInOut(duration: 1.85).repeatForever(autoreverses: true)) { float   = true }
+            withAnimation(.easeInOut(duration: 2.2).repeatForever(autoreverses: true))  { sway    = true }
+        }
     }
 }
 
