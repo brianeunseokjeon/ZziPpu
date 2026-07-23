@@ -87,44 +87,54 @@ public struct BabyAvatar: View {
 
     // MARK: Fallback
 
+    /// 사진이 없을 때의 기본 캐릭터. 성별과 무관하게 동일한 "찌뿌둥" 얼굴을 보여준다.
     private var fallbackView: some View {
-        ZStack {
-            Circle()
-                .fill(gradientForGender)
-            Text("👶")
-                .font(.system(size: size.fontSize))
-        }
+        DefaultBabyFace()
     }
+}
 
-    private var gradientForGender: LinearGradient {
-        switch gender {
-        case .male:
-            return LinearGradient(
-                colors: [
-                    theme.color.domainFeedingFormulaSolid.color.opacity(0.7),
-                    theme.color.primaryTint.color
-                ],
-                startPoint: .topLeading,
-                endPoint:   .bottomTrailing
-            )
-        case .female:
-            return LinearGradient(
-                colors: [
-                    theme.color.domainFeedingBreastLeftSolid.color.opacity(0.7),
-                    theme.color.domainFeedingBreastBothTint.color
-                ],
-                startPoint: .topLeading,
-                endPoint:   .bottomTrailing
-            )
-        case .unknown:
-            return LinearGradient(
-                colors: [
-                    theme.color.domainSleepSolid.color.opacity(0.5),
-                    theme.color.primaryTint.color
-                ],
-                startPoint: .topLeading,
-                endPoint:   .bottomTrailing
-            )
+// MARK: - DefaultBabyFace
+
+/// 앱 마스코트("찌뿌둥") 얼굴을 벡터로 그린 기본 아바타.
+/// - 에셋 이미지 대신 SwiftUI Canvas로 그려 어떤 크기에서도 선명함.
+/// - 앱 아이콘(AppIconConcept.svg)과 동일한 조형(노랑 배경·감은 눈·미소·볼터치·머리컬).
+struct DefaultBabyFace: View {
+    var body: some View {
+        Canvas { ctx, size in
+            // 원본 아이콘은 380x380 좌표계 → 실제 크기로 스케일.
+            let s = size.width / 380
+            func p(_ x: CGFloat, _ y: CGFloat) -> CGPoint { CGPoint(x: x * s, y: y * s) }
+
+            let bg     = Color(red: 1.0,   green: 0.760, blue: 0.294) // #FFC24B
+            let cheek  = Color(red: 0.949, green: 0.502, blue: 0.620) // #F2809E
+            let ink    = Color(red: 0.169, green: 0.153, blue: 0.141) // #2B2724
+
+            // 배경 (원형 클립은 BabyAvatar에서 적용).
+            ctx.fill(Path(CGRect(origin: .zero, size: size)), with: .color(bg))
+
+            // 볼터치.
+            ctx.fill(Path(ellipseIn: CGRect(x: (106 - 31) * s, y: (228 - 20) * s,
+                                            width: 62 * s, height: 40 * s)),
+                     with: .color(cheek.opacity(0.9)))
+            ctx.fill(Path(ellipseIn: CGRect(x: (274 - 31) * s, y: (228 - 20) * s,
+                                            width: 62 * s, height: 40 * s)),
+                     with: .color(cheek.opacity(0.9)))
+
+            // 감은 눈 ⌣⌣.
+            var eyeL = Path(); eyeL.move(to: p(108, 182)); eyeL.addQuadCurve(to: p(168, 182), control: p(138, 216))
+            var eyeR = Path(); eyeR.move(to: p(212, 182)); eyeR.addQuadCurve(to: p(272, 182), control: p(242, 216))
+            // 미소.
+            var smile = Path(); smile.move(to: p(146, 240)); smile.addQuadCurve(to: p(234, 240), control: p(190, 288))
+            // 머리컬.
+            var curl = Path()
+            curl.move(to: p(186, 92))
+            curl.addQuadCurve(to: p(219, 88),  control: p(202, 72))
+            curl.addQuadCurve(to: p(220, 112), control: p(232, 100))
+
+            ctx.stroke(eyeL,  with: .color(ink), style: StrokeStyle(lineWidth: 14 * s, lineCap: .round))
+            ctx.stroke(eyeR,  with: .color(ink), style: StrokeStyle(lineWidth: 14 * s, lineCap: .round))
+            ctx.stroke(smile, with: .color(ink), style: StrokeStyle(lineWidth: 15 * s, lineCap: .round))
+            ctx.stroke(curl,  with: .color(ink), style: StrokeStyle(lineWidth: 12 * s, lineCap: .round))
         }
     }
 }

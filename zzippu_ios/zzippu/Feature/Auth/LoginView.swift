@@ -10,10 +10,12 @@ struct LoginView: View {
     var body: some View {
         ScrollView {
             VStack(spacing: theme.space.lg) {
-                // 로고/타이틀 — 웹: 이모지 👶 text-5xl + "찌뿌둥" text-2xl bold + 서브 text-sm gray-500.
+                // 로고/타이틀 — 마스코트 얼굴(DefaultBabyFace) + "찌뿌둥" + 서브.
+                // 이모지(👶)는 폰트 환경에 따라 두부 글리프로 깨질 수 있어 벡터 마스코트로 대체.
                 VStack(spacing: theme.space.xs) {
-                    Text("👶")
-                        .font(.system(size: 48))
+                    DefaultBabyFace()
+                        .frame(width: 72, height: 72)
+                        .clipShape(Circle())
                     Text("찌뿌둥")
                         .font(.system(size: 24, weight: .bold))
                         .foregroundStyle(theme.color.textPrimary.color)
