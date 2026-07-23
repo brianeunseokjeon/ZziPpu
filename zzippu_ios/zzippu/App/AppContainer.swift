@@ -100,8 +100,16 @@ final class AppContainer {
     /// 401(토큰 무효) → 로그아웃 + 세션 비움 → AppRootView가 로그인 화면으로 라우팅.
     /// AppRootView의 .onReceive(메인)에서 호출되므로 여기선 메인 스레드 보장됨.
     func handleUnauthorized() {
+        clearLocalOnLogout()          // 로컬 수유 데이터 삭제 + 동기화 커서 리셋(계정 잔존 방지)
         authRepository.signOut()
         sessionState.setSession(nil)
+    }
+
+    /// 명시적 로그아웃(설정) / 401 공용 — 로컬 수유 저장소 전량 삭제 + pull 커서 리셋.
+    /// 로그아웃하면 로컬을 비우고, 다음 로그인 때 서버에서 전량 다시 받아온다.
+    /// server-only(offline == nil)면 로컬이 없으므로 no-op.
+    func clearLocalOnLogout() {
+        offline?.engine.resetForLogout()
     }
 
     // MARK: - Sync 트리거 (Feature 는 이 존재를 모른다 — App 레이어에서만 호출)

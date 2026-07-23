@@ -58,6 +58,19 @@ actor FeedingSyncEngine {
         Task { await self.scheduleDebouncedPush(debounce: seconds) }
     }
 
+    /// 로그아웃/계정 전환: 진행 중 push 취소 + 로컬 전량 삭제 + pull 커서 리셋.
+    /// 다음 로그인 때 since=nil 전량 pull로 서버에서 새로 받아온다(계정 간 기록 잔존·재push 오염 방지).
+    nonisolated func resetForLogout() {
+        Task { await self.performLogoutReset() }
+    }
+
+    private func performLogoutReset() async {
+        debounceTask?.cancel()
+        debounceTask = nil
+        try? await store.deleteAllLocal()
+        lastPulledAt = nil            // 커서 리셋 → 다음 로그인 전량 pull
+    }
+
     private func scheduleDebouncedPush(debounce seconds: Double) {
         debounceTask?.cancel()
         debounceTask = Task { [weak self] in

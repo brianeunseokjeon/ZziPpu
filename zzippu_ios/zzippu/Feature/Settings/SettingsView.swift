@@ -33,6 +33,7 @@ struct SettingsView: View {
                 )
                 let captured = container
                 newVM.onSignedOut = {
+                    captured.clearLocalOnLogout()   // 로컬 수유 데이터 삭제(계정 전환 시 기록 잔존 방지)
                     captured.sessionState.setSession(nil)
                     captured.sessionState.activeBabyRegistered = false
                 }

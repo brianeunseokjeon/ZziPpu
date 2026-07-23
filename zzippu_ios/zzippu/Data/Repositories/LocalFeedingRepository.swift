@@ -52,6 +52,13 @@ actor LocalFeedingRepository: FeedingRepository, SyncableStore {
         return FeedingModelMapper.toEntity(model)
     }
 
+    /// 로그아웃/계정 전환 시 로컬 전량 물리삭제(계정 간 기록 잔존·오염 방지).
+    /// 서버가 진실원천이므로 tombstone 없이 삭제 — 다음 로그인 때 since=nil 전량 pull로 재수신.
+    func deleteAllLocal() async throws {
+        try modelContext.delete(model: FeedingModel.self)
+        try modelContext.save()
+    }
+
     /// list: 해당 날짜(로컬 자정~자정) + deletedAt==nil 필터.
     func list(babyId: UUID, on day: Date) async throws -> [Feeding] {
         let cal = Calendar.kst
