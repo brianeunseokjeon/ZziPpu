@@ -197,6 +197,7 @@ struct HomeView: View {
             case .bath:                    careCreateCategory = .bath
             case .supplement:              careCreateCategory = .supplement
             case .medicine:                careCreateCategory = .medicine
+            case .hospital:                careCreateCategory = .hospital
             }
             return
         }
@@ -234,6 +235,8 @@ struct HomeView: View {
             careCreateCategory = .supplement   // 이름·용량 시트
         case .medicine:
             careCreateCategory = .medicine     // 이름·용량 시트
+        case .hospital:
+            careCreateCategory = .hospital     // 시각·메모 시트(목욕과 동일 형태)
         }
     }
 
@@ -243,6 +246,7 @@ struct HomeView: View {
         case .bath:       return "🛁 목욕 기록"
         case .supplement: return "🧴 영양제 기록"
         case .medicine:   return "💊 약 기록"
+        case .hospital:   return "🏥 병원 기록"
         case .none:       return "기록"
         }
     }
@@ -250,7 +254,7 @@ struct HomeView: View {
 
 // MARK: - HomeAction
 
-enum HomeAction { case formula, breast, pee, poo, sleep, play, supplement, medicine, bath }
+enum HomeAction { case formula, breast, pee, poo, sleep, play, supplement, medicine, bath, hospital }
 
 // MARK: - QuickBarStore (@Observable, 선호 보유·구독)
 

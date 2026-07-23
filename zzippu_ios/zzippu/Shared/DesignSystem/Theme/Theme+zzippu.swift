@@ -144,6 +144,15 @@ extension Theme {
                         activeBorder: DynamicColor(light: PrimitiveColor.blue400, dark: PrimitiveColor.blue400),
                         activeText:   DynamicColor(light: PrimitiveColor.blue700, dark: PrimitiveColor.blue400)
                     )
+                case .hospital:
+                    return QuickButtonColors(
+                        idleBg:   DynamicColor(light: PrimitiveColor.purple50,  dark: PrimitiveColor.purple500.opacity(0.18)),
+                        idleBorder: DynamicColor(light: PrimitiveColor.purple400.opacity(0.5), dark: PrimitiveColor.purple400.opacity(0.4)),
+                        idleText:   DynamicColor(light: PrimitiveColor.purple700, dark: PrimitiveColor.purple400),
+                        activeBg:   DynamicColor(light: PrimitiveColor.purple100, dark: PrimitiveColor.purple500.opacity(0.28)),
+                        activeBorder: DynamicColor(light: PrimitiveColor.purple400, dark: PrimitiveColor.purple400),
+                        activeText:   DynamicColor(light: PrimitiveColor.purple700, dark: PrimitiveColor.purple400)
+                    )
                 }
             }
         )

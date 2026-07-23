@@ -610,7 +610,7 @@ final class HomeViewModel {
             return rec.diapers.first { $0.id == item.id }.map(EditableRecord.diaper)
         case .play:
             return rec.plays.first { $0.id == item.id }.map(EditableRecord.play)
-        case .careBath, .careSupplement, .careMedicine:
+        case .careBath, .careSupplement, .careMedicine, .careHospital:
             return nil   // 돌봄기록은 CareInputSheet(편집모드)로 별도 처리 — vm.careLog(for:) 사용
         case .checkup:
             return nil   // 검진은 타임라인 편집 없음(달력 표시 전용)
@@ -785,7 +785,7 @@ final class HomeViewModel {
                 do { try await playRepository.delete(id: p.id, babyId: p.babyId) }
                 catch { recordsByDay[key]?.plays.insert(p, at: 0); errorMessage = "삭제 실패: \(error.localizedDescription)" }
             }
-        case .careBath, .careSupplement, .careMedicine:
+        case .careBath, .careSupplement, .careMedicine, .careHospital:
             guard let c = recordsByDay[key]?.careLogs.first(where: { $0.id == item.id }) else { return }
             recordsByDay[key]?.careLogs.removeAll { $0.id == c.id }
             Task { @MainActor in
@@ -947,6 +947,10 @@ extension CareLog {
         switch category {
         case .bath:
             return "목욕 🛁"
+        case .hospital:
+            var s = "병원 🏥"
+            if let m = memo, !m.isEmpty { s += " · \(m)" }
+            return s
         case .supplement, .medicine:
             var s = category.displayName   // "영양제" | "약"
             if let n = name, !n.isEmpty { s += " · \(n)" }
@@ -959,6 +963,7 @@ extension CareLog {
         case .bath:       return .careBath
         case .supplement: return .careSupplement
         case .medicine:   return .careMedicine
+        case .hospital:   return .careHospital
         }
     }
 }

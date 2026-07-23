@@ -8,12 +8,14 @@ enum CareCategory: String, Codable, Sendable, CaseIterable {
     case bath       = "bath"
     case supplement = "supplement"
     case medicine   = "medicine"
+    case hospital   = "hospital"
 
     var displayName: String {
         switch self {
         case .bath:       return "목욕"
         case .supplement: return "영양제"
         case .medicine:   return "약"
+        case .hospital:   return "병원"
         }
     }
 
@@ -22,6 +24,7 @@ enum CareCategory: String, Codable, Sendable, CaseIterable {
         case .bath:       return "🛁"
         case .supplement: return "🧴"
         case .medicine:   return "💊"
+        case .hospital:   return "🏥"
         }
     }
 }

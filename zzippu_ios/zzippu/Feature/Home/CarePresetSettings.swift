@@ -21,6 +21,7 @@ enum CarePresetSettings {
         case .supplement: return ["유산균", "비타민D", "유산균&비타민D"]
         case .medicine:   return ["감기약", "장염약", "해열제"]
         case .bath:       return []
+        case .hospital:   return []
         }
     }
 

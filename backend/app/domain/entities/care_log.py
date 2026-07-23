@@ -8,6 +8,7 @@ class CareCategory(str, Enum):
     BATH = "bath"
     SUPPLEMENT = "supplement"
     MEDICINE = "medicine"
+    HOSPITAL = "hospital"
 
 
 @dataclass

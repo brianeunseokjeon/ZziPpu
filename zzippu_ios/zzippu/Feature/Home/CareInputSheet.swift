@@ -58,8 +58,8 @@ struct CareInputSheet: View {
     var body: some View {
         VStack(alignment: .leading, spacing: theme.space.lg) {
 
-            // ── 종류(프리셋) — 영양제/약만 ──
-            if category != .bath {
+            // ── 종류(프리셋) — 영양제/약만 (목욕·병원은 시각+메모만) ──
+            if category != .bath && category != .hospital {
                 VStack(alignment: .leading, spacing: theme.space.sm) {
                     Text("종류")
                         .font(theme.typography.captionStrong)
@@ -158,7 +158,7 @@ struct CareInputSheet: View {
     }
 
     private func save() {
-        let name = (category == .bath) ? nil : selectedName
+        let name = (category == .bath || category == .hospital) ? nil : selectedName
         let dose = doseText.trimmingCharacters(in: .whitespacesAndNewlines)
         let memo = memoText.trimmingCharacters(in: .whitespacesAndNewlines)
 

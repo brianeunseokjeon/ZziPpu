@@ -42,6 +42,7 @@ enum QuickActionCatalog {
         QuickAction(kind: .supplement, emoji: "🧴", label: "영양제",  action: .supplement, isSessionToggle: false),
         QuickAction(kind: .medicine,   emoji: "💊", label: "약",      action: .medicine,   isSessionToggle: false),
         QuickAction(kind: .bath,       emoji: "🛁", label: "목욕",    action: .bath,       isSessionToggle: false),
+        QuickAction(kind: .hospital,   emoji: "🏥", label: "병원",    action: .hospital,   isSessionToggle: false),
     ]
 
     /// kind → QuickAction 조회.
