@@ -145,10 +145,10 @@ private struct SplashView: View {
             .frame(maxWidth: .infinity, maxHeight: .infinity)
             .background(theme.color.background.color)
             .onAppear {
-                withAnimation(.easeInOut(duration: 1.9).repeatForever(autoreverses: true)) { breathe = true }
-                withAnimation(.easeInOut(duration: 1.3).repeatForever(autoreverses: true)) { squish  = true }
-                withAnimation(.easeInOut(duration: 2.6).repeatForever(autoreverses: true)) { float   = true }
-                withAnimation(.easeInOut(duration: 3.1).repeatForever(autoreverses: true)) { sway    = true }
+                withAnimation(.easeInOut(duration: 1.35).repeatForever(autoreverses: true)) { breathe = true }
+                withAnimation(.easeInOut(duration: 0.95).repeatForever(autoreverses: true)) { squish  = true }
+                withAnimation(.easeInOut(duration: 1.85).repeatForever(autoreverses: true)) { float   = true }
+                withAnimation(.easeInOut(duration: 2.2).repeatForever(autoreverses: true))  { sway    = true }
             }
     }
 }
