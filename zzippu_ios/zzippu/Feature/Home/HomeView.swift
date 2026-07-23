@@ -661,7 +661,7 @@ private struct DayTimelineSection: View {
     /// 빈 날 상태 — "없음"이 아니라 맥락(생후일수)+안내로. 생일 이전은 존재불가 구간으로 구분.
     private var emptyStateView: DSEmptyState {
         if vm.isBeforeBirth(day) {
-            return DSEmptyState(icon: "hourglass", message: "아직 태어나기 전이에요 🌱")
+            return DSEmptyState(icon: "hourglass", message: "아직 태어나기 전이에요 🍀")
         }
         let prefix = vm.ageDays(for: day).map { "생후 \($0)일" }
         let message: String
