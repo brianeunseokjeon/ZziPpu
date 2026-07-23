@@ -565,8 +565,10 @@ private struct PastFocusView: View {
                 .padding(.vertical, theme.space.sm)
                 .background(theme.color.statusWarningBg.color)
                 .clipShape(RoundedRectangle(cornerRadius: theme.radius.control, style: .continuous))
+                .padding(.horizontal, theme.space.screenPaddingX)   // 배너만 좌우 인셋
 
                 // 과거 포커스 모드: 편집 칩/롱프레스 진입점 숨김(스펙 §5.5)
+                // 그리드는 오늘(TodayView)과 동일하게 full-bleed(좌우 패딩은 스크롤 내부가 담당).
                 BigActionGrid(
                     visibleKinds: quickBarStore.visibleKinds,
                     hasActiveSleep: false,
@@ -575,7 +577,6 @@ private struct PastFocusView: View {
                     showEditChip: false
                 )
             }
-            .padding(.horizontal, theme.space.screenPaddingX)
             .padding(.vertical, theme.space.sm)
             .background(theme.color.surface.color)
             .overlay(alignment: .bottom) {
