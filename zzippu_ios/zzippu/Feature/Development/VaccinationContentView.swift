@@ -6,11 +6,14 @@ import SwiftUI
 struct VaccinationContentView: View {
 
     @Bindable var vm: VaccinationViewModel
+    /// 방식 A(같이 스크롤)일 때 스크롤 최상단 헤더. B는 nil.
+    var header: AnyView? = nil
     @Environment(\.theme) private var theme
 
     var body: some View {
         ScrollView {
             LazyVStack(spacing: 0) {
+                if let header { header }
                 if vm.sortedVaccinations.isEmpty && !vm.isLoading {
                     DSEmptyState(
                         icon: "syringe",

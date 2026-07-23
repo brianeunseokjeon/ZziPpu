@@ -6,11 +6,14 @@ import SwiftUI
 struct DevelopmentContentView: View {
 
     @Bindable var vm: DevelopmentViewModel
+    /// 방식 A(같이 스크롤)일 때 스크롤 최상단에 함께 얹는 헤더(타이틀+세그먼트바). B는 nil.
+    var header: AnyView? = nil
     @Environment(\.theme) private var theme
 
     var body: some View {
         ScrollView {
             LazyVStack(alignment: .leading, spacing: theme.space.sectionGap) {
+                if let header { header }
                 if let stage = vm.currentStage {
                     stageCard(stage)
                         .padding(.horizontal, theme.space.screenPaddingX)
