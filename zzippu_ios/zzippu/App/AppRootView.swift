@@ -125,9 +125,10 @@ private struct SplashView: View {
 
     var body: some View {
         VStack(spacing: theme.space.md) {
-            Image(systemName: "moon.stars.fill")
-                .font(.system(size: 72))
-                .foregroundStyle(theme.color.primary.color)
+            Image("Mascot")
+                .resizable()
+                .scaledToFit()
+                .frame(width: 120, height: 120)
             Text("찌뿌둥")
                 .font(theme.typography.display)
         }
