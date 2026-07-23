@@ -36,55 +36,30 @@ struct DevelopmentView: View {
     @State private var vaccinationVM: VaccinationViewModel?
     @State private var growthVM: GrowthViewModel?
 
-    /// 발달탭 상단 레이아웃 방식(둘 다 구현 — 이 값만 바꾸면 전환).
-    /// • true  = 방식 B: 발달 타이틀 + 세그먼트바(이정표·예방접종·성장)를 **상단 고정(스티키)**, 콘텐츠만 스크롤
-    /// • false = 방식 A: 타이틀 + 세그먼트바가 콘텐츠와 **함께 스크롤**(당기면 같이 내려감)
-    private let stickyHeader = true
-
-    /// 방식 A에서 각 콘텐츠 스크롤 최상단에 얹을 헤더(방식 B면 nil → 고정 헤더가 대신 렌더).
-    private var scrollingHeader: AnyView? {
-        stickyHeader ? nil : AnyView(headerView)
-    }
-
-    /// 발달 타이틀 + 세그먼트바 묶음.
-    private var headerView: some View {
-        VStack(alignment: .leading, spacing: theme.space.sm) {
-            Text("발달")
-                .font(.largeTitle.bold())
-                .foregroundStyle(theme.color.textPrimary.color)
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .padding(.horizontal, theme.space.screenPaddingX)
-                .padding(.top, theme.space.sm)
-            segmentBar
-        }
-    }
-
     var body: some View {
         NavigationStack {
             VStack(spacing: 0) {
-                // 방식 B(stickyHeader=true): 타이틀+세그먼트바를 상단 고정.
-                if stickyHeader {
-                    headerView
-                }
+                // 세그먼트바는 라지 타이틀 아래 상단 고정(스티키). 콘텐츠만 스크롤.
+                segmentBar
 
                 Group {
                     switch segment {
                     case .development:
                         if let developmentVM {
-                            DevelopmentContentView(vm: developmentVM, header: scrollingHeader)
+                            DevelopmentContentView(vm: developmentVM)
                         } else {
                             loading
                         }
                     case .vaccination:
                         if let vaccinationVM {
-                            VaccinationContentView(vm: vaccinationVM, header: scrollingHeader)
+                            VaccinationContentView(vm: vaccinationVM)
                         } else {
                             loading
                         }
                     case .growth:
                         if let growthVM {
                             // 발달 탭이 이미 NavigationStack → GrowthDetailView는 콘텐츠로 임베드.
-                            GrowthDetailView(vm: growthVM, header: scrollingHeader)
+                            GrowthDetailView(vm: growthVM)
                         } else {
                             loading
                         }
@@ -93,7 +68,9 @@ struct DevelopmentView: View {
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
             }
             .background(theme.color.background.color)
-            .navigationBarHidden(true)   // 시스템 타이틀 대신 커스텀 헤더(headerView) 사용
+            // "발달"은 대시보드·설정과 동일한 시스템 라지 타이틀(스크롤 시 접힘).
+            .navigationTitle(segment == .growth ? "" : "발달")
+            .navigationBarTitleDisplayMode(.large)
         }
         .onAppear {
             if developmentVM == nil {

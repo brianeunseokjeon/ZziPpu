@@ -9,15 +9,12 @@ import Charts
 struct GrowthDetailView: View {
 
     @State var vm: GrowthViewModel
-    /// 방식 A(같이 스크롤)일 때 스크롤 최상단 헤더. B/단독 사용 시 nil.
-    var header: AnyView? = nil
     @Environment(\.theme) private var theme
     @Environment(ToastCenter.self) private var toastCenter
 
     var body: some View {
         ScrollView {
             VStack(spacing: 20) {
-                if let header { header }
                 // 지표 토글 (DSChip 세그먼트)
                 HStack(spacing: 8) {
                     ForEach(GrowthMetric.allCases) { metric in
