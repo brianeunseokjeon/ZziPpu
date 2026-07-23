@@ -508,10 +508,10 @@ private struct TodayView: View {
                 Group {
                     if vm.nightOffActive {
                         // "탭하면 다시 켜기"는 연하게(안내용) — 본문과 헷갈리지 않게.
-                        Text("육퇴 중 · 수유 알림 꺼짐  ")
+                        Text("육퇴 완료 · 수유 알림 꺼짐  ")
                             + Text("· 탭하면 다시 켜기").foregroundColor(activeFg.opacity(0.5))
                     } else {
-                        Text("육퇴 · 오늘 밤 수유 알림 끄기")
+                        Text("육아 중 · 오늘 밤 수유 알림 끄기")
                     }
                 }
                 .font(theme.typography.caption)
