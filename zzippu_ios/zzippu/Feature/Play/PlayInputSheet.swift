@@ -63,6 +63,7 @@ private struct PlayInputContent: View {
                         displayedComponents: [.date, .hourAndMinute]
                     )
                     .labelsHidden()
+                    .font(.system(size: 15))   // 기본(17)보다 2pt 작게
                     .frame(maxWidth: .infinity, alignment: .leading)
                 }
 
@@ -95,15 +96,13 @@ private struct PlayInputContent: View {
                     }
                 }
             }
-            .padding(.horizontal, theme.space.screenPaddingX)
-            .padding(.vertical, theme.space.md)
+            .padding(.vertical, theme.space.md)   // 좌우는 DSBottomSheet가 담당(이중패딩 방지)
 
             Spacer()
 
             DSButton("저장", variant: .primary, size: .lg) {
                 handleSave()
             }
-            .padding(.horizontal, theme.space.screenPaddingX)
             .padding(.bottom, theme.space.md)
         }
         .alert("오류", isPresented: Binding(

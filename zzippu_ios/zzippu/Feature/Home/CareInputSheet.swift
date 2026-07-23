@@ -77,9 +77,10 @@ struct CareInputSheet: View {
                     .frame(maxWidth: .infinity, alignment: .leading)
 
                     if addingPreset {
+                        // 가로 정렬 → 입력칸(44)과 버튼 높이 동일하게(.md=44).
                         HStack(spacing: theme.space.sm) {
                             DSTextField(placeholder: "새 종류 (예: 비타민D)", text: $newPresetText)
-                            DSButton("추가", variant: .secondary, size: .sm) { addPreset() }
+                            DSButton("추가", variant: .secondary, size: .md) { addPreset() }
                         }
                     }
 
@@ -131,8 +132,7 @@ struct CareInputSheet: View {
                 DSButton("저장", variant: .primary, size: .lg) { save() }
             }
         }
-        .padding(.horizontal, theme.space.screenPaddingX)
-        .padding(.vertical, theme.space.md)
+        .padding(.vertical, theme.space.md)   // 좌우는 DSBottomSheet가 담당(이중패딩 방지)
         .confirmationDialog(
             "이 기록을 삭제할까요?",
             isPresented: $showDeleteConfirm,

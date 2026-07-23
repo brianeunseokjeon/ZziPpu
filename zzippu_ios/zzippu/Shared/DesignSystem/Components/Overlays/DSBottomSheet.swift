@@ -77,7 +77,8 @@ private struct DSBottomSheetContainer<Content: View>: View {
             ScrollView {
                 content()
                     .frame(maxWidth: .infinity, alignment: .leading)
-                    .padding(.horizontal, theme.space.cardPadding)          // 20 — 좌우
+                    // 타이틀(componentPaddingX)과 동일하게 → 콘텐츠가 타이틀 아이콘 x에 왼쪽정렬.
+                    .padding(.horizontal, theme.space.componentPaddingX)     // 16 — 타이틀과 통일
                     .padding(.top, options.title != nil
                              ? theme.space.stackGapMd                       // 12 — 헤더와 간격
                              : 0)

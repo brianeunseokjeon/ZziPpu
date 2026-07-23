@@ -123,15 +123,13 @@ private struct SleepInputContent: View {
                     DSTextField(placeholder: "메모를 입력하세요", text: $vm.memo)
                 }
             }
-            .padding(.horizontal, theme.space.screenPaddingX)
-            .padding(.vertical, theme.space.md)
+            .padding(.vertical, theme.space.md)   // 좌우는 DSBottomSheet가 담당(이중패딩 방지)
 
             Spacer()
 
             DSButton("수면 기록", variant: .primary, size: .lg) {
                 handleSave()
             }
-            .padding(.horizontal, theme.space.screenPaddingX)
             .padding(.bottom, theme.space.md)
             .disabled(!isValid)
             .opacity(isValid ? 1 : 0.5)

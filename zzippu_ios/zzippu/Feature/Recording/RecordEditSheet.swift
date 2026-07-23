@@ -280,6 +280,7 @@ struct RecordEditSheet: View {
                     .foregroundStyle(theme.color.textSecondary.color)
                 DatePicker("", selection: $startTime, displayedComponents: [.hourAndMinute])
                     .labelsHidden()
+                    .font(.system(size: 15))   // 기본(17)보다 2pt 작게
                     .frame(maxWidth: .infinity, alignment: .leading)
             }
 
@@ -294,6 +295,7 @@ struct RecordEditSheet: View {
                     if hasEnd {
                         DatePicker("", selection: $endTime, displayedComponents: [.hourAndMinute])
                             .labelsHidden()
+                            .font(.system(size: 15))   // 기본(17)보다 2pt 작게
                             .frame(maxWidth: .infinity, alignment: .leading)
                     }
                 }
