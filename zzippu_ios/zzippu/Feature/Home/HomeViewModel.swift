@@ -191,13 +191,7 @@ final class HomeViewModel {
         guard let top = loadedDays.first, newToday > top else { return }
 
         // top(구 오늘) 다음날 ~ newToday 를 연속으로 앞에 추가(앱을 여러 날 켜둔 경우도 커버).
-        var day = newToday
-        var prepend: [Date] = []
-        while day > top {
-            prepend.append(day)
-            guard let prev = cal.date(byAdding: .day, value: -1, to: day) else { break }
-            day = prev
-        }
+        let prepend = Self.rolloverPrependDays(newToday: newToday, currentTop: top, calendar: cal)
         // 롤오버 전 '오늘(top)'을 보고 있었으면 새 오늘로 이동(과거를 보고 있었으면 유지).
         let wasOnToday = cal.startOfDay(for: selectedDate) == top
 
@@ -210,6 +204,20 @@ final class HomeViewModel {
             }
         }
         if wasOnToday { selectedDate = Date() }
+    }
+
+    /// 롤오버 시 피드 앞에 추가할 날짜들(newToday … currentTop 바로 다음날, 내림차순).
+    /// 순수 함수(테스트 가능): newToday ≤ currentTop 이면 빈 배열(롤오버 불필요).
+    static func rolloverPrependDays(newToday: Date, currentTop: Date, calendar cal: Calendar) -> [Date] {
+        guard newToday > currentTop else { return [] }
+        var day = newToday
+        var out: [Date] = []
+        while day > currentTop {
+            out.append(day)
+            guard let prev = cal.date(byAdding: .day, value: -1, to: day) else { break }
+            day = prev
+        }
+        return out
     }
 
     /// AppHeader 날짜 변경 → 과거 포커스/오늘 전환.
