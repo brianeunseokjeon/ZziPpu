@@ -286,6 +286,7 @@ private struct HomeContentView: View {
     let onEditQuickBar: () -> Void
 
     @Environment(\.theme) private var theme
+    @Environment(\.scenePhase) private var scenePhase
     /// 로컬 대표 이미지 변경 시 헤더 아바타 강제 갱신용.
     @State private var avatarRefresh = UUID()
 
@@ -317,6 +318,14 @@ private struct HomeContentView: View {
         .onReceive(NotificationCenter.default.publisher(for: LocalBabyImageStore.didChange)) { _ in
             avatarRefresh = UUID()   // 프로필에서 대표 이미지 변경 → 홈 헤더 아바타 갱신
         }
+        // 자정 롤오버: 앱을 켠 채 날짜가 바뀌어도 새 오늘 기록이 보이도록 피드 최상단 갱신.
+        .onReceive(NotificationCenter.default.publisher(for: .NSCalendarDayChanged)) { _ in
+            vm.rolloverIfNeeded(loadData: true)
+        }
+        .onChange(of: scenePhase) { _, phase in
+            if phase == .active { vm.rolloverIfNeeded(loadData: true) }   // 백그라운드로 자정 넘긴 경우
+        }
+        .onAppear { vm.rolloverIfNeeded(loadData: true) }                 // 탭 전환 복귀
         .alert("오류", isPresented: Binding(
             get: { vm.errorMessage != nil },
             set: { if !$0 { vm.errorMessage = nil } }

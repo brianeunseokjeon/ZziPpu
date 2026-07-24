@@ -180,6 +180,38 @@ final class HomeViewModel {
 
     var reachedMaxDays: Bool { loadedDays.count >= Self.maxDays }
 
+    /// 자정 롤오버 대응 — 오늘(KST)이 피드 최상단이 아니면 새 날짜(들)를 앞에 추가.
+    /// 앱을 켠 채 자정을 넘겨도 새 날 기록이 화면에 보이도록 한다(loadedDays가 고정되던 버그 수정).
+    /// - loadData=true(포그라운드 복귀·NSCalendarDayChanged): 새 날짜의 서버 기록도 로드.
+    /// - loadData=false(기록 저장 직전): 빈 섹션만 확보 → 낙관적 insert가 채움(페치 클로버 방지).
+    @MainActor
+    func rolloverIfNeeded(loadData: Bool = true) {
+        let cal = Calendar.kst
+        let newToday = cal.startOfDay(for: Date())
+        guard let top = loadedDays.first, newToday > top else { return }
+
+        // top(구 오늘) 다음날 ~ newToday 를 연속으로 앞에 추가(앱을 여러 날 켜둔 경우도 커버).
+        var day = newToday
+        var prepend: [Date] = []
+        while day > top {
+            prepend.append(day)
+            guard let prev = cal.date(byAdding: .day, value: -1, to: day) else { break }
+            day = prev
+        }
+        // 롤오버 전 '오늘(top)'을 보고 있었으면 새 오늘로 이동(과거를 보고 있었으면 유지).
+        let wasOnToday = cal.startOfDay(for: selectedDate) == top
+
+        loadedDays = prepend + loadedDays
+        for d in prepend {
+            if loadData {
+                loadDay(d)                                       // 캐시 없으면 서버 로드
+            } else if recordsByDay[d] == nil {
+                recordsByDay[d] = DayRecords(isLoading: false)   // 빈 섹션(즉시 렌더 — insert가 채움)
+            }
+        }
+        if wasOnToday { selectedDate = Date() }
+    }
+
     /// AppHeader 날짜 변경 → 과거 포커스/오늘 전환.
     func changeDate(_ date: Date) {
         selectedDate = date
@@ -363,6 +395,7 @@ final class HomeViewModel {
     }
 
     private func insertCareLog(_ log: CareLog) async {
+        await rolloverIfNeeded(loadData: false)
         let day = await dayKey(for: log.recordedAt)
         await mutate(day) { $0.careLogs.insert(log, at: 0) }
         do {
@@ -424,6 +457,7 @@ final class HomeViewModel {
     }
 
     private func insertFeeding(_ feeding: Feeding) async {
+        await rolloverIfNeeded(loadData: false)   // 자정 넘겼으면 새 오늘 섹션 확보
         let day = await dayKey(for: feeding.startedAt)
         await mutate(day) { $0.feedings.insert(feeding, at: 0) }
         do {
@@ -520,6 +554,7 @@ final class HomeViewModel {
     }
 
     private func insertDiaper(_ diaper: DiaperRecord) async {
+        await rolloverIfNeeded(loadData: false)
         let day = await dayKey(for: diaper.recordedAt)
         await mutate(day) { $0.diapers.insert(diaper, at: 0) }
         do {
@@ -534,6 +569,7 @@ final class HomeViewModel {
     }
 
     private func insertSleep(_ sleep: SleepRecord, markActive: Bool) async {
+        await rolloverIfNeeded(loadData: false)
         let day = await dayKey(for: sleep.startedAt)
         await mutate(day) { $0.sleeps.insert(sleep, at: 0) }
         if markActive { await MainActor.run { activeSleepSession = sleep } }
@@ -551,6 +587,7 @@ final class HomeViewModel {
     }
 
     private func insertPlay(_ play: PlayRecord, markActive: Bool) async {
+        await rolloverIfNeeded(loadData: false)
         let day = await dayKey(for: play.startedAt)
         await mutate(day) { $0.plays.insert(play, at: 0) }
         if markActive { await MainActor.run { activePlaySession = play } }
